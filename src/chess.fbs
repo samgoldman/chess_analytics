@@ -1,0 +1,101 @@
+namespace Chess;
+
+enum File : byte {
+  A = 0,
+  B = 1,
+  C = 2,
+  D = 3,
+  E = 4,
+  F = 5,
+  G = 6,
+  H = 7,
+  N_A = 127
+}
+
+enum Piece : byte {
+  None = 0,
+  Pawn = 1,
+  Knight = 2,
+  Bishop = 3,
+  Rook = 4,
+  Queen = 5,
+  King = 6,
+}
+
+enum GameResult : uint8 {
+  White = 0,
+  Black = 1,
+  Draw = 2,
+  Star = 255
+}
+
+enum Termination : uint8 {
+  Normal = 0,
+  TimeForfeit = 1,
+  Abandoned = 2,
+  RulesInfraction = 3,
+  Unterminated = 4,
+}
+
+enum Check : uint8 {
+  None = 0,
+  Check = 1,
+  Mate = 2
+}
+
+enum NAG : uint8 {
+  None = 0,
+  Good = 1,
+  Mistake = 2,
+  Brilliant = 3,
+  Blunder = 4,
+  Speculative = 5,
+  Dubious = 6,
+  Unrecognized = 255,
+}
+
+table Game {
+  year:uint16;
+  month:uint8;
+  day:uint8;
+
+  white_rating:uint16;
+  black_rating:uint16;
+
+  time_control_main:uint16;
+  time_control_increment:uint8;
+
+  opening:string;
+  eco_category:byte;
+  eco_subcategory:uint8;
+
+  from_files:[Chess.File];
+  to_files:[Chess.File];
+  from_ranks:[uint8];
+  to_ranks:[uint8];
+
+  promotions:[Chess.Piece];
+  moved:[Chess.Piece];
+  captured:[bool];
+  checks:[Chess.Check];
+  nags:[Chess.NAG];
+
+  clock_hours:[uint8];
+  clock_minutes:[uint8];
+  clock_seconds:[uint8];
+
+  eval_is_mate_forceable:[bool];
+  eval_mate_in:[int8];
+  eval_advantage:[float32];
+
+  result:Chess.GameResult;
+  termination:Chess.Termination;
+  white_diff:int16;
+  black_diff:int16;
+}
+
+table GameList {
+  games:[Game];
+}
+
+root_type GameList;
