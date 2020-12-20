@@ -48,6 +48,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 
 [[package]]
+name = "chess_analytics"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "flatbuffers",
+ "flatc-rust",
+ "glob",
+ "lazy_static",
+ "regex",
+]
+
+[[package]]
 name = "chrono"
 version = "0.4.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -191,19 +204,6 @@ name = "regex-syntax"
 version = "0.6.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3b181ba2dcf07aaccad5448e8ead58db5b742cf85dfe035e2227f137a539a189"
-
-[[package]]
-name = "rust_chess_stats"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "clap",
- "flatbuffers",
- "flatc-rust",
- "glob",
- "lazy_static",
- "regex",
-]
 
 [[package]]
 name = "smallvec"

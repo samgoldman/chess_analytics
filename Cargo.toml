@@ -1,5 +1,5 @@
 [package]
-name = "rust_chess_stats"
+name = "chess_analytics"
 version = "0.1.0"
 authors = ["Sam Goldman <sgoldman216@gmail.com>"]
 edition = "2018"
