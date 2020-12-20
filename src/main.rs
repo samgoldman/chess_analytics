@@ -10,44 +10,23 @@ use regex::Regex;
 #[path = "../target/flatbuffers/chess_generated.rs"]
 mod chess_flatbuffers;
 
-use chess_flatbuffers::chess::{root_as_game_list, Game};
+use chess_flatbuffers::chess::{root_as_game_list};
 
 mod data_containers;
 use data_containers::{MultiStatData, init_single_stat_data};
 
+mod maps;
+use maps::{*};
+
+mod folds;
+use folds::{*};
+
+mod filters;
+use filters::{*};
+
 mod utils;
 
-type AccumFn = fn(Game) -> i32;
-type FoldFn = fn(&mut Vec<i32>) -> f64;
-type Statistic = (String, AccumFn, FoldFn);
-
-fn fold_sum(data: &mut Vec<i32>) -> f64 {
-    data.iter().fold(0.0, |a, x| a as f64 + *x as f64)
-}
-
-fn fold_avg(data: &mut Vec<i32>) -> f64 {
-    data.iter().fold(0.0, |a, x| a as f64 + *x as f64) / data.len() as f64
-}
-
-fn accum_count(_game: Game) -> i32 {
-    return 1;
-}
-
-fn get_game_elo(game: Game) -> u32 {
-    (game.white_rating() + game.black_rating()) as u32 / 2
-}
-
-fn min_game_elo_filter_factory(min_elo: i32) -> Box<dyn Fn(Game) -> bool> {
-    Box::new(move |game: Game| -> bool {
-        get_game_elo(game) >= min_elo as u32
-    })
-}
-
-fn max_game_elo_filter_factory(max_elo: i32) -> Box<dyn Fn(Game) -> bool> {
-    Box::new(move |game: Game| -> bool {
-        get_game_elo(game) <= max_elo as u32
-    })
-}
+type Statistic = (String, MapFn, FoldFn);
 
 fn main() -> io::Result<()> {
     let matches = App::new("PGN to Flat Buffer")
@@ -81,7 +60,7 @@ fn main() -> io::Result<()> {
     ];
 
     let mut available_statitistcs: HashMap<&str, Statistic> = hashmap![
-        "count" => ("count".to_string(), accum_count as AccumFn, fold_sum as FoldFn)
+        "count" => ("count".to_string(), map_count as MapFn, fold_sum as FoldFn)
     ];
 
 
