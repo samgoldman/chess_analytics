@@ -58,6 +58,8 @@ fn main() -> io::Result<()> {
         (Regex::new(r#"minGameElo(\d+)"#).unwrap(), min_game_elo_filter_factory as FilterFactoryFn),
         (Regex::new(r#"maxGameElo(\d+)"#).unwrap(), max_game_elo_filter_factory),
         (Regex::new(r#"year(\d+)"#).unwrap(), year_filter_factory),
+        (Regex::new(r#"month(\d+)"#).unwrap(), month_filter_factory),
+        (Regex::new(r#"day(\d+)"#).unwrap(), day_filter_factory),
         (Regex::new(r#"minMoves(\d+)"#).unwrap(), min_moves_filter_factory)
     ];
 

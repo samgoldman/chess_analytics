@@ -27,6 +27,18 @@ pub fn year_filter_factory(year: i32) -> FilterFn {
     })
 }
 
+pub fn month_filter_factory(month: i32) -> FilterFn {
+    Box::new(move |game: crate::chess_flatbuffers::chess::Game| -> bool {
+        game.year() as i32 == month
+    })
+}
+
+pub fn day_filter_factory(day: i32) -> FilterFn {
+    Box::new(move |game: crate::chess_flatbuffers::chess::Game| -> bool {
+        game.year() as i32 == day
+    })
+}
+
 pub fn min_moves_filter_factory(min: i32) -> FilterFn {
     Box::new(move |game: crate::chess_flatbuffers::chess::Game| -> bool {
         if min == 0 {
