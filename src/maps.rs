@@ -7,3 +7,22 @@ pub type MapFn = fn(crate::chess_flatbuffers::chess::Game) -> i32;
 pub fn map_count(_game: crate::chess_flatbuffers::chess::Game) -> i32 {
     return 1;
 }
+
+pub fn map_mate_count(game: crate::chess_flatbuffers::chess::Game) -> i32 {
+    let checks = game.checks().unwrap().iter();
+    if checks.last().unwrap() == crate::chess_flatbuffers::chess::Check::Mate {
+        1
+    } else {
+        0
+    }
+}
+
+pub fn map_check_count(game: crate::chess_flatbuffers::chess::Game) -> i32 {
+    game.checks().unwrap().iter().filter(
+        |check| {
+            *check == crate::chess_flatbuffers::chess::Check::Mate || 
+            *check == crate::chess_flatbuffers::chess::Check::Check
+        }
+    ).collect::<Vec<_>>()
+    .len() as i32
+}

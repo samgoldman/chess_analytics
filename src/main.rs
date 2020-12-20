@@ -52,17 +52,22 @@ fn main() -> io::Result<()> {
 
     let mut stats: MultiStatData = HashMap::new();
 
-    let mut available_filters = hashmap![
-        "maxElo2000" => max_game_elo_filter_factory(2000)];
+    let mut available_filters: HashMap<&str, FilterFn> = hashmap![];
 
     let filter_factories = vec![
-        (Regex::new(r#"minGameElo(\d+)"#).unwrap(), min_game_elo_filter_factory)
+        (Regex::new(r#"minGameElo(\d+)"#).unwrap(), min_game_elo_filter_factory as FilterFactoryFn),
+        (Regex::new(r#"maxGameElo(\d+)"#).unwrap(), max_game_elo_filter_factory),
+        (Regex::new(r#"year(\d+)"#).unwrap(), year_filter_factory),
+        (Regex::new(r#"minMoves(\d+)"#).unwrap(), min_moves_filter_factory)
     ];
 
     let mut available_statitistcs: HashMap<&str, Statistic> = hashmap![
-        "count" => ("count".to_string(), map_count as MapFn, fold_sum as FoldFn)
+        "gameCount" => ("gameCount".to_string(), map_count as MapFn, fold_sum as FoldFn),
+        "mateCount" => ("mateCount".to_string(), map_mate_count, fold_sum),
+        "mateRate" => ("mateRate".to_string(), map_mate_count, fold_percent),
+        "checkCount" => ("checkCount".to_string(), map_check_count, fold_sum),
+        "checkRate" => ("checkRate".to_string(), map_check_count, fold_avg)
     ];
-
 
     let mut selected_filters = vec![];
 
