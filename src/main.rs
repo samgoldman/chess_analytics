@@ -8,24 +8,18 @@ use regex::Regex;
 
 #[allow(non_snake_case)]
 #[path = "../target/flatbuffers/chess_generated.rs"]
-pub mod chess_flatbuffers;
+mod chess_flatbuffers;
 
-pub use chess_flatbuffers::chess::{root_as_game_list, Game, NAG, Check, GameResult, Termination};
+use chess_flatbuffers::chess::{root_as_game_list, Game};
 
 mod data_containers;
 use data_containers::{MultiStatData, init_single_stat_data};
 
+mod utils;
+
 type AccumFn = fn(Game) -> i32;
 type FoldFn = fn(&mut Vec<i32>) -> f64;
 type Statistic = (String, AccumFn, FoldFn);
-
-macro_rules! hashmap {
-    ($( $key: expr => $val: expr ),*) => {{
-         let mut map = ::std::collections::HashMap::new();
-         $( map.insert($key, $val); )*
-         map
-    }}
-}
 
 fn fold_sum(data: &mut Vec<i32>) -> f64 {
     data.iter().fold(0.0, |a, x| a as f64 + *x as f64)
