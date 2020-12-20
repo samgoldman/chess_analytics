@@ -83,9 +83,13 @@ fn main() -> io::Result<()> {
     let mut available_statitistcs: HashMap<&str, Statistic> = hashmap![
         "gameCount" => ("gameCount".to_string(), map_count as MapFn, fold_sum as FoldFn),
         "mateCount" => ("mateCount".to_string(), map_mate_count, fold_sum),
-        "mateRate" => ("mateRate".to_string(), map_mate_count, fold_percent),
+        "matePct" => ("matePct".to_string(), map_mate_count, fold_percent),
         "checkCount" => ("checkCount".to_string(), map_check_count, fold_sum),
-        "checkRate" => ("checkRate".to_string(), map_check_count, fold_avg)
+        "checkRate" => ("checkRate".to_string(), map_check_count, fold_avg),
+        "moveCount" => ("moveCount".to_string(), map_num_moves, fold_sum),
+        "moveRate" => ("moveRate".to_string(), map_num_moves, fold_avg),
+        "moveMax" => ("moveMax".to_string(), map_num_moves, fold_max),
+        "captureMin" => ("captureMin".to_string(), map_num_captures, fold_min)
     ];
 
     let mut selected_filters = vec![];

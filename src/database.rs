@@ -38,7 +38,7 @@ impl Database {
             let mut new_path = current_path.clone();
             new_path.push(k.to_owned());
             v.deep_keys(new_path, output);
-        }    
+        }
         if !has_children && current_path.len() > 0 {
             output.push(current_path.clone());
         }
