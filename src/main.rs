@@ -3,7 +3,7 @@ use std::io::{self};
 use std::io::prelude::*;
 use std::fs::File;
 use glob::glob;
-use std::collections::HashMap;
+use std::collections::{HashMap};
 use regex::Regex;
 
 #[allow(non_snake_case)]
@@ -11,9 +11,6 @@ use regex::Regex;
 mod chess_flatbuffers;
 
 use chess_flatbuffers::chess::{root_as_game_list};
-
-mod data_containers;
-use data_containers::{MultiStatData, init_single_stat_data};
 
 mod maps;
 use maps::{*};
@@ -24,9 +21,22 @@ use folds::{*};
 mod filters;
 use filters::{*};
 
+mod database;
+use database::{Database};
+
 mod utils;
 
 type Statistic = (String, MapFn, FoldFn);
+
+type BinFn = fn(crate::chess_flatbuffers::chess::Game) -> String;
+
+fn bin_year(game: crate::chess_flatbuffers::chess::Game) -> String {
+    game.year().to_string()
+}
+
+fn bin_month(game: crate::chess_flatbuffers::chess::Game) -> String {
+    game.month().to_string()
+}
 
 fn main() -> io::Result<()> {
     let matches = App::new("PGN to Flat Buffer")
@@ -42,6 +52,10 @@ fn main() -> io::Result<()> {
             .long("filters")
             .takes_value(true)
             .multiple(true))
+        .arg(Arg::with_name("buckets")
+            .long("buckets")
+            .takes_value(true)
+            .multiple(true))
         .arg(Arg::with_name("statistics")
             .long("statistics")
             .takes_value(true)
@@ -50,7 +64,10 @@ fn main() -> io::Result<()> {
             .min_values(1))
         .get_matches();
 
-    let mut stats: MultiStatData = HashMap::new();
+    let mut db = Database {
+        children: HashMap::new(),
+        data: vec![]
+    };
 
     let mut available_filters: HashMap<&str, FilterFn> = hashmap![];
 
@@ -72,6 +89,8 @@ fn main() -> io::Result<()> {
     ];
 
     let mut selected_filters = vec![];
+
+    let selected_bins = vec![bin_year as BinFn, bin_month];
 
     match matches.values_of("filters") {
         Some(filter_strs) => {
@@ -104,10 +123,6 @@ fn main() -> io::Result<()> {
         }
     }
 
-    for i in 0..selected_statistics.len() {
-        stats.insert(selected_statistics[i].0.clone(), init_single_stat_data(2012, 2020)); 
-    }
-
     let file_glob = matches.value_of("glob").unwrap();
 
     for entry in glob(file_glob).expect("Failed to read glob pattern") {
@@ -130,31 +145,32 @@ fn main() -> io::Result<()> {
 
         for game in filtered_games {
             for i in 0..selected_statistics.len() {
-                let stats_by_year = stats.get_mut(&(selected_statistics[i].0.clone())).unwrap();
-                let stats_by_month = stats_by_year.get_mut(&(game.year() as i32)).unwrap();
-                let stats_by_day = stats_by_month.get_mut(&(game.month() as i32)).unwrap();
-                let day_stats = stats_by_day.get_mut(&(game.day() as i32)).unwrap();
-                day_stats.push(selected_statistics[i].1(game));
+                let stat = &selected_statistics[i];
+                let mut path = vec![stat.0.clone()];
+
+                for bin in &selected_bins {
+                    let new_bin = bin(game);
+                    path.push(new_bin);
+                }
+
+                let node = db.insert_path(path);
+                node.data.push(stat.1(game));
             }
         }
     }
 
     for i in 0..selected_statistics.len() {
-        let mut full_vec = vec![];
 
         let selected = &selected_statistics[i];
-        let root_data = stats.get_mut(&selected.0).unwrap();
-        for (_y, v1) in root_data.iter_mut() {
-            for (_m, v2) in v1.iter_mut() {
-                for (_d, v3) in v2.iter_mut() {
-                    full_vec.append(v3);
-                }
-            }
+
+        let stat_node = db.insert_path(vec![selected.0.to_string()]);
+
+        for key in stat_node.get_paths() {
+            let k = key.clone();
+            let node = stat_node.insert_path(k);
+            let result = selected.2(&mut node.data);
+            println!("{}\t{}  \t{:.4}", selected.0, key.join("."), result);
         }
-
-        let result = selected.2(&mut full_vec);
-
-        println!("{}: {:.4}", selected.0, result);
     }
 
     Ok(())
