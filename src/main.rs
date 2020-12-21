@@ -99,14 +99,15 @@ fn main() -> io::Result<()> {
         }
     }
 
-
     let filter_factories = vec![
         (Regex::new(r#"minGameElo(\d+)"#).unwrap(), min_game_elo_filter_factory as FilterFactoryFn),
         (Regex::new(r#"maxGameElo(\d+)"#).unwrap(), max_game_elo_filter_factory),
         (Regex::new(r#"year(\d+)"#).unwrap(), year_filter_factory),
         (Regex::new(r#"month(\d+)"#).unwrap(), month_filter_factory),
         (Regex::new(r#"day(\d+)"#).unwrap(), day_filter_factory),
-        (Regex::new(r#"minMoves(\d+)"#).unwrap(), min_moves_filter_factory)
+        (Regex::new(r#"minMoves(\d+)"#).unwrap(), min_moves_filter_factory),
+        (Regex::new(r#"minWhiteElo(\d+)"#).unwrap(), min_white_elo_filter_factory),
+        (Regex::new(r#"minBlackElo(\d+)"#).unwrap(), min_black_elo_filter_factory)
     ];
 
     let file_glob = matches.value_of("glob").unwrap();
@@ -127,7 +128,8 @@ fn main() -> io::Result<()> {
         let handle = thread::spawn(move || -> io::Result<()> {
             let mut selected_filters = vec![];
 
-            let mut available_filters: HashMap<&str, FilterFn> = hashmap![];
+            // Static filters
+            let mut available_filters = hashmap!["mateOccurs" => Box::new(mate_occurs_filter)];
 
             match matches.values_of("filters") {
                 Some(filter_strs) => {

@@ -53,3 +53,24 @@ pub fn min_moves_filter_factory(min: i32) -> FilterFn {
         }
     })
 }
+
+pub fn min_white_elo_filter_factory(min_elo: i32) -> FilterFn {
+    Box::new(move |game: crate::chess_flatbuffers::chess::Game| -> bool {
+        game.white_rating() as i32 >= min_elo
+    })
+}
+
+pub fn min_black_elo_filter_factory(min_elo: i32) -> FilterFn {
+    Box::new(move |game: crate::chess_flatbuffers::chess::Game| -> bool {
+        game.black_rating() as i32 >= min_elo
+    })
+}
+
+pub fn mate_occurs_filter(game: crate::chess_flatbuffers::chess::Game) -> bool {
+    let checks = game.checks().unwrap().iter();
+    if checks.last().unwrap() == crate::chess_flatbuffers::chess::Check::Mate {
+        true
+    } else {
+        false
+    }
+}
