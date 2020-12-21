@@ -5,7 +5,7 @@ mod chess_flatbuffers;
 pub type FilterFn = Box<dyn Fn(crate::chess_flatbuffers::chess::Game) -> bool>;
 pub type FilterFactoryFn = fn(i32) -> FilterFn;
 
-fn get_game_elo(game: crate::chess_flatbuffers::chess::Game) -> u32 {
+pub fn get_game_elo(game: crate::chess_flatbuffers::chess::Game) -> u32 {
     (game.white_rating() + game.black_rating()) as u32 / 2
 }
 

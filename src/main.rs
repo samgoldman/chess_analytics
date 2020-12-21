@@ -40,6 +40,10 @@ fn bin_month(game: crate::chess_flatbuffers::chess::Game) -> String {
     format!("{:02}", game.month())
 }
 
+fn bin_game_elo(game: crate::chess_flatbuffers::chess::Game) -> String {
+    format!("{:04}", (get_game_elo(game) / 500) * 500)
+}
+
 fn main() -> io::Result<()> {
     let matches = App::new("PGN to Flat Buffer")
         .version("0.1.0")
@@ -54,8 +58,8 @@ fn main() -> io::Result<()> {
             .long("filters")
             .takes_value(true)
             .multiple(true))
-        .arg(Arg::with_name("buckets")
-            .long("buckets")
+        .arg(Arg::with_name("bins")
+            .long("bins")
             .takes_value(true)
             .multiple(true))
         .arg(Arg::with_name("statistics")
@@ -88,14 +92,31 @@ fn main() -> io::Result<()> {
         "ratingDiffMax" => ("ratingDiffMax".to_string(), map_rating_diff, fold_max)
     ];
 
-    let selected_bins = vec![bin_year as BinFn, bin_month];
+    let mut available_bins: HashMap<&str, BinFn> = hashmap![
+        "year" => bin_year as BinFn,
+        "month" => bin_month,
+        "gameElo" => bin_game_elo
+    ];
+
+    let mut selected_bins = vec![];
+
+    for bin_str in matches.values_of("bins").unwrap() {
+        match available_bins.remove(bin_str) {
+            Some(v) => selected_bins.push(v),
+            None => {
+                eprintln!("Warning: no bin found for `{}` (note: this warning will present for duplicates)", bin_str);
+            }
+        }
+    }
     
     let mut selected_statistics = vec![];
 
     for stat_str in matches.values_of("statistics").unwrap() {
         match available_statitistcs.remove(stat_str) {
             Some(v) => selected_statistics.push(v),
-            None => {}
+            None => {
+                eprintln!("Warning: no statistic found for `{}` (note: this warning will present for duplicates)", stat_str);
+            }
         }
     }
 
