@@ -84,7 +84,8 @@ fn main() -> io::Result<()> {
         "moveCount" => ("moveCount".to_string(), map_num_moves, fold_sum),
         "moveRate" => ("moveRate".to_string(), map_num_moves, fold_avg),
         "moveMax" => ("moveMax".to_string(), map_num_moves, fold_max),
-        "captureMin" => ("captureMin".to_string(), map_num_captures, fold_min)
+        "captureMin" => ("captureMin".to_string(), map_num_captures, fold_min),
+        "ratingDiffMax" => ("ratingDiffMax".to_string(), map_rating_diff, fold_max)
     ];
 
     let selected_bins = vec![bin_year as BinFn, bin_month];

@@ -5,7 +5,7 @@ use std::collections::HashMap;
 #[derive(Default, Debug, Clone)]
 pub struct Database {
     pub children: HashMap<String, Database>,
-    pub data: Vec<i32>,
+    pub data: Vec<i16>,
 }
 
 impl Database {
