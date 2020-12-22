@@ -2,6 +2,9 @@
 #[path = "../target/flatbuffers/chess_generated.rs"]
 mod chess_flatbuffers;
 
+#[path = "./chess_utils.rs"]
+mod chess_utils;
+
 pub type MapFn = fn(crate::chess_flatbuffers::chess::Game) -> i16;
 
 pub fn map_count(_game: crate::chess_flatbuffers::chess::Game) -> i16 {
@@ -65,32 +68,9 @@ pub fn map_rating_diff(game: crate::chess_flatbuffers::chess::Game) -> i16 {
 }
 
 pub fn map_queens_gambit_count(game: crate::chess_flatbuffers::chess::Game) -> i16 {
-    let files = match game.to_files() {
-        Some(files) => files,
-        None => return 0
-    };
+    let queens_gambit_opening: Vec<(crate::chess_flatbuffers::chess::File, u8)> = vec![(crate::chess_flatbuffers::chess::File::D, 4),
+                                                                                       (crate::chess_flatbuffers::chess::File::D, 5),
+                                                                                       (crate::chess_flatbuffers::chess::File::C, 4)];
 
-    let ranks = match game.to_ranks() {
-        Some(ranks) => ranks,
-        None => return 0
-    };
-
-    if files.len() < 3 {
-        return 0;
-    }
-
-    let mut file_iter = files.iter();
-    let mut rank_iter = ranks.iter();
-
-    let expected = vec![(crate::chess_flatbuffers::chess::File::D, 4),
-                        (crate::chess_flatbuffers::chess::File::D, 5),
-                        (crate::chess_flatbuffers::chess::File::C, 4)];
-
-    for (expected_file, expected_rank) in expected {
-        if expected_file != file_iter.next().unwrap() || expected_rank != *rank_iter.next().unwrap() {
-            return 0
-        }
-    }
-    
-    1
+    chess_utils::has_opening(game, queens_gambit_opening) as i16
 }
