@@ -93,7 +93,8 @@ fn main() -> io::Result<()> {
         "moveRate" => ("moveRate".to_string(), map_num_moves, fold_avg),
         "moveMax" => ("moveMax".to_string(), map_num_moves, fold_max),
         "captureMin" => ("captureMin".to_string(), map_num_captures, fold_min),
-        "ratingDiffMax" => ("ratingDiffMax".to_string(), map_rating_diff, fold_max)
+        "ratingDiffMax" => ("ratingDiffMax".to_string(), map_rating_diff, fold_max),
+        "queensGambitRate" => ("queensGambitRate".to_string(), map_queens_gambit_count, fold_avg)
     ];
 
     let mut available_bins: HashMap<&str, BinFn> = hashmap![
