@@ -26,7 +26,7 @@ use filters::{*};
 mod database;
 use database::{Database};
 
-mod utils;
+mod general_utils;
 
 type Statistic = (String, MapFn, FoldFn);
 
