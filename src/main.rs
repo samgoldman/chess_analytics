@@ -40,6 +40,10 @@ fn bin_month(game: crate::chess_flatbuffers::chess::Game) -> String {
     format!("{:02}", game.month())
 }
 
+fn bin_day(game: crate::chess_flatbuffers::chess::Game) -> String {
+    format!("{:02}", game.day())
+}
+
 fn bin_game_elo(game: crate::chess_flatbuffers::chess::Game) -> String {
     format!("{:04}", (get_game_elo(game) / 500) * 500)
 }
@@ -95,6 +99,7 @@ fn main() -> io::Result<()> {
     let mut available_bins: HashMap<&str, BinFn> = hashmap![
         "year" => bin_year as BinFn,
         "month" => bin_month,
+        "day" => bin_day,
         "gameElo" => bin_game_elo
     ];
 
