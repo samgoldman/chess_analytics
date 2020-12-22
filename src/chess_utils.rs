@@ -1,5 +1,6 @@
+use crate::chess_flatbuffers::chess::{Game, File};
 
-pub fn has_opening(game: crate::chess_flatbuffers::chess::Game, opening: Vec<(crate::chess_flatbuffers::chess::File, u8)>) -> bool {
+pub fn has_opening(game: Game, opening: Vec<(File, u8)>) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
     let files = match game.to_files() {
         Some(files) => files,

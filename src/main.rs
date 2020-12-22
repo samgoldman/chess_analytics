@@ -11,22 +11,19 @@ use std::thread;
 #[allow(non_snake_case)]
 #[path = "../target/flatbuffers/chess_generated.rs"]
 mod chess_flatbuffers;
+mod maps;
+mod folds;
+mod filters;
+mod database;
+mod chess_utils;
+mod general_utils;
 
 use chess_flatbuffers::chess::{root_as_game_list};
-
-mod maps;
 use maps::{*};
-
-mod folds;
 use folds::{*};
-
-mod filters;
 use filters::{*};
+use database::Database;
 
-mod database;
-use database::{Database};
-
-mod general_utils;
 
 type Statistic = (String, MapFn, FoldFn);
 
