@@ -93,7 +93,8 @@ fn main() -> io::Result<()> {
         "ratingDiffMax" => ("ratingDiffMax".to_string(), map_rating_diff, fold_max),
         "queensGambitRate" => ("queensGambitRate".to_string(), map_queens_gambit_count, fold_avg),
         "queensGambitAcceptedRate" => ("queensGambitAcceptedRate".to_string(), map_queens_gambit_accepted_count, fold_avg),
-        "queensGambitDeclinedRate" => ("queensGambitDeclinedRate".to_string(), map_queens_gambit_declined_count, fold_avg)
+        "queensGambitDeclinedRate" => ("queensGambitDeclinedRate".to_string(), map_queens_gambit_declined_count, fold_avg),
+        "sicilianDefenceRate" => ("sicilianDefenceRate".to_string(), map_sicilian_defence_count, fold_avg)
     ];
 
     let mut available_bins: HashMap<&str, BinFn> = hashmap![

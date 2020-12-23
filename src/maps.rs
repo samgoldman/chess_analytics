@@ -91,3 +91,9 @@ pub fn map_queens_gambit_declined_count(game: Game) -> i16 {
 
     (chess_utils::has_opening(game, queens_gambit_opening) && !(chess_utils::has_opening(game, queens_gambit_accepted_opening)))as i16
 }
+
+pub fn map_sicilian_defence_count(game: Game) -> i16 {
+    let sicilian_defence_opening: Vec<(File, u8)> = vec![(File::E, 4), (File::C, 5)];
+
+    chess_utils::has_opening(game, sicilian_defence_opening) as i16
+}
