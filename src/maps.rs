@@ -70,3 +70,24 @@ pub fn map_queens_gambit_count(game: Game) -> i16 {
 
     chess_utils::has_opening(game, queens_gambit_opening) as i16
 }
+
+pub fn map_queens_gambit_accepted_count(game: Game) -> i16 {
+    let queens_gambit_accepted_opening: Vec<(File, u8)> = vec![(File::D, 4),
+                                                               (File::D, 5),
+                                                               (File::C, 4),
+                                                               (File::C, 4)];
+
+    chess_utils::has_opening(game, queens_gambit_accepted_opening) as i16
+}
+
+pub fn map_queens_gambit_declined_count(game: Game) -> i16 {
+    let queens_gambit_opening: Vec<(File, u8)> = vec![(File::D, 4),
+                                                      (File::D, 5),
+                                                      (File::C, 4)];
+    let queens_gambit_accepted_opening: Vec<(File, u8)> = vec![(File::D, 4),
+                                                               (File::D, 5),
+                                                               (File::C, 4),
+                                                               (File::C, 4)];
+
+    (chess_utils::has_opening(game, queens_gambit_opening) && !(chess_utils::has_opening(game, queens_gambit_accepted_opening)))as i16
+}

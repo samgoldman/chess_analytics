@@ -42,7 +42,7 @@ fn bin_day(game: crate::chess_flatbuffers::chess::Game) -> String {
 }
 
 fn bin_game_elo(game: crate::chess_flatbuffers::chess::Game) -> String {
-    format!("{:04}", (get_game_elo(game) / 500) * 500)
+    format!("{:04}", (get_game_elo(game) / 100) * 100)
 }
 
 fn main() -> io::Result<()> {
@@ -91,7 +91,9 @@ fn main() -> io::Result<()> {
         "moveMax" => ("moveMax".to_string(), map_num_moves, fold_max),
         "captureMin" => ("captureMin".to_string(), map_num_captures, fold_min),
         "ratingDiffMax" => ("ratingDiffMax".to_string(), map_rating_diff, fold_max),
-        "queensGambitRate" => ("queensGambitRate".to_string(), map_queens_gambit_count, fold_avg)
+        "queensGambitRate" => ("queensGambitRate".to_string(), map_queens_gambit_count, fold_avg),
+        "queensGambitAcceptedRate" => ("queensGambitAcceptedRate".to_string(), map_queens_gambit_accepted_count, fold_avg),
+        "queensGambitDeclinedRate" => ("queensGambitDeclinedRate".to_string(), map_queens_gambit_declined_count, fold_avg)
     ];
 
     let mut available_bins: HashMap<&str, BinFn> = hashmap![
