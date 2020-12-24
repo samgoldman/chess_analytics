@@ -7,6 +7,7 @@ use std::collections::{HashMap};
 use regex::Regex;
 use std::sync::{Arc, Mutex};
 use std::thread;
+use bzip2::read::{BzDecoder};
 
 #[allow(non_snake_case)]
 #[path = "../target/flatbuffers/chess_generated.rs"]
@@ -192,10 +193,11 @@ fn main() -> io::Result<()> {
                 }
 
                 let file_name = entry.unwrap();
-                let mut file = File::open(file_name)?;
-        
+                let file = File::open(file_name)?;
+                let mut decompressor = BzDecoder::new(file);
+
                 let mut data = Vec::new();
-                file.read_to_end(&mut data)?;
+                decompressor.read_to_end(&mut data)?;
             
                 let games = root_as_game_list(&data).unwrap().games().unwrap().iter();
         

@@ -1,4 +1,4 @@
-use crate::chess_flatbuffers::chess::{Game, Check};
+use crate::chess_flatbuffers::chess::Game;
 
 pub type FilterFn = Box<dyn Fn(Game) -> bool>;
 pub type FilterFactoryFn = fn(i32) -> FilterFn;
@@ -42,9 +42,9 @@ pub fn min_moves_filter_factory(min: i32) -> FilterFn {
         if min == 0 {
             true // Can't go lower than 0
         } else {
-            match game.moved() {
-                Some(moves) => {
-                    moves.len() as i32 >= min
+            match game.move_metadata() {
+                Some(metadata) => {
+                    metadata.len() as i32 >= min
                 },
                 None => false
             }
@@ -65,8 +65,8 @@ pub fn min_black_elo_filter_factory(min_elo: i32) -> FilterFn {
 }
 
 pub fn mate_occurs_filter(game: Game) -> bool {
-    let checks = game.checks().unwrap().iter();
-    if checks.last().unwrap() == Check::Mate {
+    let metadata = game.move_metadata().unwrap().iter();
+    if metadata.last().unwrap() & 0x0020 != 0 {
         true
     } else {
         false
