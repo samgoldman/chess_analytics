@@ -30,12 +30,12 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-    after_success: |
-      if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
-        cargo tarpaulin --out Xml
-        bash <(curl -s https://codecov.io/bash)
-      fi
-
+  
+  coverage:
+    steps:
+      -run cargo tarpaulin --out Xml
+      -run bash <(curl -s https://codecov.io/bash)
+          
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
@@ -66,3 +66,4 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
+          args: -- -D warnings
