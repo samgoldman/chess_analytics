@@ -1,3 +1,3 @@
 [submodule "chess_flat_buffer"]
 	path = chess_flat_buffer
-	url = git@github.com:samgoldman/chess_flat_buffer.git
+	url = github.com/samgoldman/chess_flat_buffer.git
