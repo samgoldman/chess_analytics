@@ -33,8 +33,8 @@ jobs:
   
   coverage:
     steps:
-      -run cargo tarpaulin --out Xml
-      -run bash <(curl -s https://codecov.io/bash)
+      - run cargo tarpaulin --out Xml
+      - run bash <(curl -s https://codecov.io/bash)
           
   fmt:
     name: Rustfmt
