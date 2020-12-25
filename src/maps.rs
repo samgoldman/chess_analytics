@@ -1,8 +1,6 @@
 use crate::chess_utils::{*};
 use crate::chess_flatbuffers::chess::Game;
 
-pub type MapFn = fn(Game) -> i16;
-
 pub fn map_count(_game: Game) -> i16 {
     return 1;
 }

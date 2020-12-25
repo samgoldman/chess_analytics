@@ -14,6 +14,7 @@ use bzip2::read::{BzDecoder};
 mod chess_flatbuffers;
 mod maps;
 mod folds;
+mod types;
 mod filters;
 mod database;
 mod chess_utils;
@@ -23,12 +24,9 @@ use chess_flatbuffers::chess::{root_as_game_list};
 use maps::{*};
 use folds::{*};
 use filters::{*};
+use types::{*};
 use database::Database;
 
-
-type Statistic = (String, MapFn, FoldFn);
-
-type BinFn = fn(crate::chess_flatbuffers::chess::Game) -> String;
 
 fn bin_year(game: crate::chess_flatbuffers::chess::Game) -> String {
     game.year().to_string()

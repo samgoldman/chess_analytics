@@ -1,7 +1,5 @@
 use crate::chess_flatbuffers::chess::Game;
-
-pub type FilterFn = Box<dyn Fn(Game) -> bool>;
-pub type FilterFactoryFn = fn(i32) -> FilterFn;
+use crate::types::{*};
 
 pub fn get_game_elo(game: Game) -> u32 {
     (game.white_rating() + game.black_rating()) as u32 / 2
