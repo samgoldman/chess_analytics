@@ -2,3 +2,4 @@
 *.txt
 cobertura.xml
 lcov.info
+*.profraw

@@ -177,10 +177,13 @@ fn main() -> io::Result<()> {
                         for i in 0..filter_factories.len() {
                             let filter_factory = &filter_factories[i];
 
-                            for cap in filter_factory.0.captures_iter(filter_str) {
-                                let filter = filter_factory.1(cap);
-                                selected_filters.push(filter);
-                                continue 'filter_str;
+                            match filter_factory.0.captures_iter(filter_str).next() {
+                                Some(cap) => {
+                                    let filter = filter_factory.1(cap);
+                                    selected_filters.push(filter);
+                                    continue 'filter_str;
+                                },
+                                None => {}
                             }
                         }
                     }
