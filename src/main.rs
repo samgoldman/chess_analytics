@@ -161,7 +161,7 @@ fn main() -> io::Result<()> {
 
             match matches.values_of("filters") {
                 Some(filter_strs) => {
-                    for filter_str in filter_strs {
+                    'filter_str: for filter_str in filter_strs {
                         for i in 0..filter_factories.len() {
                             let filter_factory = &filter_factories[i];
                 
@@ -169,12 +169,15 @@ fn main() -> io::Result<()> {
                                 let value = cap[1].parse::<i32>().unwrap();
                                 let filter = filter_factory.1(value);
                                 selected_filters.push(filter);
+                                continue 'filter_str;
                             }
                         }
                 
                         match available_filters.remove(filter_str) {
                             Some(v) => selected_filters.push(v),
-                            None => {}
+                            None => {
+                                panic!("Warning: no filter found for `{}` (note: this warning will present for duplicates)", filter_str);
+                            }
                         }
                     }
                 }
