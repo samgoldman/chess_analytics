@@ -1,4 +1,4 @@
-runs-on: [push, pull_request]
+on: [push, pull_request]
 
 name: Continuous integration
 
@@ -32,6 +32,7 @@ jobs:
           command: test
   
   coverage:
+    runs-on: ubuntu-latest
     steps:
       - run: cargo tarpaulin --out Xml
       - run: bash <(curl -s https://codecov.io/bash)

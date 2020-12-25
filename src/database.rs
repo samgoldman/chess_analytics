@@ -13,7 +13,7 @@ impl Database {
         // node is a mutable reference to the current database
         let mut node = self;
         // iterate through the path
-        for subkey in path.clone().iter() {
+        for subkey in path.iter() {
             // insert the new database object if necessary and
             // set node to (a mutable reference to) the child node
             node = node
@@ -38,8 +38,8 @@ impl Database {
             new_path.push(k.to_owned());
             v.deep_keys(new_path, output);
         }
-        if !has_children && current_path.len() > 0 {
-            output.push(current_path.clone());
+        if !has_children && !current_path.is_empty() {
+            output.push(current_path);
         }
     }
 }

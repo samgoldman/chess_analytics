@@ -67,10 +67,6 @@ pub const PLAYER_ELO_FILTER_FACTORY: FilterFactoryFn = |params: regex::Captures|
 pub const MATE_OCCURS_FILTER_FACTORY: FilterFactoryFn = |_params: regex::Captures| -> FilterFn {
     boxed_filter!(game, {
         let metadata = game.move_metadata().unwrap().iter();
-        if metadata.last().unwrap() & 0x0020 != 0 {
-            true
-        } else {
-            false
-        }
+        metadata.last().unwrap() & 0x0020 != 0
     })
 };

@@ -21,10 +21,7 @@ fn main() -> io::Result<()> {
 // Modified from https://stackoverflow.com/questions/43441166/prepend-line-to-beginning-of-file
 fn prepend_file<P: AsRef<Path>>(data: &[u8], file_path: &P) -> io::Result<()> {
     // Create a temporary file 
-    let mut tmp_path = Temp::new_file()?;
-    // Stop the temp file being automatically deleted when the variable
-    // is dropped, by releasing it.
-    //tmp_path.release();
+    let tmp_path = Temp::new_file()?;
     // Open temp file for writing
     let mut tmp = File::create(&tmp_path)?;
     // Open source file for reading

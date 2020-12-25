@@ -2,7 +2,7 @@ use crate::chess_flatbuffers::chess::Game;
 use crate::chess_utils::*;
 
 pub fn map_count(_game: Game) -> i16 {
-    return 1;
+    1
 }
 
 pub fn map_mate_count(game: Game) -> i16 {
@@ -33,8 +33,7 @@ pub fn map_num_captures(game: Game) -> i16 {
         Some(move_metadata) => move_metadata
             .iter()
             .filter(|c| (*c & 0x0008) != 0)
-            .collect::<Vec<u16>>()
-            .len() as i16,
+            .count() as i16,
         None => 0,
     }
 }
@@ -44,8 +43,7 @@ pub fn map_check_count(game: Game) -> i16 {
         Some(metadata) => metadata
             .iter()
             .filter(|meta| (*meta & (0x0010 | 0x0020)) > 0)
-            .collect::<Vec<_>>()
-            .len() as i16,
+            .count() as i16,
         None => 0,
     }
 }

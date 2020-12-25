@@ -102,22 +102,20 @@ fn main() -> io::Result<()> {
     let mut selected_bins = vec![];
 
     for bin_str in matches.values_of("bins").unwrap() {
-        match available_bins.get(bin_str) {
-            Some(v) => selected_bins.push(v.clone()),
-            None => {
-                eprintln!("Warning: no bin found for `{}`", bin_str);
-            }
+        if let Some(v) = available_bins.get(bin_str) {
+            selected_bins.push(*v)
+        } else {
+            eprintln!("Warning: no bin found for `{}`", bin_str);
         }
     }
 
     let mut selected_statistics = vec![];
 
     for stat_str in matches.values_of("statistics").unwrap() {
-        match available_statitistcs.get(stat_str) {
-            Some(v) => selected_statistics.push(v.clone()),
-            None => {
-                eprintln!("Warning: no statistic found for `{}`", stat_str);
-            }
+        if let Some(v) = available_statitistcs.get(stat_str) {
+            selected_statistics.push(v.clone())
+        } else {
+            eprintln!("Warning: no statistic found for `{}`", stat_str);
         }
     }
 
@@ -142,6 +140,7 @@ fn main() -> io::Result<()> {
             PLAYER_ELO_FILTER_FACTORY,
         ),
         (
+            #[allow(clippy::trivial_regex)]
             Regex::new(r#"mateOccurs"#).unwrap(),
             MATE_OCCURS_FILTER_FACTORY,
         ),
@@ -171,25 +170,17 @@ fn main() -> io::Result<()> {
         let handle = thread::spawn(move || -> io::Result<()> {
             let mut selected_filters = vec![];
 
-            match matches.values_of("filters") {
-                Some(filter_strs) => {
-                    'filter_str: for filter_str in filter_strs {
-                        for i in 0..filter_factories.len() {
-                            let filter_factory = &filter_factories[i];
-
-                            match filter_factory.0.captures_iter(filter_str).next() {
-                                Some(cap) => {
-                                    let filter = filter_factory.1(cap);
-                                    selected_filters.push(filter);
-                                    continue 'filter_str;
-                                },
-                                None => {}
-                            }
+            if let Some(filter_strs) = matches.values_of("filters") {
+                'filter_str: for filter_str in filter_strs {
+                    for filter_factory in &filter_factories {
+                        if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
+                                let filter = filter_factory.1(cap);
+                                selected_filters.push(filter);
+                                continue 'filter_str;
                         }
                     }
                 }
-                None => {}
-            };
+            }
 
             loop {
                 let entry;
@@ -215,7 +206,7 @@ fn main() -> io::Result<()> {
                     // Loop through every filter
                     for filter in &selected_filters {
                         // Short circuit false if a single filter fails
-                        if false == filter(*game) {
+                        if !filter(*game) {
                             return false;
                         }
                     }
@@ -223,8 +214,7 @@ fn main() -> io::Result<()> {
                 });
 
                 for game in filtered_games {
-                    for i in 0..selected_statistics.len() {
-                        let stat = &selected_statistics[i];
+                    for stat in &selected_statistics {
                         let mut path = vec![stat.0.clone()];
 
                         for bin in &selected_bins {
@@ -248,8 +238,7 @@ fn main() -> io::Result<()> {
         handle.join().unwrap()?;
     }
 
-    for i in 0..selected_statistics.len() {
-        let selected = &selected_statistics[i];
+    for selected in &selected_statistics {
         let mut db = db.lock().unwrap();
 
         let stat_node = db.insert_path(vec![selected.0.to_string()]);
