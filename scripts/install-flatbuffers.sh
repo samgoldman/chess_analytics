@@ -8,7 +8,7 @@ mkdir build
 cd build
 cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DFLATBUFFERS_BUILD_SHAREDLIB=ON
 ninja
-sudo ninja install
+ninja install
 sudo cp flatc /usr/bin
 cd
 rm -rf /tmp/flatbuffers.tar.gz /tmp/flatbuffers-1.8.0
