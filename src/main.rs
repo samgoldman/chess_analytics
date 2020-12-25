@@ -65,7 +65,7 @@ fn main() -> io::Result<()> {
         data: vec![]
     }));
 
-    let mut available_statitistcs: HashMap<&str, Statistic> = hashmap![
+    let available_statitistcs: HashMap<&str, Statistic> = hashmap![
         "gameCount" => ("gameCount".to_string(), map_count as MapFn, fold_sum as FoldFn),
         "mateCount" => ("mateCount".to_string(), map_mate_count, fold_sum),
         "matePct" => ("matePct".to_string(), map_mate_count, fold_percent),
@@ -82,7 +82,7 @@ fn main() -> io::Result<()> {
         "sicilianDefenceRate" => ("sicilianDefenceRate".to_string(), map_sicilian_defence_count, fold_avg)
     ];
 
-    let mut available_bins: HashMap<&str, BinFn> = hashmap![
+    let available_bins = hashmap![
         "year" => bin_year as BinFn,
         "month" => bin_month,
         "day" => bin_day,
@@ -92,10 +92,10 @@ fn main() -> io::Result<()> {
     let mut selected_bins = vec![];
 
     for bin_str in matches.values_of("bins").unwrap() {
-        match available_bins.remove(bin_str) {
-            Some(v) => selected_bins.push(v),
+        match available_bins.get(bin_str) {
+            Some(v) => selected_bins.push(v.clone()),
             None => {
-                eprintln!("Warning: no bin found for `{}` (note: this warning will present for duplicates)", bin_str);
+                eprintln!("Warning: no bin found for `{}`", bin_str);
             }
         }
     }
@@ -103,23 +103,23 @@ fn main() -> io::Result<()> {
     let mut selected_statistics = vec![];
 
     for stat_str in matches.values_of("statistics").unwrap() {
-        match available_statitistcs.remove(stat_str) {
-            Some(v) => selected_statistics.push(v),
+        match available_statitistcs.get(stat_str) {
+            Some(v) => selected_statistics.push(v.clone()),
             None => {
-                eprintln!("Warning: no statistic found for `{}` (note: this warning will present for duplicates)", stat_str);
+                eprintln!("Warning: no statistic found for `{}`", stat_str);
             }
         }
     }
 
     let filter_factories = vec![
-        (Regex::new(r#"minGameElo(\d+)"#).unwrap(), min_game_elo_filter_factory as FilterFactoryFn),
-        (Regex::new(r#"maxGameElo(\d+)"#).unwrap(), max_game_elo_filter_factory),
-        (Regex::new(r#"year(\d+)"#).unwrap(), year_filter_factory),
-        (Regex::new(r#"month(\d+)"#).unwrap(), month_filter_factory),
-        (Regex::new(r#"day(\d+)"#).unwrap(), day_filter_factory),
-        (Regex::new(r#"minMoves(\d+)"#).unwrap(), min_moves_filter_factory),
-        (Regex::new(r#"minWhiteElo(\d+)"#).unwrap(), min_white_elo_filter_factory),
-        (Regex::new(r#"minBlackElo(\d+)"#).unwrap(), min_black_elo_filter_factory)
+        (Regex::new(r#"minGameElo(\d+)"#).unwrap(), MIN_GAME_ELO_FILTER_FACTORY),
+        (Regex::new(r#"maxGameElo(\d+)"#).unwrap(), MAX_GAME_ELO_FILTER_FACTORY),
+        (Regex::new(r#"year(\d+)"#).unwrap(), YEAR_FILTER_FACTORY),
+        (Regex::new(r#"month(\d+)"#).unwrap(), MONTH_FILTER_FACTORY),
+        (Regex::new(r#"day(\d+)"#).unwrap(), DAY_FILTER_FACTORY),
+        (Regex::new(r#"minMoves(\d+)"#).unwrap(), MIN_MOVES_FILTER_FACTORY),
+        (Regex::new(r#"(min|max)(White|Black|Either)Elo(\d+)"#).unwrap(), PLAYER_ELO_FILTER_FACTORY),
+        (Regex::new(r#"mateOccurs"#).unwrap(), MATE_OCCURS_FILTER_FACTORY)
     ];
 
     let file_glob = matches.value_of("glob").unwrap();
@@ -140,9 +140,6 @@ fn main() -> io::Result<()> {
         let handle = thread::spawn(move || -> io::Result<()> {
             let mut selected_filters = vec![];
 
-            // Static filters
-            let mut available_filters = hashmap!["mateOccurs" => Box::new(mate_occurs_filter)];
-
             match matches.values_of("filters") {
                 Some(filter_strs) => {
                     'filter_str: for filter_str in filter_strs {
@@ -150,17 +147,9 @@ fn main() -> io::Result<()> {
                             let filter_factory = &filter_factories[i];
                 
                             for cap in filter_factory.0.captures_iter(filter_str) {
-                                let value = cap[1].parse::<i32>().unwrap();
-                                let filter = filter_factory.1(value);
+                                let filter = filter_factory.1(cap);
                                 selected_filters.push(filter);
                                 continue 'filter_str;
-                            }
-                        }
-                
-                        match available_filters.remove(filter_str) {
-                            Some(v) => selected_filters.push(v),
-                            None => {
-                                panic!("Warning: no filter found for `{}` (note: this warning will present for duplicates)", filter_str);
                             }
                         }
                     }
@@ -171,7 +160,9 @@ fn main() -> io::Result<()> {
 
             loop {
                 let entry;
+                // Scope to unlock once done with entries
                 {
+                    // Return from the thread once there are no more entries to process
                     let mut entries = entries.lock().unwrap();
                     match entries.next() {
                         Some(x) => entry = x,
@@ -179,8 +170,7 @@ fn main() -> io::Result<()> {
                     }
                 }
 
-                let file_name = entry.unwrap();
-                let file = File::open(file_name)?;
+                let file = File::open(entry.unwrap())?;
                 let mut decompressor = BzDecoder::new(file);
 
                 let mut data = Vec::new();
@@ -189,7 +179,9 @@ fn main() -> io::Result<()> {
                 let games = root_as_game_list(&data).unwrap().games().unwrap().iter();
         
                 let filtered_games = games.filter(|game| {
+                    // Loop through every filter
                     for filter in &selected_filters {
+                        // Short circuit false if a single filter fails
                         if false == filter(*game) {
                             return false;
                         }
@@ -207,6 +199,7 @@ fn main() -> io::Result<()> {
                             path.push(new_bin);
                         }
         
+                        // Unlocked at the end of the loop iteration
                         let mut db = db.lock().unwrap();
                         
                         let node = db.insert_path(path);
