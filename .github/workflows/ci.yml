@@ -13,6 +13,8 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - name: Checkout submodules
+        uses: textbook/git-checkout-submodule-action@master
       - uses: actions-rs/cargo@v1
         with:
           command: check
@@ -27,13 +29,12 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - name: Checkout submodules
+        uses: textbook/git-checkout-submodule-action@master
       - uses: actions-rs/cargo@v1
         with:
           command: test
-  
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
+      - run: cargo install cargo-tarpaulin
       - run: cargo tarpaulin --out Xml
       - run: bash <(curl -s https://codecov.io/bash)
           
@@ -47,6 +48,8 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - name: Checkout submodules
+        uses: textbook/git-checkout-submodule-action@master
       - run: rustup component add rustfmt
       - uses: actions-rs/cargo@v1
         with:
@@ -63,6 +66,8 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - name: Checkout submodules
+        uses: textbook/git-checkout-submodule-action@master
       - run: rustup component add clippy
       - uses: actions-rs/cargo@v1
         with:
