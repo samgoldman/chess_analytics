@@ -1,68 +1,78 @@
-use clap::{Arg, App};
-use std::io::{self};
-use std::io::prelude::*;
-use std::fs::File;
+use bzip2::read::BzDecoder;
+use clap::{App, Arg};
 use glob::glob;
-use std::collections::{HashMap};
 use regex::Regex;
+use std::collections::HashMap;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::{self};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use bzip2::read::{BzDecoder};
 
+mod bins;
 #[allow(non_snake_case)]
 #[path = "../target/flatbuffers/chess_generated.rs"]
 mod chess_flatbuffers;
-mod bins;
-mod maps;
-mod folds;
-mod types;
-mod filters;
-mod database;
 mod chess_utils;
+mod database;
+mod filters;
+mod folds;
 mod general_utils;
+mod maps;
+mod types;
 
-use chess_flatbuffers::chess::{root_as_game_list};
-use bins::{*};
-use maps::{*};
-use folds::{*};
-use types::{*};
-use filters::{*};
+use bins::*;
+use chess_flatbuffers::chess::root_as_game_list;
 use database::Database;
-
+use filters::*;
+use folds::*;
+use maps::*;
+use types::*;
 
 fn main() -> io::Result<()> {
     let matches = App::new("PGN to Flat Buffer")
         .version("0.1.0")
         .author("Sam Goldman")
         .about("Stats from lichess flatbuffers")
-        .arg(Arg::with_name("glob")
-            .long("glob")
-            .takes_value(true)
-            .required(true)
-            .help("A glob to capture the files to process").required(true))
-        .arg(Arg::with_name("filters")
-            .long("filters")
-            .takes_value(true)
-            .multiple(true))
-        .arg(Arg::with_name("bins")
-            .long("bins")
-            .takes_value(true)
-            .multiple(true))
-        .arg(Arg::with_name("statistics")
-            .long("statistics")
-            .takes_value(true)
-            .required(true)
-            .multiple(true)
-            .min_values(1))
-        .arg(Arg::with_name("num_threads")
-            .long("num_threads")
-            .takes_value(true)
-            .default_value("6"))
+        .arg(
+            Arg::with_name("glob")
+                .long("glob")
+                .takes_value(true)
+                .required(true)
+                .help("A glob to capture the files to process")
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("filters")
+                .long("filters")
+                .takes_value(true)
+                .multiple(true),
+        )
+        .arg(
+            Arg::with_name("bins")
+                .long("bins")
+                .takes_value(true)
+                .multiple(true),
+        )
+        .arg(
+            Arg::with_name("statistics")
+                .long("statistics")
+                .takes_value(true)
+                .required(true)
+                .multiple(true)
+                .min_values(1),
+        )
+        .arg(
+            Arg::with_name("num_threads")
+                .long("num_threads")
+                .takes_value(true)
+                .default_value("6"),
+        )
         .get_matches();
 
     let db = Arc::new(Mutex::new(Database {
         children: HashMap::new(),
-        data: vec![]
+        data: vec![],
     }));
 
     let available_statitistcs: HashMap<&str, Statistic> = hashmap![
@@ -99,7 +109,7 @@ fn main() -> io::Result<()> {
             }
         }
     }
-    
+
     let mut selected_statistics = vec![];
 
     for stat_str in matches.values_of("statistics").unwrap() {
@@ -112,21 +122,42 @@ fn main() -> io::Result<()> {
     }
 
     let filter_factories = vec![
-        (Regex::new(r#"minGameElo(\d+)"#).unwrap(), MIN_GAME_ELO_FILTER_FACTORY),
-        (Regex::new(r#"maxGameElo(\d+)"#).unwrap(), MAX_GAME_ELO_FILTER_FACTORY),
+        (
+            Regex::new(r#"minGameElo(\d+)"#).unwrap(),
+            MIN_GAME_ELO_FILTER_FACTORY,
+        ),
+        (
+            Regex::new(r#"maxGameElo(\d+)"#).unwrap(),
+            MAX_GAME_ELO_FILTER_FACTORY,
+        ),
         (Regex::new(r#"year(\d+)"#).unwrap(), YEAR_FILTER_FACTORY),
         (Regex::new(r#"month(\d+)"#).unwrap(), MONTH_FILTER_FACTORY),
         (Regex::new(r#"day(\d+)"#).unwrap(), DAY_FILTER_FACTORY),
-        (Regex::new(r#"minMoves(\d+)"#).unwrap(), MIN_MOVES_FILTER_FACTORY),
-        (Regex::new(r#"(min|max)(White|Black|Either)Elo(\d+)"#).unwrap(), PLAYER_ELO_FILTER_FACTORY),
-        (Regex::new(r#"mateOccurs"#).unwrap(), MATE_OCCURS_FILTER_FACTORY)
+        (
+            Regex::new(r#"minMoves(\d+)"#).unwrap(),
+            MIN_MOVES_FILTER_FACTORY,
+        ),
+        (
+            Regex::new(r#"(min|max)(White|Black|Either)Elo(\d+)"#).unwrap(),
+            PLAYER_ELO_FILTER_FACTORY,
+        ),
+        (
+            Regex::new(r#"mateOccurs"#).unwrap(),
+            MATE_OCCURS_FILTER_FACTORY,
+        ),
     ];
 
     let file_glob = matches.value_of("glob").unwrap();
 
-    let entries = Arc::new(Mutex::new(glob(file_glob).expect("Failed to read glob pattern")));
-    
-    let num_threads: i32 = matches.value_of("num_threads").unwrap().parse::<i32>().unwrap();
+    let entries = Arc::new(Mutex::new(
+        glob(file_glob).expect("Failed to read glob pattern"),
+    ));
+
+    let num_threads: i32 = matches
+        .value_of("num_threads")
+        .unwrap()
+        .parse::<i32>()
+        .unwrap();
 
     let mut handles = vec![];
 
@@ -145,7 +176,7 @@ fn main() -> io::Result<()> {
                     'filter_str: for filter_str in filter_strs {
                         for i in 0..filter_factories.len() {
                             let filter_factory = &filter_factories[i];
-                
+
                             for cap in filter_factory.0.captures_iter(filter_str) {
                                 let filter = filter_factory.1(cap);
                                 selected_filters.push(filter);
@@ -157,7 +188,6 @@ fn main() -> io::Result<()> {
                 None => {}
             };
 
-
             loop {
                 let entry;
                 // Scope to unlock once done with entries
@@ -166,7 +196,7 @@ fn main() -> io::Result<()> {
                     let mut entries = entries.lock().unwrap();
                     match entries.next() {
                         Some(x) => entry = x,
-                        None => return Ok(())
+                        None => return Ok(()),
                     }
                 }
 
@@ -175,9 +205,9 @@ fn main() -> io::Result<()> {
 
                 let mut data = Vec::new();
                 decompressor.read_to_end(&mut data)?;
-            
+
                 let games = root_as_game_list(&data).unwrap().games().unwrap().iter();
-        
+
                 let filtered_games = games.filter(|game| {
                     // Loop through every filter
                     for filter in &selected_filters {
@@ -188,20 +218,20 @@ fn main() -> io::Result<()> {
                     }
                     true
                 });
-                
+
                 for game in filtered_games {
                     for i in 0..selected_statistics.len() {
                         let stat = &selected_statistics[i];
                         let mut path = vec![stat.0.clone()];
-        
+
                         for bin in &selected_bins {
                             let new_bin = bin(game);
                             path.push(new_bin);
                         }
-        
+
                         // Unlocked at the end of the loop iteration
                         let mut db = db.lock().unwrap();
-                        
+
                         let node = db.insert_path(path);
                         node.data.push(stat.1(game));
                     }
@@ -216,7 +246,6 @@ fn main() -> io::Result<()> {
     }
 
     for i in 0..selected_statistics.len() {
-
         let selected = &selected_statistics[i];
         let mut db = db.lock().unwrap();
 

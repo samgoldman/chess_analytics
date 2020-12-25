@@ -30,7 +30,6 @@ impl Database {
         out
     }
 
-    
     fn deep_keys(&self, current_path: Vec<String>, output: &mut Vec<Vec<String>>) {
         let mut has_children = false;
         for (k, v) in self.children.iter() {
@@ -42,6 +41,5 @@ impl Database {
         if !has_children && current_path.len() > 0 {
             output.push(current_path.clone());
         }
-
     }
 }

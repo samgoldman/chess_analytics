@@ -8,5 +8,6 @@ fn main() {
         inputs: &[Path::new("chess_flat_buffer/chess.fbs")],
         out_dir: Path::new("target/flatbuffers/"),
         ..Default::default()
-    }).expect("flatc");
+    })
+    .expect("flatc");
 }

@@ -10,7 +10,7 @@ pub enum Rank {
     _6,
     _7,
     _8,
-    _NA
+    _NA,
 }
 
 #[derive(PartialEq)]
@@ -23,7 +23,7 @@ pub enum File {
     _F,
     _G,
     _H,
-    _NA
+    _NA,
 }
 
 fn int_to_file(int: u16) -> File {
@@ -37,7 +37,7 @@ fn int_to_file(int: u16) -> File {
         0x6 => File::_F,
         0x7 => File::_G,
         0x8 => File::_H,
-        _ => panic!("File not recongnized: {}", int)
+        _ => panic!("File not recongnized: {}", int),
     }
 }
 
@@ -52,7 +52,7 @@ fn int_to_rank(int: u16) -> Rank {
         0x6 => Rank::_6,
         0x7 => Rank::_7,
         0x8 => Rank::_8,
-        _ => panic!("Rank not recongnized: {}", int)
+        _ => panic!("Rank not recongnized: {}", int),
     }
 }
 
@@ -69,7 +69,7 @@ pub fn has_opening(game: Game, opening: Vec<(File, Rank)>) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
     let moves = match game.moves() {
         Some(moves) => moves,
-        None => return false
+        None => return false,
     };
 
     // Verify this game has enough moves for the given opening
@@ -82,9 +82,10 @@ pub fn has_opening(game: Game, opening: Vec<(File, Rank)>) -> bool {
 
     // For each expected moving in the opening, if the game moves don't match, just return false
     for (expected_file, expected_rank) in opening {
-        let (_from_file, _from_rank, to_file, to_rank) = extract_coordinates(moves_iter.next().unwrap() as u16);
+        let (_from_file, _from_rank, to_file, to_rank) =
+            extract_coordinates(moves_iter.next().unwrap() as u16);
         if expected_file != to_file || expected_rank != to_rank {
-            return false
+            return false;
         }
     }
 

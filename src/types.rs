@@ -1,4 +1,4 @@
-use crate::chess_flatbuffers::chess::{Game};
+use crate::chess_flatbuffers::chess::Game;
 
 pub type Statistic = (String, MapFn, FoldFn);
 pub type BinFn = fn(crate::chess_flatbuffers::chess::Game) -> String;
