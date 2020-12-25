@@ -90,3 +90,7 @@ pub fn has_opening(game: Game, opening: Vec<(File, Rank)>) -> bool {
 
     true
 }
+
+pub fn get_game_elo(game: Game) -> u32 {
+    (game.white_rating() + game.black_rating()) as u32 / 2
+}

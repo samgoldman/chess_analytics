@@ -12,6 +12,7 @@ use bzip2::read::{BzDecoder};
 #[allow(non_snake_case)]
 #[path = "../target/flatbuffers/chess_generated.rs"]
 mod chess_flatbuffers;
+mod bins;
 mod maps;
 mod folds;
 mod types;
@@ -21,28 +22,13 @@ mod chess_utils;
 mod general_utils;
 
 use chess_flatbuffers::chess::{root_as_game_list};
+use bins::{*};
 use maps::{*};
 use folds::{*};
-use filters::{*};
 use types::{*};
+use filters::{*};
 use database::Database;
 
-
-fn bin_year(game: crate::chess_flatbuffers::chess::Game) -> String {
-    game.year().to_string()
-}
-
-fn bin_month(game: crate::chess_flatbuffers::chess::Game) -> String {
-    format!("{:02}", game.month())
-}
-
-fn bin_day(game: crate::chess_flatbuffers::chess::Game) -> String {
-    format!("{:02}", game.day())
-}
-
-fn bin_game_elo(game: crate::chess_flatbuffers::chess::Game) -> String {
-    format!("{:04}", (get_game_elo(game) / 100) * 100)
-}
 
 fn main() -> io::Result<()> {
     let matches = App::new("PGN to Flat Buffer")

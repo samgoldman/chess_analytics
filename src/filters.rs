@@ -1,9 +1,6 @@
 use crate::chess_flatbuffers::chess::Game;
 use crate::types::{*};
-
-pub fn get_game_elo(game: Game) -> u32 {
-    (game.white_rating() + game.black_rating()) as u32 / 2
-}
+use crate::chess_utils::get_game_elo;
 
 pub fn min_game_elo_filter_factory(min_elo: i32) -> FilterFn {
     Box::new(move |game: Game| -> bool {
