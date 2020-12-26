@@ -1,4 +1,4 @@
-use crate::chess_flatbuffers::chess::Game;
+use crate::types::*;
 
 #[derive(PartialEq)]
 pub enum Rank {
@@ -65,7 +65,7 @@ fn extract_coordinates(raw_coord: u16) -> (File, Rank, File, Rank) {
 }
 
 // TODO: Refactor to support specifying "from" coordinates
-pub fn has_opening(game: Game, opening: Vec<(File, Rank)>) -> bool {
+pub fn has_opening(game: &dyn GameWrapper, opening: Vec<(File, Rank)>) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
     let moves = match game.moves() {
         Some(moves) => moves,
@@ -92,6 +92,6 @@ pub fn has_opening(game: Game, opening: Vec<(File, Rank)>) -> bool {
     true
 }
 
-pub fn get_game_elo(game: Game) -> u32 {
+pub fn get_game_elo(game: &dyn GameWrapper) -> u32 {
     (game.white_rating() + game.black_rating()) as u32 / 2
 }

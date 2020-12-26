@@ -160,7 +160,10 @@ fn main() -> io::Result<()> {
                 'filter_str: for filter_str in filter_strs {
                     for filter_factory in &filter_factories {
                         if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
-                            let filter_options: Vec<&str> = cap.iter().map(|y| y.unwrap().as_str()).collect::<Vec<&str>>();
+                            let filter_options: Vec<&str> = cap
+                                .iter()
+                                .map(|y| y.unwrap().as_str())
+                                .collect::<Vec<&str>>();
                             let filter = filter_factory.1(filter_options);
                             selected_filters.push(filter);
                             continue 'filter_str;
@@ -193,7 +196,7 @@ fn main() -> io::Result<()> {
                     // Loop through every filter
                     for filter in &selected_filters {
                         // Short circuit false if a single filter fails
-                        if !filter(*game) {
+                        if !filter(game as &dyn GameWrapper) {
                             return false;
                         }
                     }
@@ -205,7 +208,7 @@ fn main() -> io::Result<()> {
                         let mut path = vec![stat.0.clone()];
 
                         for bin in &selected_bins {
-                            let new_bin = bin(game);
+                            let new_bin = bin(&game as &dyn GameWrapper);
                             path.push(new_bin);
                         }
 
@@ -213,7 +216,7 @@ fn main() -> io::Result<()> {
                         let mut db = db.lock().unwrap();
 
                         let node = db.insert_path(path);
-                        node.data.push(stat.1(game));
+                        node.data.push(stat.1(&game as &dyn GameWrapper));
                     }
                 }
             }
