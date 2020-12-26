@@ -160,7 +160,8 @@ fn main() -> io::Result<()> {
                 'filter_str: for filter_str in filter_strs {
                     for filter_factory in &filter_factories {
                         if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
-                            let filter = filter_factory.1(cap);
+                            let filter_options: Vec<&str> = cap.iter().map(|y| y.unwrap().as_str()).collect::<Vec<&str>>();
+                            let filter = filter_factory.1(filter_options);
                             selected_filters.push(filter);
                             continue 'filter_str;
                         }

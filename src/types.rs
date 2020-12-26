@@ -5,4 +5,4 @@ pub type BinFn = fn(crate::chess_flatbuffers::chess::Game) -> String;
 pub type FoldFn = fn(&[i16]) -> f64;
 pub type MapFn = fn(Game) -> i16;
 pub type FilterFn = Box<dyn Fn(Game) -> bool>;
-pub type FilterFactoryFn = fn(regex::Captures) -> FilterFn;
+pub type FilterFactoryFn = fn(Vec<&str>) -> FilterFn;
