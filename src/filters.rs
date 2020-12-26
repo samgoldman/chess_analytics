@@ -41,11 +41,14 @@ pub fn min_moves_filter_factory(params: Vec<&str>) -> FilterFn {
 }
 
 pub fn player_elo_filter_factory(params: Vec<&str>) -> FilterFn {
-    let comparison = if params[1] == "max" {
-        u16::min
+    let comparison;
+   
+    if params[1] == "max" {
+        comparison = u16::min as fn(u16, u16) -> u16;
     } else {
-        u16::max
+        comparison = u16::max;
     };
+
     let which_player = params[2].to_string();
     let threshold_elo = params[3].parse::<u16>().unwrap();
     Box::new(move |game| -> bool {
@@ -86,7 +89,6 @@ pub fn mate_occurs_filter_factory(_params: Vec<&str>) -> FilterFn {
 
 #[cfg(test)]
 mod tests {
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
     #[test]
@@ -152,6 +154,72 @@ mod tests {
 
         test_game.expect_white_rating().times(2).returning(|| 9999);
         test_game.expect_black_rating().times(0).returning(|| 600);
+        assert_eq!(fun(&test_game), false);
+    }
+
+    #[test]
+    fn test_player_elo_filter_factory_min_black() {
+        let mut test_game = MockGameWrapper::new();
+
+        // MIN, BLACK, 700
+        let fun = player_elo_filter_factory(vec!["", "min", "Black", "700"]);
+        test_game.expect_white_rating().times(0).returning(|| 700);
+        test_game.expect_black_rating().times(2).returning(|| 0);
+        assert_eq!(fun(&test_game), false);
+
+        test_game.expect_white_rating().times(0).returning(|| 0);
+        test_game.expect_black_rating().times(2).returning(|| 700);
+        assert_eq!(fun(&test_game), true);
+
+        test_game.expect_white_rating().times(0).returning(|| 0);
+        test_game.expect_black_rating().times(2).returning(|| 6000);
+        assert_eq!(fun(&test_game), true);
+
+        // MIN, BLACK, 2000
+        let fun = player_elo_filter_factory(vec!["", "min", "Black", "2000"]);
+        test_game.expect_white_rating().times(0).returning(|| 5000);
+        test_game.expect_black_rating().times(2).returning(|| 0);
+        assert_eq!(fun(&test_game), false);
+
+        test_game.expect_white_rating().times(0).returning(|| 0);
+        test_game.expect_black_rating().times(2).returning(|| 700);
+        assert_eq!(fun(&test_game), false);
+
+        test_game.expect_white_rating().times(0).returning(|| 1999);
+        test_game.expect_black_rating().times(2).returning(|| 6000);
+        assert_eq!(fun(&test_game), true);
+    }
+
+    #[test]
+    fn test_player_elo_filter_factory_max_black() {
+        let mut test_game = MockGameWrapper::new();
+
+        // MAX, BLACK, 600
+        let fun = player_elo_filter_factory(vec!["", "max", "Black", "600"]);
+        test_game.expect_white_rating().times(0).returning(|| 600);
+        test_game.expect_black_rating().times(2).returning(|| 0);
+        assert_eq!(fun(&test_game), true);
+
+        test_game.expect_white_rating().times(0).returning(|| 0);
+        test_game.expect_black_rating().times(2).returning(|| 600);
+        assert_eq!(fun(&test_game), true);
+
+        test_game.expect_white_rating().times(0).returning(|| 600);
+        test_game.expect_black_rating().times(2).returning(|| 700);
+        assert_eq!(fun(&test_game), false);
+
+        // MAX, BLACK, 3000
+        let fun = player_elo_filter_factory(vec!["", "max", "Black", "3000"]);
+        test_game.expect_white_rating().times(0).returning(|| 4000);
+        test_game.expect_black_rating().times(2).returning(|| 2999);
+        assert_eq!(fun(&test_game), true);
+
+        test_game.expect_white_rating().times(0).returning(|| 600);
+        test_game.expect_black_rating().times(2).returning(|| 0);
+        assert_eq!(fun(&test_game), true);
+
+        test_game.expect_white_rating().times(0).returning(|| 3000);
+        test_game.expect_black_rating().times(2).returning(|| 3001);
         assert_eq!(fun(&test_game), false);
     }
 }
