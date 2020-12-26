@@ -61,7 +61,8 @@ jobs:
       - run: ./scripts/install-flatbuffers.sh
       - run: rustup component add rustfmt
       - uses: actions-rs/cargo@v1
-        with: build
+        with: 
+          command: build
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
