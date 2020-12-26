@@ -41,7 +41,7 @@ pub fn min_moves_filter_factory(params: Vec<&str>) -> FilterFn {
 }
 
 pub fn player_elo_filter_factory(params: Vec<&str>) -> FilterFn {
-    let comparison = if params[1].to_string() == "max" {
+    let comparison = if params[1] == "max" {
         u16::min
     } else {
         u16::max
