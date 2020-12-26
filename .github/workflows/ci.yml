@@ -21,6 +21,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
+      - uses: Swatinem/rust-cache@v1
 
   test:
     name: Test Suite
@@ -43,6 +44,7 @@ jobs:
       - run: cargo install cargo-tarpaulin
       - run: cargo tarpaulin --out Xml
       - run: bash <(curl -s https://codecov.io/bash)
+      - uses: Swatinem/rust-cache@v1
           
   fmt:
     name: Rustfmt
@@ -67,6 +69,7 @@ jobs:
         with:
           command: fmt
           args: -- --check
+      - uses: Swatinem/rust-cache@v1
 
   clippy:
     name: Clippy
@@ -88,3 +91,4 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
+      - uses: Swatinem/rust-cache@v1
