@@ -88,7 +88,7 @@ pub fn mate_occurs_filter_factory(_params: Vec<&str>) -> FilterFn {
 }
 
 #[cfg(test)]
-mod tests {
+mod tests_player_elo_filter_factory {
     use super::*;
 
     #[test]
