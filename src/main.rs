@@ -119,31 +119,17 @@ fn main() -> io::Result<()> {
         }
     }
 
+    #[rustfmt::skip]
     let filter_factories = vec![
-        (
-            Regex::new(r#"minGameElo(\d+)"#).unwrap(),
-            MIN_GAME_ELO_FILTER_FACTORY,
-        ),
-        (
-            Regex::new(r#"maxGameElo(\d+)"#).unwrap(),
-            MAX_GAME_ELO_FILTER_FACTORY,
-        ),
-        (Regex::new(r#"year(\d+)"#).unwrap(), YEAR_FILTER_FACTORY),
-        (Regex::new(r#"month(\d+)"#).unwrap(), MONTH_FILTER_FACTORY),
-        (Regex::new(r#"day(\d+)"#).unwrap(), DAY_FILTER_FACTORY),
-        (
-            Regex::new(r#"minMoves(\d+)"#).unwrap(),
-            MIN_MOVES_FILTER_FACTORY,
-        ),
-        (
-            Regex::new(r#"(min|max)(White|Black|Either)Elo(\d+)"#).unwrap(),
-            PLAYER_ELO_FILTER_FACTORY,
-        ),
-        (
-            #[allow(clippy::trivial_regex)]
-            Regex::new(r#"mateOccurs"#).unwrap(),
-            MATE_OCCURS_FILTER_FACTORY,
-        ),
+        (Regex::new(r#"minGameElo(\d+)"#).unwrap(), min_game_elo_filter_factory as FilterFactoryFn),
+        (Regex::new(r#"maxGameElo(\d+)"#).unwrap(), max_game_elo_filter_factory),
+        (Regex::new(r#"year(\d+)"#).unwrap(), year_filter_factory),
+        (Regex::new(r#"month(\d+)"#).unwrap(), month_filter_factory),
+        (Regex::new(r#"day(\d+)"#).unwrap(), day_filter_factory),
+        (Regex::new(r#"minMoves(\d+)"#).unwrap(), min_moves_filter_factory),
+        (Regex::new(r#"(min|max)(White|Black|Either)Elo(\d+)"#).unwrap(), player_elo_filter_factory),
+        #[allow(clippy::trivial_regex)]
+        (Regex::new(r#"mateOccurs"#).unwrap(), mate_occurs_filter_factory),
     ];
 
     let file_glob = matches.value_of("glob").unwrap();

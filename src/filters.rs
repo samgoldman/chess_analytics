@@ -1,43 +1,36 @@
-use crate::chess_flatbuffers::chess::Game;
 use crate::chess_utils::get_game_elo;
 use crate::types::*;
 
-macro_rules! boxed_filter {
-    ($param:ident, $func:expr) => {
-        Box::new(move |$param: Game| -> bool { $func })
-    };
+pub fn min_game_elo_filter_factory(params: regex::Captures) -> FilterFn {
+    let min_elo: u32 = params[1].parse::<u32>().unwrap();
+    Box::new(move |game| get_game_elo(game) >= min_elo as u32)
 }
 
-pub const MIN_GAME_ELO_FILTER_FACTORY: FilterFactoryFn = |params: regex::Captures| -> FilterFn {
-    let min_elo: u32 = params[1].parse::<u32>().unwrap();
-    boxed_filter!(game, get_game_elo(game) >= min_elo as u32)
-};
-
-pub const MAX_GAME_ELO_FILTER_FACTORY: FilterFactoryFn = |params: regex::Captures| -> FilterFn {
+pub fn max_game_elo_filter_factory(params: regex::Captures) -> FilterFn {
     let max_elo: u32 = params[1].parse::<u32>().unwrap();
-    boxed_filter!(game, get_game_elo(game) <= max_elo as u32)
-};
+    Box::new(move |game| get_game_elo(game) <= max_elo as u32)
+}
 
-pub const YEAR_FILTER_FACTORY: FilterFactoryFn = |params: regex::Captures| -> FilterFn {
+pub fn year_filter_factory(params: regex::Captures) -> FilterFn {
     let year: u32 = params[1].parse::<u32>().unwrap();
-    boxed_filter!(game, game.year() as u32 == year)
-};
+    Box::new(move |game| game.year() as u32 == year)
+}
 
-pub const MONTH_FILTER_FACTORY: FilterFactoryFn = |params: regex::Captures| -> FilterFn {
+pub fn month_filter_factory(params: regex::Captures) -> FilterFn {
     let month: u32 = params[1].parse::<u32>().unwrap();
-    boxed_filter!(game, game.year() as u32 == month)
-};
+    Box::new(move |game| game.year() as u32 == month)
+}
 
-pub const DAY_FILTER_FACTORY: FilterFactoryFn = |params: regex::Captures| -> FilterFn {
+pub fn day_filter_factory(params: regex::Captures) -> FilterFn {
     let day: u32 = params[1].parse::<u32>().unwrap();
-    boxed_filter!(game, game.year() as u32 == day)
-};
+    Box::new(move |game| game.year() as u32 == day)
+}
 
-pub const MIN_MOVES_FILTER_FACTORY: FilterFactoryFn = |params: regex::Captures| -> FilterFn {
+pub fn min_moves_filter_factory(params: regex::Captures) -> FilterFn {
     let min: u32 = params[1].parse::<u32>().unwrap();
-    boxed_filter!(game, {
+    Box::new(move |game| -> bool {
         if min == 0 {
-            true // Can't go lower than 0
+            true // can't go lower than 0
         } else {
             match game.move_metadata() {
                 Some(metadata) => metadata.len() as u32 >= min,
@@ -45,9 +38,9 @@ pub const MIN_MOVES_FILTER_FACTORY: FilterFactoryFn = |params: regex::Captures| 
             }
         }
     })
-};
+}
 
-pub const PLAYER_ELO_FILTER_FACTORY: FilterFactoryFn = |params: regex::Captures| -> FilterFn {
+pub fn player_elo_filter_factory(params: regex::Captures) -> FilterFn {
     let comparison = if params[1].to_string() == "max" {
         u16::min
     } else {
@@ -55,18 +48,18 @@ pub const PLAYER_ELO_FILTER_FACTORY: FilterFactoryFn = |params: regex::Captures|
     };
     let which_player = params[2].to_string();
     let min_elo = params[3].parse::<u16>().unwrap();
-    boxed_filter!(game, {
+    Box::new(move |game| -> bool {
         let check_white = which_player == "White" || which_player == "Either";
         let check_black = which_player == "Black" || which_player == "Either";
 
         (!check_white || comparison(game.white_rating(), min_elo) == game.white_rating())
             && (!check_black || comparison(game.black_rating(), min_elo) == game.black_rating())
     })
-};
+}
 
-pub const MATE_OCCURS_FILTER_FACTORY: FilterFactoryFn = |_params: regex::Captures| -> FilterFn {
-    boxed_filter!(game, {
+pub fn mate_occurs_filter_factory(_params: regex::Captures) -> FilterFn {
+    Box::new(move |game| -> bool {
         let metadata = game.move_metadata().unwrap().iter();
         metadata.last().unwrap() & 0x0020 != 0
     })
-};
+}

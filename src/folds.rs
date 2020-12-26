@@ -50,7 +50,7 @@ mod tests {
         assert_eq!(fold_avg(&VEC5), 0.5);
         assert_eq!(fold_avg(&VEC6), 0.5);
     }
-    
+
     #[test]
     fn test_fold_max() {
         assert_eq!(fold_max(&VEC1), i16::MIN as f64);
@@ -60,24 +60,24 @@ mod tests {
         assert_eq!(fold_max(&VEC5), 1.0);
         assert_eq!(fold_max(&VEC6), 2.0);
     }
-    
+
     #[test]
     fn test_fold_min() {
         assert_eq!(fold_min(&VEC1), i16::MAX as f64);
-        assert_eq!(fold_min(&VEC2),  1.0);
-        assert_eq!(fold_min(&VEC3),  5.0);
+        assert_eq!(fold_min(&VEC2), 1.0);
+        assert_eq!(fold_min(&VEC3), 5.0);
         assert_eq!(fold_min(&VEC4), -1.0);
-        assert_eq!(fold_min(&VEC5),  0.0);
+        assert_eq!(fold_min(&VEC5), 0.0);
         assert_eq!(fold_min(&VEC6), -1.0);
     }
-    
+
     #[test]
     fn test_fold_percent() {
         assert!(fold_percent(&VEC1).is_nan());
         assert_eq!(fold_percent(&VEC2), 100.0);
         assert_eq!(fold_percent(&VEC3), 500.0);
-        assert_eq!(fold_percent(&VEC4),  50.0);
-        assert_eq!(fold_percent(&VEC5),  50.0);
-        assert_eq!(fold_percent(&VEC6),  50.0);
+        assert_eq!(fold_percent(&VEC4), 50.0);
+        assert_eq!(fold_percent(&VEC5), 50.0);
+        assert_eq!(fold_percent(&VEC6), 50.0);
     }
 }
