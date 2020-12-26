@@ -49,12 +49,31 @@ pub fn player_elo_filter_factory(params: Vec<&str>) -> FilterFn {
     let which_player = params[2].to_string();
     let threshold_elo = params[3].parse::<u16>().unwrap();
     Box::new(move |game| -> bool {
-        let check_white = which_player == "White" || which_player == "Either";
-        let check_black = which_player == "Black" || which_player == "Either";
+        let check_white;
+        let check_black;
 
-        (!check_white || comparison(game.white_rating(), threshold_elo) == game.white_rating())
-            && (!check_black
-                || comparison(game.black_rating(), threshold_elo) == game.black_rating())
+        // This falls back to black = true, white = false
+        // TODO: panic in the event player is not one of the three expected values
+        if which_player == "Either" {
+            check_white = true;
+            check_black = true;
+        } else if which_player == "White" {
+            check_white = true;
+            check_black = false;
+        } else {
+            check_white = false;
+            check_black = true;
+        }
+
+        if check_white && comparison(game.white_rating(), threshold_elo) != game.white_rating() {
+            return false;
+        }
+
+        if check_black && comparison(game.black_rating(), threshold_elo) != game.black_rating() {
+            return false;
+        }
+
+        true
     })
 }
 
@@ -87,5 +106,52 @@ mod tests {
         test_game.expect_white_rating().times(2).returning(|| 9999);
         test_game.expect_black_rating().times(0).returning(|| 600);
         assert_eq!(fun(&test_game), true);
+
+        // MIN, WHITE, 3000
+        let fun = player_elo_filter_factory(vec!["", "min", "White", "3000"]);
+        test_game.expect_white_rating().times(2).returning(|| 0);
+        test_game.expect_black_rating().times(0).returning(|| 5000);
+        assert_eq!(fun(&test_game), false);
+
+        test_game.expect_white_rating().times(2).returning(|| 600);
+        test_game.expect_black_rating().times(0).returning(|| 0);
+        assert_eq!(fun(&test_game), false);
+
+        test_game.expect_white_rating().times(2).returning(|| 9999);
+        test_game.expect_black_rating().times(0).returning(|| 500);
+        assert_eq!(fun(&test_game), true);
+    }
+
+    #[test]
+    fn test_player_elo_filter_factory_max_white() {
+        let mut test_game = MockGameWrapper::new();
+
+        // MAX, WHITE, 600
+        let fun = player_elo_filter_factory(vec!["", "max", "White", "600"]);
+        test_game.expect_white_rating().times(2).returning(|| 0);
+        test_game.expect_black_rating().times(0).returning(|| 600);
+        assert_eq!(fun(&test_game), true);
+
+        test_game.expect_white_rating().times(2).returning(|| 600);
+        test_game.expect_black_rating().times(0).returning(|| 0);
+        assert_eq!(fun(&test_game), true);
+
+        test_game.expect_white_rating().times(2).returning(|| 9999);
+        test_game.expect_black_rating().times(0).returning(|| 600);
+        assert_eq!(fun(&test_game), false);
+
+        // MAX, WHITE, 3000
+        let fun = player_elo_filter_factory(vec!["", "max", "White", "3000"]);
+        test_game.expect_white_rating().times(2).returning(|| 0);
+        test_game.expect_black_rating().times(0).returning(|| 6000);
+        assert_eq!(fun(&test_game), true);
+
+        test_game.expect_white_rating().times(2).returning(|| 600);
+        test_game.expect_black_rating().times(0).returning(|| 0);
+        assert_eq!(fun(&test_game), true);
+
+        test_game.expect_white_rating().times(2).returning(|| 9999);
+        test_game.expect_black_rating().times(0).returning(|| 600);
+        assert_eq!(fun(&test_game), false);
     }
 }
