@@ -30,10 +30,7 @@ pub fn map_num_moves(game: Game) -> i16 {
 
 pub fn map_num_captures(game: Game) -> i16 {
     match game.move_metadata() {
-        Some(move_metadata) => move_metadata
-            .iter()
-            .filter(|c| (*c & 0x0008) != 0)
-            .count() as i16,
+        Some(move_metadata) => move_metadata.iter().filter(|c| (*c & 0x0008) != 0).count() as i16,
         None => 0,
     }
 }

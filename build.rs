@@ -1,7 +1,7 @@
 use flatc_rust::run;
 
 use mktemp::Temp;
-use std::{fs, io, io::Write, fs::File, path::Path};
+use std::{fs, fs::File, io, io::Write, path::Path};
 
 fn main() -> io::Result<()> {
     println!("cargo:rerun-if-changed=chess_flat_buffer/chess.fbs");
@@ -20,7 +20,7 @@ fn main() -> io::Result<()> {
 
 // Modified from https://stackoverflow.com/questions/43441166/prepend-line-to-beginning-of-file
 fn prepend_file<P: AsRef<Path>>(data: &[u8], file_path: &P) -> io::Result<()> {
-    // Create a temporary file 
+    // Create a temporary file
     let tmp_path = Temp::new_file()?;
     // Open temp file for writing
     let mut tmp = File::create(&tmp_path)?;

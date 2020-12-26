@@ -174,9 +174,9 @@ fn main() -> io::Result<()> {
                 'filter_str: for filter_str in filter_strs {
                     for filter_factory in &filter_factories {
                         if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
-                                let filter = filter_factory.1(cap);
-                                selected_filters.push(filter);
-                                continue 'filter_str;
+                            let filter = filter_factory.1(cap);
+                            selected_filters.push(filter);
+                            continue 'filter_str;
                         }
                     }
                 }
