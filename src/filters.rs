@@ -125,13 +125,11 @@ filter!(
                 check_black = true;
             }
 
-            if check_white && comparison(game.white_rating(), threshold_elo) != threshold_elo
-            {
+            if check_white && comparison(game.white_rating(), threshold_elo) != threshold_elo {
                 return false;
             }
 
-            if check_black && comparison(game.black_rating(), threshold_elo) != threshold_elo
-            {
+            if check_black && comparison(game.black_rating(), threshold_elo) != threshold_elo {
                 return false;
             }
 
