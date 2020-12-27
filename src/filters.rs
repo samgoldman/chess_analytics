@@ -69,16 +69,15 @@ fn get_filter(input: &str) -> Result<FilterFn, String> {
 pub fn matches_filter(input: String) -> Result<(), String> {
     match get_filter(&input) {
         Ok(_) => Ok(()),
-        Err(e) => Err(e)
+        Err(e) => Err(e),
     }
 }
 
 pub fn get_selected_filters(filter_strs: Vec<&str>) -> Vec<FilterFn> {
     let mut selected_filters = vec![];
     filter_strs.iter().for_each(|filter_str| {
-        match get_filter(filter_str) {
-            Ok(filter) => selected_filters.push(filter),
-            Err(_) => {}
+        if let Ok(filter) = get_filter(filter_str) {
+            selected_filters.push(filter)
         }
     });
     selected_filters
