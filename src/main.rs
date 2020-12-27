@@ -21,13 +21,13 @@ mod types;
 use bins::*;
 use chess_flatbuffers::chess::root_as_game_list;
 use database::Database;
-use filters::get_selected_filters;
+use filters::{get_selected_filters, matches_filter};
 use folds::*;
 use maps::*;
 use types::*;
 
 fn main() {
-    let matches = App::new("PGN to Flat Buffer")
+    let matches = App::new("Chess Statistics")
         .version("0.1.0")
         .author("Sam Goldman")
         .about("Stats from lichess flatbuffers")
@@ -43,7 +43,8 @@ fn main() {
             Arg::with_name("filters")
                 .long("filters")
                 .takes_value(true)
-                .multiple(true),
+                .multiple(true)
+                .validator(matches_filter),
         )
         .arg(
             Arg::with_name("bins")

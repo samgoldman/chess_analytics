@@ -53,17 +53,32 @@ fn capture_to_vec(cap: regex::Captures) -> Vec<&str> {
         .collect::<Vec<&str>>()
 }
 
+fn get_filter(input: &str) -> Result<FilterFn, String> {
+    let filter_factories = get_filter_factories();
+
+    for filter_factory in &filter_factories {
+        if let Some(cap) = filter_factory.0.captures_iter(input).next() {
+            let filter_options: Vec<&str> = capture_to_vec(cap);
+            return Ok(filter_factory.1(filter_options));
+        }
+    }
+
+    Err(format!("Match not found for filter '{}'", input))
+}
+
+pub fn matches_filter(input: String) -> Result<(), String> {
+    match get_filter(&input) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e)
+    }
+}
+
 pub fn get_selected_filters(filter_strs: Vec<&str>) -> Vec<FilterFn> {
     let mut selected_filters = vec![];
-    let filter_factories = get_filter_factories();
     filter_strs.iter().for_each(|filter_str| {
-        for filter_factory in &filter_factories {
-            if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
-                let filter_options: Vec<&str> = capture_to_vec(cap);
-                let filter = filter_factory.1(filter_options);
-                selected_filters.push(filter);
-                return;
-            }
+        match get_filter(filter_str) {
+            Ok(filter) => selected_filters.push(filter),
+            Err(_) => {}
         }
     });
     selected_filters
