@@ -21,7 +21,7 @@ mod types;
 use bins::*;
 use chess_flatbuffers::chess::root_as_game_list;
 use database::Database;
-use filters::get_filter_factories;
+use filters::get_selected_filters;
 use folds::*;
 use maps::*;
 use types::*;
@@ -116,8 +116,6 @@ fn main() {
         }
     }
 
-    let filter_factories = get_filter_factories();
-
     let file_glob = matches.value_of("glob").unwrap();
 
     let entries = glob(file_glob)
@@ -126,26 +124,11 @@ fn main() {
         .collect::<Vec<std::path::PathBuf>>();
 
     entries.par_iter().for_each(|entry| {
-        let mut selected_filters = vec![];
-
-        if let Some(filter_strs) = matches.values_of("filters") {
-            'filter_str: for filter_str in filter_strs {
-                for filter_factory in &filter_factories {
-                    if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
-                        let filter_options: Vec<&str> = cap
-                            .iter()
-                            .map(|y| match y {
-                                Some(s) => s.as_str(),
-                                None => "",
-                            })
-                            .collect::<Vec<&str>>();
-                        let filter = filter_factory.1(filter_options);
-                        selected_filters.push(filter);
-                        continue 'filter_str;
-                    }
-                }
-            }
-        }
+        let selected_filters = if let Some(filter_strs) = matches.values_of("filters") {
+            get_selected_filters(filter_strs.collect::<Vec<&str>>())
+        } else {
+            vec![]
+        };
 
         let file = File::open(entry).unwrap();
         let mut decompressor = BzDecoder::new(file);

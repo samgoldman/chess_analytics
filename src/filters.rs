@@ -32,7 +32,7 @@ macro_rules! include_filter {
     };
 }
 
-pub fn get_filter_factories() -> Vec<(Regex, FilterFactoryFn, String)> {
+fn get_filter_factories() -> Vec<(Regex, FilterFactoryFn, String)> {
     vec![
         include_filter!(game_elo_filter),
         include_filter!(year_filter),
@@ -42,6 +42,31 @@ pub fn get_filter_factories() -> Vec<(Regex, FilterFactoryFn, String)> {
         include_filter!(player_elo_filter),
         include_filter!(mate_occurs_filter),
     ]
+}
+
+fn capture_to_vec(cap: regex::Captures) -> Vec<&str> {
+    cap.iter()
+        .map(|y| match y {
+            Some(s) => s.as_str(),
+            None => "",
+        })
+        .collect::<Vec<&str>>()
+}
+
+pub fn get_selected_filters(filter_strs: Vec<&str>) -> Vec<FilterFn> {
+    let mut selected_filters = vec![];
+    let filter_factories = get_filter_factories();
+    filter_strs.iter().for_each(|filter_str| {
+        for filter_factory in &filter_factories {
+            if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
+                let filter_options: Vec<&str> = capture_to_vec(cap);
+                let filter = filter_factory.1(filter_options);
+                selected_filters.push(filter);
+                return;
+            }
+        }
+    });
+    selected_filters
 }
 
 filter!(
