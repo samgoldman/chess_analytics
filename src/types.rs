@@ -1,7 +1,6 @@
 use crate::chess_flatbuffers::chess::Game;
 use mockall::*;
 
-pub type Statistic = (String, MapFn, FoldFn);
 pub type BinFn = fn(&dyn GameWrapper) -> String;
 pub type FoldFn = fn(&[i16]) -> f64;
 pub type MapFn = fn(&dyn GameWrapper) -> i16;

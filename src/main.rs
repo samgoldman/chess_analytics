@@ -2,8 +2,6 @@ use bzip2::read::BzDecoder;
 use clap::{App, Arg};
 use glob::glob;
 use rayon::prelude::*;
-use regex::Regex;
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::sync::{Arc, Mutex};
@@ -27,6 +25,16 @@ use filters::*;
 use folds::*;
 use maps::*;
 use types::*;
+
+macro_rules! include_filter {
+    ($name: ident) => {
+        (
+            $name::regex(),
+            $name::factory as FilterFactoryFn,
+            $name::description(),
+        )
+    };
+}
 
 fn main() {
     let matches = App::new("PGN to Flat Buffer")
@@ -70,11 +78,11 @@ fn main() {
         .get_matches();
 
     let db = Arc::new(Mutex::new(Database {
-        children: HashMap::new(),
+        children: hashmap![],
         data: vec![],
     }));
 
-    let available_statitistcs: HashMap<&str, Statistic> = hashmap![
+    let available_statitistcs = hashmap![
         "gameCount" => ("gameCount".to_string(), map_count as MapFn, fold_sum as FoldFn),
         "mateCount" => ("mateCount".to_string(), map_mate_count, fold_sum),
         "matePct" => ("matePct".to_string(), map_mate_count, fold_percent),
@@ -118,16 +126,15 @@ fn main() {
         }
     }
 
-    #[rustfmt::skip]
     let filter_factories = vec![
-        (Regex::new(r#"^minGameElo(\d+)$"#).unwrap(), min_game_elo_filter_factory as FilterFactoryFn),
-        (Regex::new(r#"^maxGameElo(\d+)$"#).unwrap(), max_game_elo_filter_factory),
-        (Regex::new(r#"^year(\d+)$"#).unwrap(), year_filter_factory),
-        (Regex::new(r#"^month(\d+)$"#).unwrap(), month_filter_factory),
-        (Regex::new(r#"^day(\d+)$"#).unwrap(), day_filter_factory),
-        (Regex::new(r#"^minMoves(\d+)$"#).unwrap(), min_moves_filter_factory),
-        (Regex::new(r#"^(min|max)(White|Black|Both)Elo(\d+)$"#).unwrap(), player_elo_filter_factory),
-        (Regex::new(r#"^(?:(no?)M|m)ateOccurs$"#).unwrap(), mate_occurs_filter_factory),
+        include_filter!(min_game_elo_filter),
+        include_filter!(max_game_elo_filter),
+        include_filter!(year_filter),
+        include_filter!(month_filter),
+        include_filter!(day_filter),
+        include_filter!(min_moves_filter),
+        include_filter!(player_elo_filter),
+        include_filter!(mate_occurs_filter),
     ];
 
     let file_glob = matches.value_of("glob").unwrap();
@@ -202,8 +209,7 @@ fn main() {
         let stat_node = db.insert_path(vec![selected.0.to_string()]);
 
         for key in stat_node.get_paths() {
-            let k = key.clone();
-            let node = stat_node.insert_path(k);
+            let node = stat_node.insert_path(key.clone());
             let result = selected.2(&mut node.data);
             println!("{}\t{}  \t{:.4}", selected.0, key.join("."), result);
         }
