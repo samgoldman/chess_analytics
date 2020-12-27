@@ -1,13 +1,12 @@
 use bzip2::read::BzDecoder;
 use clap::{App, Arg};
 use glob::glob;
+use rayon::prelude::*;
 use regex::Regex;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::{self};
 use std::sync::{Arc, Mutex};
-use crossbeam::thread;
 
 mod bins;
 #[allow(non_snake_case)]
@@ -29,7 +28,7 @@ use folds::*;
 use maps::*;
 use types::*;
 
-fn main() -> io::Result<()> {
+fn main() {
     let matches = App::new("PGN to Flat Buffer")
         .version("0.1.0")
         .author("Sam Goldman")
@@ -134,81 +133,71 @@ fn main() -> io::Result<()> {
 
     let file_glob = matches.value_of("glob").unwrap();
 
-    let entries = glob(file_glob).expect("Failed to read glob pattern");
+    let entries = glob(file_glob)
+        .expect("Failed to read glob pattern")
+        .map(|x| x.unwrap())
+        .collect::<Vec<std::path::PathBuf>>();
 
-    thread::scope(|scope| {
-        let mut handles = vec![];
-        for entry in entries {
-            let db = Arc::clone(&db);
-            let selected_statistics = selected_statistics.clone();
-            let selected_bins = selected_bins.clone();
-            let matches = matches.clone();
-            let filter_factories = filter_factories.clone();
-            let handle = scope.spawn(move |_| -> io::Result<()> {
-                let mut selected_filters = vec![];
-    
-                if let Some(filter_strs) = matches.values_of("filters") {
-                    'filter_str: for filter_str in filter_strs {
-                        for filter_factory in &filter_factories {
-                            if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
-                                let filter_options: Vec<&str> = cap
-                                    .iter()
-                                    .map(|y| y.unwrap().as_str())
-                                    .collect::<Vec<&str>>();
-                                let filter = filter_factory.1(filter_options);
-                                selected_filters.push(filter);
-                                continue 'filter_str;
-                            }
-                        }
+    entries.par_iter().for_each(|entry| {
+        let db = Arc::clone(&db);
+        let selected_statistics = selected_statistics.clone();
+        let selected_bins = selected_bins.clone();
+        let matches = matches.clone();
+        let filter_factories = filter_factories.clone();
+        let mut selected_filters = vec![];
+
+        if let Some(filter_strs) = matches.values_of("filters") {
+            'filter_str: for filter_str in filter_strs {
+                for filter_factory in &filter_factories {
+                    if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
+                        let filter_options: Vec<&str> = cap
+                            .iter()
+                            .map(|y| y.unwrap().as_str())
+                            .collect::<Vec<&str>>();
+                        let filter = filter_factory.1(filter_options);
+                        selected_filters.push(filter);
+                        continue 'filter_str;
                     }
                 }
-    
-                let file = File::open(entry.unwrap())?;
-                let mut decompressor = BzDecoder::new(file);
+            }
+        }
 
-                let mut data = Vec::new();
-                decompressor.read_to_end(&mut data)?;
+        let file = File::open(entry).unwrap();
+        let mut decompressor = BzDecoder::new(file);
 
-                let games = root_as_game_list(&data).unwrap().games().unwrap().iter();
+        let mut data = Vec::new();
+        decompressor.read_to_end(&mut data).unwrap();
 
-                let filtered_games = games.filter(|game| {
-                    // Loop through every filter
-                    for filter in &selected_filters {
-                        // Short circuit false if a single filter fails
-                        if !filter(game as &dyn GameWrapper) {
-                            return false;
-                        }
-                    }
-                    true
-                });
+        let games = root_as_game_list(&data).unwrap().games().unwrap().iter();
 
-                for game in filtered_games {
-                    for stat in &selected_statistics {
-                        let mut path = vec![stat.0.clone()];
+        let filtered_games = games.filter(|game| {
+            // Loop through every filter
+            for filter in &selected_filters {
+                // Short circuit false if a single filter fails
+                if !filter(game as &dyn GameWrapper) {
+                    return false;
+                }
+            }
+            true
+        });
 
-                        for bin in &selected_bins {
-                            let new_bin = bin(&game as &dyn GameWrapper);
-                            path.push(new_bin);
-                        }
+        for game in filtered_games {
+            for stat in &selected_statistics {
+                let mut path = vec![stat.0.clone()];
 
-                        // Unlocked at the end of the loop iteration
-                        let mut db = db.lock().unwrap();
-
-                        let node = db.insert_path(path);
-                        node.data.push(stat.1(&game as &dyn GameWrapper));
-                    }
+                for bin in &selected_bins {
+                    let new_bin = bin(&game as &dyn GameWrapper);
+                    path.push(new_bin);
                 }
 
-                Ok(())
-            });
-            handles.push(handle);
-        }
-    
-        for handle in handles {
-            handle.join().unwrap().unwrap();
-        }
-    }).unwrap();
+                // Unlocked at the end of the loop iteration
+                let mut db = db.lock().unwrap();
 
+                let node = db.insert_path(path);
+                node.data.push(stat.1(&game as &dyn GameWrapper));
+            }
+        }
+    });
 
     for selected in &selected_statistics {
         let mut db = db.lock().unwrap();
@@ -222,6 +211,4 @@ fn main() -> io::Result<()> {
             println!("{}\t{}  \t{:.4}", selected.0, key.join("."), result);
         }
     }
-
-    Ok(())
 }
