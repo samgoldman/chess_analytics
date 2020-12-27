@@ -1,5 +1,5 @@
 use bzip2::read::BzDecoder;
-use clap::{App, Arg};
+use clap::{App, Arg, ArgMatches};
 use glob::glob;
 use regex::Regex;
 use std::collections::HashMap;
@@ -28,6 +28,34 @@ use filters::*;
 use folds::*;
 use maps::*;
 use types::*;
+
+fn build_filters(
+    matches: ArgMatches,
+    filter_factories: Vec<(
+        Regex,
+        for<'r> fn(Vec<&'r str>) -> Box<dyn for<'s, 't> Fn(&'s (dyn GameWrapper<'t> + 's)) -> bool>,
+    )>,
+) -> std::vec::Vec<
+    std::boxed::Box<dyn for<'r, 's> std::ops::Fn(&'r (dyn types::GameWrapper<'s> + 'r)) -> bool>,
+> {
+    let mut selected_filters = vec![];
+    if let Some(filter_strs) = matches.values_of("filters") {
+        'filter_str: for filter_str in filter_strs {
+            for filter_factory in &filter_factories {
+                if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
+                    let filter_options: Vec<&str> = cap
+                        .iter()
+                        .map(|y| y.unwrap().as_str())
+                        .collect::<Vec<&str>>();
+                    let filter = filter_factory.1(filter_options);
+                    selected_filters.push(filter);
+                    continue 'filter_str;
+                }
+            }
+        }
+    }
+    selected_filters
+}
 
 fn main() -> io::Result<()> {
     let matches = App::new("PGN to Flat Buffer")
@@ -138,7 +166,7 @@ fn main() -> io::Result<()> {
         glob(file_glob).expect("Failed to read glob pattern"),
     ));
 
-    let num_threads: i32 = matches
+    let num_threads = matches
         .value_of("num_threads")
         .unwrap()
         .parse::<i32>()
@@ -146,77 +174,108 @@ fn main() -> io::Result<()> {
 
     let mut handles = vec![];
 
-    for _ in 0..num_threads {
+    let loaded_games: Arc<Mutex<Vec<Vec<u8>>>> = Arc::new(Mutex::new(vec![]));
+    let num_processing: Arc<Mutex<u32>> = Arc::new(Mutex::new(0));
+    let done_with_entries: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
+
+    for x in 0..num_threads {
         let db = Arc::clone(&db);
         let entries = Arc::clone(&entries);
         let selected_statistics = selected_statistics.clone();
         let selected_bins = selected_bins.clone();
         let matches = matches.clone();
         let filter_factories = filter_factories.clone();
-        let handle = thread::spawn(move || -> io::Result<()> {
-            let mut selected_filters = vec![];
+        let loaded_games = loaded_games.clone();
+        let num_processing = num_processing.clone();
+        let done_with_entries = done_with_entries.clone();
 
-            if let Some(filter_strs) = matches.values_of("filters") {
-                'filter_str: for filter_str in filter_strs {
-                    for filter_factory in &filter_factories {
-                        if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
-                            let filter_options: Vec<&str> = cap
-                                .iter()
-                                .map(|y| y.unwrap().as_str())
-                                .collect::<Vec<&str>>();
-                            let filter = filter_factory.1(filter_options);
-                            selected_filters.push(filter);
-                            continue 'filter_str;
-                        }
-                    }
-                }
-            }
+        let loader = x == 0;
+
+        let handle = thread::spawn(move || -> io::Result<()> {
+            let selected_filters = build_filters(matches, filter_factories);
 
             loop {
-                let entry;
-                // Scope to unlock once done with entries
-                {
-                    // Return from the thread once there are no more entries to process
-                    let mut entries = entries.lock().unwrap();
-                    match entries.next() {
-                        Some(x) => entry = x,
-                        None => return Ok(()),
+                if loader {
+                    let file;
+                    {
+                        let mut entries = entries.lock().unwrap();
+                        let entry = match entries.next() {
+                            Some(x) => x,
+                            None => {
+                                let mut done_with_entries = done_with_entries.lock().unwrap();
+                                *done_with_entries = true;
+                                return Ok(());
+                            }
+                        };
+
+
+                        let entry = entry.unwrap().clone();
+                        file = File::open(entry)?;
+
+                        let mut num_processing = num_processing.lock().unwrap();
+                        *num_processing += 1;
                     }
-                }
 
-                let file = File::open(entry.unwrap())?;
-                let mut decompressor = BzDecoder::new(file);
+                    let mut decompressor = BzDecoder::new(file);
 
-                let mut data = Vec::new();
-                decompressor.read_to_end(&mut data)?;
+                    let mut data = Vec::new();
+                    decompressor.read_to_end(&mut data)?;
 
-                let games = root_as_game_list(&data).unwrap().games().unwrap().iter();
-
-                let filtered_games = games.filter(|game| {
-                    // Loop through every filter
-                    for filter in &selected_filters {
-                        // Short circuit false if a single filter fails
-                        if !filter(game as &dyn GameWrapper) {
-                            return false;
-                        }
+                    {
+                        let mut loaded_games_unlocked = loaded_games.lock().unwrap();
+                        loaded_games_unlocked.push(data);
                     }
-                    true
-                });
 
-                for game in filtered_games {
-                    for stat in &selected_statistics {
-                        let mut path = vec![stat.0.clone()];
+                } else {
+                    let mut loaded_games = loaded_games.lock().unwrap();
+                    if loaded_games.len() == 0 {
+                        let done_with_entries = done_with_entries.lock().unwrap();
+                        if *done_with_entries {
+                            let num_processing = num_processing.lock().unwrap();
+                            if *num_processing == 0 {
+                                return Ok(());
+                            } else {
+                                continue;
+                            }
+                        } else {
+                            continue;
+                        }
+                    } else {
 
-                        for bin in &selected_bins {
-                            let new_bin = bin(&game as &dyn GameWrapper);
-                            path.push(new_bin);
+                        {
+                            let mut num_processing = num_processing.lock().unwrap();
+                            *num_processing -= 1;
                         }
 
-                        // Unlocked at the end of the loop iteration
-                        let mut db = db.lock().unwrap();
+                        let data = loaded_games.pop().unwrap();
+                        let games = root_as_game_list(&data).unwrap().games().unwrap().iter();              
 
-                        let node = db.insert_path(path);
-                        node.data.push(stat.1(&game as &dyn GameWrapper));
+                        let filtered_games = games.clone().filter(|game| {
+                            // Loop through every filter
+                            for filter in &selected_filters {
+                                // Short circuit false if a single filter fails
+                                if !filter(game as &dyn GameWrapper) {
+                                    return false;
+                                }
+                            }
+                            true
+                        });
+
+                        for game in filtered_games {
+                            for stat in &selected_statistics {
+                                let mut path = vec![stat.0.clone()];
+
+                                for bin in &selected_bins {
+                                    let new_bin = bin(&game as &dyn GameWrapper);
+                                    path.push(new_bin);
+                                }
+
+                                // Unlocked at the end of the loop iteration
+                                let mut db = db.lock().unwrap();
+                                let node = db.insert_path(path);
+                                node.data.push(stat.1(&game as &dyn GameWrapper));
+                            }
+                        }
                     }
                 }
             }

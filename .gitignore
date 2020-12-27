@@ -3,3 +3,5 @@
 cobertura.xml
 lcov.info
 *.profraw
+/cov
+/tmp
