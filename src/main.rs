@@ -132,7 +132,7 @@ fn main() {
         include_filter!(year_filter),
         include_filter!(month_filter),
         include_filter!(day_filter),
-        include_filter!(min_moves_filter),
+        include_filter!(moves_count_filter),
         include_filter!(player_elo_filter),
         include_filter!(mate_occurs_filter),
     ];

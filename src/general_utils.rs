@@ -7,3 +7,11 @@ macro_rules! hashmap {
         map
     }}
 }
+
+pub fn get_comparator<T: Ord>(comparator: &str) -> fn(T, T) -> T {
+    if comparator == "max" {
+        T::max
+    } else {
+        T::min
+    }
+}
