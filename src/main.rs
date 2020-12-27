@@ -117,7 +117,7 @@ fn main() {
     }
 
     let filter_factories = get_filter_factories();
-    
+
     let file_glob = matches.value_of("glob").unwrap();
 
     let entries = glob(file_glob)

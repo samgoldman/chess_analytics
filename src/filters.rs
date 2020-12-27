@@ -1,5 +1,5 @@
-use regex::Regex;
 use crate::types::*;
+use regex::Regex;
 
 macro_rules! filter {
     ($name: ident, $regex: literal, $param: ident, $fn: block, $desc: literal) => {
@@ -32,8 +32,7 @@ macro_rules! include_filter {
     };
 }
 
-pub fn get_filter_factories() -> Vec<(Regex, for<'r> fn(std::vec::Vec<&'r str>) -> std::boxed::Box<dyn for<'s, 't0> std::ops::Fn(&'s (dyn GameWrapper<'t0> + 's)) -> bool>, std::string::String)>
-{
+pub fn get_filter_factories() -> Vec<(Regex, FilterFactoryFn, String)> {
     vec![
         include_filter!(game_elo_filter),
         include_filter!(year_filter),
