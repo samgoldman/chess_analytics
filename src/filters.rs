@@ -80,10 +80,11 @@ pub fn player_elo_filter_factory(params: Vec<&str>) -> FilterFn {
     })
 }
 
-pub fn mate_occurs_filter_factory(_params: Vec<&str>) -> FilterFn {
+pub fn mate_occurs_filter_factory(params: Vec<&str>) -> FilterFn {
+    let mate_occurs = params[1] != "no";
     Box::new(move |game| -> bool {
         let metadata = game.move_metadata().unwrap().iter();
-        metadata.last().unwrap() & 0x0020 != 0
+        mate_occurs == (metadata.last().unwrap() & 0x0020 != 0)
     })
 }
 

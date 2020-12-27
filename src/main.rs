@@ -120,15 +120,14 @@ fn main() {
 
     #[rustfmt::skip]
     let filter_factories = vec![
-        (Regex::new(r#"minGameElo(\d+)"#).unwrap(), min_game_elo_filter_factory as FilterFactoryFn),
-        (Regex::new(r#"maxGameElo(\d+)"#).unwrap(), max_game_elo_filter_factory),
-        (Regex::new(r#"year(\d+)"#).unwrap(), year_filter_factory),
-        (Regex::new(r#"month(\d+)"#).unwrap(), month_filter_factory),
-        (Regex::new(r#"day(\d+)"#).unwrap(), day_filter_factory),
-        (Regex::new(r#"minMoves(\d+)"#).unwrap(), min_moves_filter_factory),
-        (Regex::new(r#"(min|max)(White|Black|Both)Elo(\d+)"#).unwrap(), player_elo_filter_factory),
-        #[allow(clippy::trivial_regex)]
-        (Regex::new(r#"mateOccurs"#).unwrap(), mate_occurs_filter_factory),
+        (Regex::new(r#"^minGameElo(\d+)$"#).unwrap(), min_game_elo_filter_factory as FilterFactoryFn),
+        (Regex::new(r#"^maxGameElo(\d+)$"#).unwrap(), max_game_elo_filter_factory),
+        (Regex::new(r#"^year(\d+)$"#).unwrap(), year_filter_factory),
+        (Regex::new(r#"^month(\d+)$"#).unwrap(), month_filter_factory),
+        (Regex::new(r#"^day(\d+)$"#).unwrap(), day_filter_factory),
+        (Regex::new(r#"^minMoves(\d+)$"#).unwrap(), min_moves_filter_factory),
+        (Regex::new(r#"^(min|max)(White|Black|Both)Elo(\d+)$"#).unwrap(), player_elo_filter_factory),
+        (Regex::new(r#"^(?:(no?)M|m)ateOccurs$"#).unwrap(), mate_occurs_filter_factory),
     ];
 
     let file_glob = matches.value_of("glob").unwrap();
@@ -139,11 +138,6 @@ fn main() {
         .collect::<Vec<std::path::PathBuf>>();
 
     entries.par_iter().for_each(|entry| {
-        let db = Arc::clone(&db);
-        let selected_statistics = selected_statistics.clone();
-        let selected_bins = selected_bins.clone();
-        let matches = matches.clone();
-        let filter_factories = filter_factories.clone();
         let mut selected_filters = vec![];
 
         if let Some(filter_strs) = matches.values_of("filters") {
@@ -152,7 +146,10 @@ fn main() {
                     if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
                         let filter_options: Vec<&str> = cap
                             .iter()
-                            .map(|y| y.unwrap().as_str())
+                            .map(|y| match y {
+                                Some(s) => s.as_str(),
+                                None => "",
+                            })
                             .collect::<Vec<&str>>();
                         let filter = filter_factory.1(filter_options);
                         selected_filters.push(filter);
