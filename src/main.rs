@@ -21,20 +21,10 @@ mod types;
 use bins::*;
 use chess_flatbuffers::chess::root_as_game_list;
 use database::Database;
-use filters::*;
+use filters::get_filter_factories;
 use folds::*;
 use maps::*;
 use types::*;
-
-macro_rules! include_filter {
-    ($name: ident) => {
-        (
-            $name::regex(),
-            $name::factory as FilterFactoryFn,
-            $name::description(),
-        )
-    };
-}
 
 fn main() {
     let matches = App::new("PGN to Flat Buffer")
@@ -126,17 +116,8 @@ fn main() {
         }
     }
 
-    let filter_factories = vec![
-        include_filter!(min_game_elo_filter),
-        include_filter!(max_game_elo_filter),
-        include_filter!(year_filter),
-        include_filter!(month_filter),
-        include_filter!(day_filter),
-        include_filter!(moves_count_filter),
-        include_filter!(player_elo_filter),
-        include_filter!(mate_occurs_filter),
-    ];
-
+    let filter_factories = get_filter_factories();
+    
     let file_glob = matches.value_of("glob").unwrap();
 
     let entries = glob(file_glob)

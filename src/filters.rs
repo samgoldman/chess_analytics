@@ -1,6 +1,9 @@
+use regex::Regex;
+use crate::types::*;
+
 macro_rules! filter {
     ($name: ident, $regex: literal, $param: ident, $fn: block, $desc: literal) => {
-        pub mod $name {
+        mod $name {
             use crate::types::*;
             use regex::Regex;
 
@@ -19,30 +22,48 @@ macro_rules! filter {
     };
 }
 
+macro_rules! include_filter {
+    ($name: ident) => {
+        (
+            $name::regex(),
+            $name::factory as FilterFactoryFn,
+            $name::description(),
+        )
+    };
+}
+
+pub fn get_filter_factories() -> Vec<(Regex, for<'r> fn(std::vec::Vec<&'r str>) -> std::boxed::Box<dyn for<'s, 't0> std::ops::Fn(&'s (dyn GameWrapper<'t0> + 's)) -> bool>, std::string::String)>
+{
+    vec![
+        include_filter!(game_elo_filter),
+        include_filter!(year_filter),
+        include_filter!(month_filter),
+        include_filter!(day_filter),
+        include_filter!(moves_count_filter),
+        include_filter!(player_elo_filter),
+        include_filter!(mate_occurs_filter),
+    ]
+}
+
 filter!(
-    min_game_elo_filter,
-    r#"^minGameElo(\d+)$"#,
+    game_elo_filter,
+    r#"^(min|max)GameElo(\d+)$"#,
     params,
     {
         use crate::chess_utils::get_game_elo;
 
-        let min_elo: u32 = params[1].parse::<u32>().unwrap();
-        Box::new(move |game| get_game_elo(game) >= min_elo as u32)
+        let is_min = params[1] == "min";
+        let thresh: u32 = params[2].parse::<u32>().unwrap();
+        Box::new(move |game| {
+            // TODO simplify
+            if is_min {
+                get_game_elo(game) >= thresh
+            } else {
+                get_game_elo(game) <= thresh
+            }
+        })
     },
-    "Filter games where the average player rating is less than the value provided"
-);
-
-filter!(
-    max_game_elo_filter,
-    r#"^maxGameElo(\d+)$"#,
-    params,
-    {
-        use crate::chess_utils::get_game_elo;
-
-        let max_elo: u32 = params[1].parse::<u32>().unwrap();
-        Box::new(move |game| get_game_elo(game) <= max_elo as u32)
-    },
-    ""
+    "Filter games where the average player rating is greater/less than the value provided"
 );
 
 filter!(
