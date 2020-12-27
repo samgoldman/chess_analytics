@@ -7,7 +7,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self};
 use std::sync::{Arc, Mutex};
-use std::thread;
+use crossbeam::thread;
 
 mod bins;
 #[allow(non_snake_case)]
@@ -134,56 +134,35 @@ fn main() -> io::Result<()> {
 
     let file_glob = matches.value_of("glob").unwrap();
 
-    let entries = Arc::new(Mutex::new(
-        glob(file_glob).expect("Failed to read glob pattern"),
-    ));
+    let entries = glob(file_glob).expect("Failed to read glob pattern");
 
-    let num_threads: i32 = matches
-        .value_of("num_threads")
-        .unwrap()
-        .parse::<i32>()
-        .unwrap();
-
-    let mut handles = vec![];
-
-    for _ in 0..num_threads {
-        let db = Arc::clone(&db);
-        let entries = Arc::clone(&entries);
-        let selected_statistics = selected_statistics.clone();
-        let selected_bins = selected_bins.clone();
-        let matches = matches.clone();
-        let filter_factories = filter_factories.clone();
-        let handle = thread::spawn(move || -> io::Result<()> {
-            let mut selected_filters = vec![];
-
-            if let Some(filter_strs) = matches.values_of("filters") {
-                'filter_str: for filter_str in filter_strs {
-                    for filter_factory in &filter_factories {
-                        if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
-                            let filter_options: Vec<&str> = cap
-                                .iter()
-                                .map(|y| y.unwrap().as_str())
-                                .collect::<Vec<&str>>();
-                            let filter = filter_factory.1(filter_options);
-                            selected_filters.push(filter);
-                            continue 'filter_str;
+    thread::scope(|scope| {
+        let mut handles = vec![];
+        for entry in entries {
+            let db = Arc::clone(&db);
+            let selected_statistics = selected_statistics.clone();
+            let selected_bins = selected_bins.clone();
+            let matches = matches.clone();
+            let filter_factories = filter_factories.clone();
+            let handle = scope.spawn(move |_| -> io::Result<()> {
+                let mut selected_filters = vec![];
+    
+                if let Some(filter_strs) = matches.values_of("filters") {
+                    'filter_str: for filter_str in filter_strs {
+                        for filter_factory in &filter_factories {
+                            if let Some(cap) = filter_factory.0.captures_iter(filter_str).next() {
+                                let filter_options: Vec<&str> = cap
+                                    .iter()
+                                    .map(|y| y.unwrap().as_str())
+                                    .collect::<Vec<&str>>();
+                                let filter = filter_factory.1(filter_options);
+                                selected_filters.push(filter);
+                                continue 'filter_str;
+                            }
                         }
                     }
                 }
-            }
-
-            loop {
-                let entry;
-                // Scope to unlock once done with entries
-                {
-                    // Return from the thread once there are no more entries to process
-                    let mut entries = entries.lock().unwrap();
-                    match entries.next() {
-                        Some(x) => entry = x,
-                        None => return Ok(()),
-                    }
-                }
-
+    
                 let file = File::open(entry.unwrap())?;
                 let mut decompressor = BzDecoder::new(file);
 
@@ -219,14 +198,17 @@ fn main() -> io::Result<()> {
                         node.data.push(stat.1(&game as &dyn GameWrapper));
                     }
                 }
-            }
-        });
-        handles.push(handle);
-    }
 
-    for handle in handles {
-        handle.join().unwrap()?;
-    }
+                Ok(())
+            });
+            handles.push(handle);
+        }
+    
+        for handle in handles {
+            handle.join().unwrap().unwrap();
+        }
+    }).unwrap();
+
 
     for selected in &selected_statistics {
         let mut db = db.lock().unwrap();
