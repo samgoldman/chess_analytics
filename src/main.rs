@@ -87,7 +87,10 @@ fn main() {
         "queensGambitRate" => ("queensGambitRate".to_string(), map_queens_gambit_count, fold_avg),
         "queensGambitAcceptedRate" => ("queensGambitAcceptedRate".to_string(), map_queens_gambit_accepted_count, fold_avg),
         "queensGambitDeclinedRate" => ("queensGambitDeclinedRate".to_string(), map_queens_gambit_declined_count, fold_avg),
-        "sicilianDefenceRate" => ("sicilianDefenceRate".to_string(), map_sicilian_defence_count, fold_avg)
+        "sicilianDefenceRate" => ("sicilianDefenceRate".to_string(), map_sicilian_defence_count, fold_avg),
+        "whiteWinRate" => ("whiteWinRate".to_string(), map_result_white, fold_avg),
+        "blackWinRate" => ("blackWinRate".to_string(), map_result_black, fold_avg),
+        "drawRate" => ("drawRate".to_string(), map_result_draw, fold_avg)
     ];
 
     let available_bins = hashmap![

@@ -16,7 +16,7 @@ fn int_to_file(int: u16) -> File {
 }
 
 fn int_to_rank(int: u16) -> Rank {
-    match int & 0x0f {
+    match (int >> 4) & 0x0f {
         0x0 => Rank::_NA,
         0x1 => Rank::_1,
         0x2 => Rank::_2,
@@ -32,9 +32,9 @@ fn int_to_rank(int: u16) -> Rank {
 
 fn extract_coordinates(raw_coord: u16) -> (File, Rank, File, Rank) {
     let from_file = int_to_file(raw_coord);
-    let from_rank = int_to_rank(raw_coord >> 4);
+    let from_rank = int_to_rank(raw_coord);
     let to_file = int_to_file(raw_coord >> 8);
-    let to_rank = int_to_rank(raw_coord >> 12);
+    let to_rank = int_to_rank(raw_coord >> 8);
     (from_file, from_rank, to_file, to_rank)
 }
 

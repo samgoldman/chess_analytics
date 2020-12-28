@@ -1,3 +1,4 @@
+use crate::chess_flatbuffers::chess::GameResult;
 use crate::chess_utils::*;
 use crate::types::*;
 
@@ -92,4 +93,24 @@ pub fn map_sicilian_defence_count(game: &dyn GameWrapper) -> i16 {
         vec![(File::_E, Rank::_4), (File::_C, Rank::_5)];
 
     has_opening(game, sicilian_defence_opening) as i16
+}
+
+fn map_result(game: &dyn GameWrapper, res: GameResult) -> i16 {
+    if game.result() == res {
+        1
+    } else {
+        0
+    }
+}
+
+pub fn map_result_white(game: &dyn GameWrapper) -> i16 {
+    map_result(game, GameResult::White)
+}
+
+pub fn map_result_black(game: &dyn GameWrapper) -> i16 {
+    map_result(game, GameResult::Draw)
+}
+
+pub fn map_result_draw(game: &dyn GameWrapper) -> i16 {
+    map_result(game, GameResult::Draw)
 }
