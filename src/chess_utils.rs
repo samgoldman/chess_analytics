@@ -1,31 +1,5 @@
 use crate::types::*;
 
-#[derive(PartialEq)]
-pub enum Rank {
-    _1,
-    _2,
-    _3,
-    _4,
-    _5,
-    _6,
-    _7,
-    _8,
-    _NA,
-}
-
-#[derive(PartialEq)]
-pub enum File {
-    _A,
-    _B,
-    _C,
-    _D,
-    _E,
-    _F,
-    _G,
-    _H,
-    _NA,
-}
-
 fn int_to_file(int: u16) -> File {
     match int & 0x0f {
         0x0 => File::_NA,

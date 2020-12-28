@@ -7,6 +7,32 @@ pub type MapFn = fn(&dyn GameWrapper) -> i16;
 pub type FilterFn = Box<dyn Fn(&dyn GameWrapper) -> bool>;
 pub type FilterFactoryFn = fn(Vec<&str>) -> FilterFn;
 
+#[derive(PartialEq)]
+pub enum Rank {
+    _1,
+    _2,
+    _3,
+    _4,
+    _5,
+    _6,
+    _7,
+    _8,
+    _NA,
+}
+
+#[derive(PartialEq)]
+pub enum File {
+    _A,
+    _B,
+    _C,
+    _D,
+    _E,
+    _F,
+    _G,
+    _H,
+    _NA,
+}
+
 #[automock]
 pub trait GameWrapper<'a> {
     fn year(&self) -> u16;
