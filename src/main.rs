@@ -103,12 +103,16 @@ fn main() {
 
     let mut selected_bins = vec![];
 
-    for bin_str in matches.values_of("bins").unwrap() {
-        if let Some(v) = available_bins.get(bin_str) {
-            selected_bins.push(*v)
-        } else {
-            eprintln!("Warning: no bin found for `{}`", bin_str);
+    if let Some(bin_strs) = matches.values_of("bins") {
+        for bin_str in bin_strs {
+            if let Some(v) = available_bins.get(bin_str) {
+                selected_bins.push(*v)
+            } else {
+                eprintln!("Warning: no bin found for `{}`", bin_str);
+            }
         }
+    } else {
+        eprintln!{"Warning: no bins selected"};
     }
 
     let mut selected_statistics = vec![];
