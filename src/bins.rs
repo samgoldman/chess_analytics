@@ -14,7 +14,11 @@ pub fn bin_day(game: &dyn GameWrapper) -> String {
 }
 
 pub fn bin_game_elo(game: &dyn GameWrapper) -> String {
-    format!("{:04}", (get_game_elo(game) / 100) * 100)
+    format!("{:04}", (get_game_elo(game) / 300) * 300)
+}
+
+pub fn bin_eco_category(game: &dyn GameWrapper) -> String {
+    format!("ECO-{}", game.eco_category() as u8 as char)
 }
 
 #[cfg(test)]

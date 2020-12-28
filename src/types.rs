@@ -16,6 +16,7 @@ pub trait GameWrapper<'a> {
     fn year(&self) -> u16;
     fn month(&self) -> u8;
     fn day(&self) -> u8;
+    fn eco_category(&self) -> i8;
 }
 
 impl<'a> GameWrapper<'a> for Game<'a> {
@@ -45,5 +46,9 @@ impl<'a> GameWrapper<'a> for Game<'a> {
 
     fn day(&self) -> u8 {
         self.day()
+    }
+
+    fn eco_category(&self) -> i8 {
+        self.eco_category()
     }
 }

@@ -94,7 +94,8 @@ fn main() {
         "year" => bin_year as BinFn,
         "month" => bin_month,
         "day" => bin_day,
-        "gameElo" => bin_game_elo
+        "gameElo" => bin_game_elo,
+        "ecoCategory" => bin_eco_category
     ];
 
     let mut selected_bins = vec![];
