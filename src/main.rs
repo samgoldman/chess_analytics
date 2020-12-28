@@ -150,7 +150,7 @@ fn main() {
             true
         });
 
-        for game in filtered_games {
+        filtered_games.for_each(|game| {
             for stat in &selected_statistics {
                 let mut path = vec![stat.0.clone()];
 
@@ -165,10 +165,10 @@ fn main() {
                 let node = db.insert_path(path);
                 node.data.push(stat.1(&game as &dyn GameWrapper));
             }
-        }
+        });
     });
 
-    for selected in &selected_statistics {
+    selected_statistics.iter().for_each(|selected| {
         let mut db = db.lock().unwrap();
 
         let stat_node = db.insert_path(vec![selected.0.to_string()]);
@@ -178,5 +178,5 @@ fn main() {
             let result = selected.2(&mut node.data);
             println!("{}\t{}  \t{:.4}", selected.0, key.join("."), result);
         }
-    }
+    });
 }
