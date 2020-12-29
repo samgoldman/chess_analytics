@@ -18,48 +18,37 @@ pub fn bin_game_elo(game: &GameWrapper) -> String {
 }
 
 pub fn bin_eco_category(game: &GameWrapper) -> String {
-    format!("ECO-{}", game.eco_category as u8 as char)
+    format!("ECO-{}", game.eco_category)
 }
 
 #[cfg(test)]
-mod test_bins {
+mod test_basic_bins {
     use super::*;
     use crate::types::GameWrapper;
 
-    #[test]
-    fn test_bin_year() {
-        let mut test_game = GameWrapper {
-            ..Default::default()
-        };
+    macro_rules! bin_tests {
+        ($($name:ident: $field:ident, $func:ident, $value:literal, $expected:literal,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let test_game = GameWrapper {
+                    $field: $value,
+                    ..Default::default()
+                };
 
-        test_game.year = 2020;
-        assert_eq!(bin_year(&test_game), "2020");
-        test_game.year = 2013;
-        assert_eq!(bin_year(&test_game), "2013");
+                assert_eq!($expected, $func(&test_game));
+            }
+        )*
+        }
     }
 
-    #[test]
-    fn test_bin_month() {
-        let mut test_game = GameWrapper {
-            ..Default::default()
-        };
-
-        test_game.month = 10;
-        assert_eq!(bin_month(&test_game), "10");
-        test_game.month = 2;
-        assert_eq!(bin_month(&test_game), "02");
-    }
-
-    #[test]
-    fn test_bin_day() {
-        let mut test_game = GameWrapper {
-            ..Default::default()
-        };
-
-        test_game.day = 21;
-        assert_eq!(bin_day(&test_game), "21");
-        test_game.day = 9;
-        assert_eq!(bin_day(&test_game), "09");
+    bin_tests! {
+        year_1: year, bin_year, 2020, "2020",
+        year_2: year, bin_year, 2013, "2013",
+        month_1: month, bin_month, 10, "10",
+        month_2: month, bin_month, 2, "02",
+        day_1: day, bin_day, 21, "21",
+        day_2: day, bin_day, 9, "09",
     }
 
     #[test]
