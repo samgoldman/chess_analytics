@@ -39,12 +39,9 @@ fn extract_coordinates(raw_coord: u16) -> (File, Rank, File, Rank) {
 }
 
 // TODO: Refactor to support specifying "from" coordinates
-pub fn has_opening(game: &dyn GameWrapper, opening: Vec<(File, Rank)>) -> bool {
+pub fn has_opening(game: &GameWrapper, opening: Vec<(File, Rank)>) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
-    let moves = match game.moves() {
-        Some(moves) => moves,
-        None => return false,
-    };
+    let moves = &game.moves;
 
     // Verify this game has enough moves for the given opening
     if moves.len() < opening.len() {
@@ -57,7 +54,7 @@ pub fn has_opening(game: &dyn GameWrapper, opening: Vec<(File, Rank)>) -> bool {
     // For each expected moving in the opening, if the game moves don't match, just return false
     for (expected_file, expected_rank) in opening {
         let (_from_file, _from_rank, to_file, to_rank) =
-            extract_coordinates(moves_iter.next().unwrap() as u16);
+            extract_coordinates(*moves_iter.next().unwrap() as u16);
         if expected_file != to_file || expected_rank != to_rank {
             return false;
         }
@@ -66,6 +63,6 @@ pub fn has_opening(game: &dyn GameWrapper, opening: Vec<(File, Rank)>) -> bool {
     true
 }
 
-pub fn get_game_elo(game: &dyn GameWrapper) -> u32 {
-    (game.white_rating() + game.black_rating()) as u32 / 2
+pub fn get_game_elo(game: &GameWrapper) -> u32 {
+    (game.white_rating + game.black_rating) as u32 / 2
 }

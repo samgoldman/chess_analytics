@@ -112,7 +112,7 @@ fn main() {
             }
         }
     } else {
-        eprintln!{"Warning: no bins selected"};
+        eprintln! {"Warning: no bins selected"};
     }
 
     let mut selected_statistics = vec![];
@@ -132,13 +132,13 @@ fn main() {
         .map(|x| x.unwrap())
         .collect::<Vec<std::path::PathBuf>>();
 
-    entries.par_iter().for_each(|entry| {
-        let selected_filters = if let Some(filter_strs) = matches.values_of("filters") {
-            get_selected_filters(filter_strs.collect::<Vec<&str>>())
-        } else {
-            vec![]
-        };
+    let selected_filters = if let Some(filter_strs) = matches.values_of("filters") {
+        get_selected_filters(filter_strs.collect::<Vec<&str>>())
+    } else {
+        vec![]
+    };
 
+    entries.par_iter().for_each(|entry| {
         let file = File::open(entry).unwrap();
         let mut decompressor = BzDecoder::new(file);
 
@@ -147,11 +147,11 @@ fn main() {
 
         let games = root_as_game_list(&data).unwrap().games().unwrap().iter();
 
-        let filtered_games = games.filter(|game| {
+        let filtered_games = games.map(GameWrapper::new).filter(|game| {
             // Loop through every filter
             for filter in &selected_filters {
                 // Short circuit false if a single filter fails
-                if !filter(game as &dyn GameWrapper) {
+                if !filter(&game) {
                     return false;
                 }
             }
@@ -163,7 +163,7 @@ fn main() {
                 let mut path = vec![stat.0.clone()];
 
                 for bin in &selected_bins {
-                    let new_bin = bin(&game as &dyn GameWrapper);
+                    let new_bin = bin(&game);
                     path.push(new_bin);
                 }
 
@@ -175,7 +175,7 @@ fn main() {
                 let mut db = db.lock().unwrap();
 
                 let node = db.insert_path(path);
-                node.data.push(stat.1(&game as &dyn GameWrapper));
+                node.data.push(stat.1(&game));
             }
         });
     });

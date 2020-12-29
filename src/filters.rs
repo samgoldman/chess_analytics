@@ -7,7 +7,7 @@ macro_rules! include_filter {
     ($name: ident) => {
         (
             filter_defs::$name::regex(),
-            filter_defs::$name::factory as FilterFactoryFn,
+            filter_defs::$name::factory,
             filter_defs::$name::name(),
             filter_defs::$name::description(),
         )
