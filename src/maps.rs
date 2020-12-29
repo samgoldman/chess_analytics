@@ -108,7 +108,7 @@ pub fn map_result_white(game: &dyn GameWrapper) -> i16 {
 }
 
 pub fn map_result_black(game: &dyn GameWrapper) -> i16 {
-    map_result(game, GameResult::Draw)
+    map_result(game, GameResult::Black)
 }
 
 pub fn map_result_draw(game: &dyn GameWrapper) -> i16 {
