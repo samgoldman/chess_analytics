@@ -2,6 +2,7 @@ use bzip2::read::BzDecoder;
 use clap::{App, Arg};
 use glob::glob;
 use rayon::prelude::*;
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::prelude::*;
 use std::sync::{Arc, Mutex};
@@ -185,10 +186,59 @@ fn main() {
 
         let stat_node = db.insert_path(vec![selected.0.to_string()]);
 
-        for key in stat_node.get_paths() {
-            let node = stat_node.insert_path(key.clone());
-            let result = selected.2(&mut node.data);
-            println!("{}\t{}  \t{:.4}", selected.0, key.join("."), result);
+        let mut paths = stat_node.get_paths();
+
+        let mut columns = HashSet::new();
+
+        for path in paths.iter_mut() {
+            columns.insert(path.remove(0));
+        }
+
+        let columns = columns.iter().collect::<Vec<&String>>();
+
+        println!("{}", selected.0);
+
+        let mut rows = HashMap::new();
+        for path in paths {
+            let mut map: HashMap<&String, f64> = HashMap::new();
+            for column in columns.clone() {
+                map.insert(column, 0.0);
+            }
+            rows.insert(path, map);
+        }
+
+        let mut row_strs = rows
+            .clone()
+            .keys()
+            .map(|x| x.join("."))
+            .collect::<Vec<String>>();
+        row_strs.sort();
+
+        print!("\t");
+        for col in columns {
+            print!("\t{}", col);
+        }
+        println!();
+
+        for row in row_strs {
+            let path_parts = row
+                .split('.')
+                .map(|z| z.to_string())
+                .collect::<Vec<String>>();
+            let row_data = rows.get_mut(&path_parts).unwrap();
+            print!("{}", row);
+            let b = row_data.clone();
+            let mut cols: Vec<&String> = b.keys().copied().collect();
+            cols.sort();
+            for col in cols {
+                let mut a = path_parts.clone();
+                a.insert(0, col.clone().clone());
+
+                let data = selected.2(&stat_node.insert_path(a).data);
+                print!("\t{:.4}", data);
+                row_data.insert(col, data);
+            }
+            println!();
         }
     });
 }
