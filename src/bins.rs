@@ -78,10 +78,10 @@ mod test_bins {
 
         test_game.white_rating = 1600;
         test_game.black_rating = 1700;
-        assert_eq!(bin_game_elo(&test_game), "1600");
+        assert_eq!(bin_game_elo(&test_game), "1500");
 
         test_game.white_rating = 2140;
         test_game.black_rating = 2010;
-        assert_eq!(bin_game_elo(&test_game), "2000");
+        assert_eq!(bin_game_elo(&test_game), "1800");
     }
 }
