@@ -21,10 +21,6 @@ pub fn bin_eco_category(game: &dyn GameWrapper) -> String {
     format!("ECO-{}", game.eco_category() as u8 as char)
 }
 
-pub fn bin_none(_game: &dyn GameWrapper) -> String {
-    "".to_string()
-}
-
 #[cfg(test)]
 mod test_bins {
     use super::*;

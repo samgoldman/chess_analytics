@@ -98,8 +98,7 @@ fn main() {
         "month" => bin_month,
         "day" => bin_day,
         "gameElo" => bin_game_elo,
-        "ecoCategory" => bin_eco_category,
-        "none" => bin_none
+        "ecoCategory" => bin_eco_category
     ];
 
     let mut selected_bins = vec![];
@@ -166,6 +165,10 @@ fn main() {
                 for bin in &selected_bins {
                     let new_bin = bin(&game as &dyn GameWrapper);
                     path.push(new_bin);
+                }
+
+                if path.len() == 1 {
+                    path.push("".to_string());
                 }
 
                 // Unlocked at the end of the loop iteration
