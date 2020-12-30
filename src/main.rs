@@ -2,7 +2,7 @@ use bzip2::read::BzDecoder;
 use clap::{App, Arg};
 use glob::glob;
 use rayon::prelude::*;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
 use std::sync::{Arc, Mutex};
@@ -67,12 +67,15 @@ fn main() {
                 .takes_value(true)
                 .default_value("6"),
         )
+        .arg(Arg::with_name("use_columns").short("c").long("use_columns"))
         .get_matches();
 
     let db = Arc::new(Mutex::new(Database {
         children: hashmap![],
         data: vec![],
     }));
+
+    let use_columns = !matches!(matches.occurrences_of("c"), 0);
 
     let available_statitistcs = hashmap![
         "gameCount" => ("gameCount".to_string(), map_count as MapFn, fold_sum as FoldFn),
@@ -180,64 +183,56 @@ fn main() {
             }
         });
     });
-
+    println!("{}", use_columns);
     selected_statistics.iter().for_each(|selected| {
+        println!("{}", selected.0);
+
         let mut db = db.lock().unwrap();
 
         let stat_node = db.insert_path(vec![selected.0.to_string()]);
 
         let mut paths = stat_node.get_paths();
 
-        let mut columns = HashSet::new();
-
+        let mut columns: HashSet<String> = HashSet::new();
+        let mut rows = HashSet::new();
         for path in paths.iter_mut() {
-            columns.insert(path.remove(0));
-        }
-
-        let columns = columns.iter().collect::<Vec<&String>>();
-
-        println!("{}", selected.0);
-
-        let mut rows = HashMap::new();
-        for path in paths {
-            let mut map: HashMap<&String, f64> = HashMap::new();
-            for column in columns.clone() {
-                map.insert(column, 0.0);
+            if use_columns {
+                columns.insert(path.remove(0));
             }
-            rows.insert(path, map);
+
+            rows.insert(path.clone());
         }
 
-        let mut row_strs = rows
-            .clone()
-            .keys()
-            .map(|x| x.join("."))
-            .collect::<Vec<String>>();
-        row_strs.sort();
+        let mut unique_columns: Vec<String> = columns.iter().cloned().collect();
+        unique_columns.sort();
 
-        print!("\t");
-        for col in columns {
-            print!("\t{}", col);
+        if use_columns {
+            println!("\t{}", unique_columns.join("\t"));
         }
-        println!();
 
-        for row in row_strs {
-            let path_parts = row
-                .split('.')
-                .map(|z| z.to_string())
-                .collect::<Vec<String>>();
-            let row_data = rows.get_mut(&path_parts).unwrap();
-            print!("{}", row);
-            let b = row_data.clone();
-            let mut cols: Vec<&String> = b.keys().copied().collect();
-            cols.sort();
-            for col in cols {
-                let mut a = path_parts.clone();
-                a.insert(0, col.clone().clone());
+        let mut unique_rows: Vec<Vec<String>> = rows.iter().cloned().collect();
+        unique_rows.sort_by(|a, b| {
+            a.get(0)
+                .unwrap_or(&"".to_string())
+                .cmp(b.get(0).unwrap_or(&"".to_string()))
+        });
 
-                let data = selected.2(&stat_node.insert_path(a).data);
+        for row in unique_rows {
+            let row_name = row.join(".");
+            print!("{}", row_name);
+            if use_columns {
+                for col in unique_columns.clone() {
+                    let mut full_path = row.clone();
+                    full_path.insert(0, col.to_string());
+
+                    let data = selected.2(&stat_node.insert_path(full_path).data);
+                    print!("\t{:.4}", data);
+                }
+            } else {
+                let data = selected.2(&stat_node.insert_path(row).data);
                 print!("\t{:.4}", data);
-                row_data.insert(col, data);
             }
+
             println!();
         }
     });
