@@ -20,7 +20,6 @@ mod maps;
 mod types;
 
 use bins::*;
-use chess_flatbuffers::chess::root_as_game_list;
 use database::Database;
 use filters::{get_selected_filters, matches_filter};
 use folds::*;
@@ -133,9 +132,9 @@ fn main() {
         let mut data = Vec::new();
         decompressor.read_to_end(&mut data).unwrap();
 
-        let games = root_as_game_list(&data).unwrap().games().unwrap().iter();
+        let games = GameWrapper::from_game_list_data(data);
 
-        let filtered_games = games.map(GameWrapper::new).filter(|game| {
+        let filtered_games = games.iter().filter(|game| {
             // Loop through every filter
             for filter in &selected_filters {
                 // Short circuit false if a single filter fails
@@ -167,7 +166,7 @@ fn main() {
             }
         });
     });
-    println!("{}", use_columns);
+
     selected_statistics.iter().for_each(|selected| {
         println!("{}", selected.0);
 

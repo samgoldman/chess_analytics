@@ -1,4 +1,4 @@
-use crate::chess_flatbuffers::chess::{Game, GameResult, Termination};
+use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList, GameResult, Termination};
 
 pub type BinFn = Box<dyn Fn(&GameWrapper) -> String + std::marker::Sync>;
 pub type BinFactoryFn = fn(Vec<&str>) -> BinFn;
@@ -62,7 +62,21 @@ pub struct GameWrapper {
 }
 
 impl GameWrapper {
-    pub fn new(game: Game) -> GameWrapper {
+    pub fn from_game_list_data(data: Vec<u8>) -> Vec<GameWrapper> {
+        let game_list = root_as_game_list(&data).unwrap();
+        GameWrapper::from_game_list(game_list)
+    }
+
+    fn from_game_list(game_list: GameList) -> Vec<GameWrapper> {
+        game_list
+            .games()
+            .unwrap()
+            .iter()
+            .map(GameWrapper::new)
+            .collect()
+    }
+
+    fn new(game: Game) -> GameWrapper {
         GameWrapper {
             year: game.year(),
             month: game.month(),
