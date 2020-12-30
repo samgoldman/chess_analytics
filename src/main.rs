@@ -75,7 +75,7 @@ fn main() {
         data: vec![],
     }));
 
-    let use_columns = !matches!(matches.occurrences_of("c"), 0);
+    let use_columns = !matches!(matches.occurrences_of("use_columns"), 0);
 
     let available_statitistcs = hashmap![
         "gameCount" => ("gameCount".to_string(), map_count as MapFn, fold_sum as FoldFn),
@@ -97,27 +97,11 @@ fn main() {
         "drawRate" => ("drawRate".to_string(), map_result_draw, fold_avg)
     ];
 
-    let available_bins = hashmap![
-        "year" => bin_year as BinFn,
-        "month" => bin_month,
-        "day" => bin_day,
-        "gameElo" => bin_game_elo,
-        "ecoCategory" => bin_eco_category
-    ];
-
-    let mut selected_bins = vec![];
-
-    if let Some(bin_strs) = matches.values_of("bins") {
-        for bin_str in bin_strs {
-            if let Some(v) = available_bins.get(bin_str) {
-                selected_bins.push(*v)
-            } else {
-                eprintln!("Warning: no bin found for `{}`", bin_str);
-            }
-        }
+    let selected_bins = if let Some(bin_strs) = matches.values_of("bins") {
+        get_selected_bins(bin_strs.collect::<Vec<&str>>())
     } else {
-        eprintln! {"Warning: no bins selected"};
-    }
+        vec![]
+    };
 
     let mut selected_statistics = vec![];
 

@@ -1,76 +1,131 @@
-use crate::chess_utils::get_game_elo;
 use crate::types::*;
+use regex::Regex;
 
-pub fn bin_year(game: &GameWrapper) -> String {
-    game.year.to_string()
-}
+macro_rules! bin {
+    ($name: ident, $regex: literal, $param: ident, $fn: block, $s_name: literal, $desc: literal) => {
+        pub mod $name {
+            use crate::types::*;
+            use regex::Regex;
 
-pub fn bin_month(game: &GameWrapper) -> String {
-    format!("{:02}", game.month)
-}
-
-pub fn bin_day(game: &GameWrapper) -> String {
-    format!("{:02}", game.day)
-}
-
-pub fn bin_game_elo(game: &GameWrapper) -> String {
-    format!("{:04}", (get_game_elo(game) / 300) * 300)
-}
-
-pub fn bin_eco_category(game: &GameWrapper) -> String {
-    format!("ECO-{}", game.eco_category)
-}
-
-#[cfg(test)]
-mod test_basic_bins {
-    use super::*;
-    use crate::types::GameWrapper;
-
-    macro_rules! bin_tests {
-        ($($name:ident: $field:ident, $func:ident, $value:literal, $expected:literal,)*) => {
-        $(
-            #[test]
-            fn $name() {
-                let test_game = GameWrapper {
-                    $field: $value,
-                    ..Default::default()
-                };
-
-                assert_eq!($expected, $func(&test_game));
+            pub fn regex() -> Regex {
+                #![allow(clippy::trivial_regex)]
+                Regex::new($regex).unwrap()
             }
-        )*
+
+            pub fn factory($param: Vec<&str>) -> BinFn {
+                $fn
+            }
+
+            pub fn name() -> String {
+                $s_name.to_string()
+            }
+
+            pub fn description() -> String {
+                $desc.to_string()
+            }
+        }
+    };
+}
+
+macro_rules! include_bin {
+    ($name: ident) => {
+        (
+            $name::regex(),
+            $name::factory,
+            $name::name(),
+            $name::description(),
+        )
+    };
+}
+
+bin!(
+    year_bin,
+    r#"^year$"#,
+    _params,
+    { Box::new(move |game| game.year.to_string()) },
+    "Year Bin",
+    ""
+);
+
+bin!(
+    month_bin,
+    r#"^month$"#,
+    _params,
+    { Box::new(move |game| format!("{:02}", game.month)) },
+    "Month Bin",
+    ""
+);
+
+bin!(
+    day_bin,
+    r#"^day$"#,
+    _params,
+    { Box::new(move |game| format!("{:02}", game.day)) },
+    "Day Bin",
+    ""
+);
+
+bin!(
+    game_elo_bin,
+    r#"^gameElo(\d+)$"#,
+    params,
+    {
+        use crate::chess_utils::get_game_elo;
+
+        let bucket_size: u32 = params[1].parse::<u32>().unwrap();
+        Box::new(move |game| format!("{:04}", (get_game_elo(game) / bucket_size) * bucket_size))
+    },
+    "Day Bin",
+    ""
+);
+
+bin!(
+    eco_category_bin,
+    r#"^ecoCategory$"#,
+    _params,
+    { Box::new(move |game| format!("{}", game.eco_category)) },
+    "ECO Category Bin",
+    ""
+);
+
+pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn, String, String)> {
+    vec![
+        include_bin!(year_bin),
+        include_bin!(month_bin),
+        include_bin!(day_bin),
+        include_bin!(game_elo_bin),
+        include_bin!(eco_category_bin),
+    ]
+}
+
+fn capture_to_vec(cap: regex::Captures) -> Vec<&str> {
+    cap.iter()
+        .map(|y| match y {
+            Some(s) => s.as_str(),
+            None => "",
+        })
+        .collect::<Vec<&str>>()
+}
+
+fn get_bin(input: &str) -> Result<BinFn, String> {
+    let bin_factories = get_bin_factories();
+
+    for bin_factory in &bin_factories {
+        if let Some(cap) = bin_factory.0.captures_iter(input).next() {
+            let bin_options: Vec<&str> = capture_to_vec(cap);
+            return Ok(bin_factory.1(bin_options));
         }
     }
 
-    bin_tests! {
-        year_1: year, bin_year, 2020, "2020",
-        year_2: year, bin_year, 2013, "2013",
-        month_1: month, bin_month, 10, "10",
-        month_2: month, bin_month, 2, "02",
-        day_1: day, bin_day, 21, "21",
-        day_2: day, bin_day, 9, "09",
-    }
+    Err(format!("Match not found for bin '{}'", input))
+}
 
-    #[test]
-    fn test_bin_game_elo() {
-        let mut test_game = GameWrapper {
-            ..Default::default()
-        };
-
-        test_game.white_rating = 21;
-        test_game.black_rating = 21;
-        assert_eq!(bin_game_elo(&test_game), "0000");
-
-        test_game.white_rating = 2000;
-        test_game.black_rating = 1000;
-        assert_eq!(bin_game_elo(&test_game), "1500");
-
-        test_game.white_rating = 1600;
-        test_game.black_rating = 1700;
-        assert_eq!(bin_game_elo(&test_game), "1500");
-
-        test_game.white_rating = 2140;
-        test_game.black_rating = 2010;
-        assert_eq!(bin_game_elo(&test_game), "1800");
-    }
+pub fn get_selected_bins(bin_strs: Vec<&str>) -> Vec<BinFn> {
+    let mut selected_bins = vec![];
+    bin_strs.iter().for_each(|bin_str| {
+        if let Ok(bin) = get_bin(bin_str) {
+            selected_bins.push(bin)
+        }
+    });
+    selected_bins
 }

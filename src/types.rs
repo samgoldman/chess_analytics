@@ -1,6 +1,7 @@
 use crate::chess_flatbuffers::chess::{Game, GameResult, Termination};
 
-pub type BinFn = fn(&GameWrapper) -> String;
+pub type BinFn = Box<dyn Fn(&GameWrapper) -> String + std::marker::Sync>;
+pub type BinFactoryFn = fn(Vec<&str>) -> BinFn;
 pub type FoldFn = fn(&[i16]) -> f64;
 pub type MapFn = fn(&GameWrapper) -> i16;
 pub type FilterFn = Box<dyn Fn(&GameWrapper) -> bool + std::marker::Sync>;
