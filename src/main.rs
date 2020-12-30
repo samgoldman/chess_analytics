@@ -96,11 +96,13 @@ fn main() {
         "drawRate" => ("drawRate".to_string(), map_result_draw, fold_avg)
     ];
 
-    let selected_bins = if let Some(bin_strs) = matches.values_of("bins") {
-        get_selected_bins(bin_strs.collect::<Vec<&str>>())
-    } else {
-        vec![]
-    };
+    let selected_bins = matches
+        .values_of("bins")
+        .map_or(vec![], |bin_strs| get_selected_bins(bin_strs.collect()));
+
+    let selected_filters = matches.values_of("filters").map_or(vec![], |filter_strs| {
+        get_selected_filters(filter_strs.collect())
+    });
 
     let mut selected_statistics = vec![];
 
@@ -118,12 +120,6 @@ fn main() {
         .expect("Failed to read glob pattern")
         .map(|x| x.unwrap())
         .collect::<Vec<std::path::PathBuf>>();
-
-    let selected_filters = if let Some(filter_strs) = matches.values_of("filters") {
-        get_selected_filters(filter_strs.collect::<Vec<&str>>())
-    } else {
-        vec![]
-    };
 
     entries.par_iter().for_each(|entry| {
         let file = File::open(entry).unwrap();
