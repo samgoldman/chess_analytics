@@ -88,6 +88,15 @@ bin!(
     ""
 );
 
+bin!(
+    site_bin,
+    r#"^site$"#,
+    _params,
+    { Box::new(move |game| game.site.to_string()) },
+    "Site Bin",
+    "A unique bin for each game that allows investigation of oddities"
+);
+
 pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn, String, String)> {
     vec![
         include_bin!(year_bin),
@@ -95,6 +104,7 @@ pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn, String, String)> {
         include_bin!(day_bin),
         include_bin!(game_elo_bin),
         include_bin!(eco_category_bin),
+        include_bin!(site_bin),
     ]
 }
 
