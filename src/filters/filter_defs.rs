@@ -156,6 +156,18 @@ filter!(
     "mateOccurs|noMateOccurs; retains games that end with mates or retains games that do not end with mates"
 );
 
+filter!(
+    evail_available_filter,
+    r#"^eval(not|)Available$"#,
+    params,
+    {
+        let want_available = params[1].is_empty();
+        Box::new(move |game| -> bool { want_available == game.eval_available })
+    },
+    "Eval Available Filter",
+    "evalAvailable|evalNotAvailable"
+);
+
 #[cfg(test)]
 mod tests_player_elo_filter {
     use super::*;

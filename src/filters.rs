@@ -23,6 +23,7 @@ pub fn get_filter_factories() -> Vec<(Regex, FilterFactoryFn, String, String)> {
         include_filter!(moves_count_filter),
         include_filter!(player_elo_filter),
         include_filter!(mate_occurs_filter),
+        include_filter!(evail_available_filter),
     ]
 }
 
