@@ -2,6 +2,7 @@ use bzip2::read::BzDecoder;
 use clap::{App, Arg};
 use glob::glob;
 use rayon::prelude::*;
+use regex::Regex;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
@@ -24,6 +25,7 @@ use bins::*;
 use database::Database;
 use filters::{get_selected_filters, matches_filter};
 use folds::*;
+use general_utils::capture_to_vec;
 use maps::*;
 use types::*;
 
@@ -77,29 +79,20 @@ fn main() {
 
     let use_columns = !matches!(matches.occurrences_of("use_columns"), 0);
 
-    let available_statitistcs = hashmap![
-        "gameCount" => ("gameCount".to_string(), map_count as MapFn, fold_sum as FoldFn),
-        "mateCount" => ("mateCount".to_string(), map_mate_count, fold_sum),
-        "matePct" => ("matePct".to_string(), map_mate_count, fold_percent),
-        "checkCount" => ("checkCount".to_string(), map_check_count, fold_sum),
-        "checkRate" => ("checkRate".to_string(), map_check_count, fold_avg),
-        "moveCount" => ("moveCount".to_string(), map_num_moves, fold_sum),
-        "moveRate" => ("moveRate".to_string(), map_num_moves, fold_avg),
-        "moveMax" => ("moveMax".to_string(), map_num_moves, fold_max),
-        "captureMin" => ("captureMin".to_string(), map_num_captures, fold_min),
-        "ratingDiffMax" => ("ratingDiffMax".to_string(), map_rating_diff, fold_max),
-        "queensGambitRate" => ("queensGambitRate".to_string(), map_queens_gambit_count, fold_avg),
-        "queensGambitAcceptedRate" => ("queensGambitAcceptedRate".to_string(), map_queens_gambit_accepted_count, fold_avg),
-        "queensGambitDeclinedRate" => ("queensGambitDeclinedRate".to_string(), map_queens_gambit_declined_count, fold_avg),
-        "sicilianDefenceRate" => ("sicilianDefenceRate".to_string(), map_sicilian_defence_count, fold_avg),
-        "whiteWinRate" => ("whiteWinRate".to_string(), map_result_white, fold_avg),
-        "blackWinRate" => ("blackWinRate".to_string(), map_result_black, fold_avg),
-        "drawRate" => ("drawRate".to_string(), map_result_draw, fold_avg),
-        "evalAvailableRate" => ("evalAvailableRate".to_string(), map_has_eval, fold_avg),
-        "promotionRate" => ("promotionRate".to_string(), map_promotion_count, fold_avg),
-        "promotionKnightRate" => ("promotionKnightRate".to_string(), map_knight_promotion_count, fold_avg),
-        "promotionBishopRate" => ("promotionBishopRate".to_string(), map_bishop_promotion_count, fold_avg)
-    ];
+    let selected_statistics: Vec<(&str, MapFn, FoldFn)> = matches
+        .values_of("statistics")
+        .map(|raw_stat_string| {
+            let x = Regex::new(r#"^(.*):(.*):(.*)$"#).unwrap();
+            let y: Vec<&str> = raw_stat_string.collect();
+            let z: Vec<Vec<&str>> = y
+                .iter()
+                .map(|a| capture_to_vec(x.captures_iter(a).next().unwrap()))
+                .collect();
+            z.iter()
+                .map(|a| (a[0], get_map(a[1]).unwrap(), get_fold(a[2]).unwrap()))
+                .collect()
+        })
+        .unwrap();
 
     let selected_bins = matches
         .values_of("bins")
@@ -108,16 +101,6 @@ fn main() {
     let selected_filters = matches.values_of("filters").map_or(vec![], |filter_strs| {
         get_selected_filters(filter_strs.collect())
     });
-
-    let mut selected_statistics = vec![];
-
-    for stat_str in matches.values_of("statistics").unwrap() {
-        if let Some(v) = available_statitistcs.get(stat_str) {
-            selected_statistics.push(v.clone())
-        } else {
-            eprintln!("Warning: no statistic found for `{}`", stat_str);
-        }
-    }
 
     let file_glob = matches.value_of("glob").unwrap();
 
@@ -148,7 +131,7 @@ fn main() {
 
         filtered_games.for_each(|game| {
             for stat in &selected_statistics {
-                let mut path = vec![stat.0.clone()];
+                let mut path = vec![stat.0.to_string()];
 
                 for bin in &selected_bins {
                     let new_bin = bin(&game);

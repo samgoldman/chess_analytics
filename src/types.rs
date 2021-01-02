@@ -2,8 +2,10 @@ use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList, GameRes
 
 pub type BinFn = Box<dyn Fn(&GameWrapper) -> String + std::marker::Sync>;
 pub type BinFactoryFn = fn(Vec<&str>) -> BinFn;
-pub type FoldFn = fn(&[i16]) -> f64;
-pub type MapFn = fn(&GameWrapper) -> i16;
+pub type FoldFn = Box<dyn Fn(&[i16]) -> f64 + std::marker::Sync>;
+pub type FoldFactoryFn = fn(Vec<&str>) -> FoldFn;
+pub type MapFn = Box<dyn Fn(&GameWrapper) -> i16 + std::marker::Sync>;
+pub type MapFactoryFn = fn(Vec<&str>) -> MapFn;
 pub type FilterFn = Box<dyn Fn(&GameWrapper) -> bool + std::marker::Sync>;
 pub type FilterFactoryFn = fn(Vec<&str>) -> FilterFn;
 
