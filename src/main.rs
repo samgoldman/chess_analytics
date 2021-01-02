@@ -72,10 +72,7 @@ fn main() {
         .arg(Arg::with_name("use_columns").short("c").long("use_columns"))
         .get_matches();
 
-    let db = Arc::new(Mutex::new(Database {
-        children: hashmap![],
-        data: vec![],
-    }));
+    let db = Arc::new(Mutex::new(Database::default()));
 
     let use_columns = !matches!(matches.occurrences_of("use_columns"), 0);
 
@@ -89,7 +86,13 @@ fn main() {
                 .map(|a| capture_to_vec(x.captures_iter(a).next().unwrap()))
                 .collect();
             z.iter()
-                .map(|a| (a[0], get_map(a[1]).unwrap(), get_fold(a[2]).unwrap()))
+                .map(|a| {
+                    (
+                        a[1],
+                        get_map(a[2]).expect("Unexpected map name"),
+                        get_fold(a[3]).expect("Unexpected fold name"),
+                    )
+                })
                 .collect()
         })
         .unwrap();

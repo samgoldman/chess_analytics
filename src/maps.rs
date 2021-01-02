@@ -48,79 +48,98 @@ map!(
     ""
 );
 
-// pub fn map_mate_count(game: &GameWrapper) -> i16 {
-//     let metadata = &game.move_metadata;
-//     match metadata.iter().last() {
-//         Some(check) => {
-//             if *check == 0x0020 {
-//                 1
-//             } else {
-//                 0
-//             }
-//         }
-//         None => 0,
-//     }
-// }
+map!(
+    mate_count_map,
+    r#"^check(Mate|)Count$"#,
+    params,
+    {
+        let only_mate = params[1] == "Mate";
+        Box::new(move |game| {
+            let metadata = &game.move_metadata;
+            match metadata.iter().last() {
+                Some(check) => {
+                    if *check == 0x0020 || (!only_mate && *check == 0x0010) {
+                        1
+                    } else {
+                        0
+                    }
+                }
+                None => 0,
+            }
+        })
+    },
+    "",
+    ""
+);
 
-// pub fn map_num_moves(game: &GameWrapper) -> i16 {
-//     game.moves.len() as i16
-// }
+map!(
+    num_moves_map,
+    r#"^numMoves$"#,
+    _params,
+    { Box::new(|game| game.moves.len() as i16) },
+    "",
+    ""
+);
 
-// pub fn map_num_captures(game: &GameWrapper) -> i16 {
-//     game.move_metadata
-//         .iter()
-//         .filter(|c| (*c & 0x0008) != 0)
-//         .count() as i16
-// }
+map!(
+    num_captures_map,
+    r#"^numCaptures$"#,
+    _params,
+    {
+        Box::new(|game| {
+            game.move_metadata
+                .iter()
+                .filter(|c| (*c & 0x0008) != 0)
+                .count() as i16
+        })
+    },
+    "",
+    ""
+);
 
-// pub fn map_check_count(game: &GameWrapper) -> i16 {
-//     game.move_metadata
-//         .iter()
-//         .filter(|meta| (*meta & (0x0010 | 0x0020)) > 0)
-//         .count() as i16
-// }
+map!(
+    rating_diff_map,
+    r#"^ratingDiff$"#,
+    _params,
+    { Box::new(|game| (game.white_rating as i16 - game.black_rating as i16).abs()) },
+    "",
+    ""
+);
 
-// pub fn map_rating_diff(game: &GameWrapper) -> i16 {
-//     (game.white_rating as i16 - game.black_rating as i16).abs()
-// }
+map!(
+    queens_gambit_count_map,
+    r#"^queensGambit(Accepted|Declined|)Count"#,
+    params,
+    {
+        use crate::chess_utils::has_opening;
 
-// pub fn map_queens_gambit_count(game: &GameWrapper) -> i16 {
-//     let queens_gambit_opening: Vec<(File, Rank)> = vec![
-//         (File::_D, Rank::_4),
-//         (File::_D, Rank::_5),
-//         (File::_C, Rank::_4),
-//     ];
+        let queens_gambit_opening = [
+            (File::_D, Rank::_4),
+            (File::_D, Rank::_5),
+            (File::_C, Rank::_4),
+        ];
 
-//     has_opening(game, queens_gambit_opening) as i16
-// }
+        let queens_gambit_accepted_opening = [
+            (File::_D, Rank::_4),
+            (File::_D, Rank::_5),
+            (File::_C, Rank::_4),
+            (File::_C, Rank::_4),
+        ];
 
-// pub fn map_queens_gambit_accepted_count(game: &GameWrapper) -> i16 {
-//     let queens_gambit_accepted_opening: Vec<(File, Rank)> = vec![
-//         (File::_D, Rank::_4),
-//         (File::_D, Rank::_5),
-//         (File::_C, Rank::_4),
-//         (File::_C, Rank::_4),
-//     ];
+        let variation = params[1].to_string();
 
-//     has_opening(game, queens_gambit_accepted_opening) as i16
-// }
-
-// pub fn map_queens_gambit_declined_count(game: &GameWrapper) -> i16 {
-//     let queens_gambit_opening: Vec<(File, Rank)> = vec![
-//         (File::_D, Rank::_4),
-//         (File::_D, Rank::_5),
-//         (File::_C, Rank::_4),
-//     ];
-//     let queens_gambit_accepted_opening: Vec<(File, Rank)> = vec![
-//         (File::_D, Rank::_4),
-//         (File::_D, Rank::_5),
-//         (File::_C, Rank::_4),
-//         (File::_C, Rank::_4),
-//     ];
-
-//     (has_opening(game, queens_gambit_opening)
-//         && !(has_opening(game, queens_gambit_accepted_opening))) as i16
-// }
+        Box::new(move |game| match variation.as_ref() {
+            "Accepted" => has_opening(game, &queens_gambit_accepted_opening) as i16,
+            "Declined" => {
+                (has_opening(game, &queens_gambit_opening)
+                    && !(has_opening(game, &queens_gambit_accepted_opening))) as i16
+            }
+            _ => has_opening(game, &queens_gambit_opening) as i16,
+        })
+    },
+    "",
+    ""
+);
 
 // pub fn map_sicilian_defence_count(game: &GameWrapper) -> i16 {
 //     let sicilian_defence_opening: Vec<(File, Rank)> =
@@ -174,8 +193,15 @@ map!(
 //         .sum()
 // }
 
-pub fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
-    vec![include_map!(game_count_map)]
+fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
+    vec![
+        include_map!(game_count_map),
+        include_map!(mate_count_map),
+        include_map!(num_moves_map),
+        include_map!(queens_gambit_count_map),
+        include_map!(num_captures_map),
+        include_map!(rating_diff_map),
+    ]
 }
 
 pub fn get_map(input: &str) -> Result<MapFn, String> {
@@ -189,14 +215,4 @@ pub fn get_map(input: &str) -> Result<MapFn, String> {
     }
 
     Err(format!("Match not found for map '{}'", input))
-}
-
-pub fn get_selected_maps(map_strs: Vec<&str>) -> Vec<MapFn> {
-    let mut selected_maps = vec![];
-    map_strs.iter().for_each(|map_str| {
-        if let Ok(map) = get_map(map_str) {
-            selected_maps.push(map)
-        }
-    });
-    selected_maps
 }

@@ -39,7 +39,7 @@ fn extract_coordinates(raw_coord: u16) -> (File, Rank, File, Rank) {
 }
 
 // TODO: Refactor to support specifying "from" coordinates
-pub fn has_opening(game: &GameWrapper, opening: Vec<(File, Rank)>) -> bool {
+pub fn has_opening(game: &GameWrapper, opening: &[(File, Rank)]) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
     let moves = &game.moves;
 
@@ -55,7 +55,7 @@ pub fn has_opening(game: &GameWrapper, opening: Vec<(File, Rank)>) -> bool {
     for (expected_file, expected_rank) in opening {
         let (_from_file, _from_rank, to_file, to_rank) =
             extract_coordinates(*moves_iter.next().unwrap() as u16);
-        if expected_file != to_file || expected_rank != to_rank {
+        if expected_file != &to_file || expected_rank != &to_rank {
             return false;
         }
     }

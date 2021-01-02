@@ -3,7 +3,6 @@ use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList, GameRes
 pub type BinFn = Box<dyn Fn(&GameWrapper) -> String + std::marker::Sync>;
 pub type BinFactoryFn = fn(Vec<&str>) -> BinFn;
 pub type FoldFn = Box<dyn Fn(&[i16]) -> f64 + std::marker::Sync>;
-pub type FoldFactoryFn = fn(Vec<&str>) -> FoldFn;
 pub type MapFn = Box<dyn Fn(&GameWrapper) -> i16 + std::marker::Sync>;
 pub type MapFactoryFn = fn(Vec<&str>) -> MapFn;
 pub type FilterFn = Box<dyn Fn(&GameWrapper) -> bool + std::marker::Sync>;
@@ -11,28 +10,28 @@ pub type FilterFactoryFn = fn(Vec<&str>) -> FilterFn;
 
 #[derive(PartialEq)]
 pub enum Rank {
-    _1,
-    _2,
-    _3,
-    _4,
-    _5,
-    _6,
-    _7,
-    _8,
-    _NA,
+    _NA = -1,
+    _1 = 1,
+    _2 = 2,
+    _3 = 3,
+    _4 = 4,
+    _5 = 5,
+    _6 = 6,
+    _7 = 7,
+    _8 = 8,
 }
 
 #[derive(PartialEq)]
 pub enum File {
-    _A,
-    _B,
-    _C,
-    _D,
-    _E,
-    _F,
-    _G,
-    _H,
-    _NA,
+    _NA = -1,
+    _A = 1,
+    _B = 2,
+    _C = 3,
+    _D = 4,
+    _E = 5,
+    _F = 6,
+    _G = 7,
+    _H = 8,
 }
 
 #[derive(Clone)]
