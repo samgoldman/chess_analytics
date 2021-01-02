@@ -106,3 +106,7 @@ pub fn map_result_black(game: &GameWrapper) -> i16 {
 pub fn map_result_draw(game: &GameWrapper) -> i16 {
     map_result(game, GameResult::Draw)
 }
+
+pub fn map_has_eval(game: &GameWrapper) -> i16 {
+    game.eval_available as i16
+}

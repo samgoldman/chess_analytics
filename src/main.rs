@@ -93,7 +93,8 @@ fn main() {
         "sicilianDefenceRate" => ("sicilianDefenceRate".to_string(), map_sicilian_defence_count, fold_avg),
         "whiteWinRate" => ("whiteWinRate".to_string(), map_result_white, fold_avg),
         "blackWinRate" => ("blackWinRate".to_string(), map_result_black, fold_avg),
-        "drawRate" => ("drawRate".to_string(), map_result_draw, fold_avg)
+        "drawRate" => ("drawRate".to_string(), map_result_draw, fold_avg),
+        "evalAvailableRate" => ("evalAvailableRate".to_string(), map_has_eval, fold_avg)
     ];
 
     let selected_bins = matches
