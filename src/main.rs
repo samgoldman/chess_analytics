@@ -5,6 +5,7 @@ use rayon::prelude::*;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 mod bins;
@@ -120,10 +121,10 @@ fn main() {
 
     let file_glob = matches.value_of("glob").unwrap();
 
-    let entries = glob(file_glob)
+    let entries: Vec<PathBuf> = glob(file_glob)
         .expect("Failed to read glob pattern")
-        .map(|x| x.unwrap())
-        .collect::<Vec<std::path::PathBuf>>();
+        .map(Result::unwrap)
+        .collect();
 
     entries.par_iter().for_each(|entry| {
         let file = File::open(entry).unwrap();
