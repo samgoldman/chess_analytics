@@ -110,3 +110,24 @@ pub fn map_result_draw(game: &GameWrapper) -> i16 {
 pub fn map_has_eval(game: &GameWrapper) -> i16 {
     game.eval_available as i16
 }
+
+pub fn map_promotion_count(game: &GameWrapper) -> i16 {
+    game.move_metadata
+        .iter()
+        .map(|data| if (data >> 9 & 0b111) != 0 { 1 } else { 0 })
+        .sum()
+}
+
+pub fn map_knight_promotion_count(game: &GameWrapper) -> i16 {
+    game.move_metadata
+        .iter()
+        .map(|data| if (data >> 9) & 0b111 == 2 { 1 } else { 0 })
+        .sum()
+}
+
+pub fn map_bishop_promotion_count(game: &GameWrapper) -> i16 {
+    game.move_metadata
+        .iter()
+        .map(|data| if (data >> 9) & 0b111 == 3 { 1 } else { 0 })
+        .sum()
+}

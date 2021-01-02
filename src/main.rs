@@ -94,7 +94,10 @@ fn main() {
         "whiteWinRate" => ("whiteWinRate".to_string(), map_result_white, fold_avg),
         "blackWinRate" => ("blackWinRate".to_string(), map_result_black, fold_avg),
         "drawRate" => ("drawRate".to_string(), map_result_draw, fold_avg),
-        "evalAvailableRate" => ("evalAvailableRate".to_string(), map_has_eval, fold_avg)
+        "evalAvailableRate" => ("evalAvailableRate".to_string(), map_has_eval, fold_avg),
+        "promotionRate" => ("promotionRate".to_string(), map_promotion_count, fold_avg),
+        "promotionKnightRate" => ("promotionKnightRate".to_string(), map_knight_promotion_count, fold_avg),
+        "promotionBishopRate" => ("promotionBishopRate".to_string(), map_bishop_promotion_count, fold_avg)
     ];
 
     let selected_bins = matches

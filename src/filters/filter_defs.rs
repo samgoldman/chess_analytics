@@ -157,7 +157,7 @@ filter!(
 );
 
 filter!(
-    evail_available_filter,
+    eval_available_filter,
     r#"^eval(not|)Available$"#,
     params,
     {
