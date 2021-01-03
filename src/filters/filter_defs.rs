@@ -174,7 +174,7 @@ mod tests_player_elo_filter {
     use crate::types::GameWrapper;
 
     macro_rules! test_player_elo_filter {
-        ($test_name:ident, $factory_params:expr, $white_rating:literal, $black_rating:literal, $expected:literal) => {
+        ($test_name:ident, $min_max:literal, $player:literal, $thresh:literal, $white_rating:literal, $black_rating:literal, $expected:literal) => {
             #[test]
             fn $test_name() {
                 let test_game = GameWrapper {
@@ -183,135 +183,51 @@ mod tests_player_elo_filter {
                     ..Default::default()
                 };
 
-                let fun = player_elo_filter::factory($factory_params);
+                let fun = player_elo_filter::factory(vec!["", $min_max, $player, $thresh]);
                 assert_eq!(fun(&test_game), $expected);
             }
         };
     }
 
-    test_player_elo_filter!(min_white_1, vec!["", "min", "White", "600"], 0, 600, false);
-    test_player_elo_filter!(min_white_2, vec!["", "min", "White", "600"], 600, 0, true);
-    test_player_elo_filter!(
-        min_white_3,
-        vec!["", "min", "White", "600"],
-        9999,
-        600,
-        true
-    );
-    test_player_elo_filter!(
-        min_white_4,
-        vec!["", "min", "White", "3000"],
-        0,
-        5000,
-        false
-    );
-    test_player_elo_filter!(min_white_5, vec!["", "min", "White", "3000"], 600, 0, false);
-    test_player_elo_filter!(
-        min_white_6,
-        vec!["", "min", "White", "3000"],
-        9999,
-        500,
-        true
-    );
+    test_player_elo_filter!(min_white_1, "min", "White", "600", 0, 600, false);
+    test_player_elo_filter!(min_white_2, "min", "White", "600", 600, 0, true);
+    test_player_elo_filter!(min_white_3, "min", "White", "600", 9999, 600, true);
+    test_player_elo_filter!(min_white_4, "min", "White", "3000", 0, 5000, false);
+    test_player_elo_filter!(min_white_5, "min", "White", "3000", 600, 0, false);
+    test_player_elo_filter!(min_white_6, "min", "White", "3000", 9999, 500, true);
 
-    test_player_elo_filter!(max_white_1, vec!["", "max", "White", "600"], 0, 600, true);
-    test_player_elo_filter!(max_white_2, vec!["", "max", "White", "600"], 600, 0, true);
-    test_player_elo_filter!(
-        max_white_3,
-        vec!["", "max", "White", "600"],
-        9999,
-        600,
-        false
-    );
-    test_player_elo_filter!(max_white_4, vec!["", "max", "White", "3000"], 0, 6000, true);
-    test_player_elo_filter!(max_white_5, vec!["", "max", "White", "3000"], 600, 0, true);
-    test_player_elo_filter!(
-        max_white_6,
-        vec!["", "max", "White", "3000"],
-        9999,
-        600,
-        false
-    );
+    test_player_elo_filter!(max_white_1, "max", "White", "600", 0, 600, true);
+    test_player_elo_filter!(max_white_2, "max", "White", "600", 600, 0, true);
+    test_player_elo_filter!(max_white_3, "max", "White", "600", 9999, 600, false);
+    test_player_elo_filter!(max_white_4, "max", "White", "3000", 0, 6000, true);
+    test_player_elo_filter!(max_white_5, "max", "White", "3000", 600, 0, true);
+    test_player_elo_filter!(max_white_6, "max", "White", "3000", 9999, 600, false);
 
-    test_player_elo_filter!(min_black_1, vec!["", "min", "Black", "700"], 700, 0, false);
-    test_player_elo_filter!(min_black_2, vec!["", "min", "Black", "700"], 0, 700, true);
-    test_player_elo_filter!(min_black_3, vec!["", "min", "Black", "700"], 0, 6000, true);
-    test_player_elo_filter!(
-        min_black_4,
-        vec!["", "min", "Black", "2000"],
-        5000,
-        0,
-        false
-    );
-    test_player_elo_filter!(min_black_5, vec!["", "min", "Black", "2000"], 0, 700, false);
-    test_player_elo_filter!(
-        min_black_6,
-        vec!["", "min", "Black", "2000"],
-        1999,
-        6000,
-        true
-    );
+    test_player_elo_filter!(min_black_1, "min", "Black", "700", 700, 0, false);
+    test_player_elo_filter!(min_black_2, "min", "Black", "700", 0, 700, true);
+    test_player_elo_filter!(min_black_3, "min", "Black", "700", 0, 6000, true);
+    test_player_elo_filter!(min_black_4, "min", "Black", "2000", 5000, 0, false);
+    test_player_elo_filter!(min_black_5, "min", "Black", "2000", 0, 700, false);
+    test_player_elo_filter!(min_black_6, "min", "Black", "2000", 1999, 6000, true);
 
-    test_player_elo_filter!(max_black_1, vec!["", "max", "Black", "600"], 6000, 0, true);
-    test_player_elo_filter!(max_black_2, vec!["", "max", "Black", "600"], 0, 600, true);
-    test_player_elo_filter!(
-        max_black_3,
-        vec!["", "max", "Black", "600"],
-        600,
-        700,
-        false
-    );
-    test_player_elo_filter!(
-        max_black_4,
-        vec!["", "max", "Black", "3000"],
-        4000,
-        2999,
-        true
-    );
-    test_player_elo_filter!(max_black_5, vec!["", "max", "Black", "3000"], 600, 0, true);
-    test_player_elo_filter!(
-        max_black_6,
-        vec!["", "max", "Black", "3000"],
-        3000,
-        3001,
-        false
-    );
+    test_player_elo_filter!(max_black_1, "max", "Black", "600", 6000, 0, true);
+    test_player_elo_filter!(max_black_2, "max", "Black", "600", 0, 600, true);
+    test_player_elo_filter!(max_black_3, "max", "Black", "600", 600, 700, false);
+    test_player_elo_filter!(max_black_4, "max", "Black", "3000", 4000, 2999, true);
+    test_player_elo_filter!(max_black_5, "max", "Black", "3000", 600, 0, true);
+    test_player_elo_filter!(max_black_6, "max", "Black", "3000", 3000, 3001, false);
 
-    test_player_elo_filter!(min_both_1, vec!["", "min", "Both", "700"], 700, 0, false);
-    test_player_elo_filter!(min_both_2, vec!["", "min", "Both", "700"], 699, 700, false);
-    test_player_elo_filter!(min_both_3, vec!["", "min", "Both", "700"], 0, 6000, false);
-    test_player_elo_filter!(
-        min_both_4,
-        vec!["", "min", "Both", "2000"],
-        5000,
-        1999,
-        false
-    );
-    test_player_elo_filter!(min_both_5, vec!["", "min", "Both", "2000"], 0, 700, false);
-    test_player_elo_filter!(
-        min_both_6,
-        vec!["", "min", "Both", "2000"],
-        2001,
-        6000,
-        true
-    );
+    test_player_elo_filter!(min_both_1, "min", "Both", "700", 700, 0, false);
+    test_player_elo_filter!(min_both_2, "min", "Both", "700", 699, 700, false);
+    test_player_elo_filter!(min_both_3, "min", "Both", "700", 0, 6000, false);
+    test_player_elo_filter!(min_both_4, "min", "Both", "2000", 5000, 1999, false);
+    test_player_elo_filter!(min_both_5, "min", "Both", "2000", 0, 700, false);
+    test_player_elo_filter!(min_both_6, "min", "Both", "2000", 2001, 6000, true);
 
-    test_player_elo_filter!(max_both_1, vec!["", "max", "Both", "600"], 600, 0, true);
-    test_player_elo_filter!(max_both_2, vec!["", "max", "Both", "600"], 0, 601, false);
-    test_player_elo_filter!(max_both_3, vec!["", "max", "Both", "600"], 600, 700, false);
-    test_player_elo_filter!(
-        max_both_4,
-        vec!["", "max", "Both", "3000"],
-        4000,
-        2999,
-        false
-    );
-    test_player_elo_filter!(max_both_5, vec!["", "max", "Both", "3000"], 600, 0, true);
-    test_player_elo_filter!(
-        max_both_6,
-        vec!["", "max", "Both", "3000"],
-        3000,
-        2999,
-        true
-    );
+    test_player_elo_filter!(max_both_1, "max", "Both", "600", 600, 0, true);
+    test_player_elo_filter!(max_both_2, "max", "Both", "600", 0, 601, false);
+    test_player_elo_filter!(max_both_3, "max", "Both", "600", 600, 700, false);
+    test_player_elo_filter!(max_both_4, "max", "Both", "3000", 4000, 2999, false);
+    test_player_elo_filter!(max_both_5, "max", "Both", "3000", 600, 0, true);
+    test_player_elo_filter!(max_both_6, "max", "Both", "3000", 3000, 2999, true);
 }
