@@ -5,3 +5,4 @@ lcov.info
 *.profraw
 /cov
 /.vscode
+*.json

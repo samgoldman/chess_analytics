@@ -1,7 +1,13 @@
 use crate::types::*;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 
 mod filter_defs;
+
+#[derive(Serialize, Deserialize)]
+struct InputFilterSteps {
+    steps: Vec<Vec<String>>,
+}
 
 macro_rules! include_filter {
     ($name: ident) => {
@@ -49,19 +55,29 @@ fn get_filter(input: &str) -> Result<FilterFn, String> {
     Err(format!("Match not found for filter '{}'", input))
 }
 
-pub fn matches_filter(input: String) -> Result<(), String> {
-    match get_filter(&input) {
-        Ok(_) => Ok(()),
-        Err(e) => Err(e),
-    }
-}
+pub fn get_filter_steps(filter_config: &str) -> FilterFn {
+    let input: InputFilterSteps = serde_json::from_str(filter_config).unwrap();
 
-pub fn get_selected_filters(filter_strs: Vec<&str>) -> Vec<FilterFn> {
-    let mut selected_filters = vec![];
-    filter_strs.iter().for_each(|filter_str| {
-        if let Ok(filter) = get_filter(filter_str) {
-            selected_filters.push(filter)
-        }
+    let mut filter_steps = vec![];
+
+    input.steps.iter().for_each(|input_step| {
+        filter_steps.push(
+            input_step
+                .iter()
+                .map(|x| get_filter(x).unwrap())
+                .collect::<Vec<FilterFn>>(),
+        )
     });
-    selected_filters
+
+    Box::new(move |game| {
+        'step_loop: for step in &filter_steps {
+            for filter in step {
+                if !filter(game) {
+                    continue 'step_loop;
+                }
+            }
+            return true;
+        }
+        false
+    })
 }

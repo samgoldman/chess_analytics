@@ -21,7 +21,7 @@ mod types;
 
 use bins::*;
 use database::Database;
-use filters::{get_selected_filters, matches_filter};
+use filters::get_filter_steps;
 use statistics::*;
 use types::*;
 
@@ -38,13 +38,7 @@ fn main() {
                 .help("A glob to capture the files to process")
                 .required(true),
         )
-        .arg(
-            Arg::with_name("filters")
-                .long("filters")
-                .takes_value(true)
-                .multiple(true)
-                .validator(matches_filter),
-        )
+        .arg(Arg::with_name("filters").long("filters").takes_value(true))
         .arg(
             Arg::with_name("bins")
                 .long("bins")
@@ -81,9 +75,8 @@ fn main() {
         .values_of("bins")
         .map_or(vec![], |bin_strs| get_selected_bins(bin_strs.collect()));
 
-    let selected_filters = matches.values_of("filters").map_or(vec![], |filter_strs| {
-        get_selected_filters(filter_strs.collect())
-    });
+    let filter_config = std::fs::read_to_string(matches.value_of("filters").unwrap()).unwrap();
+    let selected_filters = get_filter_steps(&filter_config);
 
     let file_glob = matches.value_of("glob").unwrap();
 
@@ -101,16 +94,7 @@ fn main() {
 
         let games = GameWrapper::from_game_list_data(data);
 
-        let filtered_games = games.iter().filter(|game| {
-            // Loop through every filter
-            for filter in &selected_filters {
-                // Short circuit false if a single filter fails
-                if !filter(&game) {
-                    return false;
-                }
-            }
-            true
-        });
+        let filtered_games = games.iter().filter(|x| selected_filters(*x));
 
         filtered_games.for_each(|game| {
             for stat in &selected_statistics {
@@ -119,10 +103,6 @@ fn main() {
                 for bin in &selected_bins {
                     let new_bin = bin(&game);
                     path.push(new_bin);
-                }
-
-                if path.len() == 1 {
-                    path.push("".to_string());
                 }
 
                 // Unlocked at the end of the loop iteration
@@ -143,47 +123,52 @@ fn main() {
 
         let mut paths = stat_node.get_paths();
 
-        let mut columns: HashSet<String> = HashSet::new();
-        let mut rows = HashSet::new();
-        for path in paths.iter_mut() {
-            if use_columns {
-                columns.insert(path.remove(0));
+        if paths.is_empty() {
+            let data = selected.2(&stat_node.data);
+            print!("\t{:.4}", data);
+        } else {
+            let mut columns: HashSet<String> = HashSet::new();
+            let mut rows = HashSet::new();
+            for path in paths.iter_mut() {
+                if use_columns {
+                    columns.insert(path.remove(0));
+                }
+
+                rows.insert(path.clone());
             }
 
-            rows.insert(path.clone());
-        }
+            let mut unique_columns: Vec<String> = columns.iter().cloned().collect();
+            unique_columns.sort();
 
-        let mut unique_columns: Vec<String> = columns.iter().cloned().collect();
-        unique_columns.sort();
-
-        if use_columns {
-            println!("\t{}", unique_columns.join("\t"));
-        }
-
-        let mut unique_rows: Vec<Vec<String>> = rows.iter().cloned().collect();
-        unique_rows.sort_by(|a, b| {
-            a.get(0)
-                .unwrap_or(&"".to_string())
-                .cmp(b.get(0).unwrap_or(&"".to_string()))
-        });
-
-        for row in unique_rows {
-            let row_name = row.join(".");
-            print!("{}", row_name);
             if use_columns {
-                for col in unique_columns.clone() {
-                    let mut full_path = row.clone();
-                    full_path.insert(0, col.to_string());
+                println!("\t{}", unique_columns.join("\t"));
+            }
 
-                    let data = selected.2(&stat_node.insert_path(full_path).data);
+            let mut unique_rows: Vec<Vec<String>> = rows.iter().cloned().collect();
+            unique_rows.sort_by(|a, b| {
+                a.get(0)
+                    .unwrap_or(&"".to_string())
+                    .cmp(b.get(0).unwrap_or(&"".to_string()))
+            });
+
+            for row in unique_rows {
+                let row_name = row.join(".");
+                print!("{}", row_name);
+                if use_columns {
+                    for col in unique_columns.clone() {
+                        let mut full_path = row.clone();
+                        full_path.insert(0, col.to_string());
+
+                        let data = selected.2(&stat_node.insert_path(full_path).data);
+                        print!("\t{:.4}", data);
+                    }
+                } else {
+                    let data = selected.2(&stat_node.insert_path(row).data);
                     print!("\t{:.4}", data);
                 }
-            } else {
-                let data = selected.2(&stat_node.insert_path(row).data);
-                print!("\t{:.4}", data);
-            }
 
-            println!();
+                println!();
+            }
         }
     });
 }
