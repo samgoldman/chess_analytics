@@ -35,6 +35,35 @@ pub enum File {
 }
 
 #[derive(Clone)]
+#[cfg(not(test))]
+pub struct GameWrapper {
+    year: u16,
+    month: u8,
+    day: u8,
+    site: String,
+    white: String,
+    black: String,
+    white_rating: u16,
+    black_rating: u16,
+    time_control_main: u16,
+    time_control_increment: u8,
+    eco_category: char,
+    eco_subcategory: u8,
+    moves: Vec<u16>,
+    move_metadata: Vec<u16>,
+    clock_hours: Vec<u8>,
+    clock_minutes: Vec<u8>,
+    clock_seconds: Vec<u8>,
+    eval_available: bool,
+    eval_mate_in: Vec<i16>,
+    eval_advantage: Vec<f32>,
+    result: GameResult,
+    termination: Termination,
+    white_diff: i16,
+    black_diff: i16,
+}
+
+#[cfg(test)]
 pub struct GameWrapper {
     pub year: u16,
     pub month: u8,
@@ -126,6 +155,102 @@ impl GameWrapper {
             black_diff: game.black_diff(),
         }
     }
+
+    pub fn year(&self) -> u16 {
+        self.year
+    }
+
+    pub fn month(&self) -> u8 {
+        self.month
+    }
+
+    pub fn day(&self) -> u8 {
+        self.day
+    }
+
+    pub fn site(&self) -> &str {
+        &self.site
+    }
+
+    // pub fn white(&self) -> &str {
+    //     &self.white
+    // }
+
+    // pub fn black(&self) -> &str {
+    //     &self.black
+    // }
+
+    pub fn white_rating(&self) -> u16 {
+        self.white_rating
+    }
+
+    pub fn black_rating(&self) -> u16 {
+        self.black_rating
+    }
+
+    // pub fn time_control_main(&self) -> u16 {
+    //     self.time_control_main
+    // }
+
+    // pub fn time_control_increment(&self) -> u8 {
+    //     self.time_control_increment
+    // }
+
+    pub fn eco_category(&self) -> char {
+        self.eco_category
+    }
+
+    // pub fn eco_subcategory(&self) -> u8 {
+    //     self.eco_subcategory
+    // }
+
+    pub fn moves(&self) -> &Vec<u16> {
+        &self.moves
+    }
+
+    pub fn move_metadata(&self) -> &Vec<u16> {
+        &self.move_metadata
+    }
+
+    // pub fn clock_hours(&self) -> &Vec<u8> {
+    //     &self.clock_hours
+    // }
+
+    // pub fn clock_minutes(&self) -> &Vec<u8> {
+    //     &self.clock_minutes
+    // }
+
+    // pub fn clock_seconds(&self) -> &Vec<u8> {
+    //     &self.clock_seconds
+    // }
+
+    pub fn eval_available(&self) -> bool {
+        self.eval_available
+    }
+
+    // pub fn eval_mate_in(&self) -> &Vec<i16> {
+    //     &self.eval_mate_in
+    // }
+
+    // pub fn eval_advantage(&self) -> &Vec<f32> {
+    //     &self.eval_advantage
+    // }
+
+    pub fn result(&self) -> GameResult {
+        self.result
+    }
+
+    // pub fn termination(&self) -> Termination {
+    //     self.termination
+    // }
+
+    // pub fn white_diff(&self) -> i16 {
+    //     self.white_diff
+    // }
+
+    // pub fn black_diff(&self) -> i16 {
+    //     self.black_diff
+    // }
 }
 
 impl Default for GameWrapper {

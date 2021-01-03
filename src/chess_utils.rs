@@ -41,7 +41,7 @@ fn extract_coordinates(raw_coord: u16) -> (File, Rank, File, Rank) {
 // TODO: Refactor to support specifying "from" coordinates
 pub fn has_opening(game: &GameWrapper, opening: &[(File, Rank)]) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
-    let moves = &game.moves;
+    let moves = game.moves();
 
     // Verify this game has enough moves for the given opening
     if moves.len() < opening.len() {
@@ -64,5 +64,5 @@ pub fn has_opening(game: &GameWrapper, opening: &[(File, Rank)]) -> bool {
 }
 
 pub fn get_game_elo(game: &GameWrapper) -> u32 {
-    (game.white_rating + game.black_rating) as u32 / 2
+    (game.white_rating() + game.black_rating()) as u32 / 2
 }

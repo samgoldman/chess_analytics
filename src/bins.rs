@@ -42,7 +42,7 @@ bin!(
     year_bin,
     r#"^year$"#,
     _params,
-    { Box::new(move |game| game.year.to_string()) },
+    { Box::new(move |game| game.year().to_string()) },
     "Year Bin",
     "Bins games by unique year"
 );
@@ -51,7 +51,7 @@ bin!(
     month_bin,
     r#"^month$"#,
     _params,
-    { Box::new(move |game| format!("{:02}", game.month)) },
+    { Box::new(move |game| format!("{:02}", game.month())) },
     "Month Bin",
     "Bins games by unique month"
 );
@@ -60,7 +60,7 @@ bin!(
     day_bin,
     r#"^day$"#,
     _params,
-    { Box::new(move |game| format!("{:02}", game.day)) },
+    { Box::new(move |game| format!("{:02}", game.day())) },
     "Day Bin",
     "Bins games by unique day"
 );
@@ -83,7 +83,7 @@ bin!(
     eco_category_bin,
     r#"^ecoCategory$"#,
     _params,
-    { Box::new(move |game| format!("{}", game.eco_category)) },
+    { Box::new(move |game| format!("{}", game.eco_category())) },
     "ECO Category Bin",
     "Bins games by ECO category A-E (and empty)"
 );
@@ -92,7 +92,7 @@ bin!(
     site_bin,
     r#"^site$"#,
     _params,
-    { Box::new(move |game| game.site.to_string()) },
+    { Box::new(move |game| game.site().to_string()) },
     "Site Bin",
     "A unique bin for each game that allows investigation of oddities"
 );

@@ -51,7 +51,7 @@ filter!(
     params,
     {
         let year: u32 = params[1].parse::<u32>().unwrap();
-        Box::new(move |game| game.year as u32 == year)
+        Box::new(move |game| game.year() as u32 == year)
     },
     "Year Filter",
     "year<year>; filters out games that did not take place in the year provided"
@@ -63,7 +63,7 @@ filter!(
     params,
     {
         let month: u32 = params[1].parse::<u32>().unwrap();
-        Box::new(move |game| game.month as u32 == month)
+        Box::new(move |game| game.month() as u32 == month)
     },
     "Month Filter",
     "month<month>; filters out games that did not take place in the month provided"
@@ -75,7 +75,7 @@ filter!(
     params,
     {
         let day: u32 = params[1].parse::<u32>().unwrap();
-        Box::new(move |game| game.day as u32 == day)
+        Box::new(move |game| game.day() as u32 == day)
     },
     "Day Filter",
     "day<day>; filters out games that did not take place on the day of the month provided"
@@ -91,7 +91,7 @@ filter!(
 
         let thresh: u32 = params[2].parse::<u32>().unwrap();
         Box::new(move |game| -> bool {
-            let num_moves = game.move_metadata.len() as u32;
+            let num_moves = game.move_metadata().len() as u32;
             comparison(num_moves, thresh) == thresh
         })
     },
@@ -126,11 +126,11 @@ filter!(
                 check_black = true;
             }
 
-            if check_white && comparison(game.white_rating, threshold_elo) != threshold_elo {
+            if check_white && comparison(game.white_rating(), threshold_elo) != threshold_elo {
                 return false;
             }
 
-            if check_black && comparison(game.black_rating, threshold_elo) != threshold_elo {
+            if check_black && comparison(game.black_rating(), threshold_elo) != threshold_elo {
                 return false;
             }
 
@@ -148,7 +148,7 @@ filter!(
     {
         let mate_occurs = params[1] != "no";
         Box::new(move |game| -> bool {
-            let metadata = game.move_metadata.iter();
+            let metadata = game.move_metadata().iter();
             mate_occurs == (metadata.last().unwrap() & 0x0020 != 0)
         })
     },
@@ -162,7 +162,7 @@ filter!(
     params,
     {
         let want_available = params[1].is_empty();
-        Box::new(move |game| -> bool { want_available == game.eval_available })
+        Box::new(move |game| -> bool { want_available == game.eval_available() })
     },
     "Eval Available Filter",
     "evalAvailable|evalNotAvailable"
@@ -173,213 +173,61 @@ mod tests_player_elo_filter {
     use super::*;
     use crate::types::GameWrapper;
 
-    #[test]
-    fn test_player_elo_filter_min_white() {
-        let mut test_game = GameWrapper {
-            ..Default::default()
+    macro_rules! test_player_elo_filter {
+        ($test_name:ident, $factory_params:expr, $white_rating:literal, $black_rating:literal, $expected:literal) => {
+            #[test]
+            fn $test_name() {
+                let test_game = GameWrapper {
+                    white_rating: $white_rating,
+                    black_rating: $black_rating,
+                    ..Default::default()
+                };
+
+                let fun = player_elo_filter::factory($factory_params);
+                assert_eq!(fun(&test_game), $expected);
+            }
         };
-
-        // MIN, WHITE, 600
-        let fun = player_elo_filter::factory(vec!["", "min", "White", "600"]);
-        test_game.white_rating = 0;
-        test_game.black_rating = 600;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 600;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), true);
-
-        test_game.white_rating = 9999;
-        test_game.black_rating = 600;
-        assert_eq!(fun(&test_game), true);
-
-        // MIN, WHITE, 3000
-        let fun = player_elo_filter::factory(vec!["", "min", "White", "3000"]);
-        test_game.white_rating = 0;
-        test_game.black_rating = 5000;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 600;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 9999;
-        test_game.black_rating = 500;
-        assert_eq!(fun(&test_game), true);
     }
 
-    #[test]
-    fn test_player_elo_filter_max_white() {
-        let mut test_game = GameWrapper {
-            ..Default::default()
-        };
+    test_player_elo_filter!(min_white_1, vec!["", "min", "White", "600"], 0, 600, false);
+    test_player_elo_filter!(min_white_2, vec!["", "min", "White", "600"], 600, 0, true);
+    test_player_elo_filter!(min_white_3, vec!["", "min", "White", "600"], 9999, 600, true);
+    test_player_elo_filter!(min_white_4, vec!["", "min", "White", "3000"], 0, 5000, false);
+    test_player_elo_filter!(min_white_5, vec!["", "min", "White", "3000"], 600, 0, false);
+    test_player_elo_filter!(min_white_6, vec!["", "min", "White", "3000"], 9999, 500, true);
 
-        // MAX, WHITE, 600
-        let fun = player_elo_filter::factory(vec!["", "max", "White", "600"]);
-        test_game.white_rating = 0;
-        test_game.black_rating = 600;
-        assert_eq!(fun(&test_game), true);
+    test_player_elo_filter!(max_white_1, vec!["", "max", "White", "600"], 0, 600, true);
+    test_player_elo_filter!(max_white_2, vec!["", "max", "White", "600"], 600, 0, true);
+    test_player_elo_filter!(max_white_3, vec!["", "max", "White", "600"], 9999, 600, false);
+    test_player_elo_filter!(max_white_4, vec!["", "max", "White", "3000"], 0, 6000, true);
+    test_player_elo_filter!(max_white_5, vec!["", "max", "White", "3000"], 600, 0, true);
+    test_player_elo_filter!(max_white_6, vec!["", "max", "White", "3000"], 9999, 600, false);
 
-        test_game.white_rating = 600;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), true);
+    test_player_elo_filter!(min_black_1, vec!["", "min", "Black", "700"], 700, 0, false);
+    test_player_elo_filter!(min_black_2, vec!["", "min", "Black", "700"], 0, 700, true);
+    test_player_elo_filter!(min_black_3, vec!["", "min", "Black", "700"], 0, 6000, true);
+    test_player_elo_filter!(min_black_4, vec!["", "min", "Black", "2000"], 5000, 0, false);
+    test_player_elo_filter!(min_black_5, vec!["", "min", "Black", "2000"], 0, 700, false);
+    test_player_elo_filter!(min_black_6, vec!["", "min", "Black", "2000"], 1999, 6000, true);
 
-        test_game.white_rating = 9999;
-        test_game.black_rating = 600;
-        assert_eq!(fun(&test_game), false);
+    test_player_elo_filter!(max_black_1, vec!["", "max", "Black", "600"], 6000, 0, true);
+    test_player_elo_filter!(max_black_2, vec!["", "max", "Black", "600"], 0, 600, true);
+    test_player_elo_filter!(max_black_3, vec!["", "max", "Black", "600"], 600, 700, false);
+    test_player_elo_filter!(max_black_4, vec!["", "max", "Black", "3000"], 4000, 2999, true);
+    test_player_elo_filter!(max_black_5, vec!["", "max", "Black", "3000"], 600, 0, true);
+    test_player_elo_filter!(max_black_6, vec!["", "max", "Black", "3000"], 3000, 3001, false);
 
-        // MAX, WHITE, 3000
-        let fun = player_elo_filter::factory(vec!["", "max", "White", "3000"]);
-        test_game.white_rating = 0;
-        test_game.black_rating = 6000;
-        assert_eq!(fun(&test_game), true);
+    test_player_elo_filter!(min_both_1, vec!["", "min", "Both", "700"], 700, 0, false);
+    test_player_elo_filter!(min_both_2, vec!["", "min", "Both", "700"], 699, 700, false);
+    test_player_elo_filter!(min_both_3, vec!["", "min", "Both", "700"], 0, 6000, false);
+    test_player_elo_filter!(min_both_4, vec!["", "min", "Both", "2000"], 5000, 1999, false);
+    test_player_elo_filter!(min_both_5, vec!["", "min", "Both", "2000"], 0, 700, false);
+    test_player_elo_filter!(min_both_6, vec!["", "min", "Both", "2000"], 2001, 6000, true);
 
-        test_game.white_rating = 600;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), true);
-
-        test_game.white_rating = 9999;
-        test_game.black_rating = 600;
-        assert_eq!(fun(&test_game), false);
-    }
-
-    #[test]
-    fn test_player_elo_filter_min_black() {
-        let mut test_game = GameWrapper {
-            ..Default::default()
-        };
-
-        // MIN, BLACK, 700
-        let fun = player_elo_filter::factory(vec!["", "min", "Black", "700"]);
-        test_game.white_rating = 700;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 0;
-        test_game.black_rating = 700;
-        assert_eq!(fun(&test_game), true);
-
-        test_game.white_rating = 0;
-        test_game.black_rating = 6000;
-        assert_eq!(fun(&test_game), true);
-
-        // MIN, BLACK, 2000
-        let fun = player_elo_filter::factory(vec!["", "min", "Black", "2000"]);
-        test_game.white_rating = 5000;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 0;
-        test_game.black_rating = 700;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 1999;
-        test_game.black_rating = 6000;
-        assert_eq!(fun(&test_game), true);
-    }
-
-    #[test]
-    fn test_player_elo_filter_max_black() {
-        let mut test_game = GameWrapper {
-            ..Default::default()
-        };
-
-        // MAX, BLACK, 600
-        let fun = player_elo_filter::factory(vec!["", "max", "Black", "600"]);
-        test_game.white_rating = 600;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), true);
-
-        test_game.white_rating = 0;
-        test_game.black_rating = 600;
-        assert_eq!(fun(&test_game), true);
-
-        test_game.white_rating = 600;
-        test_game.black_rating = 700;
-        assert_eq!(fun(&test_game), false);
-
-        // MAX, BLACK, 3000
-        let fun = player_elo_filter::factory(vec!["", "max", "Black", "3000"]);
-        test_game.white_rating = 4000;
-        test_game.black_rating = 2999;
-        assert_eq!(fun(&test_game), true);
-
-        test_game.white_rating = 600;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), true);
-
-        test_game.white_rating = 3000;
-        test_game.black_rating = 3001;
-        assert_eq!(fun(&test_game), false);
-    }
-
-    #[test]
-    fn test_player_elo_filter_min_both() {
-        let mut test_game = GameWrapper {
-            ..Default::default()
-        };
-
-        // MIN, BOTH, 700
-        let fun = player_elo_filter::factory(vec!["", "min", "Both", "700"]);
-        test_game.white_rating = 700;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 0;
-        test_game.black_rating = 700;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 0;
-        test_game.black_rating = 6000;
-        assert_eq!(fun(&test_game), false);
-
-        // MIN, BOTH, 2000
-        let fun = player_elo_filter::factory(vec!["", "min", "Both", "2000"]);
-        test_game.white_rating = 5000;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 0;
-        test_game.black_rating = 700;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 2000;
-        test_game.black_rating = 6000;
-        assert_eq!(fun(&test_game), true);
-    }
-
-    #[test]
-    fn test_player_elo_filter_max_both() {
-        let mut test_game = GameWrapper {
-            ..Default::default()
-        };
-
-        // MAX, BOTH, 600
-        let fun = player_elo_filter::factory(vec!["", "max", "Both", "600"]);
-        test_game.white_rating = 600;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), true);
-
-        test_game.white_rating = 0;
-        test_game.black_rating = 601;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 600;
-        test_game.black_rating = 700;
-        assert_eq!(fun(&test_game), false);
-
-        // MAX, BOTH, 3000
-        let fun = player_elo_filter::factory(vec!["", "max", "Both", "3000"]);
-        test_game.white_rating = 4000;
-        test_game.black_rating = 2999;
-        assert_eq!(fun(&test_game), false);
-
-        test_game.white_rating = 600;
-        test_game.black_rating = 0;
-        assert_eq!(fun(&test_game), true);
-
-        test_game.white_rating = 3000;
-        test_game.black_rating = 2999;
-        assert_eq!(fun(&test_game), true);
-    }
+    test_player_elo_filter!(max_both_1, vec!["", "max", "Both", "600"], 600, 0, true);
+    test_player_elo_filter!(max_both_2, vec!["", "max", "Both", "600"], 0, 601, false);
+    test_player_elo_filter!(max_both_3, vec!["", "max", "Both", "600"], 600, 700, false);
+    test_player_elo_filter!(max_both_4, vec!["", "max", "Both", "3000"], 4000, 2999, false);
+    test_player_elo_filter!(max_both_5, vec!["", "max", "Both", "3000"], 600, 0, true);
+    test_player_elo_filter!(max_both_6, vec!["", "max", "Both", "3000"], 3000, 2999, true);
 }

@@ -55,7 +55,7 @@ map!(
     {
         let only_mate = params[1] == "Mate";
         Box::new(move |game| {
-            let metadata = &game.move_metadata;
+            let metadata = game.move_metadata();
             match metadata.iter().last() {
                 Some(check) => {
                     if *check == 0x0020 || (!only_mate && *check == 0x0010) {
@@ -76,7 +76,7 @@ map!(
     num_moves_map,
     r#"^numMoves$"#,
     _params,
-    { Box::new(|game| game.moves.len() as i16) },
+    { Box::new(|game| game.moves().len() as i16) },
     "",
     ""
 );
@@ -87,7 +87,7 @@ map!(
     _params,
     {
         Box::new(|game| {
-            game.move_metadata
+            game.move_metadata()
                 .iter()
                 .filter(|c| (*c & 0x0008) != 0)
                 .count() as i16
@@ -101,7 +101,7 @@ map!(
     rating_diff_map,
     r#"^ratingDiff$"#,
     _params,
-    { Box::new(|game| (game.white_rating as i16 - game.black_rating as i16).abs()) },
+    { Box::new(|game| (game.white_rating() as i16 - game.black_rating() as i16).abs()) },
     "",
     ""
 );
@@ -167,7 +167,7 @@ map!(
             "BlackVictory" => GameResult::Black,
             _ => GameResult::Star,
         };
-        Box::new(move |game| if game.result == expected { 1 } else { 0 })
+        Box::new(move |game| if game.result() == expected { 1 } else { 0 })
     },
     "",
     ""
@@ -177,7 +177,7 @@ map!(
     has_eval_map,
     r#"hasEval"#,
     _params,
-    { Box::new(|game| game.eval_available as i16) },
+    { Box::new(|game| game.eval_available() as i16) },
     "",
     ""
 );
@@ -196,7 +196,7 @@ map!(
         };
 
         Box::new(move |game| {
-            game.move_metadata
+            game.move_metadata()
                 .iter()
                 .map(|data| {
                     if (data >> 9 & 0b111) == expected {
