@@ -22,7 +22,7 @@ mod types;
 use bins::*;
 use database::Database;
 use filters::{get_selected_filters, matches_filter};
-use statistics::convert_to_stat_def;
+use statistics::*;
 use types::*;
 
 fn main() {
@@ -72,7 +72,7 @@ fn main() {
 
     let use_columns = !matches!(matches.occurrences_of("use_columns"), 0);
 
-    let selected_statistics: Vec<(&str, MapFn, FoldFn)> = matches
+    let selected_statistics: Vec<StatisticDefinition> = matches
         .values_of("statistics")
         .map(|input_stat_definitions| input_stat_definitions.map(convert_to_stat_def).collect())
         .unwrap();
