@@ -8,7 +8,11 @@ use maps::{get_map, MapFn};
 use lazy_static::lazy_static;
 use regex::Regex;
 
-pub type StatisticDefinition<'a> = (&'a str, MapFn, FoldFn);
+pub struct StatisticDefinition<'a> {
+    pub name: &'a str,
+    pub map: MapFn,
+    pub fold: FoldFn,
+}
 
 lazy_static! {
     static ref STAT_DEF_REGEX: Regex = Regex::new(r#"^(.*):(.*):(.*)$"#).unwrap();
@@ -22,9 +26,9 @@ pub fn convert_to_stat_def(input: &str) -> StatisticDefinition {
             .expect("Statistic not in expected format"),
     );
 
-    (
-        capture[1],
-        get_map(capture[2]).expect("Unexpected map name"),
-        get_fold(capture[3]).expect("Unexpected fold name"),
-    )
+    StatisticDefinition {
+        name: capture[1],
+        map: get_map(capture[2]).expect("Unexpected map name"),
+        fold: get_fold(capture[3]).expect("Unexpected fold name"),
+    }
 }

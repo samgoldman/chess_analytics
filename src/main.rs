@@ -2,7 +2,7 @@ use bzip2::read::BzDecoder;
 use clap::{App, Arg};
 use glob::glob;
 use rayon::prelude::*;
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
@@ -13,14 +13,12 @@ mod bins;
 #[path = "../target/flatbuffers/chess_generated.rs"]
 mod chess_flatbuffers;
 mod chess_utils;
-mod database;
 mod filters;
 mod game_wrapper;
 mod general_utils;
 mod statistics;
 
 use bins::*;
-use database::Database;
 use filters::get_filter_steps;
 use game_wrapper::GameWrapper;
 use statistics::*;
@@ -59,17 +57,17 @@ fn main() {
                 .takes_value(true)
                 .default_value("6"),
         )
-        .arg(Arg::with_name("use_columns").short("c").long("use_columns"))
         .get_matches();
 
-    let db = Arc::new(Mutex::new(Database::default()));
+    let db: Arc<Mutex<HashMap<Vec<String>, Vec<i16>>>> = Arc::new(Mutex::new(HashMap::new()));
 
-    let use_columns = !matches!(matches.occurrences_of("use_columns"), 0);
-
-    let selected_statistics: Vec<StatisticDefinition> = matches
+    let selected_statistics: HashMap<&str, StatisticDefinition> = matches
         .values_of("statistics")
-        .map(|input_stat_definitions| input_stat_definitions.map(convert_to_stat_def).collect())
-        .unwrap();
+        .unwrap()
+        .map(convert_to_stat_def)
+        .map(|stat_def| (stat_def.name, stat_def))
+        .into_iter()
+        .collect();
 
     let selected_bins = matches
         .values_of("bins")
@@ -78,9 +76,7 @@ fn main() {
     let filter_config = std::fs::read_to_string(matches.value_of("filters").unwrap()).unwrap();
     let selected_filters = get_filter_steps(&filter_config);
 
-    let file_glob = matches.value_of("glob").unwrap();
-
-    let entries: Vec<PathBuf> = glob(file_glob)
+    let entries: Vec<PathBuf> = glob(matches.value_of("glob").unwrap())
         .expect("Failed to read glob pattern")
         .map(Result::unwrap)
         .collect();
@@ -97,8 +93,8 @@ fn main() {
         let filtered_games = games.iter().filter(|x| selected_filters(*x));
 
         filtered_games.for_each(|game| {
-            for stat in &selected_statistics {
-                let mut path = vec![stat.0.to_string()];
+            for statistic_def in selected_statistics.values() {
+                let mut path = vec![statistic_def.name.to_string()];
 
                 for bin in &selected_bins {
                     let new_bin = bin(&game);
@@ -108,67 +104,24 @@ fn main() {
                 // Unlocked at the end of the loop iteration
                 let mut db = db.lock().unwrap();
 
-                let node = db.insert_path(path);
-                node.data.push(stat.1(&game));
+                if !db.contains_key(&path) {
+                    db.insert(path.clone(), vec![]);
+                }
+
+                db.get_mut(&path).unwrap().push((statistic_def.map)(&game));
             }
         });
     });
 
-    selected_statistics.iter().for_each(|selected| {
-        println!("{}", selected.0);
+    db.lock().unwrap().iter().for_each(|entry| {
+        let path = entry.0;
+        let data = entry.1;
 
-        let mut db = db.lock().unwrap();
+        let stat: &str = path[0].as_ref();
 
-        let stat_node = db.insert_path(vec![selected.0.to_string()]);
+        let fold_fn = &selected_statistics.get(stat).unwrap().fold;
 
-        let mut paths = stat_node.get_paths();
-
-        if paths.is_empty() {
-            let data = selected.2(&stat_node.data);
-            print!("\t{:.4}", data);
-        } else {
-            let mut columns: HashSet<String> = HashSet::new();
-            let mut rows = HashSet::new();
-            for path in paths.iter_mut() {
-                if use_columns {
-                    columns.insert(path.remove(0));
-                }
-
-                rows.insert(path.clone());
-            }
-
-            let mut unique_columns: Vec<String> = columns.iter().cloned().collect();
-            unique_columns.sort();
-
-            if use_columns {
-                println!("\t{}", unique_columns.join("\t"));
-            }
-
-            let mut unique_rows: Vec<Vec<String>> = rows.iter().cloned().collect();
-            unique_rows.sort_by(|a, b| {
-                a.get(0)
-                    .unwrap_or(&"".to_string())
-                    .cmp(b.get(0).unwrap_or(&"".to_string()))
-            });
-
-            for row in unique_rows {
-                let row_name = row.join(".");
-                print!("{}", row_name);
-                if use_columns {
-                    for col in unique_columns.clone() {
-                        let mut full_path = row.clone();
-                        full_path.insert(0, col.to_string());
-
-                        let data = selected.2(&stat_node.insert_path(full_path).data);
-                        print!("\t{:.4}", data);
-                    }
-                } else {
-                    let data = selected.2(&stat_node.insert_path(row).data);
-                    print!("\t{:.4}", data);
-                }
-
-                println!();
-            }
-        }
+        let result = fold_fn(data);
+        println!("{}\t{:.4}", path.join("."), result);
     });
 }
