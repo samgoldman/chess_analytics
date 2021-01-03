@@ -24,8 +24,8 @@ mod types;
 use bins::*;
 use database::Database;
 use filters::{get_selected_filters, matches_filter};
-use types::*;
 use statistics::convert_input_str_to_stat;
+use types::*;
 
 fn main() {
     let matches = App::new("Chess Statistics")
