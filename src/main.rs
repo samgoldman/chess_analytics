@@ -15,16 +15,14 @@ mod chess_flatbuffers;
 mod chess_utils;
 mod database;
 mod filters;
-mod folds;
 mod general_utils;
-mod maps;
 mod statistics;
 mod types;
 
 use bins::*;
 use database::Database;
 use filters::{get_selected_filters, matches_filter};
-use statistics::convert_input_str_to_stat;
+use statistics::convert_to_stat_def;
 use types::*;
 
 fn main() {
@@ -76,11 +74,7 @@ fn main() {
 
     let selected_statistics: Vec<(&str, MapFn, FoldFn)> = matches
         .values_of("statistics")
-        .map(|input_stat_definitions| {
-            input_stat_definitions
-                .map(convert_input_str_to_stat)
-                .collect()
-        })
+        .map(|input_stat_definitions| input_stat_definitions.map(convert_to_stat_def).collect())
         .unwrap();
 
     let selected_bins = matches
