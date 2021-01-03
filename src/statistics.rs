@@ -2,9 +2,8 @@ mod folds;
 mod maps;
 
 use crate::general_utils::capture_to_vec;
-use crate::types::*;
-use folds::get_fold;
-use maps::get_map;
+use folds::{get_fold, FoldFn};
+use maps::{get_map, MapFn};
 
 use lazy_static::lazy_static;
 use regex::Regex;

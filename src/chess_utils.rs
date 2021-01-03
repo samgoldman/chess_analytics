@@ -1,4 +1,4 @@
-use crate::types::*;
+use crate::game_wrapper::{File, GameWrapper, Rank};
 
 fn int_to_file(int: u16) -> File {
     match int & 0x0f {

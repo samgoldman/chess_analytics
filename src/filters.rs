@@ -1,8 +1,9 @@
-use crate::types::*;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 mod filter_defs;
+
+use filter_defs::{FilterFactoryFn, FilterFn};
 
 #[derive(Serialize, Deserialize)]
 struct InputFilterSteps {

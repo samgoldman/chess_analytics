@@ -1,7 +1,12 @@
+use crate::game_wrapper::GameWrapper;
+
+pub type FilterFn = Box<dyn Fn(&GameWrapper) -> bool + std::marker::Sync>;
+pub type FilterFactoryFn = fn(Vec<&str>) -> FilterFn;
+
 macro_rules! filter {
     ($name: ident, $regex: literal, $param: ident, $fn: block, $s_name: literal, $desc: literal) => {
         pub mod $name {
-            use crate::types::*;
+            use super::FilterFn;
             use regex::Regex;
 
             pub fn regex() -> Regex {
@@ -171,7 +176,7 @@ filter!(
 #[cfg(test)]
 mod tests_player_elo_filter {
     use super::*;
-    use crate::types::GameWrapper;
+    use crate::game_wrapper::GameWrapper;
 
     macro_rules! test_player_elo_filter {
         ($test_name:ident, $min_max:literal, $player:literal, $thresh:literal, $white_rating:literal, $black_rating:literal, $expected:literal) => {

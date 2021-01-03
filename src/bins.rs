@@ -1,10 +1,13 @@
-use crate::types::*;
+use crate::game_wrapper::GameWrapper;
 use regex::Regex;
+
+pub type BinFn = Box<dyn Fn(&GameWrapper) -> String + std::marker::Sync>;
+pub type BinFactoryFn = fn(Vec<&str>) -> BinFn;
 
 macro_rules! bin {
     ($name: ident, $regex: literal, $param: ident, $fn: block, $s_name: literal, $desc: literal) => {
         pub mod $name {
-            use crate::types::*;
+            use super::BinFn;
             use regex::Regex;
 
             pub fn regex() -> Regex {

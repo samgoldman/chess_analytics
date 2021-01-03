@@ -1,5 +1,6 @@
-use crate::types::FoldFn;
 use std::cmp;
+
+pub type FoldFn = Box<dyn Fn(&[i16]) -> f64 + std::marker::Sync>;
 
 fn fold_sum(data: &[i16]) -> f64 {
     data.iter().fold(0.0, |a, x| a as f64 + *x as f64)

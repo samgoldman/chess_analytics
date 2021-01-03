@@ -15,15 +15,15 @@ mod chess_flatbuffers;
 mod chess_utils;
 mod database;
 mod filters;
+mod game_wrapper;
 mod general_utils;
 mod statistics;
-mod types;
 
 use bins::*;
 use database::Database;
 use filters::get_filter_steps;
+use game_wrapper::GameWrapper;
 use statistics::*;
-use types::*;
 
 fn main() {
     let matches = App::new("Chess Statistics")

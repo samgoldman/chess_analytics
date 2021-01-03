@@ -1,11 +1,14 @@
+use crate::game_wrapper::GameWrapper;
 use crate::general_utils::capture_to_vec;
-use crate::types::*;
 use regex::Regex;
+
+pub type MapFn = Box<dyn Fn(&GameWrapper) -> i16 + std::marker::Sync>;
+pub type MapFactoryFn = fn(Vec<&str>) -> MapFn;
 
 macro_rules! map {
     ($name: ident, $regex: literal, $param: ident, $fn: block, $s_name: literal, $desc: literal) => {
         pub mod $name {
-            use crate::types::*;
+            use super::MapFn;
             use regex::Regex;
 
             pub fn regex() -> Regex {
@@ -112,6 +115,7 @@ map!(
     params,
     {
         use crate::chess_utils::has_opening;
+        use crate::game_wrapper::{File, Rank};
 
         let queens_gambit_opening = [
             (File::_D, Rank::_4),
@@ -147,6 +151,8 @@ map!(
     _params,
     {
         use crate::chess_utils::has_opening;
+        use crate::game_wrapper::{File, Rank};
+
         let sicilian_defence_opening = [(File::_E, Rank::_4), (File::_C, Rank::_5)];
 
         Box::new(move |game| has_opening(game, &sicilian_defence_opening) as i16)
