@@ -26,6 +26,7 @@ use database::Database;
 use filters::{get_selected_filters, matches_filter};
 use folds::*;
 use general_utils::capture_to_vec;
+use lazy_static::lazy_static;
 use maps::*;
 use types::*;
 
@@ -78,25 +79,23 @@ fn main() {
 
     let selected_statistics: Vec<(&str, MapFn, FoldFn)> = matches
         .values_of("statistics")
-        .map(|raw_stat_string| {
-            let x = Regex::new(r#"^(.*):(.*):(.*)$"#).unwrap();
-            let y: Vec<&str> = raw_stat_string.collect();
-            let z: Vec<Vec<&str>> = y
-                .iter()
-                .map(|a| {
-                    capture_to_vec(
-                        x.captures_iter(a)
+        .map(|input_stat_definitions| {
+            lazy_static! {
+                static ref STAT_DEF_REGEX: Regex = Regex::new(r#"^(.*):(.*):(.*)$"#).unwrap();
+            };
+
+            input_stat_definitions
+                .map(|stat| {
+                    let capture = capture_to_vec(
+                        STAT_DEF_REGEX
+                            .captures_iter(stat)
                             .next()
                             .expect("Statistic not in expected format"),
-                    )
-                })
-                .collect();
-            z.iter()
-                .map(|a| {
+                    );
                     (
-                        a[1],
-                        get_map(a[2]).expect("Unexpected map name"),
-                        get_fold(a[3]).expect("Unexpected fold name"),
+                        capture[1],
+                        get_map(capture[2]).expect("Unexpected map name"),
+                        get_fold(capture[3]).expect("Unexpected fold name"),
                     )
                 })
                 .collect()
