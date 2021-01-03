@@ -2,7 +2,6 @@ use bzip2::read::BzDecoder;
 use clap::{App, Arg};
 use glob::glob;
 use rayon::prelude::*;
-use regex::Regex;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
@@ -19,16 +18,14 @@ mod filters;
 mod folds;
 mod general_utils;
 mod maps;
+mod statistics;
 mod types;
 
 use bins::*;
 use database::Database;
 use filters::{get_selected_filters, matches_filter};
-use folds::*;
-use general_utils::capture_to_vec;
-use lazy_static::lazy_static;
-use maps::*;
 use types::*;
+use statistics::convert_input_str_to_stat;
 
 fn main() {
     let matches = App::new("Chess Statistics")
@@ -80,24 +77,8 @@ fn main() {
     let selected_statistics: Vec<(&str, MapFn, FoldFn)> = matches
         .values_of("statistics")
         .map(|input_stat_definitions| {
-            lazy_static! {
-                static ref STAT_DEF_REGEX: Regex = Regex::new(r#"^(.*):(.*):(.*)$"#).unwrap();
-            };
-
             input_stat_definitions
-                .map(|stat| {
-                    let capture = capture_to_vec(
-                        STAT_DEF_REGEX
-                            .captures_iter(stat)
-                            .next()
-                            .expect("Statistic not in expected format"),
-                    );
-                    (
-                        capture[1],
-                        get_map(capture[2]).expect("Unexpected map name"),
-                        get_fold(capture[3]).expect("Unexpected fold name"),
-                    )
-                })
+                .map(convert_input_str_to_stat)
                 .collect()
         })
         .unwrap();
