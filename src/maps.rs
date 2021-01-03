@@ -141,57 +141,76 @@ map!(
     ""
 );
 
-// pub fn map_sicilian_defence_count(game: &GameWrapper) -> i16 {
-//     let sicilian_defence_opening: Vec<(File, Rank)> =
-//         vec![(File::_E, Rank::_4), (File::_C, Rank::_5)];
+map!(
+    sicilian_defence_count_map,
+    r#"sicilianCount"#,
+    _params,
+    {
+        use crate::chess_utils::has_opening;
+        let sicilian_defence_opening = [(File::_E, Rank::_4), (File::_C, Rank::_5)];
 
-//     has_opening(game, sicilian_defence_opening) as i16
-// }
+        Box::new(move |game| has_opening(game, &sicilian_defence_opening) as i16)
+    },
+    "",
+    ""
+);
 
-// fn map_result(game: &GameWrapper, res: GameResult) -> i16 {
-//     if game.result == res {
-//         1
-//     } else {
-//         0
-//     }
-// }
+map!(
+    result_map,
+    r#"result(Draw|WhiteVictory|BlackVictory|)Count"#,
+    params,
+    {
+        use crate::chess_flatbuffers::chess::GameResult;
+        let expected = match params[1] {
+            "Draw" => GameResult::Draw,
+            "WhiteVictory" => GameResult::White,
+            "BlackVictory" => GameResult::Black,
+            _ => GameResult::Star,
+        };
+        Box::new(move |game| if game.result == expected { 1 } else { 0 })
+    },
+    "",
+    ""
+);
 
-// pub fn map_result_white(game: &GameWrapper) -> i16 {
-//     map_result(game, GameResult::White)
-// }
+map!(
+    has_eval_map,
+    r#"hasEval"#,
+    _params,
+    { Box::new(|game| game.eval_available as i16) },
+    "",
+    ""
+);
 
-// pub fn map_result_black(game: &GameWrapper) -> i16 {
-//     map_result(game, GameResult::Black)
-// }
+map!(
+    promotion_count_map,
+    r#"promotion(Knight|Bishop|Rook|Queen)Count"#,
+    params,
+    {
+        let expected = match params[1] {
+            "Knight" => 0b010,
+            "Bishop" => 0b011,
+            "Rook" => 0b100,
+            "Queen" => 0b101,
+            _ => panic!(),
+        };
 
-// pub fn map_result_draw(game: &GameWrapper) -> i16 {
-//     map_result(game, GameResult::Draw)
-// }
-
-// pub fn map_has_eval(game: &GameWrapper) -> i16 {
-//     game.eval_available as i16
-// }
-
-// pub fn map_promotion_count(game: &GameWrapper) -> i16 {
-//     game.move_metadata
-//         .iter()
-//         .map(|data| if (data >> 9 & 0b111) != 0 { 1 } else { 0 })
-//         .sum()
-// }
-
-// pub fn map_knight_promotion_count(game: &GameWrapper) -> i16 {
-//     game.move_metadata
-//         .iter()
-//         .map(|data| if (data >> 9) & 0b111 == 2 { 1 } else { 0 })
-//         .sum()
-// }
-
-// pub fn map_bishop_promotion_count(game: &GameWrapper) -> i16 {
-//     game.move_metadata
-//         .iter()
-//         .map(|data| if (data >> 9) & 0b111 == 3 { 1 } else { 0 })
-//         .sum()
-// }
+        Box::new(move |game| {
+            game.move_metadata
+                .iter()
+                .map(|data| {
+                    if (data >> 9 & 0b111) == expected {
+                        1
+                    } else {
+                        0
+                    }
+                })
+                .sum()
+        })
+    },
+    "",
+    ""
+);
 
 fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
     vec![
@@ -201,6 +220,10 @@ fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
         include_map!(queens_gambit_count_map),
         include_map!(num_captures_map),
         include_map!(rating_diff_map),
+        include_map!(has_eval_map),
+        include_map!(result_map),
+        include_map!(promotion_count_map),
+        include_map!(sicilian_defence_count_map),
     ]
 }
 

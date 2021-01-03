@@ -83,7 +83,13 @@ fn main() {
             let y: Vec<&str> = raw_stat_string.collect();
             let z: Vec<Vec<&str>> = y
                 .iter()
-                .map(|a| capture_to_vec(x.captures_iter(a).next().unwrap()))
+                .map(|a| {
+                    capture_to_vec(
+                        x.captures_iter(a)
+                            .next()
+                            .expect("Statistic not in expected format"),
+                    )
+                })
                 .collect();
             z.iter()
                 .map(|a| {
