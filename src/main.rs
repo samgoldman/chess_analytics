@@ -82,11 +82,27 @@ fn main() {
         .collect();
 
     entries.par_iter().for_each(|entry| {
-        let file = File::open(entry).unwrap();
-        let mut decompressor = BzDecoder::new(file);
-
+        let mut file = File::open(entry).unwrap();
         let mut data = Vec::new();
-        decompressor.read_to_end(&mut data).unwrap();
+
+        // Assume uncompressed unless extension is "bz2"
+        let compressed = match entry.extension() {
+            Some(extension) => {
+                if extension == "bz2" {
+                    true
+                } else {
+                    false
+                }
+            }
+            None => false,
+        };
+
+        if compressed {
+            let mut decompressor = BzDecoder::new(file);
+            decompressor.read_to_end(&mut data).unwrap();
+        } else {
+            file.read_to_end(&mut data).unwrap();
+        }
 
         let games = GameWrapper::from_game_list_data(data);
 
@@ -122,6 +138,6 @@ fn main() {
         let fold_fn = &selected_statistics.get(stat).unwrap().fold;
 
         let result = fold_fn(data);
-        println!("{}\t{:.4}", path.join("."), result);
+        println!("{}\t{:.4}", path.join("\t"), result);
     });
 }
