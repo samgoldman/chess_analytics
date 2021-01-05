@@ -87,13 +87,7 @@ fn main() {
 
         // Assume uncompressed unless extension is "bz2"
         let compressed = match entry.extension() {
-            Some(extension) => {
-                if extension == "bz2" {
-                    true
-                } else {
-                    false
-                }
-            }
+            Some(extension) => extension == "bz2",
             None => false,
         };
 
