@@ -71,6 +71,10 @@ pub fn get_filter_steps(filter_config: &str) -> FilterFn {
     });
 
     Box::new(move |game| {
+        if filter_steps.is_empty() {
+            return true;
+        }
+
         'step_loop: for step in &filter_steps {
             for filter in step {
                 if !filter(game) {
