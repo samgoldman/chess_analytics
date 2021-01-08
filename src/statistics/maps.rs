@@ -218,6 +218,28 @@ map!(
     ""
 );
 
+map!(
+    blunder_count_map,
+    r#"blunderCount"#,
+    _params,
+    {
+        Box::new(move |game| {
+            game.move_metadata()
+                .iter()
+                .map(|data| {
+                    if (data & 0b000111000000) == 0b000100000000 {
+                        1
+                    } else {
+                        0
+                    }
+                })
+                .sum()
+        })
+    },
+    "",
+    ""
+);
+
 fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
     vec![
         include_map!(game_count_map),
@@ -230,6 +252,7 @@ fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
         include_map!(result_map),
         include_map!(promotion_count_map),
         include_map!(sicilian_defence_count_map),
+        include_map!(blunder_count_map),
     ]
 }
 
