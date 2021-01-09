@@ -91,10 +91,13 @@ bin!(
         let main_only = params[1] == "MainOnly";
         Box::new(move |game| {
             if main_only {
-                format!("{}", game.time_control_main())
+                format!("{:03}", game.time_control_main())
             } else {
-
-                format!("{}+{}", game.time_control_main(), game.time_control_increment())
+                format!(
+                    "{:04}+{:03}",
+                    game.time_control_main(),
+                    game.time_control_increment()
+                )
             }
         })
     },
