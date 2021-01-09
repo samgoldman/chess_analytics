@@ -82,3 +82,22 @@ bin!(
     "Site Bin",
     "A unique bin for each game that allows investigation of oddities"
 );
+
+bin!(
+    time_control_bin,
+    r#"^timeControl(MainOnly|)$"#,
+    params,
+    {
+        let main_only = params[1] == "MainOnly";
+        Box::new(move |game| {
+            if main_only {
+                format!("{}", game.time_control_main())
+            } else {
+
+                format!("{}+{}", game.time_control_main(), game.time_control_increment())
+            }
+        })
+    },
+    "",
+    ""
+);

@@ -1,0 +1,5 @@
+{
+	"steps": [
+        ["evalAvailable", "minBothElo1", "maxGameElo3000"]
+	]
+}

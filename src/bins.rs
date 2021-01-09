@@ -25,6 +25,7 @@ pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn, String, String)> {
         include_bin!(game_elo_bin),
         include_bin!(eco_category_bin),
         include_bin!(site_bin),
+        include_bin!(time_control_bin),
     ]
 }
 

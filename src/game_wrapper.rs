@@ -180,13 +180,13 @@ impl GameWrapper {
         self.black_rating
     }
 
-    // pub fn time_control_main(&self) -> u16 {
-    //     self.time_control_main
-    // }
+    pub fn time_control_main(&self) -> u16 {
+        self.time_control_main
+    }
 
-    // pub fn time_control_increment(&self) -> u8 {
-    //     self.time_control_increment
-    // }
+    pub fn time_control_increment(&self) -> u8 {
+        self.time_control_increment
+    }
 
     pub fn eco_category(&self) -> char {
         self.eco_category
