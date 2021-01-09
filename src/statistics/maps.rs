@@ -219,15 +219,21 @@ map!(
 );
 
 map!(
-    blunder_count_map,
-    r#"blunderCount"#,
-    _params,
+    nag_count_map,
+    r#"nag(Questionable|Mistake|Blunder)Count"#,
+    params,
     {
+        let expected = match params[1] {
+            "Questionable" => 0x0180,
+            "Mistake" => 0x0080,
+            "Blunder" => 0x0100,
+            _ => panic!(),
+        };
         Box::new(move |game| {
             game.move_metadata()
                 .iter()
                 .map(|data| {
-                    if (data & 0b000111000000) == 0b000100000000 {
+                    if (data & 0b000111000000) == expected {
                         1
                     } else {
                         0
@@ -252,7 +258,7 @@ fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
         include_map!(result_map),
         include_map!(promotion_count_map),
         include_map!(sicilian_defence_count_map),
-        include_map!(blunder_count_map),
+        include_map!(nag_count_map),
     ]
 }
 
