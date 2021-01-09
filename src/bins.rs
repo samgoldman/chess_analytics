@@ -7,26 +7,28 @@ pub type BinFn = Box<dyn Fn(&GameWrapper) -> String + std::marker::Sync>;
 pub type BinFactoryFn = fn(Vec<&str>) -> BinFn;
 
 macro_rules! include_bin {
-    ($name: ident) => {
-        (
-            bin_defs::$name::regex(),
-            bin_defs::$name::factory,
-            bin_defs::$name::name(),
-            bin_defs::$name::description(),
-        )
-    };
+    ($($name:ident,)*) => {
+        vec![$(
+            (
+                bin_defs::$name::regex(),
+                bin_defs::$name::factory,
+                bin_defs::$name::name(),
+                bin_defs::$name::description(),
+            ),
+        )*]
+    }
 }
 
 pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn, String, String)> {
-    vec![
-        include_bin!(year_bin),
-        include_bin!(month_bin),
-        include_bin!(day_bin),
-        include_bin!(game_elo_bin),
-        include_bin!(eco_category_bin),
-        include_bin!(site_bin),
-        include_bin!(time_control_bin),
-    ]
+    include_bin!(
+        year_bin,
+        month_bin,
+        day_bin,
+        game_elo_bin,
+        eco_category_bin,
+        site_bin,
+        time_control_bin,
+    )
 }
 
 fn capture_to_vec(cap: regex::Captures) -> Vec<&str> {
