@@ -4,7 +4,7 @@ use glob::glob;
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 use std::collections::HashMap;
-use std::fs::{File, read_to_string};
+use std::fs::{read_to_string, File};
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -108,13 +108,11 @@ fn main() {
                 .par_iter()
                 .filter(|x| selected_filters(*x))
                 .for_each(|game| {
-                    for statistic_def in selected_statistics.values() {
-                        let mut path = vec![statistic_def.name.to_string()];
+                    let bin_path: Vec<String> = selected_bins.iter().map(|bin| bin(game)).collect();
 
-                        for bin in &selected_bins {
-                            let new_bin = bin(game);
-                            path.push(new_bin);
-                        }
+                    for statistic_def in selected_statistics.values() {
+                        let mut path = bin_path.clone();
+                        path.insert(0, statistic_def.name.to_string());
 
                         {
                             let mut db = db.lock().unwrap();
@@ -123,7 +121,9 @@ fn main() {
                                 db.insert(path.clone(), vec![]);
                             }
 
-                            db.get_mut(&path).unwrap().push((statistic_def.map)(game));
+                            let map_fn = &statistic_def.map;
+                            let mapped_value = map_fn(game);
+                            db.get_mut(&path).unwrap().push(mapped_value);
                         }
                     }
                 });
@@ -137,7 +137,7 @@ fn main() {
 
         let fold_fn = &selected_statistics.get(stat).unwrap().fold;
 
-        let result = fold_fn(data);
+        let result = (fold_fn)(data);
         println!("{}\t{:.4}", path.join("\t"), result);
     });
 }
