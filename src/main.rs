@@ -1,6 +1,7 @@
 use bzip2::read::BzDecoder;
 use clap::{App, Arg};
 use glob::glob;
+use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::fs::File;
@@ -81,47 +82,59 @@ fn main() {
         .map(Result::unwrap)
         .collect();
 
-    entries.par_iter().for_each(|entry| {
-        let mut file = File::open(entry).unwrap();
-        let mut data = Vec::new();
+    let progress_bar = ProgressBar::new(entries.len() as u64);
+    progress_bar.set_style(
+        ProgressStyle::default_bar()
+            .template("[{elapsed_precise}] [{wide_bar}] ({eta_precise}) ({pos}/{len}; {per_sec})"),
+    );
 
-        // Assume uncompressed unless extension is "bz2"
-        let compressed = match entry.extension() {
-            Some(extension) => extension == "bz2",
-            None => false,
-        };
+    entries
+        .par_iter()
+        .progress_with(progress_bar)
+        .for_each(|entry| {
+            let mut file = File::open(entry).unwrap();
+            let mut data = Vec::new();
 
-        if compressed {
-            let mut decompressor = BzDecoder::new(file);
-            decompressor.read_to_end(&mut data).unwrap();
-        } else {
-            file.read_to_end(&mut data).unwrap();
-        }
+            // Assume uncompressed unless extension is "bz2"
+            let compressed = match entry.extension() {
+                Some(extension) => extension == "bz2",
+                None => false,
+            };
 
-        let games = GameWrapper::from_game_list_data(data);
-
-        let filtered_games = games.iter().filter(|x| selected_filters(*x));
-
-        filtered_games.for_each(|game| {
-            for statistic_def in selected_statistics.values() {
-                let mut path = vec![statistic_def.name.to_string()];
-
-                for bin in &selected_bins {
-                    let new_bin = bin(&game);
-                    path.push(new_bin);
-                }
-
-                // Unlocked at the end of the loop iteration
-                let mut db = db.lock().unwrap();
-
-                if !db.contains_key(&path) {
-                    db.insert(path.clone(), vec![]);
-                }
-
-                db.get_mut(&path).unwrap().push((statistic_def.map)(&game));
+            if compressed {
+                let mut decompressor = BzDecoder::new(file);
+                decompressor.read_to_end(&mut data).unwrap();
+            } else {
+                file.read_to_end(&mut data).unwrap();
             }
+
+            let games = GameWrapper::from_game_list_data(data);
+
+            games
+                .par_iter()
+                .filter(|x| selected_filters(*x))
+                .for_each(|game| {
+                    for statistic_def in selected_statistics.values() {
+                        let mut path = vec![statistic_def.name.to_string()];
+
+                        for bin in &selected_bins {
+                            let new_bin = bin(&game);
+                            path.push(new_bin);
+                        }
+
+                        {
+                            // Unlocked at the end of the loop iteration
+                            let mut db = db.lock().unwrap();
+
+                            if !db.contains_key(&path) {
+                                db.insert(path.clone(), vec![]);
+                            }
+
+                            db.get_mut(&path).unwrap().push((statistic_def.map)(&game));
+                        }
+                    }
+                });
         });
-    });
 
     db.lock().unwrap().iter().for_each(|entry| {
         let path = entry.0;

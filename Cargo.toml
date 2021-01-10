@@ -16,6 +16,7 @@ bzip2 = "0.4.1"
 rayon = "1.5"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+indicatif = {version = "*", features = ["rayon"]}
 
 [build-dependencies]
 flatc-rust = "0.1.3"
