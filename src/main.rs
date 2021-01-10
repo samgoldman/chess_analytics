@@ -4,7 +4,7 @@ use glob::glob;
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 use std::collections::HashMap;
-use std::fs::File;
+use std::fs::{File, read_to_string};
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -52,15 +52,9 @@ fn main() {
                 .multiple(true)
                 .min_values(1),
         )
-        .arg(
-            Arg::with_name("num_threads")
-                .long("num_threads")
-                .takes_value(true)
-                .default_value("6"),
-        )
         .get_matches();
 
-    let db: Arc<Mutex<HashMap<Vec<String>, Vec<i16>>>> = Arc::new(Mutex::new(HashMap::new()));
+    let db = Arc::new(Mutex::new(HashMap::new()));
 
     let selected_statistics: HashMap<&str, StatisticDefinition> = matches
         .values_of("statistics")
@@ -74,7 +68,7 @@ fn main() {
         .values_of("bins")
         .map_or(vec![], |bin_strs| get_selected_bins(bin_strs.collect()));
 
-    let filter_config = std::fs::read_to_string(matches.value_of("filters").unwrap()).unwrap();
+    let filter_config = read_to_string(matches.value_of("filters").unwrap()).unwrap();
     let selected_filters = get_filter_steps(&filter_config);
 
     let entries: Vec<PathBuf> = glob(matches.value_of("glob").unwrap())
@@ -118,19 +112,18 @@ fn main() {
                         let mut path = vec![statistic_def.name.to_string()];
 
                         for bin in &selected_bins {
-                            let new_bin = bin(&game);
+                            let new_bin = bin(game);
                             path.push(new_bin);
                         }
 
                         {
-                            // Unlocked at the end of the loop iteration
                             let mut db = db.lock().unwrap();
 
                             if !db.contains_key(&path) {
                                 db.insert(path.clone(), vec![]);
                             }
 
-                            db.get_mut(&path).unwrap().push((statistic_def.map)(&game));
+                            db.get_mut(&path).unwrap().push((statistic_def.map)(game));
                         }
                     }
                 });
