@@ -2,7 +2,7 @@ use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList, GameRes
 
 #[derive(PartialEq)]
 pub enum Rank {
-    _NA = -1,
+    _NA = 0,
     _1 = 1,
     _2 = 2,
     _3 = 3,
@@ -15,7 +15,7 @@ pub enum Rank {
 
 #[derive(PartialEq)]
 pub enum File {
-    _NA = -1,
+    _NA = 0,
     _A = 1,
     _B = 2,
     _C = 3,
@@ -24,6 +24,17 @@ pub enum File {
     _F = 6,
     _G = 7,
     _H = 8,
+}
+
+#[derive(PartialEq)]
+pub enum Piece {
+    None = 0,
+    Pawn = 1,
+    Knight = 2,
+    Bishop = 3,
+    Rook = 4,
+    Queen = 5,
+    King = 6,
 }
 
 #[derive(Clone)]

@@ -1,4 +1,4 @@
-use crate::game_wrapper::{File, GameWrapper, Rank};
+use crate::game_wrapper::{File, GameWrapper, Piece, Rank};
 
 fn int_to_file(int: u16) -> File {
     match int & 0x0f {
@@ -30,6 +30,19 @@ fn int_to_rank(int: u16) -> Rank {
     }
 }
 
+fn extract_piece_moved(raw_metadata: u16) -> Piece {
+    match raw_metadata & 0b0111 {
+        0 => Piece::None,
+        1 => Piece::Pawn,
+        2 => Piece::Knight,
+        3 => Piece::Bishop,
+        4 => Piece::Rook,
+        5 => Piece::Queen,
+        6 => Piece::King,
+        _ => panic!("Piece not recognized: {:x}", raw_metadata),
+    }
+}
+
 fn extract_coordinates(raw_coord: u16) -> (File, Rank, File, Rank) {
     let from_file = int_to_file(raw_coord);
     let from_rank = int_to_rank(raw_coord);
@@ -38,10 +51,10 @@ fn extract_coordinates(raw_coord: u16) -> (File, Rank, File, Rank) {
     (from_file, from_rank, to_file, to_rank)
 }
 
-// TODO: Refactor to support specifying "from" coordinates
-pub fn has_opening(game: &GameWrapper, opening: &[(File, Rank)]) -> bool {
+pub fn has_opening(game: &GameWrapper, opening: &[(Piece, File, Rank, File, Rank)]) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
     let moves = game.moves();
+    let move_meta = game.move_metadata();
 
     // Verify this game has enough moves for the given opening
     if moves.len() < opening.len() {
@@ -50,12 +63,28 @@ pub fn has_opening(game: &GameWrapper, opening: &[(File, Rank)]) -> bool {
 
     // Create iterable to make the next step cleaner
     let mut moves_iter = moves.iter();
+    let mut move_meta_iter = move_meta.iter();
 
     // For each expected moving in the opening, if the game moves don't match, just return false
-    for (expected_file, expected_rank) in opening {
-        let (_from_file, _from_rank, to_file, to_rank) =
+    for (
+        expected_piece,
+        expected_from_file,
+        expected_from_rank,
+        expected_to_file,
+        expected_to_rank,
+    ) in opening
+    {
+        let (from_file, from_rank, to_file, to_rank) =
             extract_coordinates(*moves_iter.next().unwrap() as u16);
-        if expected_file != &to_file || expected_rank != &to_rank {
+
+        let piece = extract_piece_moved(*move_meta_iter.next().unwrap() as u16);
+
+        if expected_to_file != &to_file
+            || expected_to_rank != &to_rank
+            || expected_from_file != &from_file
+            || expected_from_rank != &from_rank
+            || expected_piece != &piece
+        {
             return false;
         }
     }
