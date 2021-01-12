@@ -162,6 +162,65 @@ map!(
 );
 
 map!(
+    indian_defense_count_map,
+    r#"indianDefenseCount"#,
+    _params,
+    {
+        use crate::chess_utils::has_opening;
+        use crate::game_wrapper::{File, Rank};
+
+        let indian_defense_opening = [(File::_D, Rank::_4), (File::_F, Rank::_6)];
+
+        Box::new(move |game| has_opening(game, &indian_defense_opening) as i16)
+    },
+    "",
+    ""
+);
+
+map!(
+    ruy_lopez_count_map,
+    r#"ruyLopezCount"#,
+    _params,
+    {
+        use crate::chess_utils::has_opening;
+        use crate::game_wrapper::{File, Rank};
+
+        let ruy_lopez_opening = [
+            (File::_E, Rank::_4),
+            (File::_E, Rank::_5),
+            (File::_F, Rank::_3),
+            (File::_C, Rank::_6),
+            (File::_B, Rank::_5),
+        ];
+
+        Box::new(move |game| has_opening(game, &ruy_lopez_opening) as i16)
+    },
+    "",
+    ""
+);
+
+map!(
+    french_defense_main_count_map,
+    r#"french_defense_main"#,
+    _params,
+    {
+        use crate::chess_utils::has_opening;
+        use crate::game_wrapper::{File, Rank};
+
+        let french_defense_opening = [
+            (File::_E, Rank::_4),
+            (File::_E, Rank::_6),
+            (File::_D, Rank::_4),
+            (File::_D, Rank::_5),
+        ];
+
+        Box::new(move |game| has_opening(game, &french_defense_opening) as i16)
+    },
+    "",
+    ""
+);
+
+map!(
     result_map,
     r#"result(Draw|WhiteVictory|BlackVictory|)Count"#,
     params,
@@ -259,6 +318,9 @@ fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
         include_map!(promotion_count_map),
         include_map!(sicilian_defence_count_map),
         include_map!(nag_count_map),
+        include_map!(ruy_lopez_count_map),
+        include_map!(indian_defense_count_map),
+        include_map!(french_defense_main_count_map),
     ]
 }
 
