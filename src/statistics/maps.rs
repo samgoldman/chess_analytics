@@ -114,21 +114,10 @@ map!(
     r#"^queensGambit(Accepted|Declined|)Count"#,
     params,
     {
-        use crate::chess_utils::has_opening;
-        use crate::game_wrapper::{File, Piece, Rank};
+        use crate::chess_utils::{has_opening, parse_movetext};
 
-        let queens_gambit_opening = [
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_D, Rank::_4),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_D, Rank::_5),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_C, Rank::_4),
-        ];
-
-        let queens_gambit_accepted_opening = [
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_D, Rank::_4),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_D, Rank::_5),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_C, Rank::_4),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_C, Rank::_4),
-        ];
+        let queens_gambit_opening = parse_movetext("1. d4 d5 2. c4");
+        let queens_gambit_accepted_opening = parse_movetext("1. d4 d5 2. c4 dxc4");
 
         let variation = params[1].to_string();
 
@@ -150,13 +139,9 @@ map!(
     r#"sicilianCount"#,
     _params,
     {
-        use crate::chess_utils::has_opening;
-        use crate::game_wrapper::{File, Piece, Rank};
+        use crate::chess_utils::{has_opening, parse_movetext};
 
-        let sicilian_defence_opening = [
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_E, Rank::_4),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_C, Rank::_5),
-        ];
+        let sicilian_defence_opening = parse_movetext("1. e4 c5");
 
         Box::new(move |game| has_opening(game, &sicilian_defence_opening) as i16)
     },
@@ -169,13 +154,9 @@ map!(
     r#"indianDefenceCount"#,
     _params,
     {
-        use crate::chess_utils::has_opening;
-        use crate::game_wrapper::{File, Piece, Rank};
+        use crate::chess_utils::{has_opening, parse_movetext};
 
-        let indian_defense_opening = [
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_D, Rank::_4),
-            (Piece::Knight, File::_NA, Rank::_NA, File::_F, Rank::_6),
-        ];
+        let indian_defense_opening = parse_movetext("1. d4 Nf6");
 
         Box::new(move |game| has_opening(game, &indian_defense_opening) as i16)
     },
@@ -188,16 +169,9 @@ map!(
     r#"ruyLopezCount"#,
     _params,
     {
-        use crate::chess_utils::has_opening;
-        use crate::game_wrapper::{File, Piece, Rank};
+        use crate::chess_utils::{has_opening, parse_movetext};
 
-        let ruy_lopez_opening = [
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_E, Rank::_4),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_E, Rank::_5),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_F, Rank::_3),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_C, Rank::_6),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_B, Rank::_5),
-        ];
+        let ruy_lopez_opening = parse_movetext("1. e4 e5 2. Nf3 Nc6 3. Bb5");
 
         Box::new(move |game| has_opening(game, &ruy_lopez_opening) as i16)
     },
@@ -210,15 +184,9 @@ map!(
     r#"frenchDefenceMainCount"#,
     _params,
     {
-        use crate::chess_utils::has_opening;
-        use crate::game_wrapper::{File, Piece, Rank};
+        use crate::chess_utils::{has_opening, parse_movetext};
 
-        let french_defense_opening = [
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_E, Rank::_4),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_E, Rank::_6),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_D, Rank::_4),
-            (Piece::Pawn, File::_NA, Rank::_NA, File::_D, Rank::_5),
-        ];
+        let french_defense_opening = parse_movetext("1. e4 e6 2. d4 d5");
 
         Box::new(move |game| has_opening(game, &french_defense_opening) as i16)
     },

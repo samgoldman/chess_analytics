@@ -1,4 +1,5 @@
 use crate::game_wrapper::{File, GameWrapper, Piece, Rank};
+use regex::Regex;
 
 fn int_to_file(int: u16) -> File {
     match int & 0x0f {
@@ -94,4 +95,90 @@ pub fn has_opening(game: &GameWrapper, opening: &[(Piece, File, Rank, File, Rank
 
 pub fn get_game_elo(game: &GameWrapper) -> u32 {
     (game.white_rating() + game.black_rating()) as u32 / 2
+}
+
+pub fn parse_movetext(movetext: &str) -> Vec<(Piece, File, Rank, File, Rank)> {
+    lazy_static! {
+        static ref RE_MOVE: Regex = Regex::new(
+            r#"([NBRQK]?)([a-h1-9]{0,4})(x?)([a-h1-9]{2})(=?)([NBRQK]?)([+#]?)([?!]{0,2})"#
+        )
+        .unwrap();
+        static ref RE_COORD: Regex = Regex::new(r#"^([a-h]?)([1-8]?)$"#).unwrap();
+    }
+
+    RE_MOVE
+        .captures_iter(movetext)
+        .map(|cap| {
+            let piece_str = &cap[1];
+            let disambiguation_str = &cap[2];
+            let disambiguation = RE_COORD.captures_iter(disambiguation_str).next().unwrap();
+
+            let dest_str = &cap[4];
+            let dest = RE_COORD.captures_iter(dest_str).next().unwrap();
+
+            let moved = match piece_str {
+                "" => Piece::Pawn,
+                "N" => Piece::Knight,
+                "B" => Piece::Bishop,
+                "R" => Piece::Rook,
+                "Q" => Piece::Queen,
+                "K" => Piece::King,
+                u => panic!("Unrecongized piece: {}", u),
+            };
+
+            let from_file = match &disambiguation[1] {
+                "" => File::_NA,
+                "a" => File::_A,
+                "b" => File::_B,
+                "c" => File::_C,
+                "d" => File::_D,
+                "e" => File::_E,
+                "f" => File::_F,
+                "g" => File::_G,
+                "h" => File::_H,
+                u => panic!("Unrecongnized file: {}", u),
+            };
+
+            let from_rank = match &disambiguation[2] {
+                "" => Rank::_NA,
+                "1" => Rank::_1,
+                "2" => Rank::_2,
+                "3" => Rank::_3,
+                "4" => Rank::_4,
+                "5" => Rank::_5,
+                "6" => Rank::_6,
+                "7" => Rank::_7,
+                "8" => Rank::_8,
+                u => panic!("Unrecongnized rank: {}", u),
+            };
+
+            let to_file = match &dest[1] {
+                "" => File::_NA,
+                "a" => File::_A,
+                "b" => File::_B,
+                "c" => File::_C,
+                "d" => File::_D,
+                "e" => File::_E,
+                "f" => File::_F,
+                "g" => File::_G,
+                "h" => File::_H,
+                u => panic!("Unrecongnized file: {}", u),
+            };
+
+            let to_rank = match &dest[2] {
+                "" => Rank::_NA,
+                "1" => Rank::_1,
+                "2" => Rank::_2,
+                "3" => Rank::_3,
+                "4" => Rank::_4,
+                "5" => Rank::_5,
+                "6" => Rank::_6,
+                "7" => Rank::_7,
+                "8" => Rank::_8,
+                u => panic!("Unrecongnized rank: {}", u),
+            };
+
+            (moved, from_file, from_rank, to_file, to_rank)
+        })
+        .collect()
 }

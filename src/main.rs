@@ -24,6 +24,9 @@ use filters::get_filter_steps;
 use game_wrapper::GameWrapper;
 use statistics::*;
 
+#[macro_use]
+extern crate lazy_static;
+
 fn main() {
     let matches = App::new("Chess Statistics")
         .version("0.1.0")
