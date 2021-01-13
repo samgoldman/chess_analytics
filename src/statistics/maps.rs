@@ -31,6 +31,25 @@ macro_rules! map {
     };
 }
 
+macro_rules! basic_opening_map {
+    ($name:ident, $regex:literal: $movetext:literal) => {
+        map!(
+            $name,
+            $regex,
+            _params,
+            {
+                use crate::chess_utils::{has_opening, parse_movetext};
+
+                let opening = parse_movetext($movetext);
+
+                Box::new(move |game| has_opening(game, &opening) as i16)
+            },
+            "",
+            ""
+        );
+    };
+}
+
 macro_rules! include_map {
     ($name: ident) => {
         (
@@ -134,64 +153,24 @@ map!(
     ""
 );
 
-map!(
+basic_opening_map!(
     sicilian_defence_count_map,
-    r#"sicilianCount"#,
-    _params,
-    {
-        use crate::chess_utils::{has_opening, parse_movetext};
-
-        let sicilian_defence_opening = parse_movetext("1. e4 c5");
-
-        Box::new(move |game| has_opening(game, &sicilian_defence_opening) as i16)
-    },
-    "",
-    ""
+    r#"sicilianCount"#: "1. e4 c5"
 );
 
-map!(
+basic_opening_map!(
     indian_defense_count_map,
-    r#"indianDefenceCount"#,
-    _params,
-    {
-        use crate::chess_utils::{has_opening, parse_movetext};
-
-        let indian_defense_opening = parse_movetext("1. d4 Nf6");
-
-        Box::new(move |game| has_opening(game, &indian_defense_opening) as i16)
-    },
-    "",
-    ""
+    r#"indianDefenceCount"#: "1. d4 Nf6"
 );
 
-map!(
+basic_opening_map!(
     ruy_lopez_count_map,
-    r#"ruyLopezCount"#,
-    _params,
-    {
-        use crate::chess_utils::{has_opening, parse_movetext};
-
-        let ruy_lopez_opening = parse_movetext("1. e4 e5 2. Nf3 Nc6 3. Bb5");
-
-        Box::new(move |game| has_opening(game, &ruy_lopez_opening) as i16)
-    },
-    "",
-    ""
+    r#"ruyLopezCount"#: "1. e4 e5 2. Nf3 Nc6 3. Bb5"
 );
 
-map!(
+basic_opening_map!(
     french_defense_main_count_map,
-    r#"frenchDefenceMainCount"#,
-    _params,
-    {
-        use crate::chess_utils::{has_opening, parse_movetext};
-
-        let french_defense_opening = parse_movetext("1. e4 e6 2. d4 d5");
-
-        Box::new(move |game| has_opening(game, &french_defense_opening) as i16)
-    },
-    "",
-    ""
+    r#"frenchDefenceMainCount"#: "1. e4 e6 2. d4 d5"
 );
 
 map!(
