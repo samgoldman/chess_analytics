@@ -155,22 +155,37 @@ map!(
 
 basic_opening_map!(
     sicilian_defence_count_map,
-    r#"sicilianCount"#: "1. e4 c5"
+    "sicilianCount": "1. e4 c5"
+);
+
+basic_opening_map!(
+    sicilian_defence_closed_count_map,
+    "sicilianClosedCount": "1. e4 c5 2. Nc3"
 );
 
 basic_opening_map!(
     indian_defense_count_map,
-    r#"indianDefenceCount"#: "1. d4 Nf6"
+    "indianDefenceCount": "1. d4 Nf6"
 );
 
 basic_opening_map!(
     ruy_lopez_count_map,
-    r#"ruyLopezCount"#: "1. e4 e5 2. Nf3 Nc6 3. Bb5"
+    "ruyLopezCount": "1. e4 e5 2. Nf3 Nc6 3. Bb5"
 );
 
 basic_opening_map!(
     french_defense_main_count_map,
-    r#"frenchDefenceMainCount"#: "1. e4 e6 2. d4 d5"
+    "frenchDefenceMainCount": "1. e4 e6 2. d4 d5"
+);
+
+basic_opening_map!(
+    italian_game_count_map,
+    "italianGameCount": "1. e4 e5 2. Nf3 Nc6 3. Bc4" 
+);
+
+basic_opening_map!(
+    caro_kann_defence_count_map,
+    "caroKannDefenceCount": "1. e4 c6"
 );
 
 map!(
@@ -274,6 +289,9 @@ fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
         include_map!(ruy_lopez_count_map),
         include_map!(indian_defense_count_map),
         include_map!(french_defense_main_count_map),
+        include_map!(sicilian_defence_closed_count_map),
+        include_map!(italian_game_count_map),
+        include_map!(caro_kann_defence_count_map)
     ]
 }
 
