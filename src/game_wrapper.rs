@@ -37,6 +37,14 @@ pub enum Piece {
     King = 6,
 }
 
+pub struct Move {
+    pub piece_moved: Piece,
+    pub from_file: File,
+    pub from_rank: Rank,
+    pub to_file: File,
+    pub to_rank: Rank,
+}
+
 #[derive(Clone)]
 #[cfg(not(test))]
 pub struct GameWrapper {

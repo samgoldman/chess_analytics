@@ -180,7 +180,7 @@ basic_opening_map!(
 
 basic_opening_map!(
     italian_game_count_map,
-    "italianGameCount": "1. e4 e5 2. Nf3 Nc6 3. Bc4" 
+    "italianGameCount": "1. e4 e5 2. Nf3 Nc6 3. Bc4"
 );
 
 basic_opening_map!(
@@ -291,7 +291,7 @@ fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
         include_map!(french_defense_main_count_map),
         include_map!(sicilian_defence_closed_count_map),
         include_map!(italian_game_count_map),
-        include_map!(caro_kann_defence_count_map)
+        include_map!(caro_kann_defence_count_map),
     ]
 }
 

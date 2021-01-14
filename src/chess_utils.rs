@@ -1,4 +1,4 @@
-use crate::game_wrapper::{File, GameWrapper, Piece, Rank};
+use crate::game_wrapper::{File, GameWrapper, Move, Piece, Rank};
 use regex::Regex;
 
 fn int_to_file(int: u16) -> File {
@@ -52,7 +52,7 @@ fn extract_coordinates(raw_coord: u16) -> (File, Rank, File, Rank) {
     (from_file, from_rank, to_file, to_rank)
 }
 
-pub fn has_opening(game: &GameWrapper, opening: &[(Piece, File, Rank, File, Rank)]) -> bool {
+pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
     let moves = game.moves();
     let move_meta = game.move_metadata();
@@ -67,24 +67,17 @@ pub fn has_opening(game: &GameWrapper, opening: &[(Piece, File, Rank, File, Rank
     let mut move_meta_iter = move_meta.iter();
 
     // For each expected moving in the opening, if the game moves don't match, just return false
-    for (
-        expected_piece,
-        expected_from_file,
-        expected_from_rank,
-        expected_to_file,
-        expected_to_rank,
-    ) in opening
-    {
+    for expected_move in opening {
         let (from_file, from_rank, to_file, to_rank) =
             extract_coordinates(*moves_iter.next().unwrap() as u16);
 
         let piece = extract_piece_moved(*move_meta_iter.next().unwrap() as u16);
 
-        if expected_to_file != &to_file
-            || expected_to_rank != &to_rank
-            || expected_from_file != &from_file
-            || expected_from_rank != &from_rank
-            || expected_piece != &piece
+        if expected_move.to_file != to_file
+            || expected_move.to_rank != to_rank
+            || expected_move.from_file != from_file
+            || expected_move.from_rank != from_rank
+            || expected_move.piece_moved != piece
         {
             return false;
         }
@@ -97,7 +90,7 @@ pub fn get_game_elo(game: &GameWrapper) -> u32 {
     (game.white_rating() + game.black_rating()) as u32 / 2
 }
 
-pub fn parse_movetext(movetext: &str) -> Vec<(Piece, File, Rank, File, Rank)> {
+pub fn parse_movetext(movetext: &str) -> Vec<Move> {
     lazy_static! {
         static ref RE_MOVE: Regex = Regex::new(
             r#"([NBRQK]?)([a-h1-9]{0,4})(x?)([a-h1-9]{2})(=?)([NBRQK]?)([+#]?)([?!]{0,2})"#
@@ -178,7 +171,13 @@ pub fn parse_movetext(movetext: &str) -> Vec<(Piece, File, Rank, File, Rank)> {
                 u => panic!("Unrecongnized rank: {}", u),
             };
 
-            (moved, from_file, from_rank, to_file, to_rank)
+            Move {
+                piece_moved: moved,
+                from_file,
+                from_rank,
+                to_file,
+                to_rank,
+            }
         })
         .collect()
 }
