@@ -109,67 +109,12 @@ pub fn parse_movetext(movetext: &str) -> Vec<Move> {
             let dest_str = &cap[4];
             let dest = RE_COORD.captures_iter(dest_str).next().unwrap();
 
-            let moved = match piece_str {
-                "" => Piece::Pawn,
-                "N" => Piece::Knight,
-                "B" => Piece::Bishop,
-                "R" => Piece::Rook,
-                "Q" => Piece::Queen,
-                "K" => Piece::King,
-                u => panic!("Unrecongized piece: {}", u),
-            };
+            let moved = Piece::from_str(piece_str);
 
-            let from_file = match &disambiguation[1] {
-                "" => File::_NA,
-                "a" => File::_A,
-                "b" => File::_B,
-                "c" => File::_C,
-                "d" => File::_D,
-                "e" => File::_E,
-                "f" => File::_F,
-                "g" => File::_G,
-                "h" => File::_H,
-                u => panic!("Unrecongnized file: {}", u),
-            };
-
-            let from_rank = match &disambiguation[2] {
-                "" => Rank::_NA,
-                "1" => Rank::_1,
-                "2" => Rank::_2,
-                "3" => Rank::_3,
-                "4" => Rank::_4,
-                "5" => Rank::_5,
-                "6" => Rank::_6,
-                "7" => Rank::_7,
-                "8" => Rank::_8,
-                u => panic!("Unrecongnized rank: {}", u),
-            };
-
-            let to_file = match &dest[1] {
-                "" => File::_NA,
-                "a" => File::_A,
-                "b" => File::_B,
-                "c" => File::_C,
-                "d" => File::_D,
-                "e" => File::_E,
-                "f" => File::_F,
-                "g" => File::_G,
-                "h" => File::_H,
-                u => panic!("Unrecongnized file: {}", u),
-            };
-
-            let to_rank = match &dest[2] {
-                "" => Rank::_NA,
-                "1" => Rank::_1,
-                "2" => Rank::_2,
-                "3" => Rank::_3,
-                "4" => Rank::_4,
-                "5" => Rank::_5,
-                "6" => Rank::_6,
-                "7" => Rank::_7,
-                "8" => Rank::_8,
-                u => panic!("Unrecongnized rank: {}", u),
-            };
+            let from_file = File::from_str(&disambiguation[1]);
+            let from_rank = Rank::from_str(&disambiguation[2]);
+            let to_file = File::from_str(&dest[1]);
+            let to_rank = Rank::from_str(&dest[2]);
 
             Move {
                 piece_moved: moved,

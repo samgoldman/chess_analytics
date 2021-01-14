@@ -13,6 +13,23 @@ pub enum Rank {
     _8 = 8,
 }
 
+impl Rank {
+    pub fn from_str(rank_str: &str) -> Self {
+        match rank_str {
+            "" => Rank::_NA,
+            "1" => Rank::_1,
+            "2" => Rank::_2,
+            "3" => Rank::_3,
+            "4" => Rank::_4,
+            "5" => Rank::_5,
+            "6" => Rank::_6,
+            "7" => Rank::_7,
+            "8" => Rank::_8,
+            u => panic!("Unrecongnized rank: {}", u),
+        }
+    }
+}
+
 #[derive(PartialEq)]
 pub enum File {
     _NA = 0,
@@ -26,6 +43,23 @@ pub enum File {
     _H = 8,
 }
 
+impl File {
+    pub fn from_str(file_str: &str) -> Self {
+        match file_str {
+            "" => File::_NA,
+            "a" => File::_A,
+            "b" => File::_B,
+            "c" => File::_C,
+            "d" => File::_D,
+            "e" => File::_E,
+            "f" => File::_F,
+            "g" => File::_G,
+            "h" => File::_H,
+            u => panic!("Unrecongnized file: {}", u),
+        }
+    }
+}
+
 #[derive(PartialEq)]
 pub enum Piece {
     None = 0,
@@ -35,6 +69,20 @@ pub enum Piece {
     Rook = 4,
     Queen = 5,
     King = 6,
+}
+
+impl Piece {
+    pub fn from_str(piece_str: &str) -> Self {
+        match piece_str {
+            "" => Piece::Pawn,
+            "N" => Piece::Knight,
+            "B" => Piece::Bishop,
+            "R" => Piece::Rook,
+            "Q" => Piece::Queen,
+            "K" => Piece::King,
+            u => panic!("Unrecongized piece: {}", u),
+        }
+    }
 }
 
 pub struct Move {
