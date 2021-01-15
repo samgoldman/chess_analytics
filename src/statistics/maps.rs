@@ -128,29 +128,29 @@ map!(
     ""
 );
 
-map!(
+basic_opening_map!(
     queens_gambit_count_map,
-    r#"^queensGambit(Accepted|Declined|)Count"#,
-    params,
-    {
-        use crate::chess_utils::{has_opening, parse_movetext};
+    "queensGambitCount": "1. d4 d5 2. c4"
+);
 
-        let queens_gambit_opening = parse_movetext("1. d4 d5 2. c4");
-        let queens_gambit_accepted_opening = parse_movetext("1. d4 d5 2. c4 dxc4");
+basic_opening_map!(
+    queens_gambit_accepted_count_map,
+    "queensGambitAcceptedCount": "1. d4 d5 2. c4 dxc4"
+);
 
-        let variation = params[1].to_string();
+basic_opening_map!(
+    slav_defence_count_map,
+    "slavDefenceCount": "1. d4 d5 2. c4 c6"
+);
 
-        Box::new(move |game| match variation.as_ref() {
-            "Accepted" => has_opening(game, &queens_gambit_accepted_opening) as i16,
-            "Declined" => {
-                (has_opening(game, &queens_gambit_opening)
-                    && !(has_opening(game, &queens_gambit_accepted_opening))) as i16
-            }
-            _ => has_opening(game, &queens_gambit_opening) as i16,
-        })
-    },
-    "",
-    ""
+basic_opening_map!(
+    kings_gambit_count_map,
+    "kingsGambitCount": "1. e4 e5 2. f4"
+);
+
+basic_opening_map!(
+    kings_gambit_accepted_count_map,
+    "kingsGambitAcceptedCount": "1. e4 e5 2. f4 exf4"
 );
 
 basic_opening_map!(
@@ -278,7 +278,6 @@ fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
         include_map!(game_count_map),
         include_map!(mate_count_map),
         include_map!(num_moves_map),
-        include_map!(queens_gambit_count_map),
         include_map!(num_captures_map),
         include_map!(rating_diff_map),
         include_map!(has_eval_map),
@@ -286,6 +285,11 @@ fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
         include_map!(promotion_count_map),
         include_map!(sicilian_defence_count_map),
         include_map!(nag_count_map),
+        include_map!(queens_gambit_count_map),
+        include_map!(queens_gambit_accepted_count_map),
+        include_map!(slav_defence_count_map),
+        include_map!(kings_gambit_count_map),
+        include_map!(kings_gambit_accepted_count_map),
         include_map!(ruy_lopez_count_map),
         include_map!(indian_defense_count_map),
         include_map!(french_defense_main_count_map),
