@@ -8,6 +8,7 @@ use std::fs::{read_to_string, File};
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+use itertools::Itertools;
 
 mod bins;
 #[allow(non_snake_case)]
@@ -132,15 +133,32 @@ fn main() {
                 });
         });
 
-    db.lock().unwrap().iter().for_each(|entry| {
-        let path = entry.0;
-        let data = entry.1;
+    let db = db.lock().unwrap();
 
-        let stat: &str = path[0].as_ref();
+    let columns = db.iter().map(|entry| {
+        entry.0[0].as_ref()
+    }).collect::<Vec<&str>>().into_iter().unique().sorted().collect::<Vec<&str>>();
 
-        let fold_fn = &selected_statistics.get(stat).unwrap().fold;
+    let rows = db.iter().map(|entry| {
+        entry.0[1..entry.0.len()].iter().map(|s| &**s).collect()
+    }).collect::<Vec<Vec<&str>>>().into_iter().unique().sorted().collect::<Vec<Vec<&str>>>();
 
-        let result = (fold_fn)(data);
-        println!("{}\t{:.4}", path.join("\t"), result);
-    });
+    println!("Bin\t{}", columns.join("\t"));
+    for row in rows {
+        print!("{}\t", row.join("."));
+        for stat in &columns {
+            let mut path = row.clone();
+            path.insert(0, stat);
+
+            let path: Vec<String> = path.iter().map(|s| (*s).to_string()).collect();
+
+            let data = db.get(&path).unwrap();
+
+            let fold_fn = &selected_statistics.get(stat).unwrap().fold;
+
+            let result = (fold_fn)(data);
+            print!("{:.4}\t", result);
+        }
+        println!();
+    }
 }
