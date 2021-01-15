@@ -31,6 +31,18 @@ pub fn get_filter_factories() -> Vec<(Regex, FilterFactoryFn, String, String)> {
         include_filter!(player_elo_filter),
         include_filter!(mate_occurs_filter),
         include_filter!(eval_available_filter),
+        include_filter!(sicilian_defence_filter),
+        include_filter!(queens_gambit_filter),
+        include_filter!(queens_gambit_accepted_filter),
+        include_filter!(slav_defence_filter),
+        include_filter!(kings_gambit_filter),
+        include_filter!(kings_gambit_accepted_filter),
+        include_filter!(ruy_lopez_filter),
+        include_filter!(indian_defense_filter),
+        include_filter!(french_defense_main_filter),
+        include_filter!(sicilian_defence_closed_filter),
+        include_filter!(italian_game_filter),
+        include_filter!(caro_kann_defence_filter),
     ]
 }
 

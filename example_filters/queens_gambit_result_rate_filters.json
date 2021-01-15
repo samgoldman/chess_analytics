@@ -1,0 +1,5 @@
+{
+	"steps": [
+        ["minBothElo1", "minGameElo1600", "maxGameElo3000", "queensGambit"]
+	]
+}

@@ -10,6 +10,7 @@ macro_rules! filter {
             use regex::Regex;
 
             pub fn regex() -> Regex {
+                #![allow(clippy::trivial_regex)]
                 Regex::new($regex).unwrap()
             }
 
@@ -27,6 +28,85 @@ macro_rules! filter {
         }
     };
 }
+
+macro_rules! basic_opening_filter {
+    ($name:ident, $regex:literal: $movetext:literal) => {
+        filter!(
+            $name,
+            $regex,
+            _params,
+            {
+                use crate::chess_utils::{has_opening, parse_movetext};
+
+                let opening = parse_movetext($movetext);
+
+                Box::new(move |game| has_opening(game, &opening))
+            },
+            "",
+            ""
+        );
+    };
+}
+
+basic_opening_filter!(
+    queens_gambit_filter,
+    "queensGambit": "1. d4 d5 2. c4"
+);
+
+basic_opening_filter!(
+    queens_gambit_accepted_filter,
+    "queensGambitAccepted": "1. d4 d5 2. c4 dxc4"
+);
+
+basic_opening_filter!(
+    slav_defence_filter,
+    "slavDefence": "1. d4 d5 2. c4 c6"
+);
+
+basic_opening_filter!(
+    kings_gambit_filter,
+    "kingsGambit": "1. e4 e5 2. f4"
+);
+
+basic_opening_filter!(
+    kings_gambit_accepted_filter,
+    "kingsGambitAccepted": "1. e4 e5 2. f4 exf4"
+);
+
+basic_opening_filter!(
+    sicilian_defence_filter,
+    "sicilian": "1. e4 c5"
+);
+
+basic_opening_filter!(
+    sicilian_defence_closed_filter,
+    "sicilianClosed": "1. e4 c5 2. Nc3"
+);
+
+basic_opening_filter!(
+    indian_defense_filter,
+    "indianDefence": "1. d4 Nf6"
+);
+
+basic_opening_filter!(
+    ruy_lopez_filter,
+    "ruyLopez": "1. e4 e5 2. Nf3 Nc6 3. Bb5"
+);
+
+basic_opening_filter!(
+    french_defense_main_filter,
+    "frenchDefenceMain": "1. e4 e6 2. d4 d5"
+);
+
+basic_opening_filter!(
+    italian_game_filter,
+    "italianGame": "1. e4 e5 2. Nf3 Nc6 3. Bc4"
+);
+
+basic_opening_filter!(
+    caro_kann_defence_filter,
+    "caroKannDefence": "1. e4 c6"
+);
 
 filter!(
     game_elo_filter,
