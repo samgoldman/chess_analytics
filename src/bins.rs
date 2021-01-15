@@ -28,6 +28,7 @@ pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn, String, String)> {
         eco_category_bin,
         site_bin,
         time_control_bin,
+        result_bin,
     )
 }
 

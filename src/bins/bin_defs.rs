@@ -25,6 +25,23 @@ macro_rules! bin {
 }
 
 bin!(
+    result_bin,
+    "result",
+    _params,
+    {
+        use crate::chess_flatbuffers::chess::GameResult;
+        Box::new(move |game| match game.result() {
+            GameResult::White => "White".to_string(),
+            GameResult::Black => "Black".to_string(),
+            GameResult::Draw => "Draw".to_string(),
+            _ => "?".to_string(),
+        })
+    },
+    "",
+    ""
+);
+
+bin!(
     year_bin,
     r#"^year$"#,
     _params,
