@@ -2,13 +2,13 @@ use bzip2::read::BzDecoder;
 use clap::{App, Arg};
 use glob::glob;
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
+use itertools::Itertools;
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::fs::{read_to_string, File};
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use itertools::Itertools;
 
 mod bins;
 #[allow(non_snake_case)]
@@ -135,13 +135,23 @@ fn main() {
 
     let db = db.lock().unwrap();
 
-    let columns = db.iter().map(|entry| {
-        entry.0[0].as_ref()
-    }).collect::<Vec<&str>>().into_iter().unique().sorted().collect::<Vec<&str>>();
+    let columns = db
+        .iter()
+        .map(|entry| entry.0[0].as_ref())
+        .collect::<Vec<&str>>()
+        .into_iter()
+        .unique()
+        .sorted()
+        .collect::<Vec<&str>>();
 
-    let rows = db.iter().map(|entry| {
-        entry.0[1..entry.0.len()].iter().map(|s| &**s).collect()
-    }).collect::<Vec<Vec<&str>>>().into_iter().unique().sorted().collect::<Vec<Vec<&str>>>();
+    let rows = db
+        .iter()
+        .map(|entry| entry.0[1..entry.0.len()].iter().map(|s| &**s).collect())
+        .collect::<Vec<Vec<&str>>>()
+        .into_iter()
+        .unique()
+        .sorted()
+        .collect::<Vec<Vec<&str>>>();
 
     println!("Bin\t{}", columns.join("\t"));
     for row in rows {

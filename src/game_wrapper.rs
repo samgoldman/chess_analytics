@@ -1,6 +1,26 @@
 use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList, GameResult, Termination};
+use crate::chess_utils::*;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
+pub enum NAG {
+    None = 0,
+    Questionable = 1,
+    Mistake = 2,
+    Blunder = 3,
+}
+
+impl NAG {
+    pub fn from_metadata(metadata: u16) -> Self {
+        match metadata & 0b000111000000 {
+            0x0180 => NAG::Questionable,
+            0x0080 => NAG::Mistake,
+            0x0100 => NAG::Blunder,
+            _ => NAG::None,
+        }
+    }
+}
+
+#[derive(PartialEq, Clone)]
 pub enum Rank {
     _NA = 0,
     _1 = 1,
@@ -30,7 +50,7 @@ impl Rank {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum File {
     _NA = 0,
     _A = 1,
@@ -60,7 +80,7 @@ impl File {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum Piece {
     None = 0,
     Pawn = 1,
@@ -85,12 +105,20 @@ impl Piece {
     }
 }
 
+#[derive(PartialEq, Clone)]
 pub struct Move {
-    pub piece_moved: Piece,
     pub from_file: File,
     pub from_rank: Rank,
     pub to_file: File,
     pub to_rank: Rank,
+
+    // Metadata
+    pub piece_moved: Piece,
+    pub captures: bool,
+    pub checks: bool,
+    pub mates: bool,
+    pub nag: NAG,
+    pub promoted_to: Piece,
 }
 
 #[derive(Clone)]
@@ -108,8 +136,7 @@ pub struct GameWrapper {
     time_control_increment: u8,
     eco_category: char,
     eco_subcategory: u8,
-    moves: Vec<u16>,
-    move_metadata: Vec<u16>,
+    moves: Vec<Move>,
     clock_hours: Vec<u8>,
     clock_minutes: Vec<u8>,
     clock_seconds: Vec<u8>,
@@ -136,8 +163,7 @@ pub struct GameWrapper {
     pub time_control_increment: u8,
     pub eco_category: char,
     pub eco_subcategory: u8,
-    pub moves: Vec<u16>,
-    pub move_metadata: Vec<u16>,
+    pub moves: Vec<Move>,
     pub clock_hours: Vec<u8>,
     pub clock_minutes: Vec<u8>,
     pub clock_seconds: Vec<u8>,
@@ -180,11 +206,33 @@ impl GameWrapper {
             eco_category: game.eco_category() as u8 as char,
             eco_subcategory: game.eco_subcategory(),
             moves: match game.moves() {
-                Some(moves) => moves.iter().collect::<Vec<u16>>(),
-                None => vec![],
-            },
-            move_metadata: match game.move_metadata() {
-                Some(move_metadata) => move_metadata.iter().collect::<Vec<u16>>(),
+                Some(moves) => moves
+                    .iter()
+                    .zip(game.move_metadata().unwrap())
+                    .map(|(data, metadata)| {
+                        let (from_file, from_rank) = extract_coordinate(data);
+                        let (to_file, to_rank) = extract_coordinate(data >> 8);
+                        let piece_moved = extract_piece(metadata);
+                        let captures = metadata & 0b001000 != 0;
+                        let checks = metadata & 0b010000 != 0;
+                        let mates = metadata & 0b100000 != 0;
+                        let nag = NAG::from_metadata(metadata);
+                        let promoted_to = extract_piece(metadata >> 9);
+
+                        Move {
+                            from_file,
+                            from_rank,
+                            to_file,
+                            to_rank,
+                            piece_moved,
+                            captures,
+                            checks,
+                            mates,
+                            nag,
+                            promoted_to,
+                        }
+                    })
+                    .collect(),
                 None => vec![],
             },
             clock_hours: match game.clock_hours() {
@@ -263,12 +311,8 @@ impl GameWrapper {
     //     self.eco_subcategory
     // }
 
-    pub fn moves(&self) -> &Vec<u16> {
+    pub fn moves(&self) -> &Vec<Move> {
         &self.moves
-    }
-
-    pub fn move_metadata(&self) -> &Vec<u16> {
-        &self.move_metadata
     }
 
     // pub fn clock_hours(&self) -> &Vec<u8> {
@@ -328,7 +372,6 @@ impl Default for GameWrapper {
             eco_category: '-',
             eco_subcategory: 0,
             moves: vec![],
-            move_metadata: vec![],
             clock_hours: vec![],
             clock_minutes: vec![],
             clock_seconds: vec![],

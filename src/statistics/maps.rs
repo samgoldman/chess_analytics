@@ -1,4 +1,4 @@
-use crate::game_wrapper::GameWrapper;
+use crate::game_wrapper::*;
 use crate::general_utils::capture_to_vec;
 use regex::Regex;
 
@@ -76,18 +76,15 @@ map!(
     params,
     {
         let only_mate = params[1] == "Mate";
-        Box::new(move |game| {
-            let metadata = game.move_metadata();
-            match metadata.iter().last() {
-                Some(check) => {
-                    if *check == 0x0020 || (!only_mate && *check == 0x0010) {
-                        1
-                    } else {
-                        0
-                    }
+        Box::new(move |game| match game.moves().last() {
+            Some(last_move) => {
+                if last_move.mates || (!only_mate && last_move.checks) {
+                    1
+                } else {
+                    0
                 }
-                None => 0,
             }
+            None => 0,
         })
     },
     "",
@@ -107,14 +104,7 @@ map!(
     num_captures_map,
     r#"^numCaptures$"#,
     _params,
-    {
-        Box::new(|game| {
-            game.move_metadata()
-                .iter()
-                .filter(|c| (*c & 0x0008) != 0)
-                .count() as i16
-        })
-    },
+    { Box::new(|game| { game.moves().iter().filter(|c| c.captures).count() as i16 }) },
     "",
     ""
 );
@@ -220,19 +210,21 @@ map!(
     r#"promotion(Knight|Bishop|Rook|Queen)Count"#,
     params,
     {
+        use crate::game_wrapper::Piece;
+
         let expected = match params[1] {
-            "Knight" => 0b010,
-            "Bishop" => 0b011,
-            "Rook" => 0b100,
-            "Queen" => 0b101,
+            "Knight" => Piece::Knight,
+            "Bishop" => Piece::Bishop,
+            "Rook" => Piece::Rook,
+            "Queen" => Piece::Queen,
             _ => panic!(),
         };
 
         Box::new(move |game| {
-            game.move_metadata()
+            game.moves()
                 .iter()
-                .map(|data| {
-                    if (data >> 9 & 0b111) == expected {
+                .map(|move_data| {
+                    if move_data.promoted_to == expected {
                         1
                     } else {
                         0
@@ -250,22 +242,18 @@ map!(
     r#"nag(Questionable|Mistake|Blunder)Count"#,
     params,
     {
+        use crate::game_wrapper::NAG;
+
         let expected = match params[1] {
-            "Questionable" => 0x0180,
-            "Mistake" => 0x0080,
-            "Blunder" => 0x0100,
+            "Questionable" => NAG::Questionable,
+            "Mistake" => NAG::Mistake,
+            "Blunder" => NAG::Blunder,
             _ => panic!(),
         };
         Box::new(move |game| {
-            game.move_metadata()
+            game.moves()
                 .iter()
-                .map(|data| {
-                    if (data & 0b000111000000) == expected {
-                        1
-                    } else {
-                        0
-                    }
-                })
+                .map(|move_data| if move_data.nag == expected { 1 } else { 0 })
                 .sum()
         })
     },

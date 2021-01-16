@@ -176,7 +176,7 @@ filter!(
 
         let thresh: u32 = params[2].parse::<u32>().unwrap();
         Box::new(move |game| -> bool {
-            let num_moves = game.move_metadata().len() as u32;
+            let num_moves = game.moves().len() as u32;
             comparison(num_moves, thresh) == thresh
         })
     },
@@ -233,8 +233,8 @@ filter!(
     {
         let mate_occurs = params[1] != "no";
         Box::new(move |game| -> bool {
-            let metadata = game.move_metadata().iter();
-            mate_occurs == (metadata.last().unwrap() & 0x0020 != 0)
+            let moves = game.moves().iter();
+            mate_occurs == (moves.last().unwrap().mates)
         })
     },
     "Mate Status Filter",

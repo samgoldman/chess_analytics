@@ -1,4 +1,4 @@
-use crate::game_wrapper::{File, GameWrapper, Move, Piece, Rank};
+use crate::game_wrapper::{File, GameWrapper, Move, Piece, Rank, NAG};
 use regex::Regex;
 
 fn int_to_file(int: u16) -> File {
@@ -31,7 +31,7 @@ fn int_to_rank(int: u16) -> Rank {
     }
 }
 
-fn extract_piece_moved(raw_metadata: u16) -> Piece {
+pub fn extract_piece(raw_metadata: u16) -> Piece {
     match raw_metadata & 0b0111 {
         0 => Piece::None,
         1 => Piece::Pawn,
@@ -44,18 +44,15 @@ fn extract_piece_moved(raw_metadata: u16) -> Piece {
     }
 }
 
-fn extract_coordinates(raw_coord: u16) -> (File, Rank, File, Rank) {
-    let from_file = int_to_file(raw_coord);
-    let from_rank = int_to_rank(raw_coord);
-    let to_file = int_to_file(raw_coord >> 8);
-    let to_rank = int_to_rank(raw_coord >> 8);
-    (from_file, from_rank, to_file, to_rank)
+pub fn extract_coordinate(raw_coord: u16) -> (File, Rank) {
+    let file = int_to_file(raw_coord);
+    let rank = int_to_rank(raw_coord);
+    (file, rank)
 }
 
 pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
     let moves = game.moves();
-    let move_meta = game.move_metadata();
 
     // Verify this game has enough moves for the given opening
     if moves.len() < opening.len() {
@@ -64,20 +61,16 @@ pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
 
     // Create iterable to make the next step cleaner
     let mut moves_iter = moves.iter();
-    let mut move_meta_iter = move_meta.iter();
 
     // For each expected moving in the opening, if the game moves don't match, just return false
     for expected_move in opening {
-        let (from_file, from_rank, to_file, to_rank) =
-            extract_coordinates(*moves_iter.next().unwrap() as u16);
+        let actual_move = moves_iter.next().unwrap();
 
-        let piece = extract_piece_moved(*move_meta_iter.next().unwrap() as u16);
-
-        if expected_move.to_file != to_file
-            || expected_move.to_rank != to_rank
-            || expected_move.from_file != from_file
-            || expected_move.from_rank != from_rank
-            || expected_move.piece_moved != piece
+        if expected_move.to_file != actual_move.to_file
+            || expected_move.to_rank != actual_move.to_rank
+            || expected_move.from_file != actual_move.from_file
+            || expected_move.from_rank != actual_move.from_rank
+            || expected_move.piece_moved != actual_move.piece_moved
         {
             return false;
         }
@@ -109,7 +102,7 @@ pub fn parse_movetext(movetext: &str) -> Vec<Move> {
             let dest_str = &cap[4];
             let dest = RE_COORD.captures_iter(dest_str).next().unwrap();
 
-            let moved = Piece::from_str(piece_str);
+            let piece_moved = Piece::from_str(piece_str);
 
             let from_file = File::from_str(&disambiguation[1]);
             let from_rank = Rank::from_str(&disambiguation[2]);
@@ -117,11 +110,17 @@ pub fn parse_movetext(movetext: &str) -> Vec<Move> {
             let to_rank = Rank::from_str(&dest[2]);
 
             Move {
-                piece_moved: moved,
                 from_file,
                 from_rank,
                 to_file,
                 to_rank,
+                piece_moved,
+
+                captures: false,
+                checks: false,
+                mates: false,
+                nag: NAG::None,
+                promoted_to: Piece::None,
             }
         })
         .collect()
