@@ -31,6 +31,7 @@ fn int_to_rank(int: u16) -> Rank {
     }
 }
 
+// Look at the first three bits to get the piece
 pub fn extract_piece(raw_metadata: u16) -> Piece {
     match raw_metadata & 0b0111 {
         0 => Piece::None,
@@ -76,13 +77,16 @@ pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
         }
     }
 
+    // If we made it this far, the openings match
     true
 }
 
+// Game elo is the average of the two player's ratings
 pub fn get_game_elo(game: &GameWrapper) -> u32 {
     (game.white_rating() + game.black_rating()) as u32 / 2
 }
 
+// For now this only parses the piece being moved, and the to/from coordinates
 pub fn parse_movetext(movetext: &str) -> Vec<Move> {
     lazy_static! {
         static ref RE_MOVE: Regex = Regex::new(
@@ -96,6 +100,8 @@ pub fn parse_movetext(movetext: &str) -> Vec<Move> {
         .captures_iter(movetext)
         .map(|cap| {
             let piece_str = &cap[1];
+
+            // Disambiguation, AKA from - only present if needed
             let disambiguation_str = &cap[2];
             let disambiguation = RE_COORD.captures_iter(disambiguation_str).next().unwrap();
 

@@ -12,16 +12,11 @@ struct InputFilterSteps {
 
 macro_rules! include_filter {
     ($name: ident) => {
-        (
-            filter_defs::$name::regex(),
-            filter_defs::$name::factory,
-            filter_defs::$name::name(),
-            filter_defs::$name::description(),
-        )
+        (filter_defs::$name::regex(), filter_defs::$name::factory)
     };
 }
 
-pub fn get_filter_factories() -> Vec<(Regex, FilterFactoryFn, String, String)> {
+pub fn get_filter_factories() -> Vec<(Regex, FilterFactoryFn)> {
     vec![
         include_filter!(game_elo_filter),
         include_filter!(year_filter),

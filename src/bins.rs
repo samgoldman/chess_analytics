@@ -11,15 +11,13 @@ macro_rules! include_bin {
         vec![$(
             (
                 bin_defs::$name::regex(),
-                bin_defs::$name::factory,
-                bin_defs::$name::name(),
-                bin_defs::$name::description(),
+                bin_defs::$name::factory
             ),
         )*]
     }
 }
 
-pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn, String, String)> {
+pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn)> {
     include_bin!(
         year_bin,
         month_bin,

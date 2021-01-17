@@ -6,7 +6,7 @@ pub type MapFn = Box<dyn Fn(&GameWrapper) -> i16 + std::marker::Sync>;
 pub type MapFactoryFn = fn(Vec<&str>) -> MapFn;
 
 macro_rules! map {
-    ($name: ident, $regex: literal, $param: ident, $fn: block, $s_name: literal, $desc: literal) => {
+    ($name: ident, $regex: literal, $param: ident, $fn: block) => {
         pub mod $name {
             use super::MapFn;
             use regex::Regex;
@@ -19,105 +19,59 @@ macro_rules! map {
             pub fn factory($param: Vec<&str>) -> MapFn {
                 $fn
             }
-
-            pub fn name() -> String {
-                $s_name.to_string()
-            }
-
-            pub fn description() -> String {
-                $desc.to_string()
-            }
         }
     };
 }
 
 macro_rules! basic_opening_map {
     ($name:ident, $regex:literal: $movetext:literal) => {
-        map!(
-            $name,
-            $regex,
-            _params,
-            {
-                use crate::chess_utils::{has_opening, parse_movetext};
+        map!($name, $regex, _params, {
+            use crate::chess_utils::{has_opening, parse_movetext};
 
-                let opening = parse_movetext($movetext);
+            let opening = parse_movetext($movetext);
 
-                Box::new(move |game| has_opening(game, &opening) as i16)
-            },
-            "",
-            ""
-        );
+            Box::new(move |game| has_opening(game, &opening) as i16)
+        });
     };
 }
 
 macro_rules! include_map {
     ($name: ident) => {
-        (
-            $name::regex(),
-            $name::factory,
-            $name::name(),
-            $name::description(),
-        )
+        ($name::regex(), $name::factory)
     };
 }
 
-map!(
-    game_count_map,
-    r#"^gameCount$"#,
-    _params,
-    { Box::new(|_game| 1) },
-    "",
-    ""
-);
+map!(game_count_map, r#"^gameCount$"#, _params, {
+    Box::new(|_game| 1)
+});
 
-map!(
-    mate_count_map,
-    r#"^check(Mate|)Count$"#,
-    params,
-    {
-        let only_mate = params[1] == "Mate";
-        Box::new(move |game| match game.moves().last() {
-            Some(last_move) => {
-                if last_move.mates || (!only_mate && last_move.checks) {
-                    1
-                } else {
-                    0
-                }
+map!(mate_count_map, r#"^check(Mate|)Count$"#, params, {
+    let only_mate = params[1] == "Mate";
+    Box::new(move |game| match game.moves().last() {
+        Some(last_move) => {
+            if last_move.mates || (!only_mate && last_move.checks) {
+                1
+            } else {
+                0
             }
-            None => 0,
-        })
-    },
-    "",
-    ""
-);
+        }
+        None => 0,
+    })
+});
 
-map!(
-    num_moves_map,
-    r#"^numMoves$"#,
-    _params,
-    { Box::new(|game| game.moves().len() as i16) },
-    "",
-    ""
-);
+map!(num_moves_map, r#"^numMoves$"#, _params, {
+    Box::new(|game| game.moves().len() as i16)
+});
 
-map!(
-    num_captures_map,
-    r#"^numCaptures$"#,
-    _params,
-    { Box::new(|game| { game.moves().iter().filter(|c| c.captures).count() as i16 }) },
-    "",
-    ""
-);
+map!(num_captures_map, r#"^numCaptures$"#, _params, {
+    Box::new(|game| game.moves().iter().filter(|c| c.captures).count() as i16)
+});
 
-map!(
-    rating_diff_map,
-    r#"^ratingDiff$"#,
-    _params,
-    { Box::new(|game| (game.white_rating() as i16 - game.black_rating() as i16).abs()) },
-    "",
-    ""
-);
+map!(rating_diff_map, r#"^ratingDiff$"#, _params, {
+    Box::new(|game| (game.white_rating() as i16 - game.black_rating() as i16).abs())
+});
 
+// TODO: consolidate opening maps into single map with central opening definitions (shared with filters)
 basic_opening_map!(
     queens_gambit_count_map,
     "queensGambitCount": "1. d4 d5 2. c4"
@@ -191,19 +145,12 @@ map!(
             _ => GameResult::Star,
         };
         Box::new(move |game| if game.result() == expected { 1 } else { 0 })
-    },
-    "",
-    ""
+    }
 );
 
-map!(
-    has_eval_map,
-    r#"hasEval"#,
-    _params,
-    { Box::new(|game| game.eval_available() as i16) },
-    "",
-    ""
-);
+map!(has_eval_map, r#"hasEval"#, _params, {
+    Box::new(|game| game.eval_available() as i16)
+});
 
 map!(
     promotion_count_map,
@@ -232,9 +179,7 @@ map!(
                 })
                 .sum()
         })
-    },
-    "",
-    ""
+    }
 );
 
 map!(
@@ -256,12 +201,10 @@ map!(
                 .map(|move_data| if move_data.nag == expected { 1 } else { 0 })
                 .sum()
         })
-    },
-    "",
-    ""
+    }
 );
 
-fn get_map_factories() -> Vec<(Regex, MapFactoryFn, String, String)> {
+fn get_map_factories() -> Vec<(Regex, MapFactoryFn)> {
     vec![
         include_map!(game_count_map),
         include_map!(mate_count_map),

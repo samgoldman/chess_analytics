@@ -135,23 +135,23 @@ fn main() {
 
     let db = db.lock().unwrap();
 
-    let columns = db
+    let columns: Vec<&str> = db
         .iter()
         .map(|entry| entry.0[0].as_ref())
         .collect::<Vec<&str>>()
         .into_iter()
         .unique()
         .sorted()
-        .collect::<Vec<&str>>();
+        .collect();
 
-    let rows = db
+    let rows: Vec<Vec<&str>> = db
         .iter()
         .map(|entry| entry.0[1..entry.0.len()].iter().map(|s| &**s).collect())
         .collect::<Vec<Vec<&str>>>()
         .into_iter()
         .unique()
         .sorted()
-        .collect::<Vec<Vec<&str>>>();
+        .collect();
 
     println!("Bin\t{}", columns.join("\t"));
     for row in rows {

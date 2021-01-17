@@ -210,8 +210,19 @@ impl GameWrapper {
                     .iter()
                     .zip(game.move_metadata().unwrap())
                     .map(|(data, metadata)| {
+                        // Extract move data and create a move object from it
+
+                        // Move coordinates are simple: 4 bits per rank/file
                         let (from_file, from_rank) = extract_coordinate(data);
                         let (to_file, to_rank) = extract_coordinate(data >> 8);
+
+                        // From chess.fbs:
+                        // Bits 0-2: Piece Moved
+                        // Bit    3: capture
+                        // Bit    4: check
+                        // Bit    5: mate
+                        // Bits 6-8: nag
+                        // Bits 9-11: promotion
                         let piece_moved = extract_piece(metadata);
                         let captures = metadata & 0b001000 != 0;
                         let checks = metadata & 0b010000 != 0;

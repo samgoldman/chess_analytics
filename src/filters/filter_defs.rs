@@ -17,14 +17,6 @@ macro_rules! filter {
             pub fn factory($param: Vec<&str>) -> FilterFn {
                 $fn
             }
-
-            pub fn name() -> String {
-                $s_name.to_string()
-            }
-
-            pub fn description() -> String {
-                $desc.to_string()
-            }
         }
     };
 }
@@ -48,6 +40,7 @@ macro_rules! basic_opening_filter {
     };
 }
 
+// TODO: consolidate opening filters into single filter with central opening definitions (shared with maps)
 basic_opening_filter!(
     queens_gambit_filter,
     "queensGambit": "1. d4 d5 2. c4"

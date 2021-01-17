@@ -15,6 +15,7 @@ pub struct StatisticDefinition<'a> {
 }
 
 lazy_static! {
+    // Format: stat_name:map_definition:fold
     static ref STAT_DEF_REGEX: Regex = Regex::new(r#"^(.*):(.*):(.*)$"#).unwrap();
 }
 
