@@ -41,9 +41,9 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-      - run: cargo install cargo-tarpaulin
-      - run: cargo tarpaulin --out Xml
-      - run: bash <(curl -s https://codecov.io/bash)
+      # - run: cargo install cargo-tarpaulin
+      # - run: cargo tarpaulin --out Xml
+      # - run: bash <(curl -s https://codecov.io/bash)
       - uses: Swatinem/rust-cache@v1
           
   fmt:

@@ -132,6 +132,29 @@ basic_opening_map!(
     "caroKannDefenceCount": "1. e4 c6"
 );
 
+basic_opening_map!(
+    c4_count_map,
+    "c4Count": "1. c4"
+);
+
+basic_opening_map!(
+    nf3_count_map,
+    "Nf3Count": "1. Nf3"
+);
+
+basic_opening_map!(
+    english_anglo_indian_count_map,
+    "englishAngloIndianCount": "1. c4 Nf6"
+);
+
+map!(generic_opening_count, "opening (.*) Count", params, {
+    use crate::chess_utils::{has_opening, parse_movetext};
+
+    let opening = parse_movetext(params[1]);
+
+    Box::new(move |game| has_opening(game, &opening) as i16)
+});
+
 map!(
     result_map,
     r#"result(Draw|WhiteVictory|BlackVictory|)Count"#,
@@ -227,6 +250,10 @@ fn get_map_factories() -> Vec<(Regex, MapFactoryFn)> {
         include_map!(sicilian_defence_closed_count_map),
         include_map!(italian_game_count_map),
         include_map!(caro_kann_defence_count_map),
+        include_map!(c4_count_map),
+        include_map!(nf3_count_map),
+        include_map!(english_anglo_indian_count_map),
+        include_map!(generic_opening_count),
     ]
 }
 
