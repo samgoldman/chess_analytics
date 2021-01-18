@@ -55,7 +55,19 @@ bin!(site_bin, r#"^site$"#, _params, {
     Box::new(move |game| game.site().to_string())
 });
 
-bin!(time_control_bin, r#"^timeControl(MainOnly|)$"#, params, {
+bin!(time_control_bin, "timeControlBin", _params, {
+    use crate::game_wrapper::TimeControl;
+
+    Box::new(move |game| match game.time_control() {
+        TimeControl::UltraBullet => "UltraBullet".to_string(),
+        TimeControl::Bullet => "Bullet".to_string(),
+        TimeControl::Blitz => "Blitz".to_string(),
+        TimeControl::Rapid => "Rapid".to_string(),
+        TimeControl::Classical => "Classical".to_string(),
+    })
+});
+
+bin!(raw_time_control_bin, r#"^rawTimeControl(MainOnly|)$"#, params, {
     let main_only = params[1] == "MainOnly";
     Box::new(move |game| {
         if main_only {

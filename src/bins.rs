@@ -27,6 +27,7 @@ pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn)> {
         site_bin,
         time_control_bin,
         result_bin,
+        raw_time_control_bin,
     )
 }
 

@@ -121,6 +121,15 @@ pub struct Move {
     pub promoted_to: Piece,
 }
 
+#[derive(PartialEq, Clone)]
+pub enum TimeControl {
+    UltraBullet,
+    Bullet,
+    Blitz,
+    Rapid,
+    Classical,
+}
+
 #[derive(Clone)]
 #[cfg(not(test))]
 pub struct GameWrapper {
@@ -134,6 +143,7 @@ pub struct GameWrapper {
     black_rating: u16,
     time_control_main: u16,
     time_control_increment: u8,
+    time_control: TimeControl,
     eco_category: char,
     eco_subcategory: u8,
     moves: Vec<Move>,
@@ -161,6 +171,7 @@ pub struct GameWrapper {
     pub black_rating: u16,
     pub time_control_main: u16,
     pub time_control_increment: u8,
+    pub time_control: TimeControl,
     pub eco_category: char,
     pub eco_subcategory: u8,
     pub moves: Vec<Move>,
@@ -203,6 +214,21 @@ impl GameWrapper {
             black_rating: game.black_rating(),
             time_control_main: game.time_control_main(),
             time_control_increment: game.time_control_increment(),
+            time_control: {
+                let estimated_duration = (60 * game.time_control_main() as u32)
+                    + (40 * game.time_control_increment() as u32);
+                if estimated_duration < 29 {
+                    TimeControl::UltraBullet
+                } else if estimated_duration < 179 {
+                    TimeControl::Bullet
+                } else if estimated_duration < 479 {
+                    TimeControl::Blitz
+                } else if estimated_duration < 1499 {
+                    TimeControl::Rapid
+                } else {
+                    TimeControl::Classical
+                }
+            },
             eco_category: game.eco_category() as u8 as char,
             eco_subcategory: game.eco_subcategory(),
             moves: match game.moves() {
@@ -314,6 +340,10 @@ impl GameWrapper {
         self.time_control_increment
     }
 
+    pub fn time_control(&self) -> &TimeControl {
+        &self.time_control
+    }
+
     pub fn eco_category(&self) -> char {
         self.eco_category
     }
@@ -380,6 +410,7 @@ impl Default for GameWrapper {
             black_rating: 0,
             time_control_main: 0,
             time_control_increment: 0,
+            time_control: TimeControl::UltraBullet,
             eco_category: '-',
             eco_subcategory: 0,
             moves: vec![],
