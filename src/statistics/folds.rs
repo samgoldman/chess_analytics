@@ -1,31 +1,76 @@
 use std::cmp;
 
-pub type FoldFn = Box<dyn Fn(&[i16]) -> f64 + std::marker::Sync>;
+pub type FoldAddPointFn = Box<dyn Fn(i16, &mut Vec<i128>) + std::marker::Sync>;
+pub type FoldGetResultFn = Box<dyn Fn(&[i128]) -> f64 + std::marker::Sync>;
 
 // TODO: standard deviation, variance?
 
-fn fold_sum(data: &[i16]) -> f64 {
-    data.iter().fold(0.0, |a, x| a as f64 + *x as f64)
+fn fold_sum(point: i16, data: &mut Vec<i128>) {
+    if data.is_empty() {
+        data.push(0);
+    }
+
+    data[0] += point as i128;
 }
 
-fn fold_avg(data: &[i16]) -> f64 {
-    data.iter().fold(0.0, |a, x| a as f64 + *x as f64) / data.len() as f64
+fn fold_sum_res(data: &[i128]) -> f64 {
+    data[0] as f64
 }
 
-fn fold_max(data: &[i16]) -> f64 {
-    data.iter().fold(i16::MIN, |a, x| cmp::max(a, *x)) as f64
+fn fold_avg(point: i16, data: &mut Vec<i128>) {
+    if data.is_empty() {
+        data.push(0);
+        data.push(0);
+    }
+
+    data[0] += point as i128;
+    data[1] += 1;
 }
 
-fn fold_min(data: &[i16]) -> f64 {
-    data.iter().fold(i16::MAX, |a, x| cmp::min(a, *x)) as f64
+fn fold_avg_res(data: &[i128]) -> f64 {
+    data[0] as f64 / data[1] as f64
 }
 
-pub fn get_fold(name: &str) -> Result<FoldFn, String> {
+fn fold_max(point: i16, data: &mut Vec<i128>) {
+    if data.is_empty() {
+        data.push(i128::MIN);
+    }
+
+    data[0] = cmp::max(point as i128, data[0]);
+}
+
+fn fold_max_res(data: &[i128]) -> f64 {
+    data[0] as f64
+}
+
+fn fold_min(point: i16, data: &mut Vec<i128>) {
+    if data.is_empty() {
+        data.push(i128::MAX);
+    }
+
+    data[0] = cmp::min(point as i128, data[0]);
+}
+
+fn fold_min_res(data: &[i128]) -> f64 {
+    data[0] as f64
+}
+
+pub fn get_fold_add_point(name: &str) -> FoldAddPointFn {
     match name {
-        "sum" => Ok(Box::new(fold_sum)),
-        "avg" => Ok(Box::new(fold_avg)),
-        "max" => Ok(Box::new(fold_max)),
-        "min" => Ok(Box::new(fold_min)),
-        _ => Err(format!("FoldFn not found for {}", name)),
+        "sum" => Box::new(fold_sum),
+        "avg" => Box::new(fold_avg),
+        "max" => Box::new(fold_max),
+        "min" => Box::new(fold_min),
+        _ => panic!("FoldFn not found for {}", name),
+    }
+}
+
+pub fn get_fold_get_result(name: &str) -> FoldGetResultFn {
+    match name {
+        "sum" => Box::new(fold_sum_res),
+        "avg" => Box::new(fold_avg_res),
+        "max" => Box::new(fold_max_res),
+        "min" => Box::new(fold_min_res),
+        _ => panic!("FoldFn not found for {}", name),
     }
 }

@@ -2,7 +2,7 @@ mod folds;
 mod maps;
 
 use crate::general_utils::capture_to_vec;
-use folds::{get_fold, FoldFn};
+use folds::*;
 use maps::{get_map, MapFn};
 
 use lazy_static::lazy_static;
@@ -11,7 +11,8 @@ use regex::Regex;
 pub struct StatisticDefinition<'a> {
     pub name: &'a str,
     pub map: MapFn,
-    pub fold: FoldFn,
+    pub fold_add_point: FoldAddPointFn,
+    pub fold_get_res: FoldGetResultFn,
 }
 
 lazy_static! {
@@ -30,6 +31,7 @@ pub fn convert_to_stat_def(input: &str) -> StatisticDefinition {
     StatisticDefinition {
         name: capture[1],
         map: get_map(capture[2]).expect("Unexpected map name"),
-        fold: get_fold(capture[3]).expect("Unexpected fold name"),
+        fold_add_point: get_fold_add_point(capture[3]),
+        fold_get_res: get_fold_get_result(capture[3]),
     }
 }

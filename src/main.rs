@@ -127,7 +127,10 @@ fn main() {
 
                             let map_fn = &statistic_def.map;
                             let mapped_value = map_fn(game);
-                            db.get_mut(&path).unwrap().push(mapped_value);
+                            (&statistic_def.fold_add_point)(
+                                mapped_value,
+                                db.get_mut(&path).unwrap(),
+                            );
                         }
                     }
                 });
@@ -164,7 +167,7 @@ fn main() {
 
             let data = db.get(&path).unwrap();
 
-            let fold_fn = &selected_statistics.get(stat).unwrap().fold;
+            let fold_fn = &selected_statistics.get(stat).unwrap().fold_get_res;
 
             let result = (fold_fn)(data);
             print!("{:.4}\t", result);

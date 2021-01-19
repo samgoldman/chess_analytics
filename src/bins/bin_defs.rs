@@ -67,17 +67,22 @@ bin!(time_control_bin, "timeControlBin", _params, {
     })
 });
 
-bin!(raw_time_control_bin, r#"^rawTimeControl(MainOnly|)$"#, params, {
-    let main_only = params[1] == "MainOnly";
-    Box::new(move |game| {
-        if main_only {
-            format!("{:03}", game.time_control_main())
-        } else {
-            format!(
-                "{:04}+{:03}",
-                game.time_control_main(),
-                game.time_control_increment()
-            )
-        }
-    })
-});
+bin!(
+    raw_time_control_bin,
+    r#"^rawTimeControl(MainOnly|)$"#,
+    params,
+    {
+        let main_only = params[1] == "MainOnly";
+        Box::new(move |game| {
+            if main_only {
+                format!("{:03}", game.time_control_main())
+            } else {
+                format!(
+                    "{:04}+{:03}",
+                    game.time_control_main(),
+                    game.time_control_increment()
+                )
+            }
+        })
+    }
+);
