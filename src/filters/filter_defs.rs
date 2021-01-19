@@ -246,6 +246,51 @@ filter!(
     "evalAvailable|evalNotAvailable"
 );
 
+filter!(
+    queenside_castle_mate_filter,
+    "queensideCastleMate",
+    _params,
+    {
+        Box::new(move |game| -> bool {
+            use crate::game_wrapper::{Rank, File, Piece};
+            let moves = game.moves();
+
+            if moves.is_empty() {
+                false
+            } else {
+                let last_move = moves.iter().last().unwrap();
+
+                if last_move.piece_moved == Piece::King && last_move.from_file == File::_E && last_move.mates {
+                    if moves.len() % 2 == 1 {
+                        // Odd # move = white makes last move
+                        if last_move.to_file == File::_C {
+                            assert_eq!(last_move.to_rank, Rank::_1);
+                            assert_eq!(last_move.from_rank, Rank::_1);
+                            true
+                        } else {
+                            false
+                        }
+                    } else {
+                        // Even # move = black makes last move
+                        if last_move.to_file == File::_C {
+                            assert_eq!(last_move.to_rank, Rank::_8);
+                            assert_eq!(last_move.from_rank, Rank::_8);
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                }
+                else {
+                    false
+                }
+            }
+        })
+    },
+    "",
+    ""
+);
+
 #[cfg(test)]
 mod tests_player_elo_filter {
     use super::*;
