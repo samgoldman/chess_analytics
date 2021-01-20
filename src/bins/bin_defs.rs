@@ -55,7 +55,7 @@ bin!(site_bin, r#"^site$"#, _params, {
     Box::new(move |game| game.site().to_string())
 });
 
-bin!(time_control_bin, "timeControlBin", _params, {
+bin!(time_control_bin, "^timeControl$", _params, {
     use crate::game_wrapper::TimeControl;
 
     Box::new(move |game| match game.time_control() {
@@ -64,6 +64,7 @@ bin!(time_control_bin, "timeControlBin", _params, {
         TimeControl::Blitz => "Blitz".to_string(),
         TimeControl::Rapid => "Rapid".to_string(),
         TimeControl::Classical => "Classical".to_string(),
+        TimeControl::Correspondence => "Correspondence".to_string()
     })
 });
 
@@ -86,3 +87,11 @@ bin!(
         })
     }
 );
+
+bin!(white_bin, "^white$", _params, {
+    Box::new(move |game| game.white().to_string())
+});
+
+bin!(black_bin, "^black$", _params, {
+    Box::new(move |game| game.black().to_string())
+});

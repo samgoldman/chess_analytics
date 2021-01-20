@@ -128,6 +128,7 @@ pub enum TimeControl {
     Blitz,
     Rapid,
     Classical,
+    Correspondence
 }
 
 #[derive(Clone)]
@@ -215,9 +216,11 @@ impl GameWrapper {
             time_control_main: game.time_control_main(),
             time_control_increment: game.time_control_increment(),
             time_control: {
-                let estimated_duration = (60 * game.time_control_main() as u32)
+                let estimated_duration = (game.time_control_main() as u32)
                     + (40 * game.time_control_increment() as u32);
-                if estimated_duration < 29 {
+                if estimated_duration == 0 {
+                    TimeControl::Correspondence
+                } else if estimated_duration < 29 {
                     TimeControl::UltraBullet
                 } else if estimated_duration < 179 {
                     TimeControl::Bullet
@@ -316,13 +319,13 @@ impl GameWrapper {
         &self.site
     }
 
-    // pub fn white(&self) -> &str {
-    //     &self.white
-    // }
+    pub fn white(&self) -> &str {
+        &self.white
+    }
 
-    // pub fn black(&self) -> &str {
-    //     &self.black
-    // }
+    pub fn black(&self) -> &str {
+        &self.black
+    }
 
     pub fn white_rating(&self) -> u16 {
         self.white_rating

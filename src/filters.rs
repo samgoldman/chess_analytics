@@ -38,6 +38,7 @@ pub fn get_filter_factories() -> Vec<(Regex, FilterFactoryFn)> {
         include_filter!(sicilian_defence_closed_filter),
         include_filter!(italian_game_filter),
         include_filter!(caro_kann_defence_filter),
+        include_filter!(queenside_castle_mate_filter),
     ]
 }
 
