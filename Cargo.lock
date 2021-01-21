@@ -210,9 +210,9 @@ checksum = "a357d28ed41a50f9c765dbfe56cbc04a64e53e5fc58ba79fbc34c10ef3df831f"
 
 [[package]]
 name = "flatbuffers"
-version = "0.8.0"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4d0e80bffea40f65eb6eefd74f2bef75d3c4f5dfdf973b91449706d43369cd9"
+checksum = "eb62c3be460921b3073057e5b2b08ae1682077b84ac6b341f70840693ae51c21"
 dependencies = [
  "bitflags",
  "smallvec",
@@ -565,9 +565,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.5.1"
+version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae524f056d7d770e174287294f562e95044c68e88dec909a00d2094805db9d75"
+checksum = "fe0f37c9e8f3c5a4a66ad655a93c74daac4ad00c441533bf5c6e7990bb42604e"
 
 [[package]]
 name = "strsim"
