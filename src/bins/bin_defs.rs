@@ -64,7 +64,7 @@ bin!(time_control_bin, "^timeControl$", _params, {
         TimeControl::Blitz => "Blitz".to_string(),
         TimeControl::Rapid => "Rapid".to_string(),
         TimeControl::Classical => "Classical".to_string(),
-        TimeControl::Correspondence => "Correspondence".to_string()
+        TimeControl::Correspondence => "Correspondence".to_string(),
     })
 });
 

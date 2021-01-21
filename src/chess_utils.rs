@@ -1,4 +1,4 @@
-use crate::game_wrapper::{File, GameWrapper, Move, Piece, Rank, NAG};
+use crate::game_wrapper::{File, GameWrapper, Move, Piece, Rank};
 use regex::Regex;
 
 fn int_to_file(int: u16) -> File {
@@ -115,19 +115,47 @@ pub fn parse_movetext(movetext: &str) -> Vec<Move> {
             let to_file = File::from_str(&dest[1]);
             let to_rank = Rank::from_str(&dest[2]);
 
-            Move {
-                from_file,
-                from_rank,
-                to_file,
-                to_rank,
-                piece_moved,
-
-                captures: false,
-                checks: false,
-                mates: false,
-                nag: NAG::None,
-                promoted_to: Piece::None,
-            }
+            Move::new(from_file, from_rank, to_file, to_rank, piece_moved)
         })
         .collect()
+}
+
+#[cfg(test)]
+mod test_parse_movetext {
+    use super::*;
+    use crate::game_wrapper::Move;
+
+    macro_rules! test_movetext {
+        ($test_name:ident, $movetext:literal, $expected:expr) => {
+            #[test]
+            fn $test_name() {
+                assert_eq!(parse_movetext(&$movetext), $expected);
+            }
+        };
+    }
+
+    test_movetext!(empty_movetext, "", vec![]);
+    test_movetext!(only_move_number, "1. ", vec![]);
+    test_movetext!(
+        pawn_simple_1,
+        "1. a1",
+        vec![Move::new(
+            File::_NA,
+            Rank::_NA,
+            File::_A,
+            Rank::_1,
+            Piece::Pawn
+        )]
+    );
+    test_movetext!(
+        pawn_simple_2,
+        "a1",
+        vec![Move::new(
+            File::_NA,
+            Rank::_NA,
+            File::_A,
+            Rank::_1,
+            Piece::Pawn
+        )]
+    );
 }

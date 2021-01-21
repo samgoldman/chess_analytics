@@ -1,7 +1,7 @@
 use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList, GameResult, Termination};
 use crate::chess_utils::*;
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum NAG {
     None = 0,
     Questionable = 1,
@@ -20,7 +20,7 @@ impl NAG {
     }
 }
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum Rank {
     _NA = 0,
     _1 = 1,
@@ -50,7 +50,7 @@ impl Rank {
     }
 }
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum File {
     _NA = 0,
     _A = 1,
@@ -80,7 +80,7 @@ impl File {
     }
 }
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum Piece {
     None = 0,
     Pawn = 1,
@@ -105,7 +105,7 @@ impl Piece {
     }
 }
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Debug)]
 pub struct Move {
     pub from_file: File,
     pub from_rank: Rank,
@@ -121,6 +121,29 @@ pub struct Move {
     pub promoted_to: Piece,
 }
 
+impl Move {
+    pub fn new(
+        from_file: File,
+        from_rank: Rank,
+        to_file: File,
+        to_rank: Rank,
+        piece_moved: Piece,
+    ) -> Self {
+        Move {
+            from_file,
+            from_rank,
+            to_file,
+            to_rank,
+            piece_moved,
+            captures: false,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: Piece::None,
+        }
+    }
+}
+
 #[derive(PartialEq, Clone)]
 pub enum TimeControl {
     UltraBullet,
@@ -128,7 +151,7 @@ pub enum TimeControl {
     Blitz,
     Rapid,
     Classical,
-    Correspondence
+    Correspondence,
 }
 
 #[derive(Clone)]
@@ -203,6 +226,62 @@ impl GameWrapper {
             .collect()
     }
 
+    // Convert initial time + increment time to one of the time control categories
+    // as defined here: https://lichess.org/faq#time-controls
+    // Games with 0 for both values are assumed to be correspondence
+    fn get_time_control_category(game: Game) -> TimeControl {
+        let estimated_duration =
+            (game.time_control_main() as u32) + (40 * game.time_control_increment() as u32);
+
+        if estimated_duration == 0 {
+            TimeControl::Correspondence
+        } else if estimated_duration < 29 {
+            TimeControl::UltraBullet
+        } else if estimated_duration < 179 {
+            TimeControl::Bullet
+        } else if estimated_duration < 479 {
+            TimeControl::Blitz
+        } else if estimated_duration < 1499 {
+            TimeControl::Rapid
+        } else {
+            TimeControl::Classical
+        }
+    }
+
+    // Extract move data and create a move object from it
+    fn convert_binary_move_data((data, metadata): (u16, u16)) -> Move {
+        // Move coordinates are simple: 4 bits per rank/file
+        let (from_file, from_rank) = extract_coordinate(data);
+        let (to_file, to_rank) = extract_coordinate(data >> 8);
+
+        // From chess.fbs:
+        // Bits 0-2: Piece Moved
+        // Bit    3: capture
+        // Bit    4: check
+        // Bit    5: mate
+        // Bits 6-8: nag
+        // Bits 9-11: promotion
+        let piece_moved = extract_piece(metadata);
+        let captures = metadata & 0b001000 != 0;
+        let checks = metadata & 0b010000 != 0;
+        let mates = metadata & 0b100000 != 0;
+        let nag = NAG::from_metadata(metadata);
+        let promoted_to = extract_piece(metadata >> 9);
+
+        Move {
+            from_file,
+            from_rank,
+            to_file,
+            to_rank,
+            piece_moved,
+            captures,
+            checks,
+            mates,
+            nag,
+            promoted_to,
+        }
+    }
+
     fn new(game: Game) -> GameWrapper {
         GameWrapper {
             year: game.year(),
@@ -215,78 +294,19 @@ impl GameWrapper {
             black_rating: game.black_rating(),
             time_control_main: game.time_control_main(),
             time_control_increment: game.time_control_increment(),
-            time_control: {
-                let estimated_duration = (game.time_control_main() as u32)
-                    + (40 * game.time_control_increment() as u32);
-                if estimated_duration == 0 {
-                    TimeControl::Correspondence
-                } else if estimated_duration < 29 {
-                    TimeControl::UltraBullet
-                } else if estimated_duration < 179 {
-                    TimeControl::Bullet
-                } else if estimated_duration < 479 {
-                    TimeControl::Blitz
-                } else if estimated_duration < 1499 {
-                    TimeControl::Rapid
-                } else {
-                    TimeControl::Classical
-                }
-            },
+            time_control: GameWrapper::get_time_control_category(game),
             eco_category: game.eco_category() as u8 as char,
             eco_subcategory: game.eco_subcategory(),
-            moves: match game.moves() {
-                Some(moves) => moves
+            moves: game.moves().map_or(vec![], |moves| {
+                moves
                     .iter()
                     .zip(game.move_metadata().unwrap())
-                    .map(|(data, metadata)| {
-                        // Extract move data and create a move object from it
-
-                        // Move coordinates are simple: 4 bits per rank/file
-                        let (from_file, from_rank) = extract_coordinate(data);
-                        let (to_file, to_rank) = extract_coordinate(data >> 8);
-
-                        // From chess.fbs:
-                        // Bits 0-2: Piece Moved
-                        // Bit    3: capture
-                        // Bit    4: check
-                        // Bit    5: mate
-                        // Bits 6-8: nag
-                        // Bits 9-11: promotion
-                        let piece_moved = extract_piece(metadata);
-                        let captures = metadata & 0b001000 != 0;
-                        let checks = metadata & 0b010000 != 0;
-                        let mates = metadata & 0b100000 != 0;
-                        let nag = NAG::from_metadata(metadata);
-                        let promoted_to = extract_piece(metadata >> 9);
-
-                        Move {
-                            from_file,
-                            from_rank,
-                            to_file,
-                            to_rank,
-                            piece_moved,
-                            captures,
-                            checks,
-                            mates,
-                            nag,
-                            promoted_to,
-                        }
-                    })
-                    .collect(),
-                None => vec![],
-            },
-            clock_hours: match game.clock_hours() {
-                Some(clock_hours) => clock_hours.to_vec(),
-                None => vec![],
-            },
-            clock_minutes: match game.clock_minutes() {
-                Some(clock_minutes) => clock_minutes.to_vec(),
-                None => vec![],
-            },
-            clock_seconds: match game.clock_seconds() {
-                Some(clock_seconds) => clock_seconds.to_vec(),
-                None => vec![],
-            },
+                    .map(GameWrapper::convert_binary_move_data)
+                    .collect()
+            }),
+            clock_hours: game.clock_hours().unwrap_or(&[]).to_vec(),
+            clock_minutes: game.clock_minutes().unwrap_or(&[]).to_vec(),
+            clock_seconds: game.clock_seconds().unwrap_or(&[]).to_vec(),
             eval_available: game.eval_available(),
             eval_mate_in: match game.eval_mate_in() {
                 Some(eval_mate_in) => eval_mate_in.iter().collect::<Vec<i16>>(),
