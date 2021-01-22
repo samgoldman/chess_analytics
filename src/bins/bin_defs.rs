@@ -99,3 +99,7 @@ bin!(white_bin, "^white$", _params, {
 bin!(black_bin, "^black$", _params, {
     Box::new(move |game| game.black().to_string())
 });
+
+bin!(termination_bin, "^termination$", _params, {
+    Box::new(move |game| format!("{:?}", game.termination()).to_string())
+});

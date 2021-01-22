@@ -31,6 +31,7 @@ pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn)> {
         raw_time_control_bin,
         white_bin,
         black_bin,
+        termination_bin,
     )
 }
 

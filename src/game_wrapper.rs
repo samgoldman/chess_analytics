@@ -423,9 +423,9 @@ impl GameWrapper {
         self.result
     }
 
-    // pub fn termination(&self) -> Termination {
-    //     self.termination
-    // }
+    pub fn termination(&self) -> Termination {
+        self.termination
+    }
 
     // pub fn white_diff(&self) -> i16 {
     //     self.white_diff
