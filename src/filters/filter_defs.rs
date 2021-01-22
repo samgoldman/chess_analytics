@@ -271,6 +271,15 @@ filter!(
     ""
 );
 
+filter!(
+    clock_available_filter,
+    "^clockAvailable$",
+    _params,
+    {
+        Box::new(|game| game.clock_available())
+    }, "", ""
+);
+
 #[cfg(test)]
 mod tests_player_elo_filter {
     use super::*;

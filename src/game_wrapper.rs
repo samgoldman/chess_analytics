@@ -1,5 +1,7 @@
 use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList, GameResult, Termination};
 use crate::chess_utils::*;
+use std::time::Duration;
+use itertools::izip;
 
 #[derive(PartialEq, Clone, Debug)]
 pub enum NAG {
@@ -187,9 +189,7 @@ pub struct GameWrapper {
     eco_category: char,
     eco_subcategory: u8,
     moves: Vec<Move>,
-    clock_hours: Vec<u8>,
-    clock_minutes: Vec<u8>,
-    clock_seconds: Vec<u8>,
+    clock: Vec<Duration>,
     eval_available: bool,
     eval_mate_in: Vec<i16>,
     eval_advantage: Vec<f32>,
@@ -215,9 +215,7 @@ pub struct GameWrapper {
     pub eco_category: char,
     pub eco_subcategory: u8,
     pub moves: Vec<Move>,
-    pub clock_hours: Vec<u8>,
-    pub clock_minutes: Vec<u8>,
-    pub clock_seconds: Vec<u8>,
+    pub clock: Vec<Duration>,
     pub eval_available: bool,
     pub eval_mate_in: Vec<i16>,
     pub eval_advantage: Vec<f32>,
@@ -320,9 +318,10 @@ impl GameWrapper {
                     .map(GameWrapper::convert_binary_move_data)
                     .collect()
             }),
-            clock_hours: game.clock_hours().unwrap_or(&[]).to_vec(),
-            clock_minutes: game.clock_minutes().unwrap_or(&[]).to_vec(),
-            clock_seconds: game.clock_seconds().unwrap_or(&[]).to_vec(),
+            clock: {
+                izip!(game.clock_hours().unwrap_or(&[]).to_vec(), game.clock_minutes().unwrap_or(&[]).to_vec(), game.clock_seconds().unwrap_or(&[]).to_vec())
+                .map(|(h, m, s)| Duration::from_secs((h as u64) *3600 + (m as u64) *60 + (s as u64) + game.time_control_increment() as u64)).collect()
+            },
             eval_available: game.eval_available(),
             eval_mate_in: match game.eval_mate_in() {
                 Some(eval_mate_in) => eval_mate_in.iter().collect::<Vec<i16>>(),
@@ -395,17 +394,9 @@ impl GameWrapper {
         &self.moves
     }
 
-    // pub fn clock_hours(&self) -> &Vec<u8> {
-    //     &self.clock_hours
-    // }
-
-    // pub fn clock_minutes(&self) -> &Vec<u8> {
-    //     &self.clock_minutes
-    // }
-
-    // pub fn clock_seconds(&self) -> &Vec<u8> {
-    //     &self.clock_seconds
-    // }
+    pub fn clock(&self) -> &Vec<Duration> {
+        &self.clock
+    }
 
     pub fn eval_available(&self) -> bool {
         self.eval_available
@@ -434,6 +425,18 @@ impl GameWrapper {
     // pub fn black_diff(&self) -> i16 {
     //     self.black_diff
     // }
+
+    pub fn clock_available(&self) -> bool {
+        self.clock().len() > 0
+    }
+
+    pub fn move_time(&self, move_num: usize) -> u32 {
+        if move_num == 0 || move_num == 1 || move_num == self.clock().len() {
+            0
+        } else {
+            (self.clock()[(move_num - 2)] - self.clock()[move_num]).as_secs() as u32  + self.time_control_increment() as u32
+        }
+    }
 }
 
 impl Default for GameWrapper {
@@ -453,9 +456,7 @@ impl Default for GameWrapper {
             eco_category: '-',
             eco_subcategory: 0,
             moves: vec![],
-            clock_hours: vec![],
-            clock_minutes: vec![],
-            clock_seconds: vec![],
+            clock: vec![],
             eval_available: false,
             eval_mate_in: vec![],
             eval_advantage: vec![],

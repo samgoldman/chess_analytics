@@ -227,6 +227,17 @@ map!(
     }
 );
 
+map!(
+    average_move_time_map,
+    "^averageMoveTime$",
+    _params,
+    {
+        Box::new(|game| {
+            ((0..game.moves().len()).map(|m| game.move_time(m)).sum::<u32>() / game.moves().len() as u32) as i16
+        })
+    }
+);
+
 fn get_map_factories() -> Vec<(Regex, MapFactoryFn)> {
     vec![
         include_map!(game_count_map),
@@ -254,6 +265,7 @@ fn get_map_factories() -> Vec<(Regex, MapFactoryFn)> {
         include_map!(nf3_count_map),
         include_map!(english_anglo_indian_count_map),
         include_map!(generic_opening_count),
+        include_map!(average_move_time_map),
     ]
 }
 
