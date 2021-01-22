@@ -387,9 +387,9 @@ impl GameWrapper {
         self.eco_category
     }
 
-    // pub fn eco_subcategory(&self) -> u8 {
-    //     self.eco_subcategory
-    // }
+    pub fn eco_subcategory(&self) -> u8 {
+        self.eco_subcategory
+    }
 
     pub fn moves(&self) -> &Vec<Move> {
         &self.moves

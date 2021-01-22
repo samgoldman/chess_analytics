@@ -51,6 +51,10 @@ bin!(eco_category_bin, r#"^ecoCategory$"#, _params, {
     Box::new(move |game| format!("{}", game.eco_category()))
 });
 
+bin!(eco_subcategory_bin, r#"^ecoSubCategory$"#, _params, {
+    Box::new(move |game| format!("{}", game.eco_subcategory()))
+});
+
 bin!(site_bin, r#"^site$"#, _params, {
     Box::new(move |game| game.site().to_string())
 });

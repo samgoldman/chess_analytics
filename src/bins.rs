@@ -24,6 +24,7 @@ pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn)> {
         day_bin,
         game_elo_bin,
         eco_category_bin,
+        eco_subcategory_bin,
         site_bin,
         time_control_bin,
         result_bin,
