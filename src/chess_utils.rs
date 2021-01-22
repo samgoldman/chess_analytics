@@ -167,4 +167,37 @@ mod test_parse_movetext {
             Piece::Pawn
         )]
     );
+    test_movetext!(
+        knight_simple,
+        "1. Na1",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Knight)]
+    );
+    test_movetext!(
+        bishop_simple,
+        "1. Ba1",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Bishop)]
+    );
+    test_movetext!(
+        rook_simple,
+        "1. Ra1?",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Rook)]
+    );
+    test_movetext!(
+        queen_simple,
+        "1. Qa1!?",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Queen)]
+    );
+    test_movetext!(
+        king_simple,
+        "1. Ka1??",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::King)]
+    );
+    test_movetext!(
+        two_moves,
+        "1. Kxf5 Qdd3",
+        vec![
+            Move::new_to(File::_F, Rank::_5, Piece::King),
+            Move::new_to_from(File::_D, Rank::_NA, File::_D, Rank::_3, Piece::Queen)
+        ]
+    );
 }
