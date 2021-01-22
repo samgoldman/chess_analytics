@@ -101,5 +101,5 @@ bin!(black_bin, "^black$", _params, {
 });
 
 bin!(termination_bin, "^termination$", _params, {
-    Box::new(move |game| format!("{:?}", game.termination()).to_string())
+    Box::new(move |game| format!("{:?}", game.termination()))
 });

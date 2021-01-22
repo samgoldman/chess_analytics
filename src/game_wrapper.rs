@@ -1,7 +1,7 @@
 use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList, GameResult, Termination};
 use crate::chess_utils::*;
-use std::time::Duration;
 use itertools::izip;
+use std::time::Duration;
 
 #[derive(PartialEq, Clone, Debug)]
 pub enum NAG {
@@ -319,8 +319,20 @@ impl GameWrapper {
                     .collect()
             }),
             clock: {
-                izip!(game.clock_hours().unwrap_or(&[]).to_vec(), game.clock_minutes().unwrap_or(&[]).to_vec(), game.clock_seconds().unwrap_or(&[]).to_vec())
-                .map(|(h, m, s)| Duration::from_secs((h as u64) *3600 + (m as u64) *60 + (s as u64) + game.time_control_increment() as u64)).collect()
+                izip!(
+                    game.clock_hours().unwrap_or(&[]).to_vec(),
+                    game.clock_minutes().unwrap_or(&[]).to_vec(),
+                    game.clock_seconds().unwrap_or(&[]).to_vec()
+                )
+                .map(|(h, m, s)| {
+                    Duration::from_secs(
+                        (h as u64) * 3600
+                            + (m as u64) * 60
+                            + (s as u64)
+                            + game.time_control_increment() as u64,
+                    )
+                })
+                .collect()
             },
             eval_available: game.eval_available(),
             eval_mate_in: match game.eval_mate_in() {
@@ -427,14 +439,15 @@ impl GameWrapper {
     // }
 
     pub fn clock_available(&self) -> bool {
-        self.clock().len() > 0
+        !self.clock().is_empty()
     }
 
     pub fn move_time(&self, move_num: usize) -> u32 {
         if move_num == 0 || move_num == 1 || move_num == self.clock().len() {
             0
         } else {
-            (self.clock()[(move_num - 2)] - self.clock()[move_num]).as_secs() as u32  + self.time_control_increment() as u32
+            (self.clock()[(move_num - 2)] - self.clock()[move_num]).as_secs() as u32
+                + self.time_control_increment() as u32
         }
     }
 }

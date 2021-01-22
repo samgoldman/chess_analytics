@@ -275,9 +275,9 @@ filter!(
     clock_available_filter,
     "^clockAvailable$",
     _params,
-    {
-        Box::new(|game| game.clock_available())
-    }, "", ""
+    { Box::new(|game| game.clock_available()) },
+    "",
+    ""
 );
 
 #[cfg(test)]

@@ -227,16 +227,14 @@ map!(
     }
 );
 
-map!(
-    average_move_time_map,
-    "^averageMoveTime$",
-    _params,
-    {
-        Box::new(|game| {
-            ((0..game.moves().len()).map(|m| game.move_time(m)).sum::<u32>() / game.moves().len() as u32) as i16
-        })
-    }
-);
+map!(average_move_time_map, "^averageMoveTime$", _params, {
+    Box::new(|game| {
+        ((0..game.moves().len())
+            .map(|m| game.move_time(m))
+            .sum::<u32>()
+            / game.moves().len() as u32) as i16
+    })
+});
 
 fn get_map_factories() -> Vec<(Regex, MapFactoryFn)> {
     vec![
