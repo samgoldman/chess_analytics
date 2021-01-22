@@ -122,7 +122,7 @@ pub struct Move {
 }
 
 impl Move {
-    pub fn new(
+    pub fn new_to_from(
         from_file: File,
         from_rank: Rank,
         to_file: File,
@@ -132,6 +132,22 @@ impl Move {
         Move {
             from_file,
             from_rank,
+            to_file,
+            to_rank,
+            piece_moved,
+            captures: false,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: Piece::None,
+        }
+    }
+
+    #[cfg(test)]
+    pub fn new_to(to_file: File, to_rank: Rank, piece_moved: Piece) -> Self {
+        Move {
+            from_file: File::_NA,
+            from_rank: Rank::_NA,
             to_file,
             to_rank,
             piece_moved,

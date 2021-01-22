@@ -115,7 +115,7 @@ pub fn parse_movetext(movetext: &str) -> Vec<Move> {
             let to_file = File::from_str(&dest[1]);
             let to_rank = Rank::from_str(&dest[2]);
 
-            Move::new(from_file, from_rank, to_file, to_rank, piece_moved)
+            Move::new_to_from(from_file, from_rank, to_file, to_rank, piece_moved)
         })
         .collect()
 }
@@ -139,22 +139,31 @@ mod test_parse_movetext {
     test_movetext!(
         pawn_simple_1,
         "1. a1",
-        vec![Move::new(
-            File::_NA,
-            Rank::_NA,
-            File::_A,
-            Rank::_1,
-            Piece::Pawn
-        )]
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Pawn)]
     );
     test_movetext!(
         pawn_simple_2,
         "a1",
-        vec![Move::new(
-            File::_NA,
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Pawn)]
+    );
+    test_movetext!(
+        pawn_simple_3,
+        "a3+", // Right now the parser doesn't support checks (will just ignore)
+        vec![Move::new_to(File::_A, Rank::_3, Piece::Pawn)]
+    );
+    test_movetext!(
+        pawn_simple_4,
+        "g8=P", // parse will ignore promotion
+        vec![Move::new_to(File::_G, Rank::_8, Piece::Pawn)]
+    );
+    test_movetext!(
+        pawn_capture,
+        "exd6",
+        vec![Move::new_to_from(
+            File::_E,
             Rank::_NA,
-            File::_A,
-            Rank::_1,
+            File::_D,
+            Rank::_6,
             Piece::Pawn
         )]
     );
