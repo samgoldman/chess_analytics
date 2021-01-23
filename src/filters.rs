@@ -10,36 +10,41 @@ struct InputFilterSteps {
     steps: Vec<Vec<String>>,
 }
 
-macro_rules! include_filter {
-    ($name: ident) => {
-        (filter_defs::$name::regex(), filter_defs::$name::factory)
-    };
+macro_rules! include_filters {
+    ($($name:ident,)*) => {
+        vec![$(
+            (
+                filter_defs::$name::regex(),
+                filter_defs::$name::factory
+            ),
+        )*]
+    }
 }
 
 pub fn get_filter_factories() -> Vec<(Regex, FilterFactoryFn)> {
-    vec![
-        include_filter!(game_elo_filter),
-        include_filter!(year_filter),
-        include_filter!(month_filter),
-        include_filter!(day_filter),
-        include_filter!(moves_count_filter),
-        include_filter!(player_elo_filter),
-        include_filter!(mate_occurs_filter),
-        include_filter!(eval_available_filter),
-        include_filter!(sicilian_defence_filter),
-        include_filter!(queens_gambit_filter),
-        include_filter!(queens_gambit_accepted_filter),
-        include_filter!(slav_defence_filter),
-        include_filter!(kings_gambit_filter),
-        include_filter!(kings_gambit_accepted_filter),
-        include_filter!(ruy_lopez_filter),
-        include_filter!(indian_defense_filter),
-        include_filter!(french_defense_main_filter),
-        include_filter!(sicilian_defence_closed_filter),
-        include_filter!(italian_game_filter),
-        include_filter!(caro_kann_defence_filter),
-        include_filter!(queenside_castle_mate_filter),
-        include_filter!(clock_available_filter),
+    include_filters![
+        game_elo_filter,
+        year_filter,
+        month_filter,
+        day_filter,
+        moves_count_filter,
+        player_elo_filter,
+        mate_occurs_filter,
+        eval_available_filter,
+        sicilian_defence_filter,
+        queens_gambit_filter,
+        queens_gambit_accepted_filter,
+        slav_defence_filter,
+        kings_gambit_filter,
+        kings_gambit_accepted_filter,
+        ruy_lopez_filter,
+        indian_defense_filter,
+        french_defense_main_filter,
+        sicilian_defence_closed_filter,
+        italian_game_filter,
+        caro_kann_defence_filter,
+        queenside_castle_mate_filter,
+        clock_available_filter,
     ]
 }
 
