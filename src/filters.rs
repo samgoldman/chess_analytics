@@ -1,6 +1,6 @@
 mod filter_defs;
 
-use crate::analysis_def::FilterInput;
+use crate::workflow::FilterInput;
 use filter_defs::{FilterFactoryFn, FilterFn};
 
 macro_rules! include_filters {

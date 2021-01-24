@@ -16,6 +16,7 @@ pub struct AnalyzeInput {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct MapInput {
     pub name: String,
+    pub display_name: String,
     pub parameters: Vec<String>,
 }
 
@@ -26,13 +27,13 @@ pub struct BinInput {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct InputSteps {
+pub struct Workflow {
     pub filters: Vec<Vec<FilterInput>>,
     pub analysis_steps: Vec<AnalyzeInput>,
     pub bins: Vec<BinInput>,
 }
 
-pub fn parse_analysis_def(filename: &str) -> InputSteps {
+pub fn parse_workflow(filename: &str) -> Workflow {
     let definition = read_to_string(filename).unwrap();
     serde_json::from_str(&definition).unwrap()
 }

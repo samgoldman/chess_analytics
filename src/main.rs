@@ -10,7 +10,6 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-mod analysis_def;
 mod bins;
 #[allow(non_snake_case)]
 #[path = "../target/flatbuffers/chess_generated.rs"]
@@ -20,12 +19,13 @@ mod filters;
 mod game_wrapper;
 mod general_utils;
 mod statistics;
+mod workflow;
 
-use analysis_def::parse_analysis_def;
 use bins::*;
 use filters::get_filter_steps;
 use game_wrapper::GameWrapper;
 use statistics::*;
+use workflow::parse_workflow;
 
 #[macro_use]
 extern crate lazy_static;
@@ -52,12 +52,12 @@ fn main() {
 
     let db = Arc::new(Mutex::new(HashMap::new()));
 
-    let input_steps = parse_analysis_def(matches.value_of("instructions").unwrap());
+    let input_steps = parse_workflow(matches.value_of("instructions").unwrap());
 
     let analysis_steps: Vec<(String, StatisticDefinition)> = input_steps
         .analysis_steps
         .iter()
-        .map(|x| (x.map.name.clone(), statistics::convert_to_stat_def(x)))
+        .map(|x| (x.map.display_name.clone(), statistics::convert_to_stat_def(x)))
         .collect();
     let selected_bins: Vec<BinFn> = input_steps
         .bins

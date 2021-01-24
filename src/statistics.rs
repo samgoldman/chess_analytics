@@ -1,7 +1,7 @@
 mod folds;
 mod maps;
 
-use crate::analysis_def::*;
+use crate::workflow::*;
 use folds::*;
 use maps::{get_map, MapFn};
 
@@ -13,6 +13,7 @@ pub struct FoldDefinition<'a> {
 
 pub struct StatisticDefinition<'a> {
     pub name: &'a str,
+    pub display_name: &'a str,
     pub map: MapFn,
     pub folds: Vec<FoldDefinition<'a>>,
 }
@@ -20,6 +21,7 @@ pub struct StatisticDefinition<'a> {
 pub fn convert_to_stat_def(input: &AnalyzeInput) -> StatisticDefinition {
     StatisticDefinition {
         name: input.map.name.as_ref(),
+        display_name: input.map.display_name.as_ref(),
         map: get_map(&input.map.name, input.map.parameters.clone()).expect("Unexpected map name"),
         folds: input
             .folds

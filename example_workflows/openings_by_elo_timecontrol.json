@@ -1,0 +1,176 @@
+{
+    "filters": [
+      [
+        {
+          "name": "playerElo",
+          "parameters": ["min", "Both", "1"]
+        },
+        {
+          "name": "gameElo",
+          "parameters": ["min", "600"]
+        },
+        {
+          "name": "gameElo",
+          "parameters": ["max", "3000"]
+        }
+      ]
+    ],
+    "analysis_steps": [
+      {
+        "map": {
+          "name": "openingCount",
+          "display_name": "queensGambitCount",
+          "parameters": [
+            "1. d4 d5 2. c4"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+            "name": "openingCount",
+          "display_name": "queensGambitAcceptedCount",
+          "parameters": [
+            "1. d4 d5 2. c4 dxc4"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+            "name": "openingCount",
+          "display_name": "slavDefenceCount",
+          "parameters": [
+            "1. d4 d5 2. c4 c6"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+            "name": "openingCount",
+          "display_name": "kingsGambitCount",
+          "parameters": [
+            "1. e4 e5 2. f4"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+            "name": "openingCount",
+          "display_name": "kingsGambitAcceptedCount",
+          "parameters": [
+            "1. e4 e5 2. f4 exf4"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+            "name": "openingCount",
+          "display_name": "sicilianCount",
+          "parameters": [
+            "1. e4 c5"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+            "name": "openingCount",
+          "display_name": "sicilianClosedCount",
+          "parameters": [
+            "1. e4 c5 2. Nc3"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+            "name": "openingCount",
+          "display_name": "indianDefenceCount",
+          "parameters": [
+            "1. d4 Nf6"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+            "name": "openingCount",
+          "display_name": "ruyLopezCount",
+          "parameters": [
+            "1. e4 e5 2. Nf3 Nc6 3. Bb5"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+            "name": "openingCount",
+          "display_name": "frenchDefenceMainCount",
+          "parameters": [
+            "1. e4 e6 2. d4 d5"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+            "name": "openingCount",
+          "display_name": "italianGameCount",
+          "parameters": [
+            "1. e4 e5 2. Nf3 Nc6 3. Bc4"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+            "name": "openingCount",
+          "display_name": "caroKannDefenceCount",
+          "parameters": [
+            "1. e4 c6"
+          ]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      }
+    ],
+    "bins": [
+      {
+        "name": "timeControl",
+        "parameters": []
+      },
+      {
+        "name": "gameElo",
+        "parameters": [
+          "50"
+        ]
+      }
+    ]
+  }
