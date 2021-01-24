@@ -1,7 +1,7 @@
 use std::cmp;
 
-pub type FoldAddPointFn = Box<dyn Fn(i16, &mut Vec<i128>) + std::marker::Sync>;
-pub type FoldGetResultFn = Box<dyn Fn(&[i128]) -> f64 + std::marker::Sync>;
+pub type FoldAddPointFn = Box<dyn Fn(i16, &mut Vec<i128>) + std::marker::Sync + std::marker::Send>;
+pub type FoldGetResultFn = Box<dyn Fn(&[i128]) -> f64 + std::marker::Sync + std::marker::Send>;
 
 // TODO: standard deviation, variance?
 

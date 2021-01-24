@@ -1,251 +1,129 @@
 use crate::game_wrapper::GameWrapper;
 
-pub type FilterFn = Box<dyn Fn(&GameWrapper) -> bool + std::marker::Sync>;
-pub type FilterFactoryFn = fn(Vec<&str>) -> FilterFn;
+pub type FilterFn = Box<dyn Fn(&GameWrapper) -> bool + std::marker::Sync + std::marker::Send>;
+pub type FilterFactoryFn = fn(Vec<String>) -> FilterFn;
 
 macro_rules! filter {
-    ($name: ident, $regex: literal, $param: ident, $fn: block, $s_name: literal, $desc: literal) => {
+    ($name: ident, $name_str: literal, $param: ident, $fn: block) => {
         pub mod $name {
             use super::FilterFn;
-            use regex::Regex;
 
-            pub fn regex() -> Regex {
-                #![allow(clippy::trivial_regex)]
-                Regex::new($regex).unwrap()
+            pub fn name() -> String {
+                $name_str.to_string()
             }
 
-            pub fn factory($param: Vec<&str>) -> FilterFn {
+            pub fn factory($param: Vec<String>) -> FilterFn {
                 $fn
             }
         }
     };
 }
 
-macro_rules! basic_opening_filter {
-    ($name:ident, $regex:literal: $movetext:literal) => {
-        filter!(
-            $name,
-            $regex,
-            _params,
-            {
-                use crate::chess_utils::{has_opening, parse_movetext};
+// Requires two parameters:
+// 1. min or max
+// 2. threshold
+filter!(game_elo_filter, "gameElo", params, {
+    use crate::chess_utils::get_game_elo;
 
-                let opening = parse_movetext($movetext);
+    let is_min = params[0] == "min";
+    let thresh: u32 = params[1].parse::<u32>().unwrap();
+    Box::new(move |game| {
+        // TODO simplify
+        if is_min {
+            get_game_elo(game) >= thresh
+        } else {
+            get_game_elo(game) <= thresh
+        }
+    })
+});
 
-                Box::new(move |game| has_opening(game, &opening))
-            },
-            "",
-            ""
-        );
-    };
-}
+// Requires one parameter: the year
+filter!(year_filter, "year", params, {
+    let year: u32 = params[0].parse::<u32>().unwrap();
+    Box::new(move |game| game.year() as u32 == year)
+});
 
-// TODO: consolidate opening filters into single filter with central opening definitions (shared with maps)
-basic_opening_filter!(
-    queens_gambit_filter,
-    "queensGambit": "1. d4 d5 2. c4"
-);
+// Requires one parameter: the month
+filter!(month_filter, "month", params, {
+    let month: u32 = params[0].parse::<u32>().unwrap();
+    Box::new(move |game| game.month() as u32 == month)
+});
 
-basic_opening_filter!(
-    queens_gambit_accepted_filter,
-    "queensGambitAccepted": "1. d4 d5 2. c4 dxc4"
-);
+// Requires one parameter: the day
+filter!(day_filter, "day", params, {
+    let day: u32 = params[0].parse::<u32>().unwrap();
+    Box::new(move |game| game.day() as u32 == day)
+});
 
-basic_opening_filter!(
-    slav_defence_filter,
-    "slavDefence": "1. d4 d5 2. c4 c6"
-);
+// Requires two parameters:
+// 1. min or max
+// 2. threshold
+filter!(moves_count_filter, "moveCount", params, {
+    use crate::general_utils::get_comparator;
+    let comparison = get_comparator::<u32>(&params[0]);
 
-basic_opening_filter!(
-    kings_gambit_filter,
-    "kingsGambit": "1. e4 e5 2. f4"
-);
+    let thresh: u32 = params[1].parse::<u32>().unwrap();
+    Box::new(move |game| -> bool {
+        let num_moves = game.moves().len() as u32;
+        comparison(num_moves, thresh) == thresh
+    })
+});
 
-basic_opening_filter!(
-    kings_gambit_accepted_filter,
-    "kingsGambitAccepted": "1. e4 e5 2. f4 exf4"
-);
+// Requires three parameters:
+// 1. min or max
+// 2. White, Black, both
+// 3. threshold
+filter!(player_elo_filter, "playerElo", params, {
+    use crate::general_utils::get_comparator;
+    let comparison = get_comparator::<u16>(&params[0]);
 
-basic_opening_filter!(
-    sicilian_defence_filter,
-    "sicilian": "1. e4 c5"
-);
+    let which_player = params[1].to_string();
+    let threshold_elo = params[2].parse::<u16>().unwrap();
+    Box::new(move |game| -> bool {
+        let check_white;
+        let check_black;
 
-basic_opening_filter!(
-    sicilian_defence_closed_filter,
-    "sicilianClosed": "1. e4 c5 2. Nc3"
-);
+        // This falls back to black = true, white = false
+        // TODO: panic in the event player is not one of the three expected values
+        if which_player == "Both" {
+            check_white = true;
+            check_black = true;
+        } else if which_player == "White" {
+            check_white = true;
+            check_black = false;
+        } else {
+            check_white = false;
+            check_black = true;
+        }
 
-basic_opening_filter!(
-    indian_defense_filter,
-    "indianDefence": "1. d4 Nf6"
-);
+        if check_white && comparison(game.white_rating(), threshold_elo) != threshold_elo {
+            return false;
+        }
 
-basic_opening_filter!(
-    ruy_lopez_filter,
-    "ruyLopez": "1. e4 e5 2. Nf3 Nc6 3. Bb5"
-);
+        if check_black && comparison(game.black_rating(), threshold_elo) != threshold_elo {
+            return false;
+        }
 
-basic_opening_filter!(
-    french_defense_main_filter,
-    "frenchDefenceMain": "1. e4 e6 2. d4 d5"
-);
+        true
+    })
+});
 
-basic_opening_filter!(
-    italian_game_filter,
-    "italianGame": "1. e4 e5 2. Nf3 Nc6 3. Bc4"
-);
+// Requires one parameter: either "occurs" or "does_not_occur"
+filter!(mate_occurs_filter, "mate", params, {
+    let mate_occurs = params[0] != "does_not_occur";
+    Box::new(move |game| -> bool {
+        let moves = game.moves().iter();
+        mate_occurs == (moves.last().unwrap().mates)
+    })
+});
 
-basic_opening_filter!(
-    caro_kann_defence_filter,
-    "caroKannDefence": "1. e4 c6"
-);
+// Requires one parameter: either "available" or "not_available"
+filter!(eval_available_filter, "eval", params, {
+    let want_available = params[0] == "available";
+    Box::new(move |game| -> bool { want_available == game.eval_available() })
+});
 
-filter!(
-    game_elo_filter,
-    r#"^(min|max)GameElo(\d+)$"#,
-    params,
-    {
-        use crate::chess_utils::get_game_elo;
-
-        let is_min = params[1] == "min";
-        let thresh: u32 = params[2].parse::<u32>().unwrap();
-        Box::new(move |game| {
-            // TODO simplify
-            if is_min {
-                get_game_elo(game) >= thresh
-            } else {
-                get_game_elo(game) <= thresh
-            }
-        })
-    },
-    "Game Elo Filter",
-    "<min|max>GameElo<elo>; filters out game elos above the provided maximum or below the provided minimum"
-);
-
-filter!(
-    year_filter,
-    r#"^year(\d+)$"#,
-    params,
-    {
-        let year: u32 = params[1].parse::<u32>().unwrap();
-        Box::new(move |game| game.year() as u32 == year)
-    },
-    "Year Filter",
-    "year<year>; filters out games that did not take place in the year provided"
-);
-
-filter!(
-    month_filter,
-    r#"^month(\d+)$"#,
-    params,
-    {
-        let month: u32 = params[1].parse::<u32>().unwrap();
-        Box::new(move |game| game.month() as u32 == month)
-    },
-    "Month Filter",
-    "month<month>; filters out games that did not take place in the month provided"
-);
-
-filter!(
-    day_filter,
-    r#"^day(\d+)$"#,
-    params,
-    {
-        let day: u32 = params[1].parse::<u32>().unwrap();
-        Box::new(move |game| game.day() as u32 == day)
-    },
-    "Day Filter",
-    "day<day>; filters out games that did not take place on the day of the month provided"
-);
-
-filter!(
-    moves_count_filter,
-    r#"^(min|max)Moves(\d+)$"#,
-    params,
-    {
-        use crate::general_utils::get_comparator;
-        let comparison = get_comparator::<u32>(params[1]);
-
-        let thresh: u32 = params[2].parse::<u32>().unwrap();
-        Box::new(move |game| -> bool {
-            let num_moves = game.moves().len() as u32;
-            comparison(num_moves, thresh) == thresh
-        })
-    },
-    "Move Count Filter",
-    "<min|max>Moves<moves>; filters out games with move counts above the provided maximum or below the provided minimum"
-);
-
-filter!(
-    player_elo_filter,
-    r#"^(min|max)(White|Black|Both)Elo(\d+)$"#,
-    params,
-    {
-        use crate::general_utils::get_comparator;
-        let comparison = get_comparator::<u16>(params[1]);
-
-        let which_player = params[2].to_string();
-        let threshold_elo = params[3].parse::<u16>().unwrap();
-        Box::new(move |game| -> bool {
-            let check_white;
-            let check_black;
-
-            // This falls back to black = true, white = false
-            // TODO: panic in the event player is not one of the three expected values
-            if which_player == "Both" {
-                check_white = true;
-                check_black = true;
-            } else if which_player == "White" {
-                check_white = true;
-                check_black = false;
-            } else {
-                check_white = false;
-                check_black = true;
-            }
-
-            if check_white && comparison(game.white_rating(), threshold_elo) != threshold_elo {
-                return false;
-            }
-
-            if check_black && comparison(game.black_rating(), threshold_elo) != threshold_elo {
-                return false;
-            }
-
-            true
-        })
-    },
-    "Player Elo Filter",
-    "<min|max><White|Black|Both>Elo<elo>; filters out games with white/black/both player elos above the provided maximum or below the provided minimum"
-);
-
-filter!(
-    mate_occurs_filter,
-    r#"^(?:(no?)M|m)ateOccurs$"#,
-    params,
-    {
-        let mate_occurs = params[1] != "no";
-        Box::new(move |game| -> bool {
-            let moves = game.moves().iter();
-            mate_occurs == (moves.last().unwrap().mates)
-        })
-    },
-    "Mate Status Filter",
-    "mateOccurs|noMateOccurs; retains games that end with mates or retains games that do not end with mates"
-);
-
-filter!(
-    eval_available_filter,
-    r#"^eval(not|)Available$"#,
-    params,
-    {
-        let want_available = params[1].is_empty();
-        Box::new(move |game| -> bool { want_available == game.eval_available() })
-    },
-    "Eval Available Filter",
-    "evalAvailable|evalNotAvailable"
-);
-
+// Requires no parameters
 filter!(
     queenside_castle_mate_filter,
     "queensideCastleMate",
@@ -266,19 +144,13 @@ filter!(
                     && last_move.to_file == File::_C
             }
         })
-    },
-    "",
-    ""
+    }
 );
 
-filter!(
-    clock_available_filter,
-    "^clockAvailable$",
-    _params,
-    { Box::new(|game| game.clock_available()) },
-    "",
-    ""
-);
+// Requires no parameters
+filter!(clock_available_filter, "clockAvailable", _params, {
+    Box::new(|game| game.clock_available())
+});
 
 #[cfg(test)]
 mod tests_player_elo_filter {
@@ -295,7 +167,11 @@ mod tests_player_elo_filter {
                     ..Default::default()
                 };
 
-                let fun = player_elo_filter::factory(vec!["", $min_max, $player, $thresh]);
+                let fun = player_elo_filter::factory(vec![
+                    $min_max.to_string(),
+                    $player.to_string(),
+                    $thresh.to_string(),
+                ]);
                 assert_eq!(fun(&test_game), $expected);
             }
         };

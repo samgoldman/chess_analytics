@@ -1,23 +1,23 @@
+use crate::analysis_def::*;
 use crate::game_wrapper::GameWrapper;
-use regex::Regex;
 
 mod bin_defs;
 
 pub type BinFn = Box<dyn Fn(&GameWrapper) -> String + std::marker::Sync>;
-pub type BinFactoryFn = fn(Vec<&str>) -> BinFn;
+pub type BinFactoryFn = fn(Vec<String>) -> BinFn;
 
 macro_rules! include_bin {
     ($($name:ident,)*) => {
         vec![$(
             (
-                bin_defs::$name::regex(),
+                bin_defs::$name::name(),
                 bin_defs::$name::factory
             ),
         )*]
     }
 }
 
-pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn)> {
+pub fn get_bin_factories() -> Vec<(String, BinFactoryFn)> {
     include_bin!(
         year_bin,
         month_bin,
@@ -35,34 +35,18 @@ pub fn get_bin_factories() -> Vec<(Regex, BinFactoryFn)> {
     )
 }
 
-fn capture_to_vec(cap: regex::Captures) -> Vec<&str> {
-    cap.iter()
-        .map(|y| match y {
-            Some(s) => s.as_str(),
-            None => "",
-        })
-        .collect::<Vec<&str>>()
-}
-
-fn get_bin(input: &str) -> Result<BinFn, String> {
+fn get_bin(name: &str, parameters: Vec<String>) -> BinFn {
     let bin_factories = get_bin_factories();
 
     for bin_factory in &bin_factories {
-        if let Some(cap) = bin_factory.0.captures_iter(input).next() {
-            let bin_options: Vec<&str> = capture_to_vec(cap);
-            return Ok(bin_factory.1(bin_options));
+        if name == bin_factory.0 {
+            return bin_factory.1(parameters);
         }
     }
 
-    Err(format!("Match not found for bin '{}'", input))
+    panic!("Match not found for bin '{}'", name);
 }
 
-pub fn get_selected_bins(bin_strs: Vec<&str>) -> Vec<BinFn> {
-    let mut selected_bins = vec![];
-    bin_strs.iter().for_each(|bin_str| {
-        if let Ok(bin) = get_bin(bin_str) {
-            selected_bins.push(bin)
-        }
-    });
-    selected_bins
+pub fn get_selected_bins(bin_input: BinInput) -> BinFn {
+    get_bin(&bin_input.name, bin_input.parameters)
 }

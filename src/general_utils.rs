@@ -11,12 +11,3 @@ pub fn get_comparator<T: Ord>(comparator: &str) -> fn(T, T) -> T {
         T::min
     }
 }
-
-pub fn capture_to_vec(cap: regex::Captures) -> Vec<&str> {
-    cap.iter()
-        .map(|y| match y {
-            Some(s) => s.as_str(),
-            None => "",
-        })
-        .collect::<Vec<&str>>()
-}

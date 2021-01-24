@@ -5,11 +5,12 @@ use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use itertools::Itertools;
 use rayon::prelude::*;
 use std::collections::HashMap;
-use std::fs::{read_to_string, File};
+use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
+mod analysis_def;
 mod bins;
 #[allow(non_snake_case)]
 #[path = "../target/flatbuffers/chess_generated.rs"]
@@ -20,6 +21,7 @@ mod game_wrapper;
 mod general_utils;
 mod statistics;
 
+use analysis_def::parse_analysis_def;
 use bins::*;
 use filters::get_filter_steps;
 use game_wrapper::GameWrapper;
@@ -41,39 +43,28 @@ fn main() {
                 .help("A glob to capture the files to process")
                 .required(true),
         )
-        .arg(Arg::with_name("filters").long("filters").takes_value(true))
         .arg(
-            Arg::with_name("bins")
-                .long("bins")
-                .takes_value(true)
-                .multiple(true),
-        )
-        .arg(
-            Arg::with_name("statistics")
-                .long("statistics")
-                .takes_value(true)
-                .required(true)
-                .multiple(true)
-                .min_values(1),
+            Arg::with_name("instructions")
+                .long("instructions")
+                .takes_value(true),
         )
         .get_matches();
 
     let db = Arc::new(Mutex::new(HashMap::new()));
 
-    let selected_statistics: HashMap<&str, StatisticDefinition> = matches
-        .values_of("statistics")
-        .unwrap()
-        .map(convert_to_stat_def)
-        .map(|stat_def| (stat_def.name, stat_def))
-        .into_iter()
+    let input_steps = parse_analysis_def(matches.value_of("instructions").unwrap());
+
+    let analysis_steps: Vec<(String, StatisticDefinition)> = input_steps
+        .analysis_steps
+        .iter()
+        .map(|x| (x.map.name.clone(), statistics::convert_to_stat_def(x)))
         .collect();
-
-    let selected_bins = matches
-        .values_of("bins")
-        .map_or(vec![], |bin_strs| get_selected_bins(bin_strs.collect()));
-
-    let filter_config = read_to_string(matches.value_of("filters").unwrap()).unwrap();
-    let selected_filters = get_filter_steps(&filter_config);
+    let selected_bins: Vec<BinFn> = input_steps
+        .bins
+        .iter()
+        .map(|bin_input| get_selected_bins(bin_input.clone()))
+        .collect();
+    let filter = get_filter_steps(input_steps.filters);
 
     let entries: Vec<PathBuf> = glob(matches.value_of("glob").unwrap())
         .expect("Failed to read glob pattern")
@@ -108,40 +99,36 @@ fn main() {
 
             let games = GameWrapper::from_game_list_data(data);
 
-            games
-                .par_iter()
-                .filter(|x| selected_filters(*x))
-                .for_each(|game| {
-                    let bin_path: Vec<String> = selected_bins.iter().map(|bin| bin(game)).collect();
+            games.par_iter().filter(|x| filter(*x)).for_each(|game| {
+                let bin_path: Vec<String> = selected_bins.iter().map(|bin| bin(game)).collect();
 
-                    for statistic_def in selected_statistics.values() {
+                for statistic_def in &analysis_steps {
+                    for fold in &statistic_def.1.folds {
                         let mut path = bin_path.clone();
-                        path.insert(0, statistic_def.name.to_string());
+                        path.insert(0, statistic_def.0.to_string());
 
                         {
+                            path.insert(1, fold.name.to_string());
                             let mut db = db.lock().unwrap();
 
                             if !db.contains_key(&path) {
-                                db.insert(path.clone(), vec![]);
+                                db.insert(path.clone(), (&fold.fold_get_res, vec![]));
                             }
 
-                            let map_fn = &statistic_def.map;
+                            let map_fn = &statistic_def.1.map;
                             let mapped_value = map_fn(game);
-                            (&statistic_def.fold_add_point)(
-                                mapped_value,
-                                db.get_mut(&path).unwrap(),
-                            );
+                            (fold.fold_add_point)(mapped_value, &mut db.get_mut(&path).unwrap().1);
                         }
                     }
-                });
+                }
+            });
         });
 
     let db = db.lock().unwrap();
-
-    let columns: Vec<&str> = db
+    let columns: Vec<Vec<&str>> = db
         .iter()
-        .map(|entry| entry.0[0].as_ref())
-        .collect::<Vec<&str>>()
+        .map(|entry| entry.0[0..2].iter().map(|s| &**s).collect())
+        .collect::<Vec<Vec<&str>>>()
         .into_iter()
         .unique()
         .sorted()
@@ -149,27 +136,28 @@ fn main() {
 
     let rows: Vec<Vec<&str>> = db
         .iter()
-        .map(|entry| entry.0[1..entry.0.len()].iter().map(|s| &**s).collect())
+        .map(|entry| entry.0[2..entry.0.len()].iter().map(|s| &**s).collect())
         .collect::<Vec<Vec<&str>>>()
         .into_iter()
         .unique()
         .sorted()
         .collect();
 
-    println!("Bin\t{}", columns.join("\t"));
+    println!("Bin\t{}", columns.iter().map(|x| x.join(".")).join("\t"));
     for row in rows {
         print!("{}\t", row.join("."));
         for stat in &columns {
             let mut path = row.clone();
-            path.insert(0, stat);
+            path.insert(0, stat[1]);
+            path.insert(0, stat[0]);
 
             let path: Vec<String> = path.iter().map(|s| (*s).to_string()).collect();
 
             let data = db.get(&path).unwrap();
 
-            let fold_fn = &selected_statistics.get(stat).unwrap().fold_get_res;
+            let fold_fn = &data.0;
 
-            let result = (fold_fn)(data);
+            let result = (fold_fn)(&data.1);
             print!("{:.4}\t", result);
         }
         println!();

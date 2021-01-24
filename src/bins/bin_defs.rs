@@ -1,22 +1,18 @@
 macro_rules! bin {
-    ($name: ident, $regex: literal, $param: ident, $fn: block) => {
+    ($name: ident, $name_str: literal, $param: ident, $fn: block) => {
         pub mod $name {
             use super::super::BinFn;
-            use regex::Regex;
 
-            pub fn regex() -> Regex {
-                #![allow(clippy::trivial_regex)]
-                Regex::new($regex).unwrap()
+            pub fn name() -> String {
+                $name_str.to_string()
             }
 
-            pub fn factory($param: Vec<&str>) -> BinFn {
+            pub fn factory($param: Vec<String>) -> BinFn {
                 $fn
             }
         }
     };
 }
-
-// TODO: opening bins (using eventual central definitions)
 
 bin!(result_bin, "result", _params, {
     use crate::chess_flatbuffers::chess::GameResult;
@@ -28,38 +24,39 @@ bin!(result_bin, "result", _params, {
     })
 });
 
-bin!(year_bin, r#"^year$"#, _params, {
+bin!(year_bin, "year", _params, {
     Box::new(move |game| game.year().to_string())
 });
 
-bin!(month_bin, r#"^month$"#, _params, {
+bin!(month_bin, "month", _params, {
     Box::new(move |game| format!("{:02}", game.month()))
 });
 
-bin!(day_bin, r#"^day$"#, _params, {
+bin!(day_bin, "day", _params, {
     Box::new(move |game| format!("{:02}", game.day()))
 });
 
-bin!(game_elo_bin, r#"^gameElo(\d+)$"#, params, {
+// Params: 1. bucket size
+bin!(game_elo_bin, "gameElo", params, {
     use crate::chess_utils::get_game_elo;
 
-    let bucket_size: u32 = params[1].parse::<u32>().unwrap();
+    let bucket_size: u32 = params[0].parse::<u32>().unwrap();
     Box::new(move |game| format!("{:04}", (get_game_elo(game) / bucket_size) * bucket_size))
 });
 
-bin!(eco_category_bin, r#"^ecoCategory$"#, _params, {
+bin!(eco_category_bin, "ecoCategory", _params, {
     Box::new(move |game| format!("{}", game.eco_category()))
 });
 
-bin!(eco_subcategory_bin, r#"^ecoSubCategory$"#, _params, {
+bin!(eco_subcategory_bin, "ecoSubCategory", _params, {
     Box::new(move |game| format!("{}", game.eco_subcategory()))
 });
 
-bin!(site_bin, r#"^site$"#, _params, {
+bin!(site_bin, "site", _params, {
     Box::new(move |game| game.site().to_string())
 });
 
-bin!(time_control_bin, "^timeControl$", _params, {
+bin!(time_control_bin, "timeControl", _params, {
     use crate::game_wrapper::TimeControl;
 
     Box::new(move |game| match game.time_control() {
@@ -72,34 +69,30 @@ bin!(time_control_bin, "^timeControl$", _params, {
     })
 });
 
-bin!(
-    raw_time_control_bin,
-    r#"^rawTimeControl(MainOnly|)$"#,
-    params,
-    {
-        let main_only = params[1] == "MainOnly";
-        Box::new(move |game| {
-            if main_only {
-                format!("{:03}", game.time_control_main())
-            } else {
-                format!(
-                    "{:04}+{:03}",
-                    game.time_control_main(),
-                    game.time_control_increment()
-                )
-            }
-        })
-    }
-);
+// Params: MainOnly ignores the increment
+bin!(raw_time_control_bin, "rawTimeControl", params, {
+    let main_only = params[0] == "MainOnly";
+    Box::new(move |game| {
+        if main_only {
+            format!("{:03}", game.time_control_main())
+        } else {
+            format!(
+                "{:04}+{:03}",
+                game.time_control_main(),
+                game.time_control_increment()
+            )
+        }
+    })
+});
 
-bin!(white_bin, "^white$", _params, {
+bin!(white_bin, "white", _params, {
     Box::new(move |game| game.white().to_string())
 });
 
-bin!(black_bin, "^black$", _params, {
+bin!(black_bin, "black", _params, {
     Box::new(move |game| game.black().to_string())
 });
 
-bin!(termination_bin, "^termination$", _params, {
+bin!(termination_bin, "termination", _params, {
     Box::new(move |game| format!("{:?}", game.termination()))
 });
