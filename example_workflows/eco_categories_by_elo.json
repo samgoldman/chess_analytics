@@ -1,0 +1,63 @@
+{
+    "filters": [
+      []
+    ],
+    "analysis_steps": [
+      {
+        "map": {
+          "name": "ecoCategory",
+          "display_name": "A",
+          "parameters": ["A"]
+        },
+        "folds": [
+          "avg"
+        ]
+      },
+      {
+        "map": {
+          "name": "ecoCategory",
+          "display_name": "B",
+          "parameters": ["B"]
+        },
+        "folds": [
+          "avg"
+        ]
+      },
+      {
+        "map": {
+          "name": "ecoCategory",
+          "display_name": "C",
+          "parameters": ["C"]
+        },
+        "folds": [
+          "avg"
+        ]
+      },
+      {
+        "map": {
+          "name": "ecoCategory",
+          "display_name": "D",
+          "parameters": ["D"]
+        },
+        "folds": [
+          "avg"
+        ]
+      },
+      {
+        "map": {
+          "name": "ecoCategory",
+          "display_name": "E",
+          "parameters": ["E"]
+        },
+        "folds": [
+          "avg"
+        ]
+      }
+    ],
+    "bins": [
+      {
+        "name": "gameElo",
+        "parameters": ["50"]
+      }
+    ]
+}

@@ -153,6 +153,12 @@ map!(average_move_time_map, "averageMoveTime", _params, {
     })
 });
 
+map!(eco_category_map, "ecoCategory", params, {
+    Box::new(move |game| {
+        (format!("{}", game.eco_category()) == params[0]) as i16
+    })
+});
+
 fn get_map_factories() -> Vec<(String, MapFactoryFn)> {
     vec![
         include_map!(game_count_map),
@@ -167,6 +173,7 @@ fn get_map_factories() -> Vec<(String, MapFactoryFn)> {
         include_map!(generic_opening_count),
         include_map!(average_move_time_map),
         include_map!(opeing_is_not_count),
+        include_map!(eco_category_map),
     ]
 }
 

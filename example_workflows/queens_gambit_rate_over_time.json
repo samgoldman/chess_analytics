@@ -1,0 +1,37 @@
+{
+    "filters": [
+      []
+    ],
+    "analysis_steps": [
+        {
+          "map": {
+            "name": "openingCount",
+            "display_name": "Queen's Gambit Accepted",
+            "parameters": [
+              "1. d4 d5 2. c4 dxc4"
+            ]
+          },
+          "folds": [
+            "avg", "sum"
+          ]
+        }
+    ],
+    "bins": [
+      {
+        "name": "ecoCategory",
+        "parameters": []
+      },
+      {
+        "name": "year",
+        "parameters": []
+      },
+      {
+        "name": "month",
+        "parameters": []
+      },
+      {
+        "name": "day",
+        "parameters": []
+      }
+    ]
+}
