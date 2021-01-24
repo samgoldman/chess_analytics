@@ -56,7 +56,10 @@ mod test_get_elements {
         ($test_name:ident, $vector:expr, $indices:expr, $inverted:literal, $expected:expr) => {
             #[test]
             fn $test_name() {
-                assert_eq!(get_elements::<&str>($vector, $indices, $inverted), $expected);
+                assert_eq!(
+                    get_elements::<&str>($vector, $indices, $inverted),
+                    $expected
+                );
             }
         };
     }
@@ -64,11 +67,45 @@ mod test_get_elements {
     test_get_elements!(empty_vecs_false, &[], &[], false, vec![]);
     test_get_elements!(empty_vecs_true, &[], &[], true, vec![]);
     test_get_elements!(empty_indices_false, &["a"], &[], false, vec![]);
-    test_get_elements!(empty_indices_true, &["b"], &[], true, vec![(0, "b".to_string())]);
-    test_get_elements!(single_index_false, &["a"], &[0], false, vec![(0, "a".to_string())]);
+    test_get_elements!(
+        empty_indices_true,
+        &["b"],
+        &[],
+        true,
+        vec![(0, "b".to_string())]
+    );
+    test_get_elements!(
+        single_index_false,
+        &["a"],
+        &[0],
+        false,
+        vec![(0, "a".to_string())]
+    );
     test_get_elements!(single_index_true, &["b"], &[0], true, vec![]);
-    test_get_elements!(end_index_false, &["a"], &[-1], false, vec![(0, "a".to_string())]);
+    test_get_elements!(
+        end_index_false,
+        &["a"],
+        &[-1],
+        false,
+        vec![(0, "a".to_string())]
+    );
     test_get_elements!(end_index_true, &["b"], &[-1], true, vec![]);
-    test_get_elements!(extended_test_false, &["a", "b", "c", "d", "e"], &[0, -2, 2], false, vec![(0, "a".to_string()), (2, "c".to_string()), (3, "d".to_string())]);
-    test_get_elements!(extended_test_true, &["a", "b", "c", "d", "e"], &[0, -2, 2], true, vec![(1, "b".to_string()), (4, "e".to_string())]);
+    test_get_elements!(
+        extended_test_false,
+        &["a", "b", "c", "d", "e"],
+        &[0, -2, 2],
+        false,
+        vec![
+            (0, "a".to_string()),
+            (2, "c".to_string()),
+            (3, "d".to_string())
+        ]
+    );
+    test_get_elements!(
+        extended_test_true,
+        &["a", "b", "c", "d", "e"],
+        &[0, -2, 2],
+        true,
+        vec![(1, "b".to_string()), (4, "e".to_string())]
+    );
 }

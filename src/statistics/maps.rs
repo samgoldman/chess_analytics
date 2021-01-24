@@ -78,7 +78,7 @@ map!(opeing_is_not_count, "openingIsNotCount", params, {
                 return 0;
             }
         }
-        return 1;
+        1
     })
 });
 
