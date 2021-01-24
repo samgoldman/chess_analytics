@@ -26,6 +26,7 @@ use filters::get_filter_steps;
 use game_wrapper::GameWrapper;
 use statistics::*;
 use workflow::parse_workflow;
+use general_utils::*;
 
 #[macro_use]
 extern crate lazy_static;
@@ -130,31 +131,24 @@ fn main() {
         });
 
     let db = db.lock().unwrap();
-    let columns: Vec<Vec<&str>> = db
-        .iter()
-        .map(|entry| entry.0[0..2].iter().map(|s| &**s).collect())
-        .collect::<Vec<Vec<&str>>>()
-        .into_iter()
-        .unique()
-        .sorted()
-        .collect();
 
-    let rows: Vec<Vec<&str>> = db
+    let columns = dedup_and_sort(db
         .iter()
-        .map(|entry| entry.0[2..entry.0.len()].iter().map(|s| &**s).collect())
-        .collect::<Vec<Vec<&str>>>()
-        .into_iter()
-        .unique()
-        .sorted()
-        .collect();
+        .map(|entry| get_elements(entry.0, vec![0, 1], false))
+        .collect());
+
+    let rows = dedup_and_sort(db
+        .iter()
+        .map(|entry| get_elements(entry.0, vec![0, 1], true))
+        .collect());
 
     println!("Bin\t{}", columns.iter().map(|x| x.join(".")).join("\t"));
     for row in rows {
         print!("{}\t", row.join("."));
         for stat in &columns {
             let mut path = row.clone();
-            path.insert(0, stat[1]);
-            path.insert(0, stat[0]);
+            path.insert(0, stat[1].clone());
+            path.insert(0, stat[0].clone());
 
             let path: Vec<String> = path.iter().map(|s| (*s).to_string()).collect();
 
