@@ -161,16 +161,16 @@ fn main() {
             .map(|x| x.iter().map(|y| y.1.clone()).join("."))
             .join("\t")
     );
-    
+
     for row in rows {
         print!("{}\t", row.iter().map(|x| x.1.clone()).join("."));
         for stat in &columns {
             let path: Vec<String> = vec![stat.clone(), row.clone()]
                 .into_iter()
-                .concat()           // Combine the row and column vectors
+                .concat() // Combine the row and column vectors
                 .into_iter()
-                .sorted()           // Sort by the first element (original index)
-                .map(|x| x.1)       // Map to the second element (the path field)
+                .sorted() // Sort by the first element (original index)
+                .map(|x| x.1) // Map to the second element (the path field)
                 .collect();
 
             if let Some(data) = db.get(&path) {
