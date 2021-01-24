@@ -19,145 +19,155 @@
       {
         "map": {
           "name": "openingCount",
-          "display_name": "queensGambit",
+          "display_name": "Queen's Gambit",
           "parameters": [
             "1. d4 d5 2. c4"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
         ]
       },
       {
         "map": {
           "name": "openingCount",
-          "display_name": "queensGambitAccepted",
+          "display_name": "Queen's Gambit Accepted",
           "parameters": [
             "1. d4 d5 2. c4 dxc4"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
         ]
       },
       {
         "map": {
           "name": "openingCount",
-          "display_name": "slavDefence",
+          "display_name": "Slav Defence",
           "parameters": [
             "1. d4 d5 2. c4 c6"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
         ]
       },
       {
         "map": {
           "name": "openingCount",
-          "display_name": "kingsGambit",
+          "display_name": "King's Gambit",
           "parameters": [
             "1. e4 e5 2. f4"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
         ]
       },
       {
         "map": {
           "name": "openingCount",
-          "display_name": "kingsGambitAccepted",
+          "display_name": "King's Gambit Accepted",
           "parameters": [
             "1. e4 e5 2. f4 exf4"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
         ]
       },
       {
         "map": {
           "name": "openingCount",
-          "display_name": "sicilian",
+          "display_name": "Sicilian Defence",
           "parameters": [
             "1. e4 c5"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
         ]
       },
       {
         "map": {
           "name": "openingCount",
-          "display_name": "sicilianClosed",
+          "display_name": "Sicilian Defence Closed",
           "parameters": [
             "1. e4 c5 2. Nc3"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
         ]
       },
       {
         "map": {
           "name": "openingCount",
-          "display_name": "indianDefence",
+          "display_name": "Indian Defence",
           "parameters": [
             "1. d4 Nf6"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
         ]
       },
       {
         "map": {
           "name": "openingCount",
-          "display_name": "ruyLopez",
+          "display_name": "Ruy Lopez",
           "parameters": [
             "1. e4 e5 2. Nf3 Nc6 3. Bb5"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
         ]
       },
       {
         "map": {
           "name": "openingCount",
-          "display_name": "frenchDefenceMain",
+          "display_name": "French Defence Main",
           "parameters": [
             "1. e4 e6 2. d4 d5"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
         ]
       },
       {
         "map": {
           "name": "openingCount",
-          "display_name": "italianGame",
+          "display_name": "Italian Game",
           "parameters": [
             "1. e4 e5 2. Nf3 Nc6 3. Bc4"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
         ]
       },
       {
         "map": {
           "name": "openingCount",
-          "display_name": "caroKannDefence",
+          "display_name": "Caro Kann Defence",
           "parameters": [
             "1. e4 c6"
           ]
         },
         "folds": [
-          "avg"
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+          "name": "gameCount",
+          "display_name": "_Game Count",
+          "parameters": []
+        },
+        "folds": [
+          "sum"
         ]
       }
     ],

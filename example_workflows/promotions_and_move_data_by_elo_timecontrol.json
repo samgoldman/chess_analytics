@@ -1,0 +1,102 @@
+{
+    "filters": [
+      [
+        {
+          "name": "playerElo",
+          "parameters": ["min", "Both", "1"]
+        },
+        {
+          "name": "gameElo",
+          "parameters": ["min", "600"]
+        },
+        {
+          "name": "gameElo",
+          "parameters": ["max", "3000"]
+        }
+      ]
+    ],
+    "analysis_steps": [
+      {
+        "map": {
+          "name": "gameCount",
+          "display_name": "_Game Count",
+          "parameters": []
+        },
+        "folds": [
+          "sum"
+        ]
+      },
+      {
+        "map": {
+          "name": "numCaptures",
+          "display_name": "_Number of Captures per Game",
+          "parameters": []
+        },
+        "folds": [
+          "avg"
+        ]
+      },
+      {
+        "map": {
+          "name": "numMoves",
+          "display_name": "_Number of Moves per Game",
+          "parameters": []
+        },
+        "folds": [
+          "avg"
+        ]
+      },
+      {
+        "map": {
+          "name": "promotionCount",
+          "display_name": "Promotions per Game - Knight",
+          "parameters": ["Knight"]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+          "name": "promotionCount",
+          "display_name": "Promotions per Game - Bishop",
+          "parameters": ["Bishop"]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+          "name": "promotionCount",
+          "display_name": "Promotions per Game - Rook",
+          "parameters": ["Rook"]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      },
+      {
+        "map": {
+          "name": "promotionCount",
+          "display_name": "Promotions per Game - Queen",
+          "parameters": ["Queen"]
+        },
+        "folds": [
+          "avg", "sum"
+        ]
+      }
+    ],
+    "bins": [
+      {
+        "name": "timeControl",
+        "parameters": []
+      },
+      {
+        "name": "gameElo",
+        "parameters": [
+          "50"
+        ]
+      }
+    ]
+  }

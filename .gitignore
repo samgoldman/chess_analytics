@@ -7,3 +7,4 @@ lcov.info
 /.vscode
 *.swp
 *.sh
+results/

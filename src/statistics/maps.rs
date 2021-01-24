@@ -68,6 +68,20 @@ map!(generic_opening_count, "openingCount", params, {
     Box::new(move |game| has_opening(game, &opening) as i16)
 });
 
+// Requires at least one parameter: the movetexts for openings to ignore
+map!(opeing_is_not_count, "openingIsNotCount", params, {
+    use crate::chess_utils::{has_opening, parse_movetext};
+
+    Box::new(move |game| {
+        for param in &params {
+            if has_opening(game, &parse_movetext(param)) {
+                return 0;
+            }
+        }
+        return 1;
+    })
+});
+
 // Requires 1 parameter: Draw, WhiteVictory, BlackVictory. Anything else in GameResult::Star
 map!(result_map, "resultCount", params, {
     use crate::chess_flatbuffers::chess::GameResult;
@@ -152,6 +166,7 @@ fn get_map_factories() -> Vec<(String, MapFactoryFn)> {
         include_map!(nag_count_map),
         include_map!(generic_opening_count),
         include_map!(average_move_time_map),
+        include_map!(opeing_is_not_count),
     ]
 }
 
