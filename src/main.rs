@@ -24,12 +24,13 @@ mod workflow;
 use bins::*;
 use filters::get_filter_steps;
 use game_wrapper::GameWrapper;
+use general_utils::*;
 use statistics::*;
 use workflow::parse_workflow;
-use general_utils::*;
 
 #[macro_use]
 extern crate lazy_static;
+extern crate clap;
 
 fn main() {
     let matches = App::new("Chess Statistics")
@@ -37,23 +38,30 @@ fn main() {
         .author("Sam Goldman")
         .about("Stats from lichess flatbuffers")
         .arg(
-            Arg::with_name("glob")
+            Arg::new("glob")
                 .long("glob")
                 .takes_value(true)
                 .required(true)
-                .help("A glob to capture the files to process")
                 .required(true),
         )
         .arg(
-            Arg::with_name("instructions")
+            Arg::new("instructions")
                 .long("instructions")
                 .takes_value(true),
+        )
+        .arg(
+            Arg::new("column_fields")
+                .long("column_fields")
+                .takes_value(true)
+                .multiple(true)
+                .default_values(&["0", "-1"]),
         )
         .get_matches();
 
     let db = Arc::new(Mutex::new(HashMap::new()));
 
     let input_steps = parse_workflow(matches.value_of("instructions").unwrap());
+    let column_fields = matches.values_of_t_or_exit::<i32>("column_fields");
 
     let analysis_steps: Vec<(String, StatisticDefinition)> = input_steps
         .analysis_steps
@@ -104,7 +112,10 @@ fn main() {
             }
 
             let games = GameWrapper::from_game_list_data(data);
-            let filtered_games = games.par_iter().filter(|x| filter(*x)).collect::<Vec<&GameWrapper>>();
+            let filtered_games = games
+                .par_iter()
+                .filter(|x| filter(*x))
+                .collect::<Vec<&GameWrapper>>();
 
             {
                 let mut db = db.lock().unwrap();
@@ -115,7 +126,7 @@ fn main() {
                         for fold in &statistic_def.1.folds {
                             let mut path = bin_path.clone();
                             path.insert(0, statistic_def.0.to_string());
-                            path.insert(1, fold.name.to_string());
+                            path.push(fold.name.to_string());
 
                             if !db.contains_key(&path) {
                                 db.insert(path.clone(), (&fold.fold_get_res, vec![]));
@@ -132,32 +143,44 @@ fn main() {
 
     let db = db.lock().unwrap();
 
-    let columns = dedup_and_sort(db
-        .iter()
-        .map(|entry| get_elements(entry.0, vec![0, 1], false))
-        .collect());
+    let columns = dedup_and_sort(
+        db.iter()
+            .map(|entry| get_elements(entry.0, &column_fields, false))
+            .collect(),
+    );
 
-    let rows = dedup_and_sort(db
-        .iter()
-        .map(|entry| get_elements(entry.0, vec![0, 1], true))
-        .collect());
-
-    println!("Bin\t{}", columns.iter().map(|x| x.join(".")).join("\t"));
+    let rows = dedup_and_sort(
+        db.iter()
+            .map(|entry| get_elements(entry.0, &column_fields, true))
+            .collect(),
+    );
+    println!(
+        "Bin\t{}",
+        columns
+            .iter()
+            .map(|x| x.iter().map(|y| y.1.clone()).join("."))
+            .join("\t")
+    );
+    
     for row in rows {
-        print!("{}\t", row.join("."));
+        print!("{}\t", row.iter().map(|x| x.1.clone()).join("."));
         for stat in &columns {
-            let mut path = row.clone();
-            path.insert(0, stat[1].clone());
-            path.insert(0, stat[0].clone());
+            let path: Vec<String> = vec![stat.clone(), row.clone()]
+                .into_iter()
+                .concat()           // Combine the row and column vectors
+                .into_iter()
+                .sorted()           // Sort by the first element (original index)
+                .map(|x| x.1)       // Map to the second element (the path field)
+                .collect();
 
-            let path: Vec<String> = path.iter().map(|s| (*s).to_string()).collect();
+            if let Some(data) = db.get(&path) {
+                let fold_fn = &data.0;
 
-            let data = db.get(&path).unwrap();
-
-            let fold_fn = &data.0;
-
-            let result = (fold_fn)(&data.1);
-            print!("{:.4}\t", result);
+                let result = (fold_fn)(&data.1);
+                print!("{:.4}\t", result);
+            } else {
+                print!("{:.4}\t", 0.0);
+            }
         }
         println!();
     }

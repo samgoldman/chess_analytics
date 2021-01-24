@@ -1,5 +1,5 @@
-use std::fmt::Display;
 use itertools::Itertools;
+use std::fmt::Display;
 
 /// Returns the min/max described by the provided string
 ///
@@ -15,24 +15,35 @@ pub fn get_comparator<T: Ord>(comparator: &str) -> fn(T, T) -> T {
     }
 }
 
-pub fn get_elements<T: Display>(vector: &Vec<T>, indices: Vec<usize>, inverted: bool) -> Vec<String> {
+pub fn get_elements<T: Display>(
+    vector: &[T],
+    indices: &[i32],
+    inverted: bool,
+) -> Vec<(usize, String)> {
     let mut return_value = vec![];
+
+    let indices: Vec<usize> = indices
+        .iter()
+        .map(|&i| {
+            if i < 0 {
+                (vector.len() as i32 + i) as usize
+            } else {
+                i as usize
+            }
+        })
+        .collect();
 
     for (element_index, element) in vector.iter().enumerate() {
         let in_indices = indices.iter().any(|&i| i == element_index);
 
         if (in_indices && !inverted) || (!in_indices && inverted) {
-            return_value.push(element.to_string());
+            return_value.push((element_index, element.to_string()));
         }
     }
 
     return_value
 }
 
-pub fn dedup_and_sort(vector: Vec<Vec<String>>) -> Vec<Vec<String>> {
-    vector
-    .into_iter()
-    .unique()
-    .sorted()
-    .collect()
+pub fn dedup_and_sort(vector: Vec<Vec<(usize, String)>>) -> Vec<Vec<(usize, String)>> {
+    vector.into_iter().unique().sorted().collect()
 }
