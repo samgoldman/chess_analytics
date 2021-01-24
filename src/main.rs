@@ -57,7 +57,12 @@ fn main() {
     let analysis_steps: Vec<(String, StatisticDefinition)> = input_steps
         .analysis_steps
         .iter()
-        .map(|x| (x.map.display_name.clone(), statistics::convert_to_stat_def(x)))
+        .map(|x| {
+            (
+                x.map.display_name.clone(),
+                statistics::convert_to_stat_def(x),
+            )
+        })
         .collect();
     let selected_bins: Vec<BinFn> = input_steps
         .bins
@@ -98,18 +103,18 @@ fn main() {
             }
 
             let games = GameWrapper::from_game_list_data(data);
+            let filtered_games = games.iter().filter(|x| filter(*x));
 
-            games.par_iter().filter(|x| filter(*x)).for_each(|game| {
-                let bin_path: Vec<String> = selected_bins.iter().map(|bin| bin(game)).collect();
+            {
+                let mut db = db.lock().unwrap();
+                filtered_games.for_each(|game| {
+                    let bin_path: Vec<String> = selected_bins.iter().map(|bin| bin(game)).collect();
 
-                for statistic_def in &analysis_steps {
-                    for fold in &statistic_def.1.folds {
-                        let mut path = bin_path.clone();
-                        path.insert(0, statistic_def.0.to_string());
-
-                        {
+                    for statistic_def in &analysis_steps {
+                        for fold in &statistic_def.1.folds {
+                            let mut path = bin_path.clone();
+                            path.insert(0, statistic_def.0.to_string());
                             path.insert(1, fold.name.to_string());
-                            let mut db = db.lock().unwrap();
 
                             if !db.contains_key(&path) {
                                 db.insert(path.clone(), (&fold.fold_get_res, vec![]));
@@ -120,8 +125,8 @@ fn main() {
                             (fold.fold_add_point)(mapped_value, &mut db.get_mut(&path).unwrap().1);
                         }
                     }
-                }
-            });
+                });
+            }
         });
 
     let db = db.lock().unwrap();

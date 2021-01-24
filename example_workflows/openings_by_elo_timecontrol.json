@@ -19,145 +19,145 @@
       {
         "map": {
           "name": "openingCount",
-          "display_name": "queensGambitCount",
+          "display_name": "queensGambit",
           "parameters": [
             "1. d4 d5 2. c4"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       },
       {
         "map": {
-            "name": "openingCount",
-          "display_name": "queensGambitAcceptedCount",
+          "name": "openingCount",
+          "display_name": "queensGambitAccepted",
           "parameters": [
             "1. d4 d5 2. c4 dxc4"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       },
       {
         "map": {
-            "name": "openingCount",
-          "display_name": "slavDefenceCount",
+          "name": "openingCount",
+          "display_name": "slavDefence",
           "parameters": [
             "1. d4 d5 2. c4 c6"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       },
       {
         "map": {
-            "name": "openingCount",
-          "display_name": "kingsGambitCount",
+          "name": "openingCount",
+          "display_name": "kingsGambit",
           "parameters": [
             "1. e4 e5 2. f4"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       },
       {
         "map": {
-            "name": "openingCount",
-          "display_name": "kingsGambitAcceptedCount",
+          "name": "openingCount",
+          "display_name": "kingsGambitAccepted",
           "parameters": [
             "1. e4 e5 2. f4 exf4"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       },
       {
         "map": {
-            "name": "openingCount",
-          "display_name": "sicilianCount",
+          "name": "openingCount",
+          "display_name": "sicilian",
           "parameters": [
             "1. e4 c5"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       },
       {
         "map": {
-            "name": "openingCount",
-          "display_name": "sicilianClosedCount",
+          "name": "openingCount",
+          "display_name": "sicilianClosed",
           "parameters": [
             "1. e4 c5 2. Nc3"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       },
       {
         "map": {
-            "name": "openingCount",
-          "display_name": "indianDefenceCount",
+          "name": "openingCount",
+          "display_name": "indianDefence",
           "parameters": [
             "1. d4 Nf6"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       },
       {
         "map": {
-            "name": "openingCount",
-          "display_name": "ruyLopezCount",
+          "name": "openingCount",
+          "display_name": "ruyLopez",
           "parameters": [
             "1. e4 e5 2. Nf3 Nc6 3. Bb5"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       },
       {
         "map": {
-            "name": "openingCount",
-          "display_name": "frenchDefenceMainCount",
+          "name": "openingCount",
+          "display_name": "frenchDefenceMain",
           "parameters": [
             "1. e4 e6 2. d4 d5"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       },
       {
         "map": {
-            "name": "openingCount",
-          "display_name": "italianGameCount",
+          "name": "openingCount",
+          "display_name": "italianGame",
           "parameters": [
             "1. e4 e5 2. Nf3 Nc6 3. Bc4"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       },
       {
         "map": {
-            "name": "openingCount",
-          "display_name": "caroKannDefenceCount",
+          "name": "openingCount",
+          "display_name": "caroKannDefence",
           "parameters": [
             "1. e4 c6"
           ]
         },
         "folds": [
-          "avg", "sum"
+          "avg"
         ]
       }
     ],
