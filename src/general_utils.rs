@@ -36,7 +36,7 @@ pub fn get_elements<T: Display>(
     for (element_index, element) in vector.iter().enumerate() {
         let in_indices = indices.iter().any(|&i| i == element_index);
 
-        if (in_indices && !inverted) || (!in_indices && inverted) {
+        if in_indices ^ inverted {
             return_value.push((element_index, element.to_string()));
         }
     }
