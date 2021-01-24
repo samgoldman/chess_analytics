@@ -103,11 +103,11 @@ fn main() {
             }
 
             let games = GameWrapper::from_game_list_data(data);
-            let filtered_games = games.iter().filter(|x| filter(*x));
+            let filtered_games = games.par_iter().filter(|x| filter(*x)).collect::<Vec<&GameWrapper>>();
 
             {
                 let mut db = db.lock().unwrap();
-                filtered_games.for_each(|game| {
+                filtered_games.iter().for_each(|game| {
                     let bin_path: Vec<String> = selected_bins.iter().map(|bin| bin(game)).collect();
 
                     for statistic_def in &analysis_steps {
