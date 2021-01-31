@@ -78,6 +78,10 @@
     ],
     "bins": [
       {
+        "name": "timeControl",
+        "parameters": []
+      },
+      {
         "name": "gameElo",
         "parameters": ["50"]
       }
