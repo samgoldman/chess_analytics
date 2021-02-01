@@ -54,6 +54,30 @@ map!(num_captures_map, "numCaptures", _params, {
     Box::new(|game| game.moves().iter().filter(|c| c.captures).count() as i16)
 });
 
+map!(first_capture_map, "firstCapture", _params, {
+    Box::new(|game| {
+        for (i, move_data) in game.moves().iter().enumerate() {
+            if move_data.captures {
+                return i as i16;
+            }
+        }
+
+        return 0;
+    })
+});
+
+map!(first_check_map, "firstCheck", _params, {
+    Box::new(|game| {
+        for (i, move_data) in game.moves().iter().enumerate() {
+            if move_data.checks || move_data.mates {
+                return i as i16;
+            }
+        }
+
+        return 0;
+    })
+});
+
 // Requires no parameters
 map!(rating_diff_map, "ratingDiff", _params, {
     Box::new(|game| (game.white_rating() as i16 - game.black_rating() as i16).abs())
@@ -174,6 +198,8 @@ fn get_map_factories() -> Vec<(String, MapFactoryFn)> {
         include_map!(average_move_time_map),
         include_map!(opeing_is_not_count),
         include_map!(eco_category_map),
+        include_map!(first_capture_map),
+        include_map!(first_check_map),
     ]
 }
 
