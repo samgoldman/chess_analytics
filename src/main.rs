@@ -44,11 +44,7 @@ fn main() {
                 .required(true)
                 .required(true),
         )
-        .arg(
-            Arg::new("instructions")
-                .long("instructions")
-                .takes_value(true),
-        )
+        .arg(Arg::new("workflow").long("workflow").takes_value(true))
         .arg(
             Arg::new("column_fields")
                 .long("column_fields")
@@ -60,7 +56,7 @@ fn main() {
 
     let db = Arc::new(Mutex::new(HashMap::new()));
 
-    let input_steps = parse_workflow(matches.value_of("instructions").unwrap());
+    let input_steps = parse_workflow(matches.value_of("workflow").unwrap());
     let column_fields = matches.values_of_t_or_exit::<i32>("column_fields");
 
     let analysis_steps: Vec<(String, StatisticDefinition)> = input_steps

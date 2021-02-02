@@ -32,15 +32,27 @@ map!(game_count_map, "gameCount", _params, {
 // Requires 1 parameter. If 1st parameter is "Mate", only counts mates
 map!(mate_count_map, "checkCount", params, {
     let only_mate = params[0] == "Mate";
-    Box::new(move |game| match game.moves().last() {
-        Some(last_move) => {
-            if last_move.mates || (!only_mate && last_move.checks) {
-                1
-            } else {
-                0
+    Box::new(move |game| {
+        if only_mate {
+            match game.moves().last() {
+                Some(last_move) => {
+                    if last_move.mates {
+                        1
+                    } else {
+                        0
+                    }
+                }
+                None => 0,
             }
+        } else {
+            let mut count = 0;
+            for move_data in game.moves() {
+                if move_data.checks || move_data.mates {
+                    count += 1;
+                }
+            }
+            count
         }
-        None => 0,
     })
 });
 
@@ -178,9 +190,7 @@ map!(average_move_time_map, "averageMoveTime", _params, {
 });
 
 map!(eco_category_map, "ecoCategory", params, {
-    Box::new(move |game| {
-        (format!("{}", game.eco_category()) == params[0]) as i16
-    })
+    Box::new(move |game| (format!("{}", game.eco_category()) == params[0]) as i16)
 });
 
 fn get_map_factories() -> Vec<(String, MapFactoryFn)> {
