@@ -64,7 +64,7 @@
         "map": {
           "name": "checkCount",
           "display_name": "mateRate",
-          "parameters": [""]
+          "parameters": ["Mate"]
         },
         "folds": [
           "avg"
