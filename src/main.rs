@@ -119,6 +119,9 @@ fn main() {
                     let bin_path: Vec<String> = selected_bins.iter().map(|bin| bin(game)).collect();
 
                     for statistic_def in &analysis_steps {
+                        let map_fn = &statistic_def.1.map;
+                        let mapped_value = map_fn(game);
+
                         for fold in &statistic_def.1.folds {
                             let mut path = bin_path.clone();
                             path.insert(0, statistic_def.0.to_string());
@@ -128,8 +131,6 @@ fn main() {
                                 db.insert(path.clone(), (&fold.fold_get_res, vec![]));
                             }
 
-                            let map_fn = &statistic_def.1.map;
-                            let mapped_value = map_fn(game);
                             (fold.fold_add_point)(mapped_value, &mut db.get_mut(&path).unwrap().1);
                         }
                     }

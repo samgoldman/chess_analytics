@@ -74,7 +74,7 @@ map!(first_capture_map, "firstCapture", _params, {
             }
         }
 
-        return 0;
+        0
     })
 });
 
@@ -86,7 +86,7 @@ map!(first_check_map, "firstCheck", _params, {
             }
         }
 
-        return 0;
+        0
     })
 });
 
