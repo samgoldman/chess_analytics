@@ -18,13 +18,25 @@
         {
           "map": {
             "name": "openingCount",
+            "display_name": "Queen's Gambit",
+            "parameters": [
+              "1. d4 d5 2. c4"
+            ]
+          },
+          "folds": [
+            "avg"
+          ]
+        },
+        {
+          "map": {
+            "name": "openingCount",
             "display_name": "Queen's Gambit Accepted",
             "parameters": [
               "1. d4 d5 2. c4 dxc4"
             ]
           },
           "folds": [
-            "avg", "sum"
+            "avg"
           ]
         }
     ],
