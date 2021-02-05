@@ -1,6 +1,18 @@
 {
     "filters": [
-      []
+      [
+        {
+          "name": "playerElo",
+          "parameters": ["min", "Both", "1"]
+        },
+        {
+          "name": "gameElo",
+          "parameters": ["min", "600"]
+        },
+        {
+          "name": "gameElo",
+          "parameters": ["max", "3000"]
+        }]
     ],
     "analysis_steps": [
         {
@@ -17,10 +29,6 @@
         }
     ],
     "bins": [
-      {
-        "name": "ecoCategory",
-        "parameters": []
-      },
       {
         "name": "year",
         "parameters": []
