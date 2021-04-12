@@ -1,9 +1,10 @@
 use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList, GameResult, Termination};
 use crate::chess_utils::*;
+use crate::board::Board;
 use itertools::izip;
 use std::time::Duration;
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Copy)]
 pub enum NAG {
     None = 0,
     Questionable = 1,
@@ -22,7 +23,7 @@ impl NAG {
     }
 }
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Copy)]
 pub enum Rank {
     _NA = 0,
     _1 = 1,
@@ -50,9 +51,13 @@ impl Rank {
             u => panic!("Unrecongnized rank: {}", u),
         }
     }
+
+    pub fn as_index(&self) -> usize {
+        *self as usize - 1
+    }
 }
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Copy)]
 pub enum File {
     _NA = 0,
     _A = 1,
@@ -80,9 +85,13 @@ impl File {
             u => panic!("Unrecongnized file: {}", u),
         }
     }
+
+    pub fn as_index(&self) -> usize {
+        *self as usize - 1
+    }
 }
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Copy)]
 pub enum Piece {
     None = 0,
     Pawn = 1,
@@ -90,7 +99,7 @@ pub enum Piece {
     Bishop = 3,
     Rook = 4,
     Queen = 5,
-    King = 6,
+    King = 6
 }
 
 impl Piece {
@@ -197,7 +206,9 @@ pub struct GameWrapper {
     termination: Termination,
     white_diff: i16,
     black_diff: i16,
+    pub boards: Vec<Board>
 }
+#[derive(Clone)]
 
 #[cfg(test)]
 pub struct GameWrapper {
@@ -223,6 +234,7 @@ pub struct GameWrapper {
     pub termination: Termination,
     pub white_diff: i16,
     pub black_diff: i16,
+    pub boards: Vec<Board>
 }
 
 impl GameWrapper {
@@ -347,6 +359,7 @@ impl GameWrapper {
             termination: game.termination(),
             white_diff: game.white_diff(),
             black_diff: game.black_diff(),
+            boards: vec![]
         }
     }
 
@@ -450,6 +463,19 @@ impl GameWrapper {
                 + self.time_control_increment() as u32
         }
     }
+
+    pub fn build_boards(&self) -> Vec<Board> {
+        let mut boards = vec![Board::default()];
+
+        for (i, a_move) in self.moves.iter().enumerate() {
+            let prev_board = boards[i];
+
+            let new_board = prev_board.move_piece(a_move.clone());
+            boards.push(new_board);
+        }
+
+        boards
+    }
 }
 
 impl Default for GameWrapper {
@@ -477,6 +503,7 @@ impl Default for GameWrapper {
             termination: Termination::Normal,
             white_diff: 0,
             black_diff: 0,
+            boards: vec![],
         }
     }
 }

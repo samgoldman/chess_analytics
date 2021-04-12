@@ -26,6 +26,7 @@ pub fn get_filter_factories() -> Vec<(String, FilterFactoryFn)> {
         eval_available_filter,
         queenside_castle_mate_filter,
         clock_available_filter,
+        site_matches_any_filter,
     ]
 }
 

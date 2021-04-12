@@ -87,6 +87,7 @@ pub fn get_game_elo(game: &GameWrapper) -> u32 {
 }
 
 // For now this only parses the piece being moved, and the to/from coordinates
+// TODO: support castling
 pub fn parse_movetext(movetext: &str) -> Vec<Move> {
     lazy_static! {
         static ref RE_MOVE: Regex = Regex::new(

@@ -117,6 +117,13 @@ filter!(mate_occurs_filter, "mate", params, {
     })
 });
 
+// Requires any parameters: the 
+filter!(site_matches_any_filter, "siteMatchesAny", params, {
+    Box::new(move |game| -> bool {
+        params.iter().any(|allowed_site| allowed_site.contains(game.site()))
+    })
+});
+
 // Requires one parameter: either "available" or "not_available"
 filter!(eval_available_filter, "eval", params, {
     let want_available = params[0] == "available";

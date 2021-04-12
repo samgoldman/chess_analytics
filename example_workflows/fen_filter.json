@@ -1,0 +1,38 @@
+{
+    "filters": [[
+        {
+          "name": "moveCount",
+          "parameters": ["min", "20"]
+        },
+        {
+          "name": "mate",
+          "parameters": ["occurs"]
+        },
+        {
+          "name": "playerElo",
+          "parameters": ["min", "Both", "1"]
+        },
+        {
+          "name": "gameElo",
+          "parameters": ["min", "600"]
+        },
+        {
+          "name": "gameElo",
+          "parameters": ["max", "3000"]
+        }
+    ]],
+    "analysis_steps": [
+      {
+        "map": {
+          "name": "gameCount",
+          "display_name": "gameCount",
+          "parameters": []
+        },
+        "folds": [
+          "sum"
+        ]
+      }
+    ],
+    "bins": [
+    ]
+  }

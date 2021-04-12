@@ -9,11 +9,13 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+use std::panic;
 
 mod bins;
 #[allow(non_snake_case)]
 #[path = "../target/flatbuffers/chess_generated.rs"]
 mod chess_flatbuffers;
+mod board;
 mod chess_utils;
 mod filters;
 mod game_wrapper;
@@ -107,7 +109,8 @@ fn main() {
                 file.read_to_end(&mut data).unwrap();
             }
 
-            let games = GameWrapper::from_game_list_data(data);
+            let mut games = GameWrapper::from_game_list_data(data);
+
             let filtered_games = games
                 .par_iter()
                 .filter(|x| filter(*x))
@@ -116,6 +119,27 @@ fn main() {
             {
                 let mut db = db.lock().unwrap();
                 filtered_games.iter().for_each(|game| {
+
+                    let mut mutable_game = game.clone();
+
+                    panic::set_hook(Box::new(|_info| {
+                        // do nothing
+                    }));
+                
+                    let result = panic::catch_unwind(|| {
+                        game.build_boards();
+                    });
+                
+                    match result {
+                        Ok(res) => res,
+                        Err(_) => {
+                            println!("{}: failed", game.site());
+                        },
+                    }
+
+                    // TODO
+                    // println!("{}", game.boards.last().unwrap().to_fen());
+
                     let bin_path: Vec<String> = selected_bins.iter().map(|bin| bin(game)).collect();
 
                     for statistic_def in &analysis_steps {
