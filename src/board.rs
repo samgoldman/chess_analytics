@@ -27,7 +27,7 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn to_fen(&self) -> String {
+    pub fn to_fen(self) -> String {
         let mut fen = String::default();
 
         for rank in 0..8 {
@@ -326,7 +326,7 @@ impl Board {
             }
         }
 
-        self.set_piece(to_rank, to_file, self.board[from_rank][from_file].clone());
+        self.set_piece(to_rank, to_file, self.board[from_rank][from_file]);
         self.set_piece(from_rank, from_file, EMPTY_CELL);
     }
 
@@ -367,7 +367,7 @@ impl Board {
                 // Multiple pieces could make it, so not disambiguated because one or more pieces are pinned to the king
                 let mut i = 0;
                 for possible_origin in possible_origins.clone() {
-                    let mut test_board = self.clone();
+                    let mut test_board = *self;
 
                     // println!("\t\t\tTesting check...");
                     test_board.execute_move(
@@ -406,7 +406,7 @@ impl Board {
             }
         }
 
-        if possible_origins.len() == 0 {
+        if possible_origins.is_empty() {
             panic!("No possible origins found");
         } else if possible_origins.len() > 1 {
             panic!("Too many possible origins found: {:?}", possible_origins);
@@ -443,20 +443,16 @@ impl Board {
 
                 if found_piece.piece == piece && found_piece.player == self.to_move {
                     if piece == Piece::Pawn {
-                        // println!("\tPawn: to_move: {:?}; rank_indx={}, file_indx={}, rank_diff={}, file_diff={}", self.to_move, rank_indx, file_indx, rank_diff, file_diff);
-
                         if self.to_move == Player::White {
                             if (rank_indx == 1 && rank_diff == 2 && file_diff == 0)
                                 || (rank_diff == 1 && file_diff.abs() <= 1)
                             {
                                 possible_origins.push((rank_indx, file_indx));
                             }
-                        } else {
-                            if (rank_indx == 6 && rank_diff == -2 && file_diff == 0)
-                                || (rank_diff == -1 && file_diff.abs() <= 1)
-                            {
-                                possible_origins.push((rank_indx, file_indx));
-                            }
+                        } else if (rank_indx == 6 && rank_diff == -2 && file_diff == 0)
+                            || (rank_diff == -1 && file_diff.abs() <= 1)
+                        {
+                            possible_origins.push((rank_indx, file_indx));
                         }
                     } else if piece == Piece::Bishop {
                         if rank_diff.abs() == file_diff.abs() {
@@ -492,7 +488,7 @@ impl Board {
     }
 
     pub fn move_piece(&self, move_description: Move) -> Board {
-        let mut new_board = self.clone();
+        let mut new_board = *self;
         new_board.toggle_to_move();
 
         let to_rank = move_description.to_rank.as_index();
