@@ -1,4 +1,4 @@
-use crate::game_wrapper::{Piece, Move, File, Rank};
+use crate::game_wrapper::{File, Move, Piece, Rank};
 
 const DEBUG: bool = false;
 
@@ -6,43 +6,41 @@ const DEBUG: bool = false;
 pub enum Player {
     White,
     Black,
-    NA
+    NA,
 }
 
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub struct PlayerPiece {
     piece: Piece,
-    player: Player
+    player: Player,
 }
 
 const EMPTY_CELL: PlayerPiece = PlayerPiece {
     piece: Piece::None,
-    player: Player::NA
+    player: Player::NA,
 };
 
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub struct Board {
     board: [[PlayerPiece; 8]; 8],
-    to_move: Player
+    to_move: Player,
 }
 
 impl Board {
-
     pub fn to_fen(&self) -> String {
         let mut fen = String::default();
 
         for rank in 0..8 {
-
             let mut blanks = 0;
 
             for file in 0..8 {
                 let piece = self.board[7 - rank][file];
-                
+
                 if piece.piece == Piece::None {
                     blanks += 1;
                     continue;
-                } 
-                
+                }
+
                 if blanks > 0 {
                     fen += &blanks.to_string();
                     blanks = 0;
@@ -55,15 +53,19 @@ impl Board {
                     Piece::Rook => "R",
                     Piece::Queen => "Q",
                     Piece::King => "K",
-                    _ => "U"
+                    _ => "U",
                 };
 
                 let lower = letter.to_ascii_lowercase();
-                letter = if piece.player == Player::White {letter} else {&lower};
+                letter = if piece.player == Player::White {
+                    letter
+                } else {
+                    &lower
+                };
 
                 fen += letter;
             }
-                
+
             if blanks > 0 {
                 fen += &blanks.to_string();
             }
@@ -74,22 +76,43 @@ impl Board {
     }
 
     pub fn toggle_to_move(&mut self) {
-        self.to_move = if self.to_move == Player::White {Player::Black} else {Player::White};
+        self.to_move = if self.to_move == Player::White {
+            Player::Black
+        } else {
+            Player::White
+        };
     }
 
     pub fn is_cell_empty(&self, rank: usize, file: usize) -> bool {
         self.board[rank][file].piece == Piece::None
     }
 
-    pub fn generate_non_inclusive_path(&self, from_rank: usize, from_file: usize, to_rank: usize, to_file: usize) -> Vec<(usize, usize)> {
+    pub fn generate_non_inclusive_path(
+        &self,
+        from_rank: usize,
+        from_file: usize,
+        to_rank: usize,
+        to_file: usize,
+    ) -> Vec<(usize, usize)> {
         let rank_diff = (to_rank as i32) - from_rank as i32;
         let file_diff = (to_file as i32) - from_file as i32;
 
         let mut result = vec![];
 
-        if (rank_diff != 0 && file_diff == 0) || (rank_diff == 0 && file_diff != 0) || (rank_diff.abs() == file_diff.abs()) {
-            let rank_inc = if rank_diff != 0 {rank_diff / rank_diff.abs()} else {0};
-            let file_inc = if file_diff != 0 {file_diff / file_diff.abs()} else {0};
+        if (rank_diff != 0 && file_diff == 0)
+            || (rank_diff == 0 && file_diff != 0)
+            || (rank_diff.abs() == file_diff.abs())
+        {
+            let rank_inc = if rank_diff != 0 {
+                rank_diff / rank_diff.abs()
+            } else {
+                0
+            };
+            let file_inc = if file_diff != 0 {
+                file_diff / file_diff.abs()
+            } else {
+                0
+            };
 
             let mut rank_cur = from_rank as i32 + rank_inc;
             let mut file_cur = from_file as i32 + file_inc;
@@ -101,27 +124,37 @@ impl Board {
                 file_cur += file_inc;
             }
         } else {
-            panic!("generate_non_inclusive_path: non linear path requested: ({}, {}) -> ({}, {})", from_rank, from_file, to_rank, to_file);
+            panic!(
+                "generate_non_inclusive_path: non linear path requested: ({}, {}) -> ({}, {})",
+                from_rank, from_file, to_rank, to_file
+            );
         }
 
         result
     }
 
     pub fn is_path_clear(&self, path: Vec<(usize, usize)>) -> bool {
-        path.iter().all(|cell| {
-            self.is_cell_empty(cell.0, cell.1)
-        })
+        path.iter().all(|cell| self.is_cell_empty(cell.0, cell.1))
     }
 
     pub fn is_in_check(&self, player: Player) -> bool {
         let king_loc = self.find_king_loc(player);
-        let opposing_pieces = self.find_player_piece_locs(if player == Player::White {Player::Black} else {Player::White});
+        let opposing_pieces = self.find_player_piece_locs(if player == Player::White {
+            Player::Black
+        } else {
+            Player::White
+        });
 
         let check = opposing_pieces.iter().any(|opposing_piece_loc| {
-            let check = self.does_piece_check_loc(opposing_piece_loc.0, opposing_piece_loc.1, king_loc.0, king_loc.1);
+            let check = self.does_piece_check_loc(
+                opposing_piece_loc.0,
+                opposing_piece_loc.1,
+                king_loc.0,
+                king_loc.1,
+            );
 
             if check {
-                // println!("\t\t\t\t{:?} checks {:?}", opposing_piece_loc, king_loc); 
+                // println!("\t\t\t\t{:?} checks {:?}", opposing_piece_loc, king_loc);
             }
 
             check
@@ -132,9 +165,20 @@ impl Board {
         check
     }
 
-    pub fn does_piece_check_loc(&self, attacker_rank: usize, attacker_file: usize, target_rank: usize, target_file: usize) -> bool {
+    pub fn does_piece_check_loc(
+        &self,
+        attacker_rank: usize,
+        attacker_file: usize,
+        target_rank: usize,
+        target_file: usize,
+    ) -> bool {
         if self.is_cell_empty(attacker_rank, attacker_file) {
-            panic!("does_piece_check_loc: no piece in attacker location: {}, {}, {}", attacker_rank, attacker_file, self.to_fen());
+            panic!(
+                "does_piece_check_loc: no piece in attacker location: {}, {}, {}",
+                attacker_rank,
+                attacker_file,
+                self.to_fen()
+            );
         }
 
         let rank_diff = (target_rank as i32) - attacker_rank as i32;
@@ -146,23 +190,44 @@ impl Board {
                 match self.board[attacker_rank][attacker_file].player {
                     Player::White => file_diff.abs() == 1 && rank_diff == 1,
                     Player::Black => file_diff.abs() == 1 && rank_diff == -1,
-                    Player::NA => panic!("does_piece_check_loc: somehow got pawn with NA player") // Uh oh
+                    Player::NA => panic!("does_piece_check_loc: somehow got pawn with NA player"), // Uh oh
                 }
-            },
+            }
             Piece::Bishop => {
-                rank_diff.abs() == file_diff.abs() && self.is_path_clear(self.generate_non_inclusive_path(attacker_rank, attacker_file, target_rank, target_file))
-            },
+                rank_diff.abs() == file_diff.abs()
+                    && self.is_path_clear(self.generate_non_inclusive_path(
+                        attacker_rank,
+                        attacker_file,
+                        target_rank,
+                        target_file,
+                    ))
+            }
             Piece::Knight => {
-                (rank_diff.abs() == 2 && file_diff.abs() == 1) || (rank_diff.abs() == 1 && file_diff.abs() == 2)
-            },
+                (rank_diff.abs() == 2 && file_diff.abs() == 1)
+                    || (rank_diff.abs() == 1 && file_diff.abs() == 2)
+            }
             Piece::Rook => {
-                ((rank_diff != 0 && file_diff == 0) || (rank_diff == 0 && file_diff != 0)) && self.is_path_clear(self.generate_non_inclusive_path(attacker_rank, attacker_file, target_rank, target_file))
-            },
+                ((rank_diff != 0 && file_diff == 0) || (rank_diff == 0 && file_diff != 0))
+                    && self.is_path_clear(self.generate_non_inclusive_path(
+                        attacker_rank,
+                        attacker_file,
+                        target_rank,
+                        target_file,
+                    ))
+            }
             Piece::Queen => {
-                ((rank_diff != 0 && file_diff == 0) || (rank_diff == 0 && file_diff != 0) || (rank_diff.abs() == file_diff.abs())) && self.is_path_clear(self.generate_non_inclusive_path(attacker_rank, attacker_file, target_rank, target_file))
-            },
+                ((rank_diff != 0 && file_diff == 0)
+                    || (rank_diff == 0 && file_diff != 0)
+                    || (rank_diff.abs() == file_diff.abs()))
+                    && self.is_path_clear(self.generate_non_inclusive_path(
+                        attacker_rank,
+                        attacker_file,
+                        target_rank,
+                        target_file,
+                    ))
+            }
             Piece::King => false,
-            Piece::None => panic!("does_piece_check_loc: no piece in attacker location")
+            Piece::None => panic!("does_piece_check_loc: no piece in attacker location"),
         }
     }
 
@@ -198,8 +263,14 @@ impl Board {
         panic!("find_king_loc: king not found on board");
     }
 
-    pub fn execute_move(&mut self, piece: Piece, from_rank: usize, from_file: usize, to_rank: usize, to_file: usize) {
-
+    pub fn execute_move(
+        &mut self,
+        piece: Piece,
+        from_rank: usize,
+        from_file: usize,
+        to_rank: usize,
+        to_file: usize,
+    ) {
         let diff_file = to_file as i32 - from_file as i32;
 
         // Special cases
@@ -211,30 +282,75 @@ impl Board {
         } else if piece == Piece::King {
             // Check for castling
             if diff_file == 2 {
-                if DEBUG {println!("\t\tKingside castling!");}
-                if DEBUG {println!("\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}", Piece::Rook, from_rank, File::_H.as_index(), to_rank, File::_F.as_index());}
-                self.execute_move(Piece::Rook, from_rank, File::_H.as_index(), to_rank, File::_F.as_index());
+                if DEBUG {
+                    println!("\t\tKingside castling!");
+                }
+                if DEBUG {
+                    println!(
+                        "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
+                        Piece::Rook,
+                        from_rank,
+                        File::_H.as_index(),
+                        to_rank,
+                        File::_F.as_index()
+                    );
+                }
+                self.execute_move(
+                    Piece::Rook,
+                    from_rank,
+                    File::_H.as_index(),
+                    to_rank,
+                    File::_F.as_index(),
+                );
             } else if diff_file == -2 {
-                if DEBUG {println!("\t\tQueenside castling!");}
-                if DEBUG {println!("\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}", Piece::Rook, from_rank, File::_A.as_index(), to_rank, File::_D.as_index());}
-                self.execute_move(Piece::Rook, from_rank, File::_A.as_index(), to_rank, File::_D.as_index());
+                if DEBUG {
+                    println!("\t\tQueenside castling!");
+                }
+                if DEBUG {
+                    println!(
+                        "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
+                        Piece::Rook,
+                        from_rank,
+                        File::_A.as_index(),
+                        to_rank,
+                        File::_D.as_index()
+                    );
+                }
+                self.execute_move(
+                    Piece::Rook,
+                    from_rank,
+                    File::_A.as_index(),
+                    to_rank,
+                    File::_D.as_index(),
+                );
             }
         }
 
         self.set_piece(to_rank, to_file, self.board[from_rank][from_file].clone());
         self.set_piece(from_rank, from_file, EMPTY_CELL);
-
-
     }
 
-    pub fn find_origin(&self, piece: Piece, dest_rank: Rank, dest_file: File, from_rank: Rank, from_file: File) -> (usize, usize) {
-        let mut possible_origins = self.find_possible_origins(piece, dest_rank, dest_file, from_rank, from_file);
+    pub fn find_origin(
+        &self,
+        piece: Piece,
+        dest_rank: Rank,
+        dest_file: File,
+        from_rank: Rank,
+        from_file: File,
+    ) -> (usize, usize) {
+        let mut possible_origins =
+            self.find_possible_origins(piece, dest_rank, dest_file, from_rank, from_file);
 
         if possible_origins.len() > 1 {
             if piece != Piece::Knight {
                 let mut i = 0;
                 for possible_origin in possible_origins.clone() {
-                    let path = self.generate_non_inclusive_path(possible_origin.0, possible_origin.1, dest_rank.as_index(), dest_file.as_index());
+                    let path = self.generate_non_inclusive_path(
+                        possible_origin.0,
+                        possible_origin.1,
+                        dest_rank.as_index(),
+                        dest_file.as_index(),
+                    );
 
                     if !self.is_path_clear(path) {
                         // println!("\t\t\t\tObstructed, removing: {:?}", possible_origin);
@@ -254,7 +370,13 @@ impl Board {
                     let mut test_board = self.clone();
 
                     // println!("\t\t\tTesting check...");
-                    test_board.execute_move(piece, possible_origin.0, possible_origin.1, dest_rank.as_index(), dest_file.as_index());
+                    test_board.execute_move(
+                        piece,
+                        possible_origin.0,
+                        possible_origin.1,
+                        dest_rank.as_index(),
+                        dest_file.as_index(),
+                    );
                     // println!("\t\t\t...done testing check!");
 
                     if test_board.is_in_check(self.to_move) {
@@ -268,11 +390,13 @@ impl Board {
 
             if possible_origins.len() > 1 && piece == Piece::Pawn {
                 let mut i = 0;
-                
+
                 for possible_origin in possible_origins.clone() {
                     let diff_file = dest_file.as_index() as i32 - possible_origin.1 as i32;
 
-                    if self.board[dest_rank.as_index()][dest_file.as_index()].piece == Piece::None && diff_file != 0 {
+                    if self.board[dest_rank.as_index()][dest_file.as_index()].piece == Piece::None
+                        && diff_file != 0
+                    {
                         // println!("\t\t\t\tPawn rule, removing: {:?}", possible_origin);
                         possible_origins.remove(i);
                     } else {
@@ -292,17 +416,22 @@ impl Board {
     }
 
     // Return a list locations that contain the matching piece and that piece could move to the destination __if__ it was an otherwise empty board
-    pub fn find_possible_origins(&self, piece: Piece, dest_rank: Rank, dest_file: File, from_rank: Rank, from_file: File) -> Vec<(usize, usize)> {
+    pub fn find_possible_origins(
+        &self,
+        piece: Piece,
+        dest_rank: Rank,
+        dest_file: File,
+        from_rank: Rank,
+        from_file: File,
+    ) -> Vec<(usize, usize)> {
         let mut possible_origins = vec![];
 
         for rank_indx in 0..8 {
-
             if from_rank != Rank::_NA && rank_indx != from_rank.as_index() {
                 continue;
             }
 
             for file_indx in 0..8 {
-
                 if from_file != File::_NA && file_indx != from_file.as_index() {
                     continue;
                 }
@@ -317,14 +446,16 @@ impl Board {
                         // println!("\tPawn: to_move: {:?}; rank_indx={}, file_indx={}, rank_diff={}, file_diff={}", self.to_move, rank_indx, file_indx, rank_diff, file_diff);
 
                         if self.to_move == Player::White {
-                            if (rank_indx == 1 && rank_diff == 2 && file_diff == 0) ||
-                               (rank_diff == 1 && file_diff.abs() <= 1) {
-                                    possible_origins.push((rank_indx, file_indx));
+                            if (rank_indx == 1 && rank_diff == 2 && file_diff == 0)
+                                || (rank_diff == 1 && file_diff.abs() <= 1)
+                            {
+                                possible_origins.push((rank_indx, file_indx));
                             }
                         } else {
-                            if (rank_indx == 6 && rank_diff == -2 && file_diff == 0) ||
-                               (rank_diff == -1 && file_diff.abs() <= 1) {
-                                    possible_origins.push((rank_indx, file_indx));
+                            if (rank_indx == 6 && rank_diff == -2 && file_diff == 0)
+                                || (rank_diff == -1 && file_diff.abs() <= 1)
+                            {
+                                possible_origins.push((rank_indx, file_indx));
                             }
                         }
                     } else if piece == Piece::Bishop {
@@ -332,15 +463,21 @@ impl Board {
                             possible_origins.push((rank_indx, file_indx));
                         }
                     } else if piece == Piece::Knight {
-                        if (rank_diff.abs() == 2 && file_diff.abs() == 1) || (rank_diff.abs() == 1 && file_diff.abs() == 2) {
+                        if (rank_diff.abs() == 2 && file_diff.abs() == 1)
+                            || (rank_diff.abs() == 1 && file_diff.abs() == 2)
+                        {
                             possible_origins.push((rank_indx, file_indx));
                         }
                     } else if piece == Piece::Rook {
-                        if (rank_diff != 0 && file_diff == 0) || (rank_diff == 0 && file_diff != 0) {
+                        if (rank_diff != 0 && file_diff == 0) || (rank_diff == 0 && file_diff != 0)
+                        {
                             possible_origins.push((rank_indx, file_indx));
                         }
                     } else if piece == Piece::Queen {
-                        if (rank_diff != 0 && file_diff == 0) || (rank_diff == 0 && file_diff != 0) || (rank_diff.abs() == file_diff.abs()) {
+                        if (rank_diff != 0 && file_diff == 0)
+                            || (rank_diff == 0 && file_diff != 0)
+                            || (rank_diff.abs() == file_diff.abs())
+                        {
                             possible_origins.push((rank_indx, file_indx));
                         }
                     } else {
@@ -348,7 +485,6 @@ impl Board {
                         possible_origins.push((rank_indx, file_indx));
                     }
                 }
-
             }
         }
 
@@ -362,26 +498,60 @@ impl Board {
         let to_rank = move_description.to_rank.as_index();
         let to_file = move_description.to_file.as_index();
 
-        
-        if DEBUG {println!("\tMove: ({:?}, {:?}) -> ({:?}, {:?}); {:?}", move_description.from_rank, move_description.from_file, move_description.to_rank, move_description.to_file, move_description.piece_moved);}
+        if DEBUG {
+            println!(
+                "\tMove: ({:?}, {:?}) -> ({:?}, {:?}); {:?}",
+                move_description.from_rank,
+                move_description.from_file,
+                move_description.to_rank,
+                move_description.to_file,
+                move_description.piece_moved
+            );
+        }
         let piece_moved = move_description.piece_moved;
 
-        if DEBUG {println!("\t\tCurrent board: {}", self.to_fen());}
+        if DEBUG {
+            println!("\t\tCurrent board: {}", self.to_fen());
+        }
         // If there's a from rank and file, just make the move
-        let (from_rank, from_file) = if move_description.from_rank != Rank::_NA && move_description.from_file != File::_NA {
-            (move_description.from_rank.as_index(), move_description.from_file.as_index())
-        } else {
-            self.find_origin(piece_moved, move_description.to_rank, move_description.to_file, move_description.from_rank, move_description.from_file)
-        };
-        
-        if DEBUG {println!("\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}", piece_moved, from_rank, from_file, to_rank, to_file);}
+        let (from_rank, from_file) =
+            if move_description.from_rank != Rank::_NA && move_description.from_file != File::_NA {
+                (
+                    move_description.from_rank.as_index(),
+                    move_description.from_file.as_index(),
+                )
+            } else {
+                self.find_origin(
+                    piece_moved,
+                    move_description.to_rank,
+                    move_description.to_file,
+                    move_description.from_rank,
+                    move_description.from_file,
+                )
+            };
+
+        if DEBUG {
+            println!(
+                "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
+                piece_moved, from_rank, from_file, to_rank, to_file
+            );
+        }
         new_board.execute_move(piece_moved, from_rank, from_file, to_rank, to_file);
 
         if move_description.promoted_to != Piece::None {
-            new_board.set_piece(to_rank, to_file, PlayerPiece {piece: move_description.promoted_to, player: new_board.board[to_rank][to_file].player})
+            new_board.set_piece(
+                to_rank,
+                to_file,
+                PlayerPiece {
+                    piece: move_description.promoted_to,
+                    player: new_board.board[to_rank][to_file].player,
+                },
+            )
         }
 
-        if DEBUG {println!("\t\tNew board: {}", new_board.to_fen());}
+        if DEBUG {
+            println!("\t\tNew board: {}", new_board.to_fen());
+        }
 
         new_board
     }
@@ -395,16 +565,161 @@ impl Default for Board {
     fn default() -> Board {
         Board {
             board: [
-            [PlayerPiece{piece: Piece::Rook, player: Player::White}, PlayerPiece{piece: Piece::Knight, player: Player::White}, PlayerPiece{piece: Piece::Bishop, player: Player::White}, PlayerPiece{piece: Piece::Queen, player: Player::White}, PlayerPiece{piece: Piece::King, player: Player::White}, PlayerPiece{piece: Piece::Bishop, player: Player::White}, PlayerPiece{piece: Piece::Knight, player: Player::White}, PlayerPiece{piece: Piece::Rook, player: Player::White}],
-            [PlayerPiece{piece: Piece::Pawn, player: Player::White}, PlayerPiece{piece: Piece::Pawn,   player: Player::White}, PlayerPiece{piece: Piece::Pawn,   player: Player::White}, PlayerPiece{piece: Piece::Pawn, player: Player::White},  PlayerPiece{piece: Piece::Pawn, player: Player::White}, PlayerPiece{piece: Piece::Pawn, player: Player::White},   PlayerPiece{piece: Piece::Pawn,   player: Player::White}, PlayerPiece{piece: Piece::Pawn, player: Player::White}],
-            [EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL],
-            [EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL],
-            [EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL],
-            [EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL],
-            [PlayerPiece{piece: Piece::Pawn, player: Player::Black}, PlayerPiece{piece: Piece::Pawn, player: Player::Black},   PlayerPiece{piece: Piece::Pawn, player: Player::Black},   PlayerPiece{piece: Piece::Pawn, player: Player::Black},  PlayerPiece{piece: Piece::Pawn, player: Player::Black}, PlayerPiece{piece: Piece::Pawn, player: Player::Black},   PlayerPiece{piece: Piece::Pawn, player: Player::Black},   PlayerPiece{piece: Piece::Pawn, player: Player::Black}],
-            [PlayerPiece{piece: Piece::Rook, player: Player::Black}, PlayerPiece{piece: Piece::Knight, player: Player::Black}, PlayerPiece{piece: Piece::Bishop, player: Player::Black}, PlayerPiece{piece: Piece::Queen, player: Player::Black}, PlayerPiece{piece: Piece::King, player: Player::Black}, PlayerPiece{piece: Piece::Bishop, player: Player::Black}, PlayerPiece{piece: Piece::Knight, player: Player::Black}, PlayerPiece{piece: Piece::Rook, player: Player::Black}],],
+                [
+                    PlayerPiece {
+                        piece: Piece::Rook,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Knight,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Bishop,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Queen,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::King,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Bishop,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Knight,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Rook,
+                        player: Player::White,
+                    },
+                ],
+                [
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::White,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::White,
+                    },
+                ],
+                [
+                    EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,
+                    EMPTY_CELL, EMPTY_CELL,
+                ],
+                [
+                    EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,
+                    EMPTY_CELL, EMPTY_CELL,
+                ],
+                [
+                    EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,
+                    EMPTY_CELL, EMPTY_CELL,
+                ],
+                [
+                    EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,
+                    EMPTY_CELL, EMPTY_CELL,
+                ],
+                [
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Pawn,
+                        player: Player::Black,
+                    },
+                ],
+                [
+                    PlayerPiece {
+                        piece: Piece::Rook,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Knight,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Bishop,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Queen,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::King,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Bishop,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Knight,
+                        player: Player::Black,
+                    },
+                    PlayerPiece {
+                        piece: Piece::Rook,
+                        player: Player::Black,
+                    },
+                ],
+            ],
 
-            to_move: Player::White
+            to_move: Player::White,
         }
     }
 }

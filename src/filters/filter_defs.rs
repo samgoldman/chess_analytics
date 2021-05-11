@@ -117,10 +117,12 @@ filter!(mate_occurs_filter, "mate", params, {
     })
 });
 
-// Requires any parameters: the 
+// Requires any parameters: the
 filter!(site_matches_any_filter, "siteMatchesAny", params, {
     Box::new(move |game| -> bool {
-        params.iter().any(|allowed_site| allowed_site.contains(game.site()))
+        params
+            .iter()
+            .any(|allowed_site| allowed_site.contains(game.site()))
     })
 });
 
@@ -157,6 +159,67 @@ filter!(
 // Requires no parameters
 filter!(clock_available_filter, "clockAvailable", _params, {
     Box::new(|game| game.clock_available())
+});
+
+filter!(final_fen_search_filter, "finalFenMatchesAny", params, {
+    use std::panic;
+
+    Box::new(move |game| -> bool {
+        panic::set_hook(Box::new(|_info| {
+            // do nothing
+        }));
+
+        let result = panic::catch_unwind(|| game.build_boards());
+
+        match result {
+            Ok(res) => {
+                let actual_fen = res.last().unwrap().to_fen();
+                params
+                    .iter()
+                    .any(|allowed_fen| allowed_fen.contains(&actual_fen))
+            }
+            Err(err) => {
+                println!("{} failed with: {:?}", game.site(), err);
+                false
+            }
+        }
+    })
+});
+
+filter!(final_piece_count_filter, "finalPieceCount", params, {
+    use crate::general_utils::get_comparator;
+
+    let which_player = params[0].to_string();
+    let comparison = get_comparator::<u16>(&params[1]);
+    let threshold = params[2].parse::<u16>().unwrap();
+    Box::new(move |game| -> bool {
+        let result = {
+            let mut white_piece_count = 16;
+            let mut black_piece_count = 16;
+
+            for (i, m) in game.moves().iter().enumerate() {
+                let player = i % 2;
+
+                if m.captures {
+                    if player == 0 {
+                        black_piece_count -= 1;
+                    } else {
+                        white_piece_count -= 1;
+                    }
+                }
+            }
+
+            if which_player == "White" {
+                white_piece_count
+            } else if which_player == "Black" {
+                black_piece_count
+            } else {
+                white_piece_count + black_piece_count
+            }
+        };
+
+        comparison(result, threshold) == threshold
+    })
 });
 
 #[cfg(test)]

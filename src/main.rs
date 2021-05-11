@@ -3,19 +3,21 @@ use clap::{App, Arg};
 use glob::glob;
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use itertools::Itertools;
+use log::LevelFilter;
+use log::{info, trace};
 use rayon::prelude::*;
+use simple_logger::SimpleLogger;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use std::panic;
 
 mod bins;
+mod board;
 #[allow(non_snake_case)]
 #[path = "../target/flatbuffers/chess_generated.rs"]
 mod chess_flatbuffers;
-mod board;
 mod chess_utils;
 mod filters;
 mod game_wrapper;
@@ -56,6 +58,11 @@ fn main() {
         )
         .get_matches();
 
+    SimpleLogger::new()
+        .with_level(LevelFilter::Warn)
+        .init()
+        .unwrap();
+
     let db = Arc::new(Mutex::new(HashMap::new()));
 
     let input_steps = parse_workflow(matches.value_of("workflow").unwrap());
@@ -71,17 +78,22 @@ fn main() {
             )
         })
         .collect();
+    info!("Loaded {} analysis steps", analysis_steps.len());
+
     let selected_bins: Vec<BinFn> = input_steps
         .bins
         .iter()
         .map(|bin_input| get_selected_bins(bin_input.clone()))
         .collect();
+    info!("Loaded {} bins", selected_bins.len());
+
     let filter = get_filter_steps(input_steps.filters);
 
     let entries: Vec<PathBuf> = glob(matches.value_of("glob").unwrap())
         .expect("Failed to read glob pattern")
         .map(Result::unwrap)
         .collect();
+    info!("Found {} files via glob", entries.len());
 
     let progress_bar = ProgressBar::new(entries.len() as u64);
     progress_bar.set_style(
@@ -93,6 +105,8 @@ fn main() {
         .par_iter()
         .progress_with(progress_bar)
         .for_each(|entry| {
+            trace!("Starting to process entry: {:?}", entry);
+
             let mut file = File::open(entry).unwrap();
             let mut data = Vec::new();
 
@@ -103,39 +117,54 @@ fn main() {
             };
 
             if compressed {
+                trace!("Attempting to decompress entry: {:?}", entry);
                 let mut decompressor = BzDecoder::new(file);
                 decompressor.read_to_end(&mut data).unwrap();
+                trace!("Decompressed and read entry: {:?}", entry);
             } else {
+                trace!("Reading uncompressed entry: {:?}", entry);
                 file.read_to_end(&mut data).unwrap();
+                trace!("Read uncompressed entry: {:?}", entry);
             }
 
-            let mut games = GameWrapper::from_game_list_data(data);
+            let games = GameWrapper::from_game_list_data(data);
+            trace!("Read {} games from entry: {:?}", games.len(), entry);
 
             let filtered_games = games
                 .par_iter()
-                .filter(|x| filter(*x))
+                .filter(|x| filter(x))
                 .collect::<Vec<&GameWrapper>>();
+
+            info!("Filtered games for entry {:?}", entry);
+            trace!(
+                "Filtering games from {:?} resulted in {} games (out of {} original games)",
+                entry,
+                filtered_games.len(),
+                games.len()
+            );
 
             {
                 let mut db = db.lock().unwrap();
                 filtered_games.iter().for_each(|game| {
+                    // let mut mutable_game = (*game).clone();
 
-                    let mut mutable_game = game.clone();
+                    // panic::set_hook(Box::new(|_info| {
+                    //     // do nothing
+                    // }));
 
-                    panic::set_hook(Box::new(|_info| {
-                        // do nothing
-                    }));
-                
-                    let result = panic::catch_unwind(|| {
-                        game.build_boards();
-                    });
-                
-                    match result {
-                        Ok(res) => res,
-                        Err(_) => {
-                            println!("{}: failed", game.site());
-                        },
-                    }
+                    // let result = panic::catch_unwind(|| {
+                    //     mutable_game.build_boards()
+                    // });
+
+                    // match result {
+                    //     Ok(res) => {
+                    //         mutable_game.boards = res;
+                    //         println!("{}", mutable_game.boards.last().unwrap().to_fen());
+                    //     },
+                    //     Err(_) => {
+                    //         // println!("{}: failed", game.site());
+                    //     },
+                    // }
 
                     // TODO
                     // println!("{}", game.boards.last().unwrap().to_fen());

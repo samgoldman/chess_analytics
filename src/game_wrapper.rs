@@ -1,6 +1,6 @@
+use crate::board::Board;
 use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList, GameResult, Termination};
 use crate::chess_utils::*;
-use crate::board::Board;
 use itertools::izip;
 use std::time::Duration;
 
@@ -99,7 +99,7 @@ pub enum Piece {
     Bishop = 3,
     Rook = 4,
     Queen = 5,
-    King = 6
+    King = 6,
 }
 
 impl Piece {
@@ -206,10 +206,9 @@ pub struct GameWrapper {
     termination: Termination,
     white_diff: i16,
     black_diff: i16,
-    pub boards: Vec<Board>
+    pub boards: Vec<Board>,
 }
 #[derive(Clone)]
-
 #[cfg(test)]
 pub struct GameWrapper {
     pub year: u16,
@@ -234,7 +233,7 @@ pub struct GameWrapper {
     pub termination: Termination,
     pub white_diff: i16,
     pub black_diff: i16,
-    pub boards: Vec<Board>
+    pub boards: Vec<Board>,
 }
 
 impl GameWrapper {
@@ -359,7 +358,7 @@ impl GameWrapper {
             termination: game.termination(),
             white_diff: game.white_diff(),
             black_diff: game.black_diff(),
-            boards: vec![]
+            boards: vec![],
         }
     }
 

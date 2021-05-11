@@ -32,6 +32,8 @@ pub fn get_bin_factories() -> Vec<(String, BinFactoryFn)> {
         white_bin,
         black_bin,
         termination_bin,
+        game_length_bin,
+        final_fen_bin,
     )
 }
 

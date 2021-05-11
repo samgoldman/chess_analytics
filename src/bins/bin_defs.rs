@@ -52,6 +52,27 @@ bin!(eco_subcategory_bin, "ecoSubCategory", _params, {
     Box::new(move |game| format!("{}", game.eco_subcategory()))
 });
 
+bin!(game_length_bin, "gameLength", _params, {
+    Box::new(move |game| format!("{}", game.moves().len()))
+});
+
+bin!(final_fen_bin, "finalFen", _params, {
+    use std::panic;
+
+    Box::new(move |game| -> String {
+        panic::set_hook(Box::new(|_info| {
+            // do nothing
+        }));
+
+        let result = panic::catch_unwind(|| game.build_boards());
+
+        match result {
+            Ok(res) => res.last().unwrap().to_fen(),
+            Err(_) => "Failed to parse".to_string(),
+        }
+    })
+});
+
 bin!(site_bin, "site", _params, {
     Box::new(move |game| game.site().to_string())
 });
