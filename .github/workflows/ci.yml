@@ -11,7 +11,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: nightly
           override: true
       - name: Checkout submodules
         run: git submodule update --init --recursive
@@ -21,7 +21,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
-      - uses: Swatinem/rust-cache@v1
+      # - uses: Swatinem/rust-cache@v1
 
   test:
     name: Test Suite
@@ -31,7 +31,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: nightly
           override: true
       - name: Checkout submodules
         run: git submodule update --init --recursive
@@ -44,7 +44,7 @@ jobs:
       # - run: cargo install cargo-tarpaulin
       # - run: cargo tarpaulin --out Xml
       # - run: bash <(curl -s https://codecov.io/bash)
-      - uses: Swatinem/rust-cache@v1
+      # - uses: Swatinem/rust-cache@v1
           
   fmt:
     name: Rustfmt
@@ -54,7 +54,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: nightly
           override: true
       - name: Checkout submodules
         run: git submodule update --init --recursive
@@ -69,7 +69,7 @@ jobs:
         with:
           command: fmt
           args: -- --check
-      - uses: Swatinem/rust-cache@v1
+      # - uses: Swatinem/rust-cache@v1
 
   clippy_check:
       runs-on: ubuntu-latest
