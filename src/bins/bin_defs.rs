@@ -15,7 +15,7 @@ macro_rules! bin {
 }
 
 bin!(result_bin, "result", _params, {
-    use crate::chess_flatbuffers::chess::GameResult;
+    use crate::game_wrapper::GameResult;
     Box::new(move |game| match game.result() {
         GameResult::White => "White".to_string(),
         GameResult::Black => "Black".to_string(),

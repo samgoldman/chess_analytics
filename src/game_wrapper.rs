@@ -1,8 +1,50 @@
 use crate::board::Board;
-use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList, GameResult, Termination};
+use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList};
 use crate::chess_utils::*;
 use itertools::izip;
 use std::time::Duration;
+
+#[derive(PartialEq, Clone, Debug, Copy)]
+pub enum GameResult {
+    White = 0,
+    Black = 1,
+    Draw = 2,
+    Star = 255,
+}
+
+impl GameResult {
+    fn from_u8(n: u8) -> Option<GameResult> {
+        match n {
+            0 => Some(GameResult::White),
+            1 => Some(GameResult::Black),
+            2 => Some(GameResult::Draw),
+            255 => Some(GameResult::Star),
+            _ => None,
+        }
+    }
+}
+
+#[derive(PartialEq, Clone, Debug, Copy)]
+pub enum Termination {
+    Normal = 0,
+    TimeForfeit = 1,
+    Abandoned = 2,
+    RulesInfraction = 3,
+    Unterminated = 4,
+}
+
+impl Termination {
+    fn from_u8(n: u8) -> Option<Termination> {
+        match n {
+            0 => Some(Termination::Normal),
+            1 => Some(Termination::TimeForfeit),
+            2 => Some(Termination::Abandoned),
+            3 => Some(Termination::RulesInfraction),
+            4 => Some(Termination::Unterminated),
+            _ => None,
+        }
+    }
+}
 
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub enum NAG {
@@ -354,8 +396,8 @@ impl GameWrapper {
                 Some(eval_advantage) => eval_advantage.iter().collect::<Vec<f32>>(),
                 None => vec![],
             },
-            result: game.result(),
-            termination: game.termination(),
+            result: GameResult::from_u8(game.result()).unwrap(),
+            termination: Termination::from_u8(game.termination()).unwrap(),
             white_diff: game.white_diff(),
             black_diff: game.black_diff(),
             boards: vec![],

@@ -120,7 +120,7 @@ map!(opeing_is_not_count, "openingIsNotCount", params, {
 
 // Requires 1 parameter: Draw, WhiteVictory, BlackVictory. Anything else in GameResult::Star
 map!(result_map, "resultCount", params, {
-    use crate::chess_flatbuffers::chess::GameResult;
+    use crate::game_wrapper::GameResult;
     let expected = match params[0].as_ref() {
         "Draw" => GameResult::Draw,
         "WhiteVictory" => GameResult::White,
