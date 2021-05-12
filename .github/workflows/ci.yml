@@ -71,24 +71,16 @@ jobs:
           args: -- --check
       - uses: Swatinem/rust-cache@v1
 
-  clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - run: chmod u+x ./scripts/install-flatbuffers.sh
-      - uses: seanmiddleditch/gha-setup-ninja@master
-      - run: ./scripts/install-flatbuffers.sh
-      - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
-      - uses: Swatinem/rust-cache@v1
+  clippy_check:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v1
+        - uses: actions-rs/toolchain@v1
+          with:
+              toolchain: nightly
+              components: clippy
+              override: true
+        - uses: actions-rs/clippy-check@v1
+          with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            args: --all-features
