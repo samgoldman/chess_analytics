@@ -1,5 +1,5 @@
 branch: true
-ignore-not-existing: true
+ignore-not-existing: false
 llvm: true
 filter: covered
 output-type: lcov
@@ -10,5 +10,3 @@ ignore:
   - "C:/*"
   - "../*"
   - "*generated*"
-path-mapping:
-  - "/**"
