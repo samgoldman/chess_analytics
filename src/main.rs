@@ -13,6 +13,7 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
+mod basic_types;
 mod bins;
 mod board;
 #[allow(non_snake_case)]
