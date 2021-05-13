@@ -41,9 +41,6 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-      # - run: cargo install cargo-tarpaulin
-      # - run: cargo tarpaulin --out Xml
-      # - run: bash <(curl -s https://codecov.io/bash)
       # - uses: Swatinem/rust-cache@v1
           
   fmt:
@@ -55,13 +52,13 @@ jobs:
         with:
           profile: minimal
           toolchain: nightly
+          components: rustfmt
           override: true
       - name: Checkout submodules
         run: git submodule update --init --recursive
       - run: chmod u+x ./scripts/install-flatbuffers.sh
       - uses: seanmiddleditch/gha-setup-ninja@master
       - run: ./scripts/install-flatbuffers.sh
-      - run: rustup component add rustfmt
       - uses: actions-rs/cargo@v1
         with: 
           command: build
