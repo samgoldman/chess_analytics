@@ -21,3 +21,24 @@ fn test_from_u8() {
         "convert_125": (125, None),
     }
 }
+
+#[test]
+fn test_equality() {
+    macro_rules! cases_equality {
+        ($($name:literal: $value:expr,)*) => {
+        $(
+            let ((a, b), expected) = $value;
+            assert_eq!(expected, a == b, $name);
+        )*
+        }
+    }
+
+    cases_equality! {
+        "equality_White_White": ((GameResult::White, GameResult::White), true),
+        "equality_Black_Black": ((GameResult::White, GameResult::White), true),
+        "equality_Draw_Draw": ((GameResult::White, GameResult::White), true),
+        "equality_Star_Star": ((GameResult::White, GameResult::White), true),
+        "equality_White_Black": ((GameResult::White, GameResult::Black), false),
+        "equality_Black_White": ((GameResult::White, GameResult::Black), false),
+    }
+}
