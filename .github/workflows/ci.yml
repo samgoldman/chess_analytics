@@ -21,7 +21,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
-      # - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v1
 
   test:
     name: Test Suite
@@ -41,9 +41,23 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-      - uses: actions-rs/cargo@v1
+      - uses: Swatinem/rust-cache@v1
+
+  coverage:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
         with:
-          command: clean
+          profile: minimal
+          toolchain: nightly
+          override: true
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - run: chmod u+x ./scripts/install-flatbuffers.sh
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      - run: ./scripts/install-flatbuffers.sh
       - uses: actions-rs/cargo@v1
         with:
           command: test
@@ -59,7 +73,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ${{ steps.coverage.outputs.report }}
-      # - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v1
           
   fmt:
     name: Rustfmt
@@ -84,7 +98,7 @@ jobs:
         with:
           command: fmt
           args: -- --check
-      # - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v1
 
   clippy_check:
     runs-on: ubuntu-latest
