@@ -1,4 +1,6 @@
-use crate::game_wrapper::{File, Move, Piece, Rank};
+use crate::basic_types::file::File;
+use crate::basic_types::rank::Rank;
+use crate::game_wrapper::{Move, Piece};
 
 const DEBUG: bool = false;
 

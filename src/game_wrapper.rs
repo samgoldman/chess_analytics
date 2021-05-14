@@ -1,4 +1,6 @@
+use crate::basic_types::file::File;
 use crate::basic_types::game_result::GameResult;
+use crate::basic_types::rank::Rank;
 use crate::basic_types::termination::Termination;
 use crate::board::Board;
 use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList};
@@ -22,74 +24,6 @@ impl NAG {
             0x0100 => NAG::Blunder,
             _ => NAG::None,
         }
-    }
-}
-
-#[derive(PartialEq, Clone, Debug, Copy)]
-pub enum Rank {
-    _NA = 0,
-    _1 = 1,
-    _2 = 2,
-    _3 = 3,
-    _4 = 4,
-    _5 = 5,
-    _6 = 6,
-    _7 = 7,
-    _8 = 8,
-}
-
-impl Rank {
-    pub fn from_str(rank_str: &str) -> Self {
-        match rank_str {
-            "" => Rank::_NA,
-            "1" => Rank::_1,
-            "2" => Rank::_2,
-            "3" => Rank::_3,
-            "4" => Rank::_4,
-            "5" => Rank::_5,
-            "6" => Rank::_6,
-            "7" => Rank::_7,
-            "8" => Rank::_8,
-            u => panic!("Unrecongnized rank: {}", u),
-        }
-    }
-
-    pub fn as_index(&self) -> usize {
-        *self as usize - 1
-    }
-}
-
-#[derive(PartialEq, Clone, Debug, Copy)]
-pub enum File {
-    _NA = 0,
-    _A = 1,
-    _B = 2,
-    _C = 3,
-    _D = 4,
-    _E = 5,
-    _F = 6,
-    _G = 7,
-    _H = 8,
-}
-
-impl File {
-    pub fn from_str(file_str: &str) -> Self {
-        match file_str {
-            "" => File::_NA,
-            "a" => File::_A,
-            "b" => File::_B,
-            "c" => File::_C,
-            "d" => File::_D,
-            "e" => File::_E,
-            "f" => File::_F,
-            "g" => File::_G,
-            "h" => File::_H,
-            u => panic!("Unrecongnized file: {}", u),
-        }
-    }
-
-    pub fn as_index(&self) -> usize {
-        *self as usize - 1
     }
 }
 

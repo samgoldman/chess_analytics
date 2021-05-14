@@ -1,4 +1,6 @@
-use crate::game_wrapper::{File, GameWrapper, Move, Piece, Rank};
+use crate::basic_types::file::File;
+use crate::basic_types::rank::Rank;
+use crate::game_wrapper::{GameWrapper, Move, Piece};
 use regex::Regex;
 
 fn int_to_file(int: u16) -> File {

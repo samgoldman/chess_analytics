@@ -139,7 +139,9 @@ filter!(
     _params,
     {
         Box::new(move |game| -> bool {
-            use crate::game_wrapper::{File, Piece};
+            use crate::basic_types::file::File;
+            use crate::game_wrapper::Piece;
+
             let moves = game.moves();
 
             if moves.is_empty() {
