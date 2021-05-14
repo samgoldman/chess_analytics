@@ -1,31 +1,10 @@
 use crate::basic_types::game_result::GameResult;
+use crate::basic_types::termination::Termination;
 use crate::board::Board;
 use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList};
 use crate::chess_utils::*;
 use itertools::izip;
 use std::time::Duration;
-
-#[derive(PartialEq, Clone, Debug, Copy)]
-pub enum Termination {
-    Normal = 0,
-    TimeForfeit = 1,
-    Abandoned = 2,
-    RulesInfraction = 3,
-    Unterminated = 4,
-}
-
-impl Termination {
-    fn from_u8(n: u8) -> Option<Termination> {
-        match n {
-            0 => Some(Termination::Normal),
-            1 => Some(Termination::TimeForfeit),
-            2 => Some(Termination::Abandoned),
-            3 => Some(Termination::RulesInfraction),
-            4 => Some(Termination::Unterminated),
-            _ => None,
-        }
-    }
-}
 
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub enum NAG {
