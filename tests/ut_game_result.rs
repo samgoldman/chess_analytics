@@ -1,44 +1,44 @@
 use chess_analytics::basic_types::game_result::GameResult;
 
-#[test]
-fn test_from_u8() {
-    macro_rules! cases_from_u8 {
-        ($($name:literal: $value:expr,)*) => {
-        $(
+macro_rules! tests_from_u8 {
+    ($($name:ident: $value:expr,)*) => {
+    $(
+        #[test]
+        fn $name() {
             let (input, expected) = $value;
-            assert_eq!(expected, GameResult::from_u8(input), $name);
-        )*
+            assert_eq!(expected, GameResult::from_u8(input));
         }
-    }
-
-    cases_from_u8! {
-        "convert_0": (0, Some(GameResult::White)),
-        "convert_1": (1, Some(GameResult::Black)),
-        "convert_2": (2, Some(GameResult::Draw)),
-        "convert_255": (255, Some(GameResult::Star)),
-        "convert_45": (45, None),
-        "convert_85": (85, None),
-        "convert_125": (125, None),
+    )*
     }
 }
 
-#[test]
-fn test_equality() {
-    macro_rules! cases_equality {
-        ($($name:literal: $value:expr,)*) => {
-        $(
-            let ((a, b), expected) = $value;
-            assert_eq!(expected, a == b, $name);
-        )*
-        }
-    }
+tests_from_u8! {
+    test_from_u8_0: (0, Some(GameResult::White)),
+    test_from_u8_1: (1, Some(GameResult::Black)),
+    test_from_u8_2: (2, Some(GameResult::Draw)),
+    test_from_u8_255: (255, Some(GameResult::Star)),
+    test_from_u8_45: (45, None),
+    test_from_u8_85: (85, None),
+    test_from_u8_125: (125, None),
+}
 
-    cases_equality! {
-        "equality_White_White": ((GameResult::White, GameResult::White), true),
-        "equality_Black_Black": ((GameResult::White, GameResult::White), true),
-        "equality_Draw_Draw": ((GameResult::White, GameResult::White), true),
-        "equality_Star_Star": ((GameResult::White, GameResult::White), true),
-        "equality_White_Black": ((GameResult::White, GameResult::Black), false),
-        "equality_Black_White": ((GameResult::White, GameResult::Black), false),
+macro_rules! tests_equality {
+    ($($name:ident: $value:expr,)*) => {
+    $(
+        #[test]
+        fn $name() {
+            let ((a, b), expected) = $value;
+            assert_eq!(expected, a == b);
+        }
+    )*
     }
+}
+
+tests_equality! {
+    equality_white_white: ((GameResult::White, GameResult::White), true),
+    equality_black_black: ((GameResult::White, GameResult::White), true),
+    equality_draw_draw: ((GameResult::White, GameResult::White), true),
+    equality_star_star: ((GameResult::White, GameResult::White), true),
+    equality_white_black: ((GameResult::White, GameResult::Black), false),
+    equality_black_white: ((GameResult::White, GameResult::Black), false),
 }
