@@ -2,7 +2,6 @@ use chess_analytics::basic_types::game_result::GameResult;
 
 #[test]
 fn test_from_u8() {
-
     macro_rules! cases_from_u8 {
         ($($name:literal: $value:expr,)*) => {
         $(
