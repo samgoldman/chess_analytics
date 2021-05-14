@@ -33,7 +33,7 @@ mod test_game_result_from_u8 {
         )*
         }
     }
-    
+
     tests_from_u8! {
         test_from_u8_0: (0, Some(GameResult::White)),
         test_from_u8_1: (1, Some(GameResult::Black)),
@@ -42,31 +42,5 @@ mod test_game_result_from_u8 {
         test_from_u8_45: (45, None),
         test_from_u8_85: (85, None),
         test_from_u8_125: (125, None),
-    }
-}
-
-#[cfg(test)]
-mod test_game_result_equality {
-    use super::*;
-
-    macro_rules! tests_equality {
-        ($($name:ident: $value:expr,)*) => {
-        $(
-            #[test]
-            fn $name() {
-                let ((a, b), expected) = $value;
-                assert_eq!(expected, a == b);
-            }
-        )*
-        }
-    }
-    
-    tests_equality! {
-        equality_white_white: ((GameResult::White, GameResult::White), true),
-        equality_black_black: ((GameResult::White, GameResult::White), true),
-        equality_draw_draw: ((GameResult::White, GameResult::White), true),
-        equality_star_star: ((GameResult::White, GameResult::White), true),
-        equality_white_black: ((GameResult::White, GameResult::Black), false),
-        equality_black_white: ((GameResult::White, GameResult::Black), false),
     }
 }
