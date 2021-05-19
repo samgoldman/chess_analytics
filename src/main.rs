@@ -25,6 +25,7 @@ mod game_wrapper;
 mod general_utils;
 mod statistics;
 mod workflow;
+mod workflow_step;
 
 use bins::*;
 use filters::get_filter_steps;
