@@ -1,16 +1,10 @@
 use crate::basic_types::file::File;
+use crate::basic_types::player::Player;
 use crate::basic_types::rank::Rank;
 use crate::game_wrapper::{Move, Piece};
 use log::{debug, trace};
 use std::convert::TryInto;
 use std::iter;
-
-#[derive(PartialEq, Clone, Debug, Copy)]
-pub enum Player {
-    White,
-    Black,
-    NA,
-}
 
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub struct PlayerPiece {
@@ -596,7 +590,7 @@ impl Default for Board {
                 EMPTY_ROW,
                 EMPTY_ROW,
                 PlayerPiece::build_pawn_row(Player::Black),
-                PlayerPiece::build_back_row(Player::Black)
+                PlayerPiece::build_back_row(Player::Black),
             ],
 
             to_move: Player::White,
