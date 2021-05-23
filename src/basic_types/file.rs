@@ -12,7 +12,7 @@ pub enum File {
 }
 
 impl File {
-    pub fn from_str(file_str: &str) -> Self {
+    pub fn from_char(file_str: &str) -> Self {
         match file_str {
             "" => File::_NA,
             "a" => File::_A,

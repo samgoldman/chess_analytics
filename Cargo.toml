@@ -12,7 +12,7 @@ path = "src/lib.rs"
 test = true
 
 [dependencies]
-flatbuffers = "0.9.0"
+flatbuffers = "2.0.0"
 lazy_static = "1.4.0"
 regex = "1.4.2"
 clap = "3.0.0-beta.2"

@@ -12,7 +12,7 @@ pub enum Rank {
 }
 
 impl Rank {
-    pub fn from_str(rank_str: &str) -> Self {
+    pub fn from_char(rank_str: &str) -> Self {
         match rank_str {
             "" => Rank::_NA,
             "1" => Rank::_1,
