@@ -137,7 +137,7 @@ map!(has_eval_map, "hasEval", _params, {
 
 // Requires 1 parameter: the promotion type being counted
 map!(promotion_count_map, "promotionCount", params, {
-    use crate::game_wrapper::Piece;
+    use crate::basic_types::piece::Piece;
 
     let expected = match params[0].as_ref() {
         "Knight" => Piece::Knight,

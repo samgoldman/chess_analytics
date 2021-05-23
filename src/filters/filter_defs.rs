@@ -140,7 +140,7 @@ filter!(
     {
         Box::new(move |game| -> bool {
             use crate::basic_types::file::File;
-            use crate::game_wrapper::Piece;
+            use crate::basic_types::piece::Piece;
 
             let moves = game.moves();
 

@@ -1,5 +1,6 @@
 use crate::basic_types::file::File;
 use crate::basic_types::game_result::GameResult;
+use crate::basic_types::piece::Piece;
 use crate::basic_types::rank::Rank;
 use crate::basic_types::termination::Termination;
 use crate::board::Board;
@@ -23,31 +24,6 @@ impl NAG {
             0x0080 => NAG::Mistake,
             0x0100 => NAG::Blunder,
             _ => NAG::None,
-        }
-    }
-}
-
-#[derive(PartialEq, Clone, Debug, Copy)]
-pub enum Piece {
-    None = 0,
-    Pawn = 1,
-    Knight = 2,
-    Bishop = 3,
-    Rook = 4,
-    Queen = 5,
-    King = 6,
-}
-
-impl Piece {
-    pub fn from_pgn(piece_str: &str) -> Self {
-        match piece_str {
-            "" => Piece::Pawn,
-            "N" => Piece::Knight,
-            "B" => Piece::Bishop,
-            "R" => Piece::Rook,
-            "Q" => Piece::Queen,
-            "K" => Piece::King,
-            u => panic!("Unrecongized piece: {}", u),
         }
     }
 }
