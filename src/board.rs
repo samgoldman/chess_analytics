@@ -1,7 +1,9 @@
 use crate::basic_types::file::File;
 use crate::basic_types::rank::Rank;
 use crate::game_wrapper::{Move, Piece};
-use log::debug;
+use log::{debug, trace};
+use std::convert::TryInto;
+use std::iter;
 
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub enum Player {
@@ -16,10 +18,41 @@ pub struct PlayerPiece {
     player: Player,
 }
 
+impl PlayerPiece {
+    pub fn new(piece: Piece, player: Player) -> Self {
+        PlayerPiece { piece, player }
+    }
+
+    pub fn build_pawn_row(player: Player) -> [PlayerPiece; 8] {
+        iter::repeat(PlayerPiece::new(Piece::Pawn, player))
+            .take(8)
+            .collect::<Vec<PlayerPiece>>()
+            .try_into()
+            .unwrap()
+    }
+
+    pub fn build_back_row(player: Player) -> [PlayerPiece; 8] {
+        [
+            PlayerPiece::new(Piece::Rook, player),
+            PlayerPiece::new(Piece::Knight, player),
+            PlayerPiece::new(Piece::Bishop, player),
+            PlayerPiece::new(Piece::Queen, player),
+            PlayerPiece::new(Piece::King, player),
+            PlayerPiece::new(Piece::Bishop, player),
+            PlayerPiece::new(Piece::Knight, player),
+            PlayerPiece::new(Piece::Rook, player),
+        ]
+    }
+}
+
 const EMPTY_CELL: PlayerPiece = PlayerPiece {
     piece: Piece::None,
     player: Player::NA,
 };
+
+const EMPTY_ROW: [PlayerPiece; 8] = [
+    EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,
+];
 
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub struct Board {
@@ -285,10 +318,10 @@ impl Board {
         } else if piece == Piece::King {
             // Check for castling
             if diff_file == 2 {
-                debug!("\t\tKingside castling!");
+                debug!("Kingside castling");
 
-                debug!(
-                    "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
+                trace!(
+                    "Kingside castling, executing move: {:?}, {:?}, {:?}, {:?}, {:?}",
                     Piece::Rook,
                     from_rank,
                     File::_H.as_index(),
@@ -304,10 +337,10 @@ impl Board {
                     File::_F.as_index(),
                 );
             } else if diff_file == -2 {
-                debug!("\t\tQueenside castling!");
+                debug!("Queenside castling");
 
-                debug!(
-                    "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
+                trace!(
+                    "Queenside castling, executing move: {:?}, {:?}, {:?}, {:?}, {:?}",
                     Piece::Rook,
                     from_rank,
                     File::_A.as_index(),
@@ -491,7 +524,7 @@ impl Board {
         let to_file = move_description.to_file.as_index();
 
         debug!(
-            "\tMove: ({:?}, {:?}) -> ({:?}, {:?}); {:?}",
+            "Move: ({:?}, {:?}) -> ({:?}, {:?}); {:?}",
             move_description.from_rank,
             move_description.from_file,
             move_description.to_rank,
@@ -501,7 +534,7 @@ impl Board {
 
         let piece_moved = move_description.piece_moved;
 
-        debug!("\t\tCurrent board: {}", self.to_fen());
+        debug!("Current board: {}", self.to_fen());
 
         // If there's a from rank and file, just make the move
         let (from_rank, from_file) =
@@ -520,9 +553,13 @@ impl Board {
                 )
             };
 
-        debug!(
-            "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
-            piece_moved, from_rank, from_file, to_rank, to_file
+        trace!(
+            "Executing move: {:?}, {:?}, {:?}, {:?}, {:?}",
+            piece_moved,
+            from_rank,
+            from_file,
+            to_rank,
+            to_file
         );
 
         new_board.execute_move(piece_moved, from_rank, from_file, to_rank, to_file);
@@ -538,7 +575,7 @@ impl Board {
             )
         }
 
-        debug!("\t\tNew board: {}", new_board.to_fen());
+        trace!("New board: {}", new_board.to_fen());
 
         new_board
     }
@@ -552,158 +589,14 @@ impl Default for Board {
     fn default() -> Board {
         Board {
             board: [
-                [
-                    PlayerPiece {
-                        piece: Piece::Rook,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Knight,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Bishop,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Queen,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::King,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Bishop,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Knight,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Rook,
-                        player: Player::White,
-                    },
-                ],
-                [
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::White,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::White,
-                    },
-                ],
-                [
-                    EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,
-                    EMPTY_CELL, EMPTY_CELL,
-                ],
-                [
-                    EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,
-                    EMPTY_CELL, EMPTY_CELL,
-                ],
-                [
-                    EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,
-                    EMPTY_CELL, EMPTY_CELL,
-                ],
-                [
-                    EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,
-                    EMPTY_CELL, EMPTY_CELL,
-                ],
-                [
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Pawn,
-                        player: Player::Black,
-                    },
-                ],
-                [
-                    PlayerPiece {
-                        piece: Piece::Rook,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Knight,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Bishop,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Queen,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::King,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Bishop,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Knight,
-                        player: Player::Black,
-                    },
-                    PlayerPiece {
-                        piece: Piece::Rook,
-                        player: Player::Black,
-                    },
-                ],
+                PlayerPiece::build_back_row(Player::White),
+                PlayerPiece::build_pawn_row(Player::White),
+                EMPTY_ROW,
+                EMPTY_ROW,
+                EMPTY_ROW,
+                EMPTY_ROW,
+                PlayerPiece::build_pawn_row(Player::Black),
+                PlayerPiece::build_back_row(Player::Black)
             ],
 
             to_move: Player::White,
