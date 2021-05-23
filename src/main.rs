@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
+use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 
 mod basic_types;
@@ -58,10 +59,19 @@ fn main() {
                 .multiple(true)
                 .default_values(&["0", "-1"]),
         )
+        .arg(
+            Arg::new("logger_level")
+                .long("logger_level")
+                .takes_value(true)
+                .default_value("warn"),
+        )
         .get_matches();
 
     SimpleLogger::new()
-        .with_level(LevelFilter::Warn)
+        .with_level(
+            LevelFilter::from_str(matches.value_of("logger_level").unwrap())
+                .unwrap_or(LevelFilter::Warn),
+        )
         .init()
         .unwrap();
 

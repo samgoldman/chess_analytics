@@ -7,7 +7,7 @@ trait Step {
 }
 
 #[allow(dead_code)] // TODO: remove
-struct WorkflowProcessor<'a> {
+pub struct WorkflowProcessor<'a> {
     step: &'a dyn Step,
     substeps: Vec<&'a WorkflowProcessor<'a>>,
 }
