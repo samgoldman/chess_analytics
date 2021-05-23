@@ -29,7 +29,7 @@ impl Rank {
 
     pub fn as_index(&self) -> usize {
         if Rank::_NA == *self {
-            panic!("File::_NA has no index value!");
+            panic!("Rank::_NA has no index value!");
         }
 
         *self as usize - 1
@@ -113,7 +113,7 @@ mod test_rank_as_index {
     }
 
     #[test]
-    #[should_panic(expected = "File::_NA has no index value!")]
+    #[should_panic(expected = "Rank::_NA has no index value!")]
     fn test_as_index_na() {
         Rank::_NA.as_index();
     }
