@@ -44,3 +44,88 @@ pub const EMPTY_CELL: PlayerPiece = PlayerPiece {
 pub const EMPTY_ROW: [PlayerPiece; 8] = [
     EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,
 ];
+
+#[cfg(test)]
+mod test_new {
+    use super::*;
+
+    macro_rules! tests_new {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (piece, player) = $value;
+                assert_eq!(PlayerPiece::new(piece, player), PlayerPiece {
+                    piece, player
+                });
+            }
+        )*
+        }
+    }
+
+    tests_new! {
+        test_empty: (Piece::None, Player::NA),
+        test_new_white_pawn: (Piece::Pawn, Player::White),
+        test_new_black_queen: (Piece::Queen, Player::Black),
+    }
+}
+
+#[cfg(test)]
+mod test_back_row {
+    use super::*;
+
+    macro_rules! tests_back_row {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                assert_eq!(PlayerPiece::build_back_row($value), [
+                    PlayerPiece {piece: Piece::Rook, player: $value},
+                    PlayerPiece {piece: Piece::Knight, player: $value},
+                    PlayerPiece {piece: Piece::Bishop, player: $value},
+                    PlayerPiece {piece: Piece::Queen, player: $value},
+                    PlayerPiece {piece: Piece::King, player: $value},
+                    PlayerPiece {piece: Piece::Bishop, player: $value},
+                    PlayerPiece {piece: Piece::Knight, player: $value},
+                    PlayerPiece {piece: Piece::Rook, player: $value},
+                ]);
+            }
+        )*
+        }
+    }
+
+    tests_back_row! {
+        test_white_back_row: Player::White,
+        test_black_back_row: Player::Black,
+    }
+}
+
+#[cfg(test)]
+mod test_build_pawn_row {
+    use super::*;
+
+    macro_rules! tests_pawn_row {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                assert_eq!(PlayerPiece::build_pawn_row($value), [
+                    PlayerPiece {piece: Piece::Pawn, player: $value},
+                    PlayerPiece {piece: Piece::Pawn, player: $value},
+                    PlayerPiece {piece: Piece::Pawn, player: $value},
+                    PlayerPiece {piece: Piece::Pawn, player: $value},
+                    PlayerPiece {piece: Piece::Pawn, player: $value},
+                    PlayerPiece {piece: Piece::Pawn, player: $value},
+                    PlayerPiece {piece: Piece::Pawn, player: $value},
+                    PlayerPiece {piece: Piece::Pawn, player: $value},
+                ]);
+            }
+        )*
+        }
+    }
+
+    tests_pawn_row! {
+        test_white_pawn_row: Player::White,
+        test_black_pawn_row: Player::Black,
+    }
+}
