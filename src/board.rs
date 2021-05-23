@@ -1,8 +1,7 @@
 use crate::basic_types::file::File;
 use crate::basic_types::rank::Rank;
 use crate::game_wrapper::{Move, Piece};
-
-const DEBUG: bool = false;
+use log::debug;
 
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub enum Player {
@@ -162,7 +161,7 @@ impl Board {
             check
         });
 
-        // println!("Is in check: {}, {}", check, self.to_fen());
+        debug!("Is in check: {}, {}", check, self.to_fen());
 
         check
     }
@@ -236,14 +235,16 @@ impl Board {
     pub fn find_player_piece_locs(&self, player: Player) -> Vec<(usize, usize)> {
         let mut result = vec![];
 
-        // println!("{}", self.to_fen());
         for rank_indx in 0..8 {
             for file_indx in 0..8 {
                 let piece = self.board[rank_indx][file_indx];
 
                 if piece.player == player {
                     result.push((rank_indx, file_indx));
-                    // println!("Found piece for {:?} at ({}, {})", player, rank_indx, file_indx);
+                    debug!(
+                        "Found piece for {:?} at ({}, {})",
+                        player, rank_indx, file_indx
+                    );
                 }
             }
         }
@@ -284,19 +285,17 @@ impl Board {
         } else if piece == Piece::King {
             // Check for castling
             if diff_file == 2 {
-                if DEBUG {
-                    println!("\t\tKingside castling!");
-                }
-                if DEBUG {
-                    println!(
-                        "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
-                        Piece::Rook,
-                        from_rank,
-                        File::_H.as_index(),
-                        to_rank,
-                        File::_F.as_index()
-                    );
-                }
+                debug!("\t\tKingside castling!");
+
+                debug!(
+                    "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
+                    Piece::Rook,
+                    from_rank,
+                    File::_H.as_index(),
+                    to_rank,
+                    File::_F.as_index()
+                );
+
                 self.execute_move(
                     Piece::Rook,
                     from_rank,
@@ -305,19 +304,17 @@ impl Board {
                     File::_F.as_index(),
                 );
             } else if diff_file == -2 {
-                if DEBUG {
-                    println!("\t\tQueenside castling!");
-                }
-                if DEBUG {
-                    println!(
-                        "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
-                        Piece::Rook,
-                        from_rank,
-                        File::_A.as_index(),
-                        to_rank,
-                        File::_D.as_index()
-                    );
-                }
+                debug!("\t\tQueenside castling!");
+
+                debug!(
+                    "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
+                    Piece::Rook,
+                    from_rank,
+                    File::_A.as_index(),
+                    to_rank,
+                    File::_D.as_index()
+                );
+
                 self.execute_move(
                     Piece::Rook,
                     from_rank,
@@ -371,7 +368,6 @@ impl Board {
                 for possible_origin in possible_origins.clone() {
                     let mut test_board = *self;
 
-                    // println!("\t\t\tTesting check...");
                     test_board.execute_move(
                         piece,
                         possible_origin.0,
@@ -379,10 +375,8 @@ impl Board {
                         dest_rank.as_index(),
                         dest_file.as_index(),
                     );
-                    // println!("\t\t\t...done testing check!");
 
                     if test_board.is_in_check(self.to_move) {
-                        // println!("\t\t\t\tPinned, removing: {:?}", possible_origin);
                         possible_origins.remove(i);
                     } else {
                         i += 1;
@@ -496,21 +490,19 @@ impl Board {
         let to_rank = move_description.to_rank.as_index();
         let to_file = move_description.to_file.as_index();
 
-        if DEBUG {
-            println!(
-                "\tMove: ({:?}, {:?}) -> ({:?}, {:?}); {:?}",
-                move_description.from_rank,
-                move_description.from_file,
-                move_description.to_rank,
-                move_description.to_file,
-                move_description.piece_moved
-            );
-        }
+        debug!(
+            "\tMove: ({:?}, {:?}) -> ({:?}, {:?}); {:?}",
+            move_description.from_rank,
+            move_description.from_file,
+            move_description.to_rank,
+            move_description.to_file,
+            move_description.piece_moved
+        );
+
         let piece_moved = move_description.piece_moved;
 
-        if DEBUG {
-            println!("\t\tCurrent board: {}", self.to_fen());
-        }
+        debug!("\t\tCurrent board: {}", self.to_fen());
+
         // If there's a from rank and file, just make the move
         let (from_rank, from_file) =
             if move_description.from_rank != Rank::_NA && move_description.from_file != File::_NA {
@@ -528,12 +520,11 @@ impl Board {
                 )
             };
 
-        if DEBUG {
-            println!(
-                "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
-                piece_moved, from_rank, from_file, to_rank, to_file
-            );
-        }
+        debug!(
+            "\t\tExecuting move: {:?}, {:?}, {:?}, {:?}, {:?}",
+            piece_moved, from_rank, from_file, to_rank, to_file
+        );
+
         new_board.execute_move(piece_moved, from_rank, from_file, to_rank, to_file);
 
         if move_description.promoted_to != Piece::None {
@@ -547,9 +538,7 @@ impl Board {
             )
         }
 
-        if DEBUG {
-            println!("\t\tNew board: {}", new_board.to_fen());
-        }
+        debug!("\t\tNew board: {}", new_board.to_fen());
 
         new_board
     }
