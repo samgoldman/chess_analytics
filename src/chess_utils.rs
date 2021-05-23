@@ -111,12 +111,12 @@ pub fn parse_movetext(movetext: &str) -> Vec<Move> {
             let dest_str = &cap[4];
             let dest = RE_COORD.captures_iter(dest_str).next().unwrap();
 
-            let piece_moved = Piece::from_str(piece_str);
+            let piece_moved = Piece::from_pgn(piece_str);
 
-            let from_file = File::from_char(&disambiguation[1]);
-            let from_rank = Rank::from_char(&disambiguation[2]);
-            let to_file = File::from_char(&dest[1]);
-            let to_rank = Rank::from_char(&dest[2]);
+            let from_file = File::from_pgn(&disambiguation[1]);
+            let from_rank = Rank::from_pgn(&disambiguation[2]);
+            let to_file = File::from_pgn(&dest[1]);
+            let to_rank = Rank::from_pgn(&dest[2]);
 
             Move::new_to_from(from_file, from_rank, to_file, to_rank, piece_moved)
         })

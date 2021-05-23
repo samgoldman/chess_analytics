@@ -39,7 +39,7 @@ pub enum Piece {
 }
 
 impl Piece {
-    pub fn from_str(piece_str: &str) -> Self {
+    pub fn from_pgn(piece_str: &str) -> Self {
         match piece_str {
             "" => Piece::Pawn,
             "N" => Piece::Knight,
