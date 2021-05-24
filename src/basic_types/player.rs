@@ -6,9 +6,9 @@ pub enum Player {
 }
 
 impl Player {
-    pub fn toggle_player(&self) -> Self {
+    pub fn get_opposing_player(&self) -> Self {
         if Player::NA == *self {
-            panic!("Cannot toggle Player::NA");
+            panic!("Player::NA has no opposing player");
         }
 
         if Player::White == *self {
@@ -20,22 +20,22 @@ impl Player {
 }
 
 #[cfg(test)]
-mod test_toggle_player {
+mod test_get_opposing_player {
     use super::*;
 
     #[test]
-    #[should_panic(expected = "Cannot toggle Player::NA")]
+    #[should_panic(expected = "Player::NA has no opposing player")]
     fn test_na_panics() {
-        Player::NA.toggle_player();
+        Player::NA.get_opposing_player();
     }
 
     #[test]
     fn test_toggle_black() {
-        assert_eq!(Player::Black.toggle_player(), Player::White);
+        assert_eq!(Player::Black.get_opposing_player(), Player::White);
     }
 
     #[test]
     fn test_toggle_white() {
-        assert_eq!(Player::White.toggle_player(), Player::Black);
+        assert_eq!(Player::White.get_opposing_player(), Player::Black);
     }
 }

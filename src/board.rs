@@ -62,7 +62,7 @@ impl Board {
     }
 
     pub fn toggle_to_move(&mut self) {
-        self.to_move = self.to_move.toggle_player();
+        self.to_move = self.to_move.get_opposing_player();
     }
 
     pub fn is_cell_empty(&self, rank: usize, file: usize) -> bool {
@@ -121,11 +121,7 @@ impl Board {
 
     pub fn is_in_check(&self, player: Player) -> bool {
         let king_loc = self.find_king_loc(player);
-        let opposing_pieces = self.find_player_piece_locs(if player == Player::White {
-            Player::Black
-        } else {
-            Player::White
-        });
+        let opposing_pieces = self.find_player_piece_locs(player.get_opposing_player());
 
         let check = opposing_pieces.iter().any(|opposing_piece_loc| {
             let check = self.does_piece_check_loc(
