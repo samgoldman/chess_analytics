@@ -21,6 +21,45 @@ impl Piece {
             u => panic!("Unrecognized piece: {}", u),
         }
     }
+
+    pub fn to_fen(self) -> &'static str {
+        match self {
+            Piece::Pawn => "P",
+            Piece::Bishop => "B",
+            Piece::Knight => "N",
+            Piece::Rook => "R",
+            Piece::Queen => "Q",
+            Piece::King => "K",
+            Piece::None => "U",
+        }
+    }
+}
+
+#[cfg(test)]
+mod test_to_fen {
+    use super::*;
+
+    macro_rules! tests_to_fen {
+        ($($name:ident: $value:expr,)*) => {
+            $(
+                #[test]
+                fn $name() {
+                    let (input, expected) = $value;
+                    assert_eq!(expected, input.to_fen());
+                }
+            )*
+        }
+    }
+
+    tests_to_fen! {
+        test_pawn: (Piece::Pawn, "P"),
+        test_knight: (Piece::Knight, "N"),
+        test_bishop: (Piece::Bishop, "B"),
+        test_rook: (Piece::Rook, "R"),
+        test_queen: (Piece::Queen, "Q"),
+        test_king: (Piece::King, "K"),
+        test_none: (Piece::None, "U"),
+    }
 }
 
 #[cfg(test)]

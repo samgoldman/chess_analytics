@@ -31,15 +31,7 @@ impl Board {
                     blanks = 0;
                 }
 
-                let mut letter = match piece.piece {
-                    Piece::Pawn => "P",
-                    Piece::Bishop => "B",
-                    Piece::Knight => "N",
-                    Piece::Rook => "R",
-                    Piece::Queen => "Q",
-                    Piece::King => "K",
-                    _ => "U",
-                };
+                let mut letter = piece.piece.to_fen();
 
                 let lower = letter.to_ascii_lowercase();
                 letter = if piece.player == Player::White {
