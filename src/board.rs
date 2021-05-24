@@ -62,11 +62,7 @@ impl Board {
     }
 
     pub fn toggle_to_move(&mut self) {
-        self.to_move = if self.to_move == Player::White {
-            Player::Black
-        } else {
-            Player::White
-        };
+        self.to_move = self.to_move.toggle_player();
     }
 
     pub fn is_cell_empty(&self, rank: usize, file: usize) -> bool {
