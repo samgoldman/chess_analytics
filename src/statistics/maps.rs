@@ -163,7 +163,7 @@ map!(promotion_count_map, "promotionCount", params, {
 
 // Requires 1 parameter: the NAG type being counted
 map!(nag_count_map, "nagCount", params, {
-    use crate::game_wrapper::NAG;
+    use crate::basic_types::nag::NAG;
 
     let expected = match params[0].as_ref() {
         "Questionable" => NAG::Questionable,

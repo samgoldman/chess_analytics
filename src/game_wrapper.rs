@@ -1,5 +1,6 @@
 use crate::basic_types::file::File;
 use crate::basic_types::game_result::GameResult;
+use crate::basic_types::nag::NAG;
 use crate::basic_types::piece::Piece;
 use crate::basic_types::rank::Rank;
 use crate::basic_types::termination::Termination;
@@ -8,25 +9,6 @@ use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList};
 use crate::chess_utils::*;
 use itertools::izip;
 use std::time::Duration;
-
-#[derive(PartialEq, Clone, Debug, Copy)]
-pub enum NAG {
-    None = 0,
-    Questionable = 1,
-    Mistake = 2,
-    Blunder = 3,
-}
-
-impl NAG {
-    pub fn from_metadata(metadata: u16) -> Self {
-        match metadata & 0b000111000000 {
-            0x0180 => NAG::Questionable,
-            0x0080 => NAG::Mistake,
-            0x0100 => NAG::Blunder,
-            _ => NAG::None,
-        }
-    }
-}
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct Move {
@@ -118,8 +100,9 @@ pub struct GameWrapper {
     termination: Termination,
     white_diff: i16,
     black_diff: i16,
-    pub boards: Vec<Board>,
+    boards: Vec<Board>,
 }
+
 #[derive(Clone)]
 #[cfg(test)]
 pub struct GameWrapper {
