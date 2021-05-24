@@ -4,7 +4,6 @@ use crate::basic_types::player::Player;
 use crate::basic_types::player_piece::*;
 use crate::basic_types::rank::Rank;
 use crate::game_wrapper::Move;
-use log::{debug, trace};
 
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub struct Board {
@@ -124,21 +123,13 @@ impl Board {
         let opposing_pieces = self.find_player_piece_locs(player.get_opposing_player());
 
         let check = opposing_pieces.iter().any(|opposing_piece_loc| {
-            let check = self.does_piece_check_loc(
+            self.does_piece_check_loc(
                 opposing_piece_loc.0,
                 opposing_piece_loc.1,
                 king_loc.0,
                 king_loc.1,
-            );
-
-            if check {
-                // println!("\t\t\t\t{:?} checks {:?}", opposing_piece_loc, king_loc);
-            }
-
-            check
+            )
         });
-
-        debug!("Is in check: {}, {}", check, self.to_fen());
 
         check
     }
@@ -218,10 +209,6 @@ impl Board {
 
                 if piece.player == player {
                     result.push((rank_indx, file_indx));
-                    debug!(
-                        "Found piece for {:?} at ({}, {})",
-                        player, rank_indx, file_indx
-                    );
                 }
             }
         }
@@ -262,17 +249,6 @@ impl Board {
         } else if piece == Piece::King {
             // Check for castling
             if diff_file == 2 {
-                debug!("Kingside castling");
-
-                trace!(
-                    "Kingside castling, executing move: {:?}, {:?}, {:?}, {:?}, {:?}",
-                    Piece::Rook,
-                    from_rank,
-                    File::_H.as_index(),
-                    to_rank,
-                    File::_F.as_index()
-                );
-
                 self.execute_move(
                     Piece::Rook,
                     from_rank,
@@ -281,17 +257,6 @@ impl Board {
                     File::_F.as_index(),
                 );
             } else if diff_file == -2 {
-                debug!("Queenside castling");
-
-                trace!(
-                    "Queenside castling, executing move: {:?}, {:?}, {:?}, {:?}, {:?}",
-                    Piece::Rook,
-                    from_rank,
-                    File::_A.as_index(),
-                    to_rank,
-                    File::_D.as_index()
-                );
-
                 self.execute_move(
                     Piece::Rook,
                     from_rank,
@@ -329,7 +294,6 @@ impl Board {
                     );
 
                     if !self.is_path_clear(path) {
-                        // println!("\t\t\t\tObstructed, removing: {:?}", possible_origin);
                         possible_origins.remove(i);
                     } else {
                         i += 1;
@@ -370,7 +334,6 @@ impl Board {
                     if self.board[dest_rank.as_index()][dest_file.as_index()].piece == Piece::None
                         && diff_file != 0
                     {
-                        // println!("\t\t\t\tPawn rule, removing: {:?}", possible_origin);
                         possible_origins.remove(i);
                     } else {
                         i += 1;
@@ -467,18 +430,7 @@ impl Board {
         let to_rank = move_description.to_rank.as_index();
         let to_file = move_description.to_file.as_index();
 
-        debug!(
-            "Move: ({:?}, {:?}) -> ({:?}, {:?}); {:?}",
-            move_description.from_rank,
-            move_description.from_file,
-            move_description.to_rank,
-            move_description.to_file,
-            move_description.piece_moved
-        );
-
         let piece_moved = move_description.piece_moved;
-
-        debug!("Current board: {}", self.to_fen());
 
         // If there's a from rank and file, just make the move
         let (from_rank, from_file) =
@@ -497,15 +449,6 @@ impl Board {
                 )
             };
 
-        trace!(
-            "Executing move: {:?}, {:?}, {:?}, {:?}, {:?}",
-            piece_moved,
-            from_rank,
-            from_file,
-            to_rank,
-            to_file
-        );
-
         new_board.execute_move(piece_moved, from_rank, from_file, to_rank, to_file);
 
         if move_description.promoted_to != Piece::None {
@@ -518,8 +461,6 @@ impl Board {
                 },
             )
         }
-
-        trace!("New board: {}", new_board.to_fen());
 
         new_board
     }
