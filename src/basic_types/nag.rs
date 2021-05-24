@@ -34,7 +34,7 @@ mod test_from_metadata {
     }
 
     tests_from_metadata! {
-        test_from_metadata_0: (0x0F00, NAG::None),
+        test_from_metadata_0: (0x0F00, NAG::Blunder),
         test_from_metadata_1: (0x0001, NAG::None),
         test_from_metadata_2: (0x0180, NAG::Questionable),
         test_from_metadata_3: (0x1080, NAG::Mistake),
