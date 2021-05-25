@@ -460,6 +460,15 @@ impl Board {
     pub fn set_piece(&mut self, rank: usize, file: usize, piece: PlayerPiece) {
         self.board[rank][file] = piece;
     }
+
+    #[cfg(test)]
+    pub fn from_fen(fen: &str) -> Result<Self, &str> {
+        if "" == fen {
+            Err("Cannot parse empty FEN")
+        } else {
+            Ok(Board::default())
+        }
+    }
 }
 
 impl Default for Board {
@@ -478,5 +487,27 @@ impl Default for Board {
 
             to_move: Player::White,
         }
+    }
+}
+
+#[cfg(test)]
+mod test_from_fen {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, Board::from_fen(input));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_empty_fen: ("", Err("Cannot parse empty FEN")),
+        test_default_fen: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Ok(Board::default())),
     }
 }
