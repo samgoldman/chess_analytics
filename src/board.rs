@@ -466,7 +466,25 @@ impl Board {
         if "" == fen {
             Err("Cannot parse empty FEN")
         } else {
-            Ok(Board::default())
+            let fields: Vec<&str> = fen.split(" ").collect();
+
+            if fields.len() != 6 {
+                Err("Incorrect number of fields")
+            } else {
+                let rows: Vec<&str> = fen.split("/").collect();
+
+                if rows.len() != 8 {
+                    Err("Starting position has wrong number of rows")
+                } else {
+                    let mut board = Board::default();
+
+                    if fields.get(1).unwrap() == &"b" {
+                        board.to_move = Player::Black;
+                    }
+
+                    Ok(board)
+                }
+            }
         }
     }
 }
@@ -509,5 +527,22 @@ mod test_from_fen {
     tests! {
         test_empty_fen: ("", Err("Cannot parse empty FEN")),
         test_default_fen: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Ok(Board::default())),
+        test_only_board_portion: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", Err("Incorrect number of fields")),
+        test_not_enough_rows: ("rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Err("Starting position has wrong number of rows")),
+        test_black_to_move: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", Ok(
+            Board {
+                board: [
+                    PlayerPiece::build_back_row(Player::White),
+                    PlayerPiece::build_pawn_row(Player::White),
+                    EMPTY_ROW,
+                    EMPTY_ROW,
+                    EMPTY_ROW,
+                    EMPTY_ROW,
+                    PlayerPiece::build_pawn_row(Player::Black),
+                    PlayerPiece::build_back_row(Player::Black),
+                ],
+
+                to_move: Player::Black,
+            })),
     }
 }
