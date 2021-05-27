@@ -473,15 +473,15 @@ impl Board {
 
     #[allow(dead_code)]
     pub fn from_fen(fen: &str) -> Result<Self, &str> {
-        if "" == fen {
+        if fen.is_empty() {
             Err("Cannot parse empty FEN")
         } else {
-            let fields: Vec<&str> = fen.split(" ").collect();
+            let fields: Vec<&str> = fen.split(' ').collect();
 
             if fields.len() != 6 {
                 Err("Incorrect number of fields")
             } else {
-                let ranks: Vec<&str> = fields.get(0).unwrap().split("/").collect();
+                let ranks: Vec<&str> = fields.get(0).unwrap().split('/').collect();
 
                 if ranks.len() != 8 {
                     Err("Starting position has wrong number of rows")
