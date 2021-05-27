@@ -726,3 +726,24 @@ mod test_toggle_to_move {
         test_other_2: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 w - - 5 17", "r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 b"),
     }
 }
+
+#[cfg(test)]
+mod test_generate_non_inclusive_path {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (from, to, expected) = $value;
+                assert_eq!(expected, Board::empty().generate_non_inclusive_path(from.0, from.1, to.0, to.1));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_0_0_to_7_7: ((0, 0), (7, 7), vec![(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6)]),
+    }
+}
