@@ -24,23 +24,23 @@ impl Board {
                 if piece.piece == Piece::None {
                     blanks += 1;
                     continue;
-                }
-
-                if blanks > 0 {
-                    fen += &blanks.to_string();
-                    blanks = 0;
-                }
-
-                let mut letter = piece.piece.to_fen();
-
-                let lower = letter.to_ascii_lowercase();
-                letter = if piece.player == Player::White {
-                    letter
                 } else {
-                    &lower
-                };
+                    if blanks > 0 {
+                        fen += &blanks.to_string();
+                        blanks = 0;
+                    }
 
-                fen += letter;
+                    let mut letter = piece.piece.to_fen();
+
+                    let lower = letter.to_ascii_lowercase();
+                    letter = if piece.player == Player::White {
+                        letter
+                    } else {
+                        &lower
+                    };
+
+                    fen += letter;
+                }
             }
 
             if blanks > 0 {
@@ -52,12 +52,11 @@ impl Board {
             }
         }
 
-        fen += if self.to_move == Player::White {
-            " w"
+        if self.to_move == Player::White {
+            fen + " w"
         } else {
-            " b"
-        };
-        fen
+            fen + " b"
+        }
     }
 
     pub fn toggle_to_move(&mut self) {
