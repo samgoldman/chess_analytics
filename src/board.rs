@@ -47,8 +47,16 @@ impl Board {
                 fen += &blanks.to_string();
             }
 
-            fen += "/";
+            if rank != 7 {
+                fen += "/";
+            }
         }
+
+        fen += if self.to_move == Player::White {
+            " w"
+        } else {
+            " b"
+        };
         fen
     }
 
@@ -610,6 +618,45 @@ mod test_from_fen {
                 to_move: Player::Black
             }
         )),
+        test_valid_fen_2: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 w - - 5 17", Ok(
+            Board {
+                board: [
+                    [EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, white!(Piece::Rook), white!(Piece::Rook), EMPTY_CELL, white!(Piece::King), EMPTY_CELL],
+                    [white!(Piece::Pawn), white!(Piece::Pawn), white!(Piece::Pawn), EMPTY_CELL, white!(Piece::Queen), white!(Piece::Pawn), white!(Piece::Bishop), EMPTY_CELL],
+                    [EMPTY_CELL, EMPTY_CELL, white!(Piece::Knight), EMPTY_CELL, white!(Piece::Bishop), EMPTY_CELL, white!(Piece::Pawn), white!(Piece::Pawn)],
+                    [EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, white!(Piece::Pawn), EMPTY_CELL, EMPTY_CELL, EMPTY_CELL],
+                    [EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, white!(Piece::Knight), EMPTY_CELL],
+                    [EMPTY_CELL, EMPTY_CELL, black!(Piece::Knight), EMPTY_CELL, EMPTY_CELL, black!(Piece::Knight), black!(Piece::Pawn), EMPTY_CELL],
+                    [black!(Piece::Pawn), black!(Piece::Pawn), EMPTY_CELL, EMPTY_CELL, black!(Piece::Queen), black!(Piece::Pawn), black!(Piece::Bishop), black!(Piece::Pawn)],
+                    [black!(Piece::Rook), EMPTY_CELL, EMPTY_CELL, black!(Piece::Rook), black!(Piece::Bishop), EMPTY_CELL, black!(Piece::King), EMPTY_CELL],
+                ],
+                to_move: Player::White
+            }
+        )),
+    }
+}
+
+#[cfg(test)]
+mod test_to_fen {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, Board::from_fen(input).unwrap().to_fen());
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_initial_white: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"),
+        test_initial_black: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b"),
+        test_other_1: ("r1bqkb1r/pp1npppp/2p2N2/8/2PP4/8/PP3PPP/R1BQKBNR b KQkq - 0 6", "r1bqkb1r/pp1npppp/2p2N2/8/2PP4/8/PP3PPP/R1BQKBNR b"),
+        test_other_2: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 w - - 5 17", "r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 w"),
     }
 }
 
