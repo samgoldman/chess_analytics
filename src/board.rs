@@ -23,7 +23,6 @@ impl Board {
 
                 if piece.piece == Piece::None {
                     blanks += 1;
-                    continue;
                 } else {
                     if blanks > 0 {
                         fen += &blanks.to_string();
