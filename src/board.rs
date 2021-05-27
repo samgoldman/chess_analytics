@@ -677,7 +677,7 @@ mod test_empty {
     }
 }
 
-#[cfg(test)] 
+#[cfg(test)]
 mod test_is_cell_empty {
     use super::*;
 
