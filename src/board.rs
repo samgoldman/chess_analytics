@@ -461,7 +461,17 @@ impl Board {
         self.board[rank][file] = piece;
     }
 
-    #[cfg(test)]
+    pub fn empty() -> Self {
+        Board {
+            board: [
+                EMPTY_ROW, EMPTY_ROW, EMPTY_ROW, EMPTY_ROW, EMPTY_ROW, EMPTY_ROW, EMPTY_ROW,
+                EMPTY_ROW,
+            ],
+            to_move: Player::NA,
+        }
+    }
+
+    #[allow(dead_code)]
     pub fn from_fen(fen: &str) -> Result<Self, &str> {
         if "" == fen {
             Err("Cannot parse empty FEN")
@@ -471,15 +481,38 @@ impl Board {
             if fields.len() != 6 {
                 Err("Incorrect number of fields")
             } else {
-                let rows: Vec<&str> = fen.split("/").collect();
+                let ranks: Vec<&str> = fields.get(0).unwrap().split("/").collect();
 
-                if rows.len() != 8 {
+                if ranks.len() != 8 {
                     Err("Starting position has wrong number of rows")
                 } else {
-                    let mut board = Board::default();
+                    let mut board = Board::empty();
 
                     if fields.get(1).unwrap() == &"b" {
                         board.to_move = Player::Black;
+                    } else {
+                        board.to_move = Player::White;
+                    }
+
+                    for (rank, fen_rank) in ranks.iter().enumerate() {
+                        let mut file = 0;
+                        for c in fen_rank.chars() {
+                            if c.is_digit(10) {
+                                file += c.to_digit(10).unwrap();
+                            } else {
+                                let piece = PlayerPiece {
+                                    piece: Piece::from_fen(c.to_string().as_ref()),
+                                    player: if c.is_ascii_uppercase() {
+                                        Player::White
+                                    } else {
+                                        Player::Black
+                                    },
+                                };
+
+                                board.set_piece(7 - rank as usize, file as usize, piece);
+                                file += 1;
+                            }
+                        }
                     }
 
                     Ok(board)
@@ -524,6 +557,24 @@ mod test_from_fen {
         }
     }
 
+    macro_rules! white {
+        ($piece:expr) => {
+            PlayerPiece {
+                piece: $piece,
+                player: Player::White,
+            }
+        };
+    }
+
+    macro_rules! black {
+        ($piece:expr) => {
+            PlayerPiece {
+                piece: $piece,
+                player: Player::Black,
+            }
+        };
+    }
+
     tests! {
         test_empty_fen: ("", Err("Cannot parse empty FEN")),
         test_default_fen: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Ok(Board::default())),
@@ -544,5 +595,39 @@ mod test_from_fen {
 
                 to_move: Player::Black,
             })),
+        test_valid_fen_1: ("r1bqkb1r/pp1npppp/2p2N2/8/2PP4/8/PP3PPP/R1BQKBNR b KQkq - 0 6", Ok(
+            Board {
+                board: [
+                    [white!(Piece::Rook), EMPTY_CELL, white!(Piece::Bishop), white!(Piece::Queen), white!(Piece::King), white!(Piece::Bishop), white!(Piece::Knight), white!(Piece::Rook)],
+                    [white!(Piece::Pawn), white!(Piece::Pawn), EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, white!(Piece::Pawn), white!(Piece::Pawn), white!(Piece::Pawn)],
+                    EMPTY_ROW,
+                    [EMPTY_CELL, EMPTY_CELL, white!(Piece::Pawn), white!(Piece::Pawn), EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL],
+                    EMPTY_ROW,
+                    [EMPTY_CELL, EMPTY_CELL, black!(Piece::Pawn), EMPTY_CELL, EMPTY_CELL, white!(Piece::Knight), EMPTY_CELL, EMPTY_CELL],
+                    [black!(Piece::Pawn), black!(Piece::Pawn), EMPTY_CELL, black!(Piece::Knight), black!(Piece::Pawn), black!(Piece::Pawn), black!(Piece::Pawn), black!(Piece::Pawn)],
+                    [black!(Piece::Rook), EMPTY_CELL, black!(Piece::Bishop), black!(Piece::Queen), black!(Piece::King), black!(Piece::Bishop), EMPTY_CELL, black!(Piece::Rook)],
+                ],
+                to_move: Player::Black
+            }
+        )),
+    }
+}
+
+#[cfg(test)]
+mod test_empty {
+    use super::*;
+
+    #[test]
+    fn test_empty() {
+        assert_eq!(
+            Board::empty(),
+            Board {
+                board: [
+                    EMPTY_ROW, EMPTY_ROW, EMPTY_ROW, EMPTY_ROW, EMPTY_ROW, EMPTY_ROW, EMPTY_ROW,
+                    EMPTY_ROW
+                ],
+                to_move: Player::NA
+            }
+        );
     }
 }
