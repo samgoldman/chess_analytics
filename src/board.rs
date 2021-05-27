@@ -102,14 +102,14 @@ impl Board {
                 rank_cur += rank_inc;
                 file_cur += file_inc;
             }
+
+            result
         } else {
             panic!(
                 "generate_non_inclusive_path: non linear path requested: ({}, {}) -> ({}, {})",
                 from_rank, from_file, to_rank, to_file
             );
         }
-
-        result
     }
 
     pub fn is_path_clear(&self, path: Vec<(usize, usize)>) -> bool {
@@ -745,5 +745,13 @@ mod test_generate_non_inclusive_path {
 
     tests! {
         test_0_0_to_7_7: ((0, 0), (7, 7), vec![(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6)]),
+        test_2_3_to_6_3: ((2, 3), (6, 3), vec![(3, 3), (4, 3), (5, 3)]),
+        test_7_5_to_7_3: ((7, 5), (7, 3), vec![(7, 4)]),
+    }
+
+    #[test]
+    #[should_panic(expected="generate_non_inclusive_path: non linear path requested: (1, 0) -> (7, 3)")]
+    fn test_non_linear_path() {
+        Board::empty().generate_non_inclusive_path(1, 0, 7, 3);
     }
 }
