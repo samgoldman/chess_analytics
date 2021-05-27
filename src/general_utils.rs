@@ -15,6 +15,15 @@ pub fn get_comparator<T: Ord>(comparator: &str) -> fn(T, T) -> T {
     }
 }
 
+// Reduce value to -1, 0, or 1, if it is negative, zero, or positive respectively
+pub fn get_unit_value(val: i32) -> i32 {
+    if val != 0 {
+        val / val.abs()
+    } else {
+        0
+    }
+}
+
 pub fn get_elements<T: Display>(
     vector: &[T],
     indices: &[i32],
@@ -46,6 +55,33 @@ pub fn get_elements<T: Display>(
 
 pub fn dedup_and_sort(vector: Vec<Vec<(usize, String)>>) -> Vec<Vec<(usize, String)>> {
     vector.into_iter().unique().sorted().collect()
+}
+
+#[cfg(test)]
+mod test_get_unit_value {
+    use super::get_unit_value;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, get_unit_value(input));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_0: (0, 0),
+        test_1: (1, 1),
+        test_neg_1: (-1, -1),
+        test_2: (2, 1),
+        test_neg_2: (-2, -1),
+        test_42: (42, 1),
+        test_neg_99: (-99, -1),
+    }
 }
 
 #[cfg(test)]

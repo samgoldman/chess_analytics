@@ -4,6 +4,7 @@ use crate::basic_types::player::Player;
 use crate::basic_types::player_piece::*;
 use crate::basic_types::rank::Rank;
 use crate::game_wrapper::Move;
+use crate::general_utils::get_unit_value;
 
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub struct Board {
@@ -82,16 +83,8 @@ impl Board {
             || (rank_diff == 0 && file_diff != 0)
             || (rank_diff.abs() == file_diff.abs())
         {
-            let rank_inc = if rank_diff != 0 {
-                rank_diff / rank_diff.abs()
-            } else {
-                0
-            };
-            let file_inc = if file_diff != 0 {
-                file_diff / file_diff.abs()
-            } else {
-                0
-            };
+            let rank_inc = get_unit_value(rank_diff);
+            let file_inc = get_unit_value(file_diff);
 
             let mut rank_cur = from_rank as i32 + rank_inc;
             let mut file_cur = from_file as i32 + file_inc;
