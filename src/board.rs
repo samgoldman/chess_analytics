@@ -676,3 +676,27 @@ mod test_empty {
         );
     }
 }
+
+#[cfg(test)] 
+mod test_is_cell_empty {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, input, expected) = $value;
+                assert_eq!(expected, Board::from_fen(board).unwrap().is_cell_empty(input.0, input.1));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_initial_0_0: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", (0, 0), false),
+        test_initial_3_5: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", (3, 5), true),
+        test_other_1: ("r1bqkb1r/pp1npppp/2p2N2/8/2PP4/8/PP3PPP/R1BQKBNR b KQkq - 0 6", (3, 2), false),
+        test_other_2: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 w - - 5 17", (1, 3), true),
+    }
+}
