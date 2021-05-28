@@ -5,6 +5,7 @@ use crate::basic_types::player_piece::*;
 use crate::basic_types::rank::Rank;
 use crate::game_wrapper::Move;
 use crate::general_utils::get_unit_value;
+use std::iter;
 
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub struct Board {
@@ -77,8 +78,6 @@ impl Board {
         let rank_diff = (to_rank as i32) - from_rank as i32;
         let file_diff = (to_file as i32) - from_file as i32;
 
-        let mut result = vec![];
-
         if (rank_diff != 0 && file_diff == 0)
             || (rank_diff == 0 && file_diff != 0)
             || (rank_diff.abs() == file_diff.abs())
@@ -86,21 +85,25 @@ impl Board {
             let rank_inc = get_unit_value(rank_diff);
             let file_inc = get_unit_value(file_diff);
 
-            let mut rank_cur = from_rank as i32 + rank_inc;
-            let mut file_cur = from_file as i32 + file_inc;
-
-            while rank_cur != to_rank as i32 || file_cur != to_file as i32 {
-                result.push((rank_cur as usize, file_cur as usize));
-
-                rank_cur += rank_inc;
-                file_cur += file_inc;
-            }
-
-            result
+            iter::repeat(1)
+                .take(i32::max(rank_diff.abs(), file_diff.abs()) as usize - 1)
+                .enumerate()
+                .map(|(i, _)| {
+                    (
+                        (from_rank as i32 + (rank_inc as i32 * (i + 1) as i32)) as usize,
+                        (from_file as i32 + (file_inc as i32 * (i + 1) as i32)) as usize,
+                    )
+                })
+                .collect::<Vec<(usize, usize)>>()
         } else {
-            panic!(
-                "generate_non_inclusive_path: non linear path requested: ({}, {}) -> ({}, {})",
+            let input = format!(
+                "({}, {}) -> ({}, {})",
                 from_rank, from_file, to_rank, to_file
+            );
+
+            panic!(
+                "generate_non_inclusive_path: non linear path requested: {}",
+                input
             );
         }
     }
