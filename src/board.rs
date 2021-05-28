@@ -738,9 +738,7 @@ mod test_generate_non_inclusive_path {
     }
 
     #[test]
-    #[should_panic(
-        expected = "generate_non_inclusive_path: non linear path requested"
-    )]
+    #[should_panic(expected = "generate_non_inclusive_path: non linear path requested")]
     fn test_non_linear_path() {
         Board::empty().generate_non_inclusive_path(1, 0, 7, 3);
     }
