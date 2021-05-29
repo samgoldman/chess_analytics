@@ -127,15 +127,6 @@ impl Board {
         target_rank: usize,
         target_file: usize,
     ) -> bool {
-        if self.is_cell_empty(attacker_rank, attacker_file) {
-            panic!(
-                "does_piece_check_loc: no piece in attacker location: {}, {}, {}",
-                attacker_rank,
-                attacker_file,
-                self.to_fen()
-            );
-        }
-
         let rank_diff = (target_rank as i32) - attacker_rank as i32;
         let file_diff = (target_file as i32) - attacker_file as i32;
 
@@ -814,5 +805,46 @@ mod test_find_king_loc {
     tests_panic! {
         test_missing_white_white: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::White),
         test_missing_black_black: ("r2rb11K/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::Black),
+    }
+}
+
+#[cfg(test)]
+mod test_does_piece_check_loc {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, attacker, target, expected) = $value;
+                assert_eq!(expected, Board::from_fen(board).unwrap().does_piece_check_loc(attacker.0, attacker.1, target.0, target.1));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_pawn_1: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (4, 4), true),
+        test_pawn_2: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (4, 2), true),
+        test_pawn_3: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (2, 2), false),
+    }
+
+    macro_rules! tests_panic {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            #[should_panic(expected="does_piece_check_loc: no piece in attacker location")]
+            fn $name() {
+                let (board, attacker, target) = $value;
+                Board::from_fen(board).unwrap().does_piece_check_loc(attacker.0, attacker.1, target.0, target.1);
+            }
+        )*
+        }
+    }
+
+    tests_panic! {
+        test_empty_board: ("8/8/8/8/8/8/8/8 w - - 0 1", (0, 0), (1, 1)),
+        test_initial_board_1: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", (2, 2), (1, 1)),
     }
 }
