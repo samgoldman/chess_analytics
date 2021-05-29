@@ -831,6 +831,9 @@ mod test_does_piece_check_loc {
         test_pawn_4: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (1, 6), true),
         test_pawn_5: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (1, 4), true),
         test_pawn_6: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (2, 4), false),
+        test_king_1: ("8/8/8/8/5k2/2K5/8/8 w - - 0 1", (2, 2), (3, 3), false),
+        test_king_2: ("8/8/8/8/5k2/2K5/8/8 w - - 0 1", (3, 5), (3, 3), false),
+        test_king_3: ("8/8/8/8/5k2/2K5/8/8 w - - 0 1", (3, 5), (2, 5), false),
     }
 
     macro_rules! tests_panic {
