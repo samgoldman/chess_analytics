@@ -133,10 +133,10 @@ impl Board {
         // Note: assume target is occupied, we're just checking if the attacker is applying check to the target
         match self.board[attacker_rank][attacker_file].piece {
             Piece::Pawn => {
-                match self.board[attacker_rank][attacker_file].player {
-                    Player::White => file_diff.abs() == 1 && rank_diff == 1,
-                    Player::Black => file_diff.abs() == 1 && rank_diff == -1,
-                    Player::NA => panic!("does_piece_check_loc: somehow got pawn with NA player"), // Uh oh
+                if self.board[attacker_rank][attacker_file].player == Player::White {
+                    file_diff.abs() == 1 && rank_diff == 1
+                } else {
+                    file_diff.abs() == 1 && rank_diff == -1
                 }
             }
             Piece::Bishop => {
@@ -828,6 +828,9 @@ mod test_does_piece_check_loc {
         test_pawn_1: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (4, 4), true),
         test_pawn_2: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (4, 2), true),
         test_pawn_3: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (2, 2), false),
+        test_pawn_4: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (1, 6), true),
+        test_pawn_5: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (1, 4), true),
+        test_pawn_6: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (2, 4), false),
     }
 
     macro_rules! tests_panic {
