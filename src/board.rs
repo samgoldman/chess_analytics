@@ -133,6 +133,7 @@ impl Board {
         let is_vertical = rank_diff != 0 && file_diff == 0;
         let is_horizontal = rank_diff == 0 && file_diff != 0;
         let is_diagonal = rank_diff.abs() == file_diff.abs();
+        let is_straight = is_vertical || is_horizontal;
 
         let is_linear = is_vertical || is_horizontal || is_diagonal;
 
@@ -151,31 +152,13 @@ impl Board {
                     file_diff.abs() == 1 && rank_diff == -1
                 }
             }
-            Piece::Bishop => {
-                if is_diagonal && !is_vertical && !is_horizontal {
-                    self.is_path_clear(path)
-                } else {
-                    false
-                }
-            }
+            Piece::Bishop => is_diagonal && !is_straight && self.is_path_clear(path),
             Piece::Knight => {
                 (rank_diff.abs() == 2 && file_diff.abs() == 1)
                     || (rank_diff.abs() == 1 && file_diff.abs() == 2)
             }
-            Piece::Rook => {
-                if !is_diagonal && (is_vertical || is_horizontal) {
-                    self.is_path_clear(path)
-                } else {
-                    false
-                }
-            }
-            Piece::Queen => {
-                if is_diagonal || is_vertical || is_horizontal {
-                    self.is_path_clear(path)
-                } else {
-                    false
-                }
-            }
+            Piece::Rook => !is_diagonal && is_straight && self.is_path_clear(path),
+            Piece::Queen => (is_diagonal || is_straight) && self.is_path_clear(path),
             Piece::King => false,
             Piece::None => panic!("does_piece_check_loc: no piece in attacker location"),
         }
