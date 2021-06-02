@@ -840,6 +840,9 @@ mod test_does_piece_check_loc {
         test_king_2: ("8/8/8/8/5k2/2K5/8/8 w - - 0 1", (3, 5), (3, 3), false),
         test_king_3: ("8/8/8/8/5k2/2K5/8/8 w - - 0 1", (3, 5), (2, 5), false),
         test_queen_1: ("8/8/2q5/8/8/8/3Q4/8 w - - 0 1", (1, 3), (2, 4), true),
+        test_queen_2: ("8/8/2q5/8/8/8/3Q4/8 w - - 0 1", (5, 2), (2, 4), false),
+        test_queen_3: ("8/8/2q5/8/8/8/3Q4/8 w - - 0 1", (5, 2), (5, 7), true),
+        test_queen_4: ("8/8/2q5/8/8/4P3/3Q4/8 w - - 0 1", (1, 3), (3, 5), false),
     }
 
     macro_rules! tests_panic {
