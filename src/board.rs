@@ -885,3 +885,33 @@ mod test_find_player_piece_locs {
         test_black_1: ("3N4/r2n4/1k3B2/2K1b2q/6p1/1Q2R3/2N3K1/4p3 w - - 0 1", Player::Black, vec![(0, 4), (3, 6), (4, 4), (4, 7), (5, 1), (6, 0), (6, 3)]),
     }
 }
+
+#[cfg(test)]
+mod test_execute_move {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, piece, from, to, expected) = $value;
+                let mut board = Board::from_fen(board).unwrap();
+                board.execute_move(piece, from.0, from.1, to.0, to.1);
+                assert_eq!(expected, board.to_fen());
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_en_passant: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Pawn, (4, 1), (5, 2), "r3kb1r/pp1ppppp/2P2n2/8/6B1/2P5/P2PPPPP/RNBQK2R w"),
+        test_queenside: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::King, (7, 4), (7, 2), "2kr1b1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w"),
+        test_kingside: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::King, (0, 4), (0, 6), "r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQ1RK1 w"),
+        test_bishop_cap: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Bishop, (3, 6), (6, 3), "r3kb1r/pp1Bpppp/5n2/1Pp5/8/2P5/P2PPPPP/RNBQK2R w"),
+        test_king_normal: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::King, (0, 4), (0, 5), "r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQ1K1R w"),
+        test_knight_cap: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Knight, (5, 5), (3, 6), "r3kb1r/pp1ppppp/8/1Pp5/6n1/2P5/P2PPPPP/RNBQK2R w"),
+        test_pawn_jump:  ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Pawn, (1, 0), (3, 0), "r3kb1r/pp1ppppp/5n2/1Pp5/P5B1/2P5/3PPPPP/RNBQK2R w"),
+        test_pawn_normal: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Pawn, (1, 0), (2, 0), "r3kb1r/pp1ppppp/5n2/1Pp5/6B1/P1P5/3PPPPP/RNBQK2R w"),
+    }
+}
