@@ -133,7 +133,7 @@ impl Board {
         let is_vertical = rank_diff != 0 && file_diff == 0;
         let is_horizontal = rank_diff == 0 && file_diff != 0;
         let is_diagonal = rank_diff.abs() == file_diff.abs();
-        let is_straight = is_vertical || is_horizontal;
+        let is_orthogonal = is_vertical || is_horizontal;
 
         let is_linear = is_vertical || is_horizontal || is_diagonal;
 
@@ -152,13 +152,10 @@ impl Board {
                     file_diff.abs() == 1 && rank_diff == -1
                 }
             }
-            Piece::Bishop => is_diagonal && !is_straight && self.is_path_clear(path),
-            Piece::Knight => {
-                (rank_diff.abs() == 2 && file_diff.abs() == 1)
-                    || (rank_diff.abs() == 1 && file_diff.abs() == 2)
-            }
-            Piece::Rook => !is_diagonal && is_straight && self.is_path_clear(path),
-            Piece::Queen => (is_diagonal || is_straight) && self.is_path_clear(path),
+            Piece::Bishop => is_diagonal && !is_orthogonal && self.is_path_clear(path),
+            Piece::Knight => rank_diff.abs() + file_diff.abs() == 3 && !is_orthogonal,
+            Piece::Rook => !is_diagonal && is_orthogonal && self.is_path_clear(path),
+            Piece::Queen => (is_diagonal || is_orthogonal) && self.is_path_clear(path),
             Piece::King => false,
             Piece::None => panic!("does_piece_check_loc: no piece in attacker location"),
         }
@@ -839,6 +836,7 @@ mod test_does_piece_check_loc {
         test_knight_6: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (6, 0), true),
         test_knight_7: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (3, 2), false),
         test_knight_8: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (6, 3), false),
+        test_knight_9: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (5, 5), false),
         test_rook_1: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (1, 3), (2, 4), false),
         test_rook_2: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (5, 2), (2, 4), false),
         test_rook_3: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (5, 2), (5, 7), true),
