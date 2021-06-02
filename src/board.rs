@@ -863,3 +863,26 @@ mod test_does_piece_check_loc {
         test_initial_board_1: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", (2, 2), (1, 1)),
     }
 }
+
+#[cfg(test)]
+mod test_find_player_piece_locs {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, input, expected) = $value;
+                assert_eq!(expected, Board::from_fen(board).unwrap().find_player_piece_locs(input));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_white_1: ("3N4/r2n4/1k3B2/2K1b2q/6p1/1Q2R3/2N3K1/4p3 w - - 0 1", Player::White, vec![(1, 2), (1, 6), (2, 1), (2, 4), (4, 2), (5, 5), (7, 3)]),
+        test_black_1: ("3N4/r2n4/1k3B2/2K1b2q/6p1/1Q2R3/2N3K1/4p3 w - - 0 1", Player::Black, vec![(0, 4), (3, 6), (4, 4), (4, 7), (5, 1), (6, 0), (6, 3)]),
+    }
+}
+
