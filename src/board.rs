@@ -130,6 +130,18 @@ impl Board {
         let rank_diff = (target_rank as i32) - attacker_rank as i32;
         let file_diff = (target_file as i32) - attacker_file as i32;
 
+        let is_vertical = rank_diff != 0 && file_diff == 0;
+        let is_horizontal = rank_diff == 0 && file_diff != 0;
+        let is_diagonal = rank_diff.abs() == file_diff.abs();
+
+        let is_linear = is_vertical || is_horizontal || is_diagonal;
+
+        let path = if is_linear {
+            self.generate_path(attacker_rank, attacker_file, target_rank, target_file)
+        } else {
+            vec![]
+        };
+
         // Note: assume target is occupied, we're just checking if the attacker is applying check to the target
         match self.board[attacker_rank][attacker_file].piece {
             Piece::Pawn => {
@@ -140,38 +152,25 @@ impl Board {
                 }
             }
             Piece::Bishop => {
-                rank_diff.abs() == file_diff.abs()
-                    && self.is_path_clear(self.generate_path(
-                        attacker_rank,
-                        attacker_file,
-                        target_rank,
-                        target_file,
-                    ))
+                if is_diagonal && !is_vertical && !is_horizontal {
+                    self.is_path_clear(path)
+                } else {
+                    false
+                }
             }
             Piece::Knight => {
                 (rank_diff.abs() == 2 && file_diff.abs() == 1)
                     || (rank_diff.abs() == 1 && file_diff.abs() == 2)
             }
             Piece::Rook => {
-                ((rank_diff != 0 && file_diff == 0) || (rank_diff == 0 && file_diff != 0))
-                    && self.is_path_clear(self.generate_path(
-                        attacker_rank,
-                        attacker_file,
-                        target_rank,
-                        target_file,
-                    ))
+                if !is_diagonal && (is_vertical || is_horizontal) {
+                    self.is_path_clear(path)
+                } else {
+                    false
+                }
             }
             Piece::Queen => {
-                let is_vert = rank_diff != 0 && file_diff == 0;
-                let is_horz = rank_diff == 0 && file_diff != 0;
-                let is_diag = rank_diff.abs() == file_diff.abs();
-
-                let is_linear = is_vert || is_horz || is_diag;
-
-                if is_linear {
-                    let path =
-                        self.generate_path(attacker_rank, attacker_file, target_rank, target_file);
-
+                if is_diagonal || is_vertical || is_horizontal {
                     self.is_path_clear(path)
                 } else {
                     false
