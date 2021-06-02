@@ -885,4 +885,3 @@ mod test_find_player_piece_locs {
         test_black_1: ("3N4/r2n4/1k3B2/2K1b2q/6p1/1Q2R3/2N3K1/4p3 w - - 0 1", Player::Black, vec![(0, 4), (3, 6), (4, 4), (4, 7), (5, 1), (6, 0), (6, 3)]),
     }
 }
-
