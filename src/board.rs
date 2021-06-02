@@ -68,7 +68,7 @@ impl Board {
         self.board[rank][file].piece == Piece::None
     }
 
-    pub fn generate_non_inclusive_path(
+    pub fn generate_path(
         &self,
         from_rank: usize,
         from_file: usize,
@@ -96,7 +96,7 @@ impl Board {
                 })
                 .collect::<Vec<(usize, usize)>>()
         } else {
-            panic!("generate_non_inclusive_path: non linear path requested");
+            panic!("generate_path: non linear path requested");
         }
     }
 
@@ -141,7 +141,7 @@ impl Board {
             }
             Piece::Bishop => {
                 rank_diff.abs() == file_diff.abs()
-                    && self.is_path_clear(self.generate_non_inclusive_path(
+                    && self.is_path_clear(self.generate_path(
                         attacker_rank,
                         attacker_file,
                         target_rank,
@@ -154,7 +154,7 @@ impl Board {
             }
             Piece::Rook => {
                 ((rank_diff != 0 && file_diff == 0) || (rank_diff == 0 && file_diff != 0))
-                    && self.is_path_clear(self.generate_non_inclusive_path(
+                    && self.is_path_clear(self.generate_path(
                         attacker_rank,
                         attacker_file,
                         target_rank,
@@ -162,15 +162,20 @@ impl Board {
                     ))
             }
             Piece::Queen => {
-                ((rank_diff != 0 && file_diff == 0)
-                    || (rank_diff == 0 && file_diff != 0)
-                    || (rank_diff.abs() == file_diff.abs()))
-                    && self.is_path_clear(self.generate_non_inclusive_path(
-                        attacker_rank,
-                        attacker_file,
-                        target_rank,
-                        target_file,
-                    ))
+                let is_vert = rank_diff != 0 && file_diff == 0;
+                let is_horz = rank_diff == 0 && file_diff != 0;
+                let is_diag = rank_diff.abs() == file_diff.abs();
+
+                let is_linear = is_vert || is_horz || is_diag;
+
+                if is_linear {
+                    let path =
+                        self.generate_path(attacker_rank, attacker_file, target_rank, target_file);
+
+                    self.is_path_clear(path)
+                } else {
+                    false
+                }
             }
             Piece::King => false,
             Piece::None => panic!("does_piece_check_loc: no piece in attacker location"),
@@ -263,7 +268,7 @@ impl Board {
             if piece != Piece::Knight {
                 let mut i = 0;
                 for possible_origin in possible_origins.clone() {
-                    let path = self.generate_non_inclusive_path(
+                    let path = self.generate_path(
                         possible_origin.0,
                         possible_origin.1,
                         dest_rank.as_index(),
@@ -707,7 +712,7 @@ mod test_toggle_to_move {
 }
 
 #[cfg(test)]
-mod test_generate_non_inclusive_path {
+mod test_generate_path {
     use super::*;
 
     macro_rules! tests {
@@ -716,7 +721,7 @@ mod test_generate_non_inclusive_path {
             #[test]
             fn $name() {
                 let (from, to, expected) = $value;
-                assert_eq!(expected, Board::empty().generate_non_inclusive_path(from.0, from.1, to.0, to.1));
+                assert_eq!(expected, Board::empty().generate_path(from.0, from.1, to.0, to.1));
             }
         )*
         }
@@ -729,9 +734,9 @@ mod test_generate_non_inclusive_path {
     }
 
     #[test]
-    #[should_panic(expected = "generate_non_inclusive_path: non linear path requested")]
+    #[should_panic(expected = "generate_path: non linear path requested")]
     fn test_non_linear_path() {
-        Board::empty().generate_non_inclusive_path(1, 0, 7, 3);
+        Board::empty().generate_path(1, 0, 7, 3);
     }
 }
 
