@@ -843,6 +843,24 @@ mod test_does_piece_check_loc {
         test_queen_2: ("8/8/2q5/8/8/8/3Q4/8 w - - 0 1", (5, 2), (2, 4), false),
         test_queen_3: ("8/8/2q5/8/8/8/3Q4/8 w - - 0 1", (5, 2), (5, 7), true),
         test_queen_4: ("8/8/2q5/8/8/4P3/3Q4/8 w - - 0 1", (1, 3), (3, 5), false),
+        test_bishop_1: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (2, 2), (3, 3), true), // does_piece_check_loc is not supposed to check for a king
+        test_bishop_2: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (5, 6), (0, 4), false),
+        test_bishop_3: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (2, 2), (0, 4), true),
+        test_bishop_4: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (5, 6), (1, 6), false),
+        test_bishop_5: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (2, 2), (4, 4), false),
+        test_bishop_6: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (5, 6), (7, 4), true),
+        test_knight_1: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (4, 6), true),
+        test_knight_2: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (4, 4), true),
+        test_knight_3: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (6, 3), false),
+        test_knight_4: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (1, 1), false),
+        test_knight_5: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (3, 3), true),
+        test_knight_6: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (6, 0), true),
+        test_knight_7: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (3, 2), false),
+        test_knight_8: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (6, 3), false),
+        test_rook_1: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (1, 3), (2, 4), false),
+        test_rook_2: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (5, 2), (2, 4), false),
+        test_rook_3: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (5, 2), (5, 7), true),
+        test_rook_4: ("8/8/2r5/8/8/4P3/3R4/8 w - - 0 1", (1, 3), (3, 5), false),
     }
 
     macro_rules! tests_panic {
