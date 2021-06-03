@@ -58,6 +58,31 @@ pub fn dedup_and_sort(vector: Vec<Vec<(usize, String)>>) -> Vec<Vec<(usize, Stri
 }
 
 #[cfg(test)]
+mod test_dedup_and_sort {
+    use super::dedup_and_sort;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected): (Vec<Vec<(usize, String)>>, Vec<Vec<(usize, String)>>) = $value;
+                assert_eq!(expected, dedup_and_sort(input));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_0: (vec![vec![]], vec![vec![]]),
+        test_1: (vec![vec![(0, "a".to_string())]], vec![vec![(0, "a".to_string())]]),
+        test_2: (vec![vec![(0, "a".to_string())], vec![(0, "a".to_string())]], vec![vec![(0, "a".to_string())]]),
+        test_3: (vec![vec![(1, "a".to_string())], vec![(0, "b".to_string())], vec![(0, "a".to_string())], vec![(0, "a".to_string())]],
+                 vec![vec![(0, "a".to_string())], vec![(0, "b".to_string())], vec![(1, "a".to_string())]]),
+    }
+}
+
+#[cfg(test)]
 mod test_get_unit_value {
     use super::get_unit_value;
 
