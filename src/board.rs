@@ -108,25 +108,17 @@ impl Board {
         let king_loc = self.find_king_loc(player);
         let opposing_pieces = self.find_player_piece_locs(player.get_opposing_player());
 
-        let check = opposing_pieces.iter().any(|opposing_piece_loc| {
-            self.does_piece_check_loc(
-                opposing_piece_loc.0,
-                opposing_piece_loc.1,
-                king_loc.0,
-                king_loc.1,
-            )
-        });
-
-        check
+        opposing_pieces
+            .iter()
+            .any(|opposing_piece_loc| self.does_piece_check_loc(*opposing_piece_loc, king_loc))
     }
 
     pub fn does_piece_check_loc(
         &self,
-        attacker_rank: usize,
-        attacker_file: usize,
-        target_rank: usize,
-        target_file: usize,
+        (attacker_rank, attacker_file): (usize, usize),
+        (target_rank, target_file): (usize, usize),
     ) -> bool {
+        // let  = attacker_location;
         let rank_diff = (target_rank as i32) - attacker_rank as i32;
         let file_diff = (target_file as i32) - attacker_file as i32;
 
@@ -802,7 +794,7 @@ mod test_does_piece_check_loc {
             #[test]
             fn $name() {
                 let (board, attacker, target, expected) = $value;
-                assert_eq!(expected, Board::from_fen(board).unwrap().does_piece_check_loc(attacker.0, attacker.1, target.0, target.1));
+                assert_eq!(expected, Board::from_fen(board).unwrap().does_piece_check_loc(attacker, target));
             }
         )*
         }
@@ -850,7 +842,7 @@ mod test_does_piece_check_loc {
             #[should_panic(expected="does_piece_check_loc: no piece in attacker location")]
             fn $name() {
                 let (board, attacker, target) = $value;
-                Board::from_fen(board).unwrap().does_piece_check_loc(attacker.0, attacker.1, target.0, target.1);
+                Board::from_fen(board).unwrap().does_piece_check_loc(attacker, target);
             }
         )*
         }
