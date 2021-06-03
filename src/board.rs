@@ -913,3 +913,32 @@ mod test_execute_move {
         test_pawn_normal: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Pawn, (1, 0), (2, 0), "r3kb1r/pp1ppppp/5n2/1Pp5/6B1/P1P5/3PPPPP/RNBQK2R w"),
     }
 }
+
+#[cfg(test)]
+mod test_is_in_check {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, expected_white, expected_black) = $value;
+                let board = Board::from_fen(board).unwrap();
+                assert_eq!(expected_white, board.is_in_check(Player::White));
+                assert_eq!(expected_black, board.is_in_check(Player::Black));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_only_kings: ("8/4k3/8/8/8/2K5/8/8 w - - 0 1", false, false),
+        test_not_checking_self: ("8/4k3/3b4/8/8/2K3R1/8/8 w - - 0 1", false, false),
+        test_basic_check_both: ("8/4k1R1/8/4b3/8/2K5/8/8 w - - 0 1", true, true),
+        test_blocked_checks: ("8/R2qk3/8/4b3/3P4/2K5/8/8 w - - 0 1", false, false),
+        test_pawn_dir_multi_piece: ("8/R7/2q5/4b3/3P4/2K1k3/8/8 w - - 0 1", true, false),
+        test_only_knight_white: ("8/R7/1q6/3Nb3/3P4/2K1k3/8/8 w - - 0 1", false, true),
+        test_pawns: ("8/R7/1q6/3Nb3/1p1P4/2K1k3/5P2/8 w - - 0 1", true, true),
+    }
+}
