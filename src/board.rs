@@ -942,7 +942,7 @@ mod test_find_possible_origins {
         $(
             #[test]
             fn $name() {
-                let (board, piece, dest, from, expected) = $value;
+                let (board, piece, dest, from, expected): (&str, Piece, (Rank, File), (Rank, File), Vec<(Rank, File)>) = $value;
                 let board = Board::from_fen(board).unwrap();
                 let actual_expected: Vec<(usize, usize)> = expected.iter().map(|location| (location.0.as_index(), location.1.as_index())).collect();
                 assert_eq!(actual_expected, board.find_possible_origins(piece, dest, from));
@@ -954,5 +954,25 @@ mod test_find_possible_origins {
     tests! {
         test_pawn_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), vec![(Rank::_4, File::_A)]),
         test_pawn_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), vec![(Rank::_6, File::_B)]),
+        test_pawn_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_4, File::_B), (Rank::_NA, File::_NA), vec![(Rank::_3, File::_B), (Rank::_3, File::_C)]),
+        test_pawn_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_4, File::_B), (Rank::_NA, File::_B), vec![(Rank::_3, File::_B)]),
+        test_pawn_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_5, File::_B), (Rank::_NA, File::_B), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
+        // test_: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::None, (Rank::_NA, File::_NA), (Rank::_NA, File::_NA), vec![]),
     }
 }
