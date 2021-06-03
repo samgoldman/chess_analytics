@@ -233,7 +233,7 @@ impl Board {
         from_file: File,
     ) -> (usize, usize) {
         let mut possible_origins =
-            self.find_possible_origins(piece, dest_rank, dest_file, from_rank, from_file);
+            self.find_possible_origins(piece, (dest_rank, dest_file), (from_rank, from_file));
 
         if possible_origins.len() > 1 {
             if piece != Piece::Knight {
@@ -308,10 +308,8 @@ impl Board {
     pub fn find_possible_origins(
         &self,
         piece: Piece,
-        dest_rank: Rank,
-        dest_file: File,
-        from_rank: Rank,
-        from_file: File,
+        (dest_rank, dest_file): (Rank, File),
+        (from_rank, from_file): (Rank, File),
     ) -> Vec<(usize, usize)> {
         let mut possible_origins = vec![];
 
@@ -932,5 +930,29 @@ mod test_is_in_check {
         test_pawn_dir_multi_piece: ("8/R7/2q5/4b3/3P4/2K1k3/8/8 w - - 0 1", true, false),
         test_only_knight_white: ("8/R7/1q6/3Nb3/3P4/2K1k3/8/8 w - - 0 1", false, true),
         test_pawns: ("8/R7/1q6/3Nb3/1p1P4/2K1k3/5P2/8 w - - 0 1", true, true),
+    }
+}
+
+#[cfg(test)]
+mod test_find_possible_origins {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, piece, dest, from, expected) = $value;
+                let board = Board::from_fen(board).unwrap();
+                let actual_expected: Vec<(usize, usize)> = expected.iter().map(|location| (location.0.as_index(), location.1.as_index())).collect();
+                assert_eq!(actual_expected, board.find_possible_origins(piece, dest, from));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_pawn_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), vec![(Rank::_4, File::_A)]),
+        test_pawn_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), vec![(Rank::_6, File::_B)]),
     }
 }
