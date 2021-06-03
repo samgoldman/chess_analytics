@@ -5,6 +5,7 @@ use crate::basic_types::player_piece::*;
 use crate::basic_types::rank::Rank;
 use crate::game_wrapper::Move;
 use crate::general_utils::get_unit_value;
+use itertools::Itertools;
 use std::iter;
 
 #[derive(PartialEq, Clone, Debug, Copy)]
@@ -154,19 +155,18 @@ impl Board {
     }
 
     pub fn find_player_piece_locs(&self, player: Player) -> Vec<(usize, usize)> {
-        let mut result = vec![];
-
-        for rank_indx in 0..8 {
-            for file_indx in 0..8 {
-                let piece = self.board[rank_indx][file_indx];
+        (0..8)
+            .cartesian_product(0..8)
+            .filter_map(|(rank, file)| {
+                let piece = self.board[rank][file];
 
                 if piece.player == player {
-                    result.push((rank_indx, file_indx));
+                    Some((rank, file))
+                } else {
+                    None
                 }
-            }
-        }
-
-        result
+            })
+            .collect()
     }
 
     pub fn find_king_loc(&self, player: Player) -> (usize, usize) {
