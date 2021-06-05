@@ -15,7 +15,7 @@ fn int_to_file(int: u16) -> File {
         0x6 => File::_F,
         0x7 => File::_G,
         0x8 => File::_H,
-        _ => panic!("File not recongnized: {}", int),
+        _ => panic!("File not recognized: 0x{:02x}", int),
     }
 }
 
@@ -30,7 +30,7 @@ fn int_to_rank(int: u16) -> Rank {
         0x6 => Rank::_6,
         0x7 => Rank::_7,
         0x8 => Rank::_8,
-        _ => panic!("Rank not recongnized: {}", int),
+        _ => panic!("Rank not recognized: 0x{:02x}", int),
     }
 }
 
@@ -204,4 +204,98 @@ mod test_parse_movetext {
             Move::new_to_from(File::_D, Rank::_NA, File::_D, Rank::_3, Piece::Queen)
         ]
     );
+}
+
+#[cfg(test)]
+mod test_int_to_file {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, int_to_file(input));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_0x20: (0x20, File::_NA),
+        test_0x31: (0x31, File::_A),
+        test_0x02: (0x02, File::_B),
+        test_0x13: (0x13, File::_C),
+        test_0xe4: (0xe4, File::_D),
+        test_0xf5: (0xf5, File::_E),
+        test_0x86: (0x86, File::_F),
+        test_0x97: (0x97, File::_G),
+        test_0x58: (0x58, File::_H),
+    }
+
+    macro_rules! test_panics {
+        ($($name:ident: $value:expr, $panic_str:literal, )*) => {
+        $(
+            #[test]
+            #[should_panic(expected=$panic_str)]
+            fn $name() {
+                int_to_file($value);
+            }
+        )*
+        }
+    }
+
+    test_panics! {
+        test_0x0f: 0x0f, "File not recognized: 0x0f",
+        test_0xff: 0xff, "File not recognized: 0xff",
+        test_0x0e: 0x0e, "File not recognized: 0x0e",
+    }
+}
+
+#[cfg(test)]
+mod test_int_to_rank {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, int_to_rank(input));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_0x00: (0x00, Rank::_NA),
+        test_0x14: (0x14, Rank::_1),
+        test_0x28: (0x28, Rank::_2),
+        test_0x39: (0x39, Rank::_3),
+        test_0x4a: (0x4a, Rank::_4),
+        test_0x5b: (0x5b, Rank::_5),
+        test_0x6d: (0x6d, Rank::_6),
+        test_0x7e: (0x7e, Rank::_7),
+        test_0x8f: (0x8f, Rank::_8),
+    }
+
+    macro_rules! test_panics {
+        ($($name:ident: $value:expr, $panic_str:literal, )*) => {
+        $(
+            #[test]
+            #[should_panic(expected=$panic_str)]
+            fn $name() {
+                int_to_rank($value);
+            }
+        )*
+        }
+    }
+
+    test_panics! {
+        test_0x0f0: 0xf1, "Rank not recognized: 0xf1",
+        test_0xff0: 0xa3, "Rank not recognized: 0xa3",
+        test_0x0e0: 0xff, "Rank not recognized: 0xff",
+    }
 }
