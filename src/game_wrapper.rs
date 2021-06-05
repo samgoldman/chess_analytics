@@ -76,7 +76,6 @@ pub enum TimeControl {
 }
 
 #[derive(Clone)]
-#[cfg(not(test))]
 pub struct GameWrapper {
     year: u16,
     month: u8,
@@ -101,34 +100,6 @@ pub struct GameWrapper {
     white_diff: i16,
     black_diff: i16,
     boards: Vec<Board>,
-}
-
-#[derive(Clone)]
-#[cfg(test)]
-pub struct GameWrapper {
-    pub year: u16,
-    pub month: u8,
-    pub day: u8,
-    pub site: String,
-    pub white: String,
-    pub black: String,
-    pub white_rating: u16,
-    pub black_rating: u16,
-    pub time_control_main: u16,
-    pub time_control_increment: u8,
-    pub time_control: TimeControl,
-    pub eco_category: char,
-    pub eco_subcategory: u8,
-    pub moves: Vec<Move>,
-    pub clock: Vec<Duration>,
-    pub eval_available: bool,
-    pub eval_mate_in: Vec<i16>,
-    pub eval_advantage: Vec<f32>,
-    pub result: GameResult,
-    pub termination: Termination,
-    pub white_diff: i16,
-    pub black_diff: i16,
-    pub boards: Vec<Board>,
 }
 
 impl GameWrapper {
@@ -285,8 +256,18 @@ impl GameWrapper {
         self.white_rating
     }
 
+    #[cfg(test)]
+    pub fn set_white_rating(&mut self, rating: u16) {
+        self.white_rating = rating;
+    }
+
     pub fn black_rating(&self) -> u16 {
         self.black_rating
+    }
+
+    #[cfg(test)]
+    pub fn set_black_rating(&mut self, rating: u16) {
+        self.black_rating = rating;
     }
 
     pub fn time_control_main(&self) -> u16 {
@@ -321,13 +302,15 @@ impl GameWrapper {
         self.eval_available
     }
 
-    // pub fn eval_mate_in(&self) -> &Vec<i16> {
-    //     &self.eval_mate_in
-    // }
+    #[allow(dead_code)]
+    pub fn eval_mate_in(&self) -> &Vec<i16> {
+        &self.eval_mate_in
+    }
 
-    // pub fn eval_advantage(&self) -> &Vec<f32> {
-    //     &self.eval_advantage
-    // }
+    #[allow(dead_code)]
+    pub fn eval_advantage(&self) -> &Vec<f32> {
+        &self.eval_advantage
+    }
 
     pub fn result(&self) -> GameResult {
         self.result
@@ -337,13 +320,15 @@ impl GameWrapper {
         self.termination
     }
 
-    // pub fn white_diff(&self) -> i16 {
-    //     self.white_diff
-    // }
+    #[allow(dead_code)]
+    pub fn white_diff(&self) -> i16 {
+        self.white_diff
+    }
 
-    // pub fn black_diff(&self) -> i16 {
-    //     self.black_diff
-    // }
+    #[allow(dead_code)]
+    pub fn black_diff(&self) -> i16 {
+        self.black_diff
+    }
 
     pub fn clock_available(&self) -> bool {
         !self.clock().is_empty()
@@ -372,6 +357,7 @@ impl GameWrapper {
     }
 }
 
+#[cfg(test)]
 impl Default for GameWrapper {
     fn default() -> GameWrapper {
         GameWrapper {

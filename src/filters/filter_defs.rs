@@ -233,11 +233,9 @@ mod tests_player_elo_filter {
         ($test_name:ident, $min_max:literal, $player:literal, $thresh:literal, $white_rating:literal, $black_rating:literal, $expected:literal) => {
             #[test]
             fn $test_name() {
-                let test_game = GameWrapper {
-                    white_rating: $white_rating,
-                    black_rating: $black_rating,
-                    ..Default::default()
-                };
+                let mut test_game = GameWrapper::default();
+                test_game.set_white_rating($white_rating);
+                test_game.set_black_rating($black_rating);
 
                 let fun = player_elo_filter::factory(vec![
                     $min_max.to_string(),
