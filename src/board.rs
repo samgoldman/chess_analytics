@@ -186,10 +186,8 @@ impl Board {
     pub fn execute_move(
         &mut self,
         piece: Piece,
-        from_rank: usize,
-        from_file: usize,
-        to_rank: usize,
-        to_file: usize,
+        (from_rank, from_file): (usize, usize),
+        (to_rank, to_file): (usize, usize),
     ) {
         let diff_file = to_file as i32 - from_file as i32;
 
@@ -204,18 +202,14 @@ impl Board {
             if diff_file == 2 {
                 self.execute_move(
                     Piece::Rook,
-                    from_rank,
-                    File::_H.as_index(),
-                    to_rank,
-                    File::_F.as_index(),
+                    (from_rank, File::_H.as_index()),
+                    (to_rank, File::_F.as_index()),
                 );
             } else if diff_file == -2 {
                 self.execute_move(
                     Piece::Rook,
-                    from_rank,
-                    File::_A.as_index(),
-                    to_rank,
-                    File::_D.as_index(),
+                    (from_rank, File::_A.as_index()),
+                    (to_rank, File::_D.as_index()),
                 );
             }
         }
@@ -227,10 +221,8 @@ impl Board {
     pub fn find_origin(
         &self,
         piece: Piece,
-        dest_rank: Rank,
-        dest_file: File,
-        from_rank: Rank,
-        from_file: File,
+        (dest_rank, dest_file): (Rank, File),
+        (from_rank, from_file): (Rank, File),
     ) -> (usize, usize) {
         let mut possible_origins =
             self.find_possible_origins(piece, (dest_rank, dest_file), (from_rank, from_file));
@@ -264,10 +256,8 @@ impl Board {
 
                     test_board.execute_move(
                         piece,
-                        possible_origin.0,
-                        possible_origin.1,
-                        dest_rank.as_index(),
-                        dest_file.as_index(),
+                        (possible_origin.0, possible_origin.1),
+                        (dest_rank.as_index(), dest_file.as_index()),
                     );
 
                     if test_board.is_in_check(self.to_move) {
@@ -409,14 +399,12 @@ impl Board {
             } else {
                 self.find_origin(
                     piece_moved,
-                    move_description.to_rank,
-                    move_description.to_file,
-                    move_description.from_rank,
-                    move_description.from_file,
+                    (move_description.to_rank, move_description.to_file),
+                    (move_description.from_rank, move_description.from_file),
                 )
             };
 
-        new_board.execute_move(piece_moved, from_rank, from_file, to_rank, to_file);
+        new_board.execute_move(piece_moved, (from_rank, from_file), (to_rank, to_file));
 
         if move_description.promoted_to != Piece::None {
             new_board.set_piece(
@@ -901,7 +889,7 @@ mod test_execute_move {
             fn $name() {
                 let (board, piece, from, to, expected) = $value;
                 let mut board = Board::from_fen(board).unwrap();
-                board.execute_move(piece, from.0, from.1, to.0, to.1);
+                board.execute_move(piece, from, to);
                 assert_eq!(expected, board.to_fen());
             }
         )*
