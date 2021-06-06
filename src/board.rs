@@ -311,18 +311,22 @@ impl Board {
         (dest_rank, dest_file): (Rank, File),
         (from_rank, from_file): (Rank, File),
     ) -> Vec<(usize, usize)> {
-        let mut possible_origins = vec![];
+        let search_ranks = if from_rank == Rank::_NA {
+            0..8
+        } else {
+            from_rank.as_index()..from_rank.as_index() + 1
+        };
 
-        for rank_indx in 0..8 {
-            if from_rank != Rank::_NA && rank_indx != from_rank.as_index() {
-                continue;
-            }
+        let search_files = if from_file == File::_NA {
+            0..8
+        } else {
+            from_file.as_index()..from_file.as_index() + 1
+        };
 
-            for file_indx in 0..8 {
-                if from_file != File::_NA && file_indx != from_file.as_index() {
-                    continue;
-                }
+        let search_cells = (search_ranks).cartesian_product(search_files);
 
+        search_cells
+            .filter_map(|(rank_indx, file_indx)| {
                 let found_piece = self.board[rank_indx][file_indx];
 
                 let rank_diff = (dest_rank.as_index() as i32) - rank_indx as i32;
@@ -334,44 +338,56 @@ impl Board {
                             if (rank_indx == 1 && rank_diff == 2 && file_diff == 0)
                                 || (rank_diff == 1 && file_diff.abs() <= 1)
                             {
-                                possible_origins.push((rank_indx, file_indx));
+                                Some((rank_indx, file_indx))
+                            } else {
+                                None
                             }
                         } else if (rank_indx == 6 && rank_diff == -2 && file_diff == 0)
                             || (rank_diff == -1 && file_diff.abs() <= 1)
                         {
-                            possible_origins.push((rank_indx, file_indx));
+                            Some((rank_indx, file_indx))
+                        } else {
+                            None
                         }
                     } else if piece == Piece::Bishop {
                         if rank_diff.abs() == file_diff.abs() {
-                            possible_origins.push((rank_indx, file_indx));
+                            Some((rank_indx, file_indx))
+                        } else {
+                            None
                         }
                     } else if piece == Piece::Knight {
                         if (rank_diff.abs() == 2 && file_diff.abs() == 1)
                             || (rank_diff.abs() == 1 && file_diff.abs() == 2)
                         {
-                            possible_origins.push((rank_indx, file_indx));
+                            Some((rank_indx, file_indx))
+                        } else {
+                            None
                         }
                     } else if piece == Piece::Rook {
                         if (rank_diff != 0 && file_diff == 0) || (rank_diff == 0 && file_diff != 0)
                         {
-                            possible_origins.push((rank_indx, file_indx));
+                            Some((rank_indx, file_indx))
+                        } else {
+                            None
                         }
                     } else if piece == Piece::Queen {
                         if (rank_diff != 0 && file_diff == 0)
                             || (rank_diff == 0 && file_diff != 0)
                             || (rank_diff.abs() == file_diff.abs())
                         {
-                            possible_origins.push((rank_indx, file_indx));
+                            Some((rank_indx, file_indx))
+                        } else {
+                            None
                         }
                     } else {
                         // King: will never have to disambiguate, so just use it once we find it
-                        possible_origins.push((rank_indx, file_indx));
+                        Some((rank_indx, file_indx))
                     }
+                } else {
+                    None
                 }
-            }
-        }
-
-        possible_origins
+            })
+            .collect()
     }
 
     pub fn move_piece(&self, move_description: Move) -> Board {
