@@ -1004,6 +1004,7 @@ mod test_find_origin {
         test_pawn_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), (Rank::_4, File::_A)),
         test_pawn_2: ("k2bR3/2pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), (Rank::_6, File::_B)),
         test_pawn_3: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_4, File::_B), (Rank::_NA, File::_B), (Rank::_3, File::_B)),
+        test_pawn_4: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/Pq1n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_4, File::_B), (Rank::_NA, File::_NA), (Rank::_3, File::_C)),
 
         test_bishop_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, (Rank::_5, File::_G), (Rank::_4, File::_NA), (Rank::_4, File::_F)),
         test_bishop_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, (Rank::_5, File::_G), (Rank::_NA, File::_H), (Rank::_6, File::_H)),
