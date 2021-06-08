@@ -71,10 +71,8 @@ impl Board {
 
     pub fn generate_path(
         &self,
-        from_rank: usize,
-        from_file: usize,
-        to_rank: usize,
-        to_file: usize,
+        (from_rank, from_file): (usize, usize),
+        (to_rank, to_file): (usize, usize),
     ) -> Vec<(usize, usize)> {
         let rank_diff = (to_rank as i32) - from_rank as i32;
         let file_diff = (to_file as i32) - from_file as i32;
@@ -131,7 +129,7 @@ impl Board {
         let is_linear = is_vertical || is_horizontal || is_diagonal;
 
         let path = if is_linear {
-            self.generate_path(attacker_rank, attacker_file, target_rank, target_file)
+            self.generate_path((attacker_rank, attacker_file), (target_rank, target_file))
         } else {
             vec![]
         };
@@ -232,10 +230,8 @@ impl Board {
                 let mut i = 0;
                 for possible_origin in possible_origins.clone() {
                     let path = self.generate_path(
-                        possible_origin.0,
-                        possible_origin.1,
-                        dest_rank.as_index(),
-                        dest_file.as_index(),
+                        (possible_origin.0, possible_origin.1),
+                        (dest_rank.as_index(), dest_file.as_index()),
                     );
 
                     if !self.is_path_clear(path) {
@@ -694,7 +690,7 @@ mod test_generate_path {
             #[test]
             fn $name() {
                 let (from, to, expected) = $value;
-                assert_eq!(expected, Board::empty().generate_path(from.0, from.1, to.0, to.1));
+                assert_eq!(expected, Board::empty().generate_path(from, to));
             }
         )*
         }
@@ -709,7 +705,7 @@ mod test_generate_path {
     #[test]
     #[should_panic(expected = "generate_path: non linear path requested")]
     fn test_non_linear_path() {
-        Board::empty().generate_path(1, 0, 7, 3);
+        Board::empty().generate_path((1, 0), (7, 3));
     }
 }
 
