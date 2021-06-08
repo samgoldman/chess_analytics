@@ -1069,3 +1069,39 @@ mod test_find_origin {
 
     }
 }
+
+#[cfg(test)]
+mod test_move_piece {
+    use super::*;
+    use crate::basic_types::nag::NAG;
+    use crate::game_wrapper::Move;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (initial_board_fen, the_move, expected_board_fen): (&str, Move, &str) = $value;
+                let initial_board = Board::from_fen(initial_board_fen).unwrap();
+                let new_board = initial_board.move_piece(the_move);
+                assert_eq!(expected_board_fen, new_board.to_fen());
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: ("rnbqr1k1/pp3pbp/2p2np1/3P4/3NP3/2N2P2/PP2B1PP/R1BQ1R1K b - - 0 11", Move {
+            piece_moved: Piece::Pawn,
+            captures: true,
+            to_file: File::_D,
+            to_rank: Rank::_5,
+            from_file: File::_NA,
+            from_rank: Rank::_NA,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: Piece::None,
+        }, "rnbqr1k1/pp3pbp/5np1/3p4/3NP3/2N2P2/PP2B1PP/R1BQ1R1K w"),
+    }
+}
