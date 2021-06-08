@@ -219,11 +219,11 @@ impl Board {
     pub fn find_origin(
         &self,
         piece: Piece,
-        (dest_rank, dest_file): (Rank, File),
-        (from_rank, from_file): (Rank, File),
+        dest: (Rank, File),
+        from: (Rank, File),
     ) -> (usize, usize) {
-        let possible_origins =
-            self.find_possible_origins(piece, (dest_rank, dest_file), (from_rank, from_file));
+        let possible_origins = self.find_possible_origins(piece, dest, from);
+        let (dest_rank, dest_file) = dest;
 
         let filtered_origins = possible_origins
             .iter()
