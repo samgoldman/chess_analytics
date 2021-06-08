@@ -193,7 +193,7 @@ impl Board {
         if piece == Piece::Pawn {
             if diff_file != 0 && self.board[to_rank][to_file].piece == Piece::None {
                 // En passant
-                self.set_piece(from_rank, to_file, EMPTY_CELL);
+                self.set_piece((from_rank, to_file), EMPTY_CELL);
             }
         } else if piece == Piece::King {
             // Check for castling
@@ -212,8 +212,8 @@ impl Board {
             }
         }
 
-        self.set_piece(to_rank, to_file, self.board[from_rank][from_file]);
-        self.set_piece(from_rank, from_file, EMPTY_CELL);
+        self.set_piece((to_rank, to_file), self.board[from_rank][from_file]);
+        self.set_piece((from_rank, from_file), EMPTY_CELL);
     }
 
     pub fn find_origin(
@@ -386,8 +386,7 @@ impl Board {
 
         if move_description.promoted_to != Piece::None {
             new_board.set_piece(
-                to_rank,
-                to_file,
+                (to_rank, to_file),
                 PlayerPiece {
                     piece: move_description.promoted_to,
                     player: new_board.board[to_rank][to_file].player,
@@ -398,7 +397,7 @@ impl Board {
         new_board
     }
 
-    pub fn set_piece(&mut self, rank: usize, file: usize, piece: PlayerPiece) {
+    pub fn set_piece(&mut self, (rank, file): (usize, usize), piece: PlayerPiece) {
         self.board[rank][file] = piece;
     }
 
@@ -450,7 +449,7 @@ impl Board {
                                     },
                                 };
 
-                                board.set_piece(7 - rank as usize, file as usize, piece);
+                                board.set_piece((7 - rank as usize, file as usize), piece);
                                 file += 1;
                             }
                         }
