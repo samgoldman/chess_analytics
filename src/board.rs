@@ -225,7 +225,6 @@ impl Board {
         let possible_origins =
             self.find_possible_origins(piece, (dest_rank, dest_file), (from_rank, from_file));
 
-        println!("Possible origins: {:?}", possible_origins);
         let filtered_origins = possible_origins
             .iter()
             .filter(|possible_origin| {
@@ -233,13 +232,6 @@ impl Board {
                     let path = self.generate_path(
                         (possible_origin.0, possible_origin.1),
                         (dest_rank.as_index(), dest_file.as_index()),
-                    );
-
-                    println!(
-                        "Origin: {:?} to {:?}; path is clear: {}",
-                        possible_origin,
-                        (dest_rank.as_index(), dest_file.as_index()),
-                        self.is_path_clear(path.clone())
                     );
                     self.is_path_clear(path)
                 } else {
@@ -253,12 +245,6 @@ impl Board {
                     piece,
                     (possible_origin.0, possible_origin.1),
                     (dest_rank.as_index(), dest_file.as_index()),
-                );
-
-                println!(
-                    "Origin: {:?}; is in check: {}",
-                    possible_origin,
-                    test_board.is_in_check(self.to_move)
                 );
                 !test_board.is_in_check(self.to_move)
             })
