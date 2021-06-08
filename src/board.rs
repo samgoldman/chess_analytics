@@ -222,71 +222,67 @@ impl Board {
         (dest_rank, dest_file): (Rank, File),
         (from_rank, from_file): (Rank, File),
     ) -> (usize, usize) {
-        let mut possible_origins =
+        let possible_origins =
             self.find_possible_origins(piece, (dest_rank, dest_file), (from_rank, from_file));
 
-        if possible_origins.len() > 1 {
-            if piece != Piece::Knight {
-                let mut i = 0;
-                for possible_origin in possible_origins.clone() {
+        println!("Possible origins: {:?}", possible_origins);
+        let filtered_origins = possible_origins
+            .iter()
+            .filter(|possible_origin| {
+                if piece != Piece::Knight {
                     let path = self.generate_path(
                         (possible_origin.0, possible_origin.1),
                         (dest_rank.as_index(), dest_file.as_index()),
                     );
 
-                    if !self.is_path_clear(path) {
-                        possible_origins.remove(i);
-                    } else {
-                        i += 1;
-                    }
-                }
-            }
-
-            if possible_origins.len() == 1 {
-                return possible_origins[0];
-            } else {
-                // Multiple pieces could make it, so not disambiguated because one or more pieces are pinned to the king
-                let mut i = 0;
-                for possible_origin in possible_origins.clone() {
-                    let mut test_board = *self;
-
-                    test_board.execute_move(
-                        piece,
-                        (possible_origin.0, possible_origin.1),
+                    println!(
+                        "Origin: {:?} to {:?}; path is clear: {}",
+                        possible_origin,
                         (dest_rank.as_index(), dest_file.as_index()),
+                        self.is_path_clear(path.clone())
                     );
-
-                    if test_board.is_in_check(self.to_move) {
-                        possible_origins.remove(i);
-                    } else {
-                        i += 1;
-                    }
+                    self.is_path_clear(path)
+                } else {
+                    true
                 }
-            }
+            })
+            .filter(|possible_origin| {
+                let mut test_board = *self;
 
-            if possible_origins.len() > 1 && piece == Piece::Pawn {
-                let mut i = 0;
+                test_board.execute_move(
+                    piece,
+                    (possible_origin.0, possible_origin.1),
+                    (dest_rank.as_index(), dest_file.as_index()),
+                );
 
-                for possible_origin in possible_origins.clone() {
-                    let diff_file = dest_file.as_index() as i32 - possible_origin.1 as i32;
+                println!(
+                    "Origin: {:?}; is in check: {}",
+                    possible_origin,
+                    test_board.is_in_check(self.to_move)
+                );
+                !test_board.is_in_check(self.to_move)
+            })
+            .filter(|possible_origin| {
+                let diff_file = dest_file.as_index() as i32 - possible_origin.1 as i32;
 
-                    if self.board[dest_rank.as_index()][dest_file.as_index()].piece == Piece::None
-                        && diff_file != 0
-                    {
-                        possible_origins.remove(i);
+                if piece == Piece::Pawn {
+                    if self.board[dest_rank.as_index()][dest_file.as_index()].piece != Piece::None {
+                        diff_file != 0 // If capturing, must be diagonal
                     } else {
-                        i += 1;
+                        true
                     }
+                } else {
+                    true
                 }
-            }
-        }
+            })
+            .collect::<Vec<&(usize, usize)>>();
 
-        if possible_origins.is_empty() {
+        if filtered_origins.is_empty() {
             panic!("No possible origins found");
-        } else if possible_origins.len() > 1 {
-            panic!("Too many possible origins found: {:?}", possible_origins);
+        } else if filtered_origins.len() > 1 {
+            panic!("Too many possible origins found: {:?}", filtered_origins);
         } else {
-            possible_origins[0]
+            *filtered_origins[0]
         }
     }
 
@@ -1020,40 +1016,39 @@ mod test_find_origin {
 
     tests! {
         test_pawn_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), (Rank::_4, File::_A)),
-        test_pawn_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), (Rank::_6, File::_B)),
-        test_pawn_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_4, File::_B), (Rank::_NA, File::_NA), (Rank::_3, File::_B)),
-        test_pawn_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_4, File::_B), (Rank::_NA, File::_B), (Rank::_3, File::_B)),
+        test_pawn_2: ("k2bR3/2pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), (Rank::_6, File::_B)),
+        test_pawn_3: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_4, File::_B), (Rank::_NA, File::_B), (Rank::_3, File::_B)),
 
         test_bishop_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, (Rank::_5, File::_G), (Rank::_4, File::_NA), (Rank::_4, File::_F)),
         test_bishop_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, (Rank::_5, File::_G), (Rank::_NA, File::_H), (Rank::_6, File::_H)),
-        test_bishop_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_NA, File::_NA), (Rank::_8, File::_D)),
-        test_bishop_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_8, File::_NA), (Rank::_8, File::_D)),
-        test_bishop_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_NA, File::_C), (Rank::_5, File::_C)),
+        test_bishop_3: ("3bR3/k1pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_NA, File::_NA), (Rank::_8, File::_D)),
+        test_bishop_4: ("3bR3/k1pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_8, File::_NA), (Rank::_8, File::_D)),
+        test_bishop_5: ("3bR3/k1pP2KN/qpr3pB/2b1pR1N/P1n2B1P/1PP1npQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_NA, File::_C), (Rank::_5, File::_C)),
 
         test_knight_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_6, File::_F), (Rank::_7, File::_NA), (Rank::_7, File::_H)),
         test_knight_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_3, File::_G), (Rank::_NA, File::_NA), (Rank::_5, File::_H)),
-        test_knight_3: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_1, File::_NA), (Rank::_1, File::_A)),
-        test_knight_4: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_4, File::_D), (Rank::_4, File::_D)),
-        test_knight_5: ("3bR3/2pP2KN/qpr3pB/k1b1pR1N/Pn3B1P/1P2PpQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_NA, File::_NA), (Rank::_1, File::_A)),
+        test_knight_3: ("3bR3/2pP2KN/qprk2pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_1, File::_NA), (Rank::_1, File::_A)),
+        test_knight_4: ("1k1bR3/2pP2KN/qpr3pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_4, File::_D), (Rank::_4, File::_D)),
+        test_knight_5: ("3bR3/2pP2KN/qprb2pB/k3pR1N/Pn3B1P/1P2PpQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_NA, File::_NA), (Rank::_1, File::_A)),
 
         test_rook_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, (Rank::_8, File::_H), (Rank::_NA, File::_NA), (Rank::_8, File::_E)),
         test_rook_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, (Rank::_5, File::_E), (Rank::_NA, File::_F), (Rank::_5, File::_F)),
-        test_rook_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Rook, (Rank::_6, File::_G), (Rank::_NA, File::_NA), (Rank::_6, File::_C)),
-        test_rook_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Rook, (Rank::_2, File::_F), (Rank::_NA, File::_NA), (Rank::_2, File::_B)),
+        test_rook_3: ("2nbR1p1/2pP2K1/qpr3NB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/k5q1 b - - 0 1", Piece::Rook, (Rank::_6, File::_G), (Rank::_NA, File::_NA), (Rank::_6, File::_C)),
+        test_rook_4: ("k2bR3/2pP2KN/qprn2pB/b3pR1N/P2n1B1P/1P3pQ1/1r1QPP1B/6q1 b - - 0 1", Piece::Rook, (Rank::_2, File::_C), (Rank::_NA, File::_B), (Rank::_2, File::_B)),
 
         test_queen_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_2, File::_G), (Rank::_NA, File::_NA), (Rank::_3, File::_G)),
         test_queen_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_3, File::_E), (Rank::_NA, File::_NA), (Rank::_2, File::_D)),
-        test_queen_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_3, File::_E), (Rank::_3, File::_NA), (Rank::_3, File::_G)),
-        test_queen_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, (Rank::_1, File::_A), (Rank::_NA, File::_NA), (Rank::_1, File::_G)),
-        test_queen_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, (Rank::_4, File::_C), (Rank::_NA, File::_NA), (Rank::_6, File::_A)),
-        test_queen_6: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, (Rank::_6, File::_G), (Rank::_1, File::_NA), (Rank::_1, File::_G)),
-        test_queen_7: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, (Rank::_6, File::_G), (Rank::_6, File::_NA), (Rank::_6, File::_A)),
+        test_queen_3: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/P2n1B1P/1PP3Q1/1r1QPp1B/6q1 w - - 0 1", Piece::Queen, (Rank::_3, File::_E), (Rank::_3, File::_NA), (Rank::_3, File::_G)),
+        test_queen_4: ("3bR3/2pP2KN/qprk2pB/1Pb1pR1N/Pn1n1B1P/2P2pQ1/1rnQPN1B/6q1 b - - 0 1", Piece::Queen, (Rank::_1, File::_A), (Rank::_NA, File::_NA), (Rank::_1, File::_G)),
+        test_queen_5: ("3bR3/2pP2KN/qprk2pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Queen, (Rank::_4, File::_C), (Rank::_NA, File::_NA), (Rank::_6, File::_A)),
+        test_queen_6: ("3bR3/1rpP1pKN/q6B/1pbkpR1N/Pn1n1B1P/1PP2p2/1r1QPQ1B/n3N1q1 b - - 0 1", Piece::Queen, (Rank::_6, File::_G), (Rank::_1, File::_NA), (Rank::_1, File::_G)),
+        test_queen_7: ("3bR3/1rpP1pKN/q6B/1pbkpR1N/Pn1n1B1P/1PP2p2/1r1QPQ1B/n3N1q1 b - - 0 1", Piece::Queen, (Rank::_6, File::_G), (Rank::_6, File::_NA), (Rank::_6, File::_A)),
 
         test_king_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, (Rank::_8, File::_H), (Rank::_NA, File::_NA), (Rank::_7, File::_G)),
-        test_king_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, (Rank::_7, File::_F), (Rank::_NA, File::_NA), (Rank::_7, File::_G)),
-        test_king_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, (Rank::_6, File::_F), (Rank::_NA, File::_NA), (Rank::_7, File::_G)),
+        test_king_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, (Rank::_8, File::_G), (Rank::_NA, File::_NA), (Rank::_7, File::_G)),
+        test_king_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, (Rank::_8, File::_F), (Rank::_NA, File::_NA), (Rank::_7, File::_G)),
         test_king_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::King, (Rank::_5, File::_F), (Rank::_NA, File::_NA), (Rank::_6, File::_F)),
-        test_king_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::King, (Rank::_7, File::_G), (Rank::_NA, File::_NA), (Rank::_6, File::_F)),
+        test_king_5: ("3bR3/2pP2KN/qprk2pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::King, (Rank::_5, File::_D), (Rank::_NA, File::_NA), (Rank::_6, File::_D)),
     }
 
     macro_rules! panic_tests {
