@@ -1103,5 +1103,31 @@ mod test_move_piece {
             nag: NAG::None,
             promoted_to: Piece::None,
         }, "rnbqr1k1/pp3pbp/5np1/3p4/3NP3/2N2P2/PP2B1PP/R1BQ1R1K w"),
+
+        test_2: ("8/2KP1p2/6p1/5pk1/3r4/2R5/6P1/8 w - - 1 53", Move {
+            piece_moved: Piece::Pawn,
+            captures: false,
+            to_file: File::_D,
+            to_rank: Rank::_8,
+            from_file: File::_NA,
+            from_rank: Rank::_NA,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: Piece::Queen,
+        }, "3Q4/2K2p2/6p1/5pk1/3r4/2R5/6P1/8 b"),
+
+        test_3: ("r2Q1bkr/p5pp/5p2/1p1n4/8/2pQ1Q2/P1P1PPPP/RNB1KBNR w KQ - 0 16", Move {
+            piece_moved: Piece::Queen,
+            captures: true,
+            to_file: File::_D,
+            to_rank: Rank::_5,
+            from_file: File::_D,
+            from_rank: Rank::_3,
+            checks: true,
+            mates: true,
+            nag: NAG::None,
+            promoted_to: Piece::Queen,
+        }, "r2Q1bkr/p5pp/5p2/1p1Q4/8/2p2Q2/P1P1PPPP/RNB1KBNR b"),
     }
 }
