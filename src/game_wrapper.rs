@@ -12,8 +12,8 @@ use std::time::Duration;
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct Move {
-    pub from_file: File,
-    pub from_rank: Rank,
+    pub from_file: Option<File>,
+    pub from_rank: Option<Rank>,
     pub to_file: File,
     pub to_rank: Rank,
 
@@ -23,7 +23,7 @@ pub struct Move {
     pub checks: bool,
     pub mates: bool,
     pub nag: NAG,
-    pub promoted_to: Piece,
+    pub promoted_to: Option<Piece>,
 }
 
 impl Move {
@@ -35,8 +35,8 @@ impl Move {
         piece_moved: Piece,
     ) -> Self {
         Move {
-            from_file,
-            from_rank,
+            from_file: Some(from_file),
+            from_rank: Some(from_rank),
             to_file,
             to_rank,
             piece_moved,
@@ -44,25 +44,25 @@ impl Move {
             checks: false,
             mates: false,
             nag: NAG::None,
-            promoted_to: Piece::None,
+            promoted_to: None,
         }
     }
 
-    #[cfg(test)]
-    pub fn new_to(to_file: File, to_rank: Rank, piece_moved: Piece) -> Self {
-        Move {
-            from_file: File::_NA,
-            from_rank: Rank::_NA,
-            to_file,
-            to_rank,
-            piece_moved,
-            captures: false,
-            checks: false,
-            mates: false,
-            nag: NAG::None,
-            promoted_to: Piece::None,
-        }
-    }
+    // #[cfg(test)]
+    // pub fn new_to(to_file: File, to_rank: Rank, piece_moved: Piece) -> Self {
+    //     Move {
+    //         from_file: None,
+    //         from_rank: None,
+    //         to_file,
+    //         to_rank,
+    //         piece_moved,
+    //         captures: false,
+    //         checks: false,
+    //         mates: false,
+    //         nag: NAG::None,
+    //         promoted_to: None,
+    //     }
+    // }
 }
 
 #[derive(PartialEq, Clone)]
@@ -162,9 +162,10 @@ impl GameWrapper {
         Move {
             from_file,
             from_rank,
-            to_file,
-            to_rank,
-            piece_moved,
+            // TODO handle unwraps more gracefully
+            to_file: to_file.unwrap(),
+            to_rank: to_rank.unwrap(),
+            piece_moved: piece_moved.unwrap(),
             captures,
             checks,
             mates,
@@ -347,7 +348,7 @@ impl GameWrapper {
         let mut boards = vec![Board::default()];
 
         for (i, a_move) in self.moves.iter().enumerate() {
-            let prev_board = boards[i];
+            let prev_board = boards[i].clone();
 
             let new_board = prev_board.move_piece(a_move.clone());
             boards.push(new_board);

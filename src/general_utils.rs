@@ -16,6 +16,7 @@ pub fn get_comparator<T: Ord>(comparator: &str) -> fn(T, T) -> T {
 }
 
 // Reduce value to -1, 0, or 1, if it is negative, zero, or positive respectively
+#[cfg(test)]
 pub fn get_unit_value(val: i32) -> i32 {
     if val != 0 {
         val / val.abs()

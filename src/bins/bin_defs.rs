@@ -67,7 +67,7 @@ bin!(final_fen_bin, "finalFen", _params, {
         let result = panic::catch_unwind(|| game.build_boards());
 
         match result {
-            Ok(res) => res.last().unwrap().to_fen(),
+            Ok(res) => res.last().unwrap().clone().to_fen(),
             Err(_) => "Failed to parse".to_string(),
         }
     })

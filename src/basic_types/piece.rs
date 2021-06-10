@@ -1,6 +1,5 @@
-#[derive(PartialEq, Clone, Debug, Copy)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq)]
 pub enum Piece {
-    None = 0,
     Pawn = 1,
     Knight = 2,
     Bishop = 3,
@@ -42,7 +41,6 @@ impl Piece {
             Piece::Rook => "R",
             Piece::Queen => "Q",
             Piece::King => "K",
-            Piece::None => "U",
         }
     }
 }
@@ -70,7 +68,6 @@ mod test_to_fen {
         test_rook: (Piece::Rook, "R"),
         test_queen: (Piece::Queen, "Q"),
         test_king: (Piece::King, "K"),
-        test_none: (Piece::None, "U"),
     }
 }
 

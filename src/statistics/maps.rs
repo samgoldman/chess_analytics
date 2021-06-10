@@ -151,7 +151,7 @@ map!(promotion_count_map, "promotionCount", params, {
         game.moves()
             .iter()
             .map(|move_data| {
-                if move_data.promoted_to == expected {
+                if move_data.promoted_to.is_some() && move_data.promoted_to.unwrap() == expected {
                     1
                 } else {
                     0

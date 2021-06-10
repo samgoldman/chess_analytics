@@ -1,4 +1,4 @@
-#[derive(PartialEq, Clone, Debug, Copy)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq)]
 pub enum Player {
     White,
     Black,

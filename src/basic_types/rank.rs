@@ -1,6 +1,8 @@
-#[derive(PartialEq, Clone, Debug, Copy)]
+use strum_macros::EnumIter;
+// use std::ops;
+
+#[derive(PartialEq, Clone, Debug, Copy, Eq, EnumIter, Hash)]
 pub enum Rank {
-    _NA = 0,
     _1 = 1,
     _2 = 2,
     _3 = 3,
@@ -14,7 +16,6 @@ pub enum Rank {
 impl Rank {
     pub fn from_pgn(rank_str: &str) -> Self {
         match rank_str {
-            "" => Rank::_NA,
             "1" => Rank::_1,
             "2" => Rank::_2,
             "3" => Rank::_3,
@@ -28,13 +29,22 @@ impl Rank {
     }
 
     pub fn as_index(&self) -> usize {
-        if Rank::_NA == *self {
-            panic!("Rank::_NA has no index value!");
-        }
-
         *self as usize - 1
     }
+
+    // pub fn as_integer(&self) -> u8 {
+    //     *self as u8
+    // }
 }
+
+// impl ops::Sub<Rank> for u8 {
+//     type Output = Rank;
+
+//     fn sub(self, rhs: Rank) -> Rank {
+//         let new_val = self - rhs.as_integer();
+//         Rank::from_pgn(new_val.to_string().as_ref())
+//     }
+// }
 
 #[cfg(test)]
 mod test_rank_from_pgn {
@@ -53,7 +63,6 @@ mod test_rank_from_pgn {
     }
 
     tests_nominal_from_pgn! {
-        test_from_pgn_empty: ("", Rank::_NA),
         test_from_pgn_1: ("1", Rank::_1),
         test_from_pgn_2: ("2", Rank::_2),
         test_from_pgn_3: ("3", Rank::_3),
@@ -110,11 +119,5 @@ mod test_rank_as_index {
         test_from_pgn_6: (Rank::_6, 5),
         test_from_pgn_7: (Rank::_7, 6),
         test_from_pgn_8: (Rank::_8, 7),
-    }
-
-    #[test]
-    #[should_panic(expected = "Rank::_NA has no index value!")]
-    fn test_as_index_na() {
-        Rank::_NA.as_index();
     }
 }

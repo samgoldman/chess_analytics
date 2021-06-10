@@ -1,6 +1,7 @@
-#[derive(PartialEq, Clone, Debug, Copy)]
+use strum_macros::EnumIter;
+
+#[derive(PartialEq, Clone, Debug, Copy, Eq, EnumIter, Hash)]
 pub enum File {
-    _NA = 0,
     _A = 1,
     _B = 2,
     _C = 3,
@@ -14,7 +15,6 @@ pub enum File {
 impl File {
     pub fn from_pgn(file_str: &str) -> Self {
         match file_str {
-            "" => File::_NA,
             "a" => File::_A,
             "b" => File::_B,
             "c" => File::_C,
@@ -28,10 +28,6 @@ impl File {
     }
 
     pub fn as_index(&self) -> usize {
-        if File::_NA == *self {
-            panic!("File::_NA has no index value!");
-        }
-
         *self as usize - 1
     }
 }
@@ -53,7 +49,6 @@ mod test_file_from_pgn {
     }
 
     tests_nominal_from_pgn! {
-        test_from_pgn_empty: ("", File::_NA),
         test_from_pgn_a: ("a", File::_A),
         test_from_pgn_b: ("b", File::_B),
         test_from_pgn_c: ("c", File::_C),
@@ -110,11 +105,5 @@ mod test_file_as_index {
         test_from_pgn_f: (File::_F, 5),
         test_from_pgn_g: (File::_G, 6),
         test_from_pgn_h: (File::_H, 7),
-    }
-
-    #[test]
-    #[should_panic(expected = "File::_NA has no index value!")]
-    fn test_as_index_na() {
-        File::_NA.as_index();
     }
 }

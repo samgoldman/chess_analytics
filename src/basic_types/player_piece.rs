@@ -1,19 +1,25 @@
 use crate::basic_types::piece::Piece;
 use crate::basic_types::player::Player;
+
+#[cfg(test)]
 use std::convert::TryInto;
+
+#[cfg(test)]
 use std::iter;
 
-#[derive(PartialEq, Clone, Debug, Copy)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq)]
 pub struct PlayerPiece {
     pub piece: Piece,
     pub player: Player,
 }
 
 impl PlayerPiece {
+    #[cfg(test)]
     pub fn new(piece: Piece, player: Player) -> Self {
         PlayerPiece { piece, player }
     }
 
+    #[cfg(test)]
     pub fn build_pawn_row(player: Player) -> [PlayerPiece; 8] {
         iter::repeat(PlayerPiece::new(Piece::Pawn, player))
             .take(8)
@@ -22,6 +28,7 @@ impl PlayerPiece {
             .unwrap()
     }
 
+    #[cfg(test)]
     pub fn build_back_row(player: Player) -> [PlayerPiece; 8] {
         [
             PlayerPiece::new(Piece::Rook, player),
@@ -35,15 +42,6 @@ impl PlayerPiece {
         ]
     }
 }
-
-pub const EMPTY_CELL: PlayerPiece = PlayerPiece {
-    piece: Piece::None,
-    player: Player::NA,
-};
-
-pub const EMPTY_ROW: [PlayerPiece; 8] = [
-    EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL, EMPTY_CELL,
-];
 
 #[cfg(test)]
 mod test_new {
@@ -64,7 +62,6 @@ mod test_new {
     }
 
     tests_new! {
-        test_empty: (Piece::None, Player::NA),
         test_new_white_pawn: (Piece::Pawn, Player::White),
         test_new_black_queen: (Piece::Queen, Player::Black),
     }

@@ -150,7 +150,7 @@ filter!(
                 let last_move = moves.iter().last().unwrap();
 
                 last_move.piece_moved == Piece::King
-                    && last_move.from_file == File::_E
+                    && last_move.from_file.unwrap() == File::_E
                     && last_move.mates
                     && last_move.to_file == File::_C
             }
@@ -175,7 +175,7 @@ filter!(final_fen_search_filter, "finalFenMatchesAny", params, {
 
         match result {
             Ok(res) => {
-                let actual_fen = res.last().unwrap().to_fen();
+                let actual_fen = res.last().unwrap().clone().to_fen();
                 params
                     .iter()
                     .any(|allowed_fen| allowed_fen.contains(&actual_fen))

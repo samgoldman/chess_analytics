@@ -1,6 +1,9 @@
+pub mod cell;
 pub mod file;
 pub mod game_result;
 pub mod nag;
+pub mod partial_cell;
+pub mod path;
 pub mod piece;
 pub mod player;
 pub mod player_piece;
