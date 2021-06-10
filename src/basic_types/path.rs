@@ -54,31 +54,33 @@ impl Path {
     }
 }
 
-// #[cfg(test)]
-// mod test_generate_path {
-//     use super::*;
+#[cfg(test)]
+mod test_generate_path {
+    use super::*;
 
-//     macro_rules! tests {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             fn $name() {
-//                 let (from, to, expected) = $value;
-//                 assert_eq!(Path(expected), Path::generate_path(from, to));
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (from, to, expected) = $value;
+                assert_eq!(Path(expected.iter().map(|indices| {
+                    Cell::from_indices(*indices)
+                }).collect()), Path::generate_path(Cell::from_indices(from), Cell::from_indices(to)));
+            }
+        )*
+        }
+    }
 
-//     tests! {
-//         test_0_0_to_7_7: ((0, 0), (7, 7), vec![(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6)]),
-//         test_2_3_to_6_3: ((2, 3), (6, 3), vec![(3, 3), (4, 3), (5, 3)]),
-//         test_7_5_to_7_3: ((7, 5), (7, 3), vec![(7, 4)]),
-//     }
+    tests! {
+        test_0_0_to_7_7: ((0, 0), (7, 7), vec![(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6)]),
+        test_2_3_to_6_3: ((2, 3), (6, 3), vec![(3, 3), (4, 3), (5, 3)]),
+        test_7_5_to_7_3: ((7, 5), (7, 3), vec![(7, 4)]),
+    }
 
-//     #[test]
-//     #[should_panic(expected = "generate_path: non linear path requested")]
-//     fn test_non_linear_path() {
-//         Path::generate_path((1, 0), (7, 3));
-//     }
-// }
+    #[test]
+    #[should_panic(expected = "generate_path: non linear path requested")]
+    fn test_non_linear_path() {
+        Path::generate_path(Cell::from_indices((1, 0)), Cell::from_indices((7, 3)));
+    }
+}
