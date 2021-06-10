@@ -1017,64 +1017,64 @@ mod test_does_piece_check_loc {
 //     }
 // }
 
-// #[cfg(test)]
-// mod test_move_piece {
-//     use super::*;
-//     use crate::basic_types::nag::NAG;
-//     use crate::game_wrapper::Move;
+#[cfg(test)]
+mod test_move_piece {
+    use super::*;
+    use crate::basic_types::nag::NAG;
+    use crate::game_wrapper::Move;
 
-//     macro_rules! tests {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             fn $name() {
-//                 let (initial_board_fen, the_move, expected_board_fen): (&str, Move, &str) = $value;
-//                 let initial_board = Board::from_fen(initial_board_fen).unwrap();
-//                 let new_board = initial_board.move_piece(the_move);
-//                 assert_eq!(expected_board_fen, new_board.to_fen());
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (initial_board_fen, the_move, expected_board_fen): (&str, Move, &str) = $value;
+                let initial_board = Board::from_fen(initial_board_fen).unwrap();
+                let new_board = initial_board.move_piece(the_move);
+                assert_eq!(expected_board_fen, new_board.to_fen());
+            }
+        )*
+        }
+    }
 
-//     tests! {
-//         test_1: ("rnbqr1k1/pp3pbp/2p2np1/3P4/3NP3/2N2P2/PP2B1PP/R1BQ1R1K b - - 0 11", Move {
-//             piece_moved: Piece::Pawn,
-//             captures: true,
-//             to_file: File::_D,
-//             to_rank: Rank::_5,
-//             from_file: File::_NA,
-//             from_rank: Rank::_NA,
-//             checks: false,
-//             mates: false,
-//             nag: NAG::None,
-//             promoted_to: Piece::None,
-//         }, "rnbqr1k1/pp3pbp/5np1/3p4/3NP3/2N2P2/PP2B1PP/R1BQ1R1K w"),
+    tests! {
+        test_1: ("rnbqr1k1/pp3pbp/2p2np1/3P4/3NP3/2N2P2/PP2B1PP/R1BQ1R1K b - - 0 11", Move {
+            piece_moved: Piece::Pawn,
+            captures: true,
+            to_file: File::_D,
+            to_rank: Rank::_5,
+            from_file: None,
+            from_rank: None,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None,
+        }, "rnbqr1k1/pp3pbp/5np1/3p4/3NP3/2N2P2/PP2B1PP/R1BQ1R1K w"),
 
-//         test_2: ("8/2KP1p2/6p1/5pk1/3r4/2R5/6P1/8 w - - 1 53", Move {
-//             piece_moved: Piece::Pawn,
-//             captures: false,
-//             to_file: File::_D,
-//             to_rank: Rank::_8,
-//             from_file: File::_NA,
-//             from_rank: Rank::_NA,
-//             checks: false,
-//             mates: false,
-//             nag: NAG::None,
-//             promoted_to: Piece::Queen,
-//         }, "3Q4/2K2p2/6p1/5pk1/3r4/2R5/6P1/8 b"),
+        test_2: ("8/2KP1p2/6p1/5pk1/3r4/2R5/6P1/8 w - - 1 53", Move {
+            piece_moved: Piece::Pawn,
+            captures: false,
+            to_file: File::_D,
+            to_rank: Rank::_8,
+            from_file: None,
+            from_rank: None,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: Some(Piece::Queen),
+        }, "3Q4/2K2p2/6p1/5pk1/3r4/2R5/6P1/8 b"),
 
-//         test_3: ("r2Q1bkr/p5pp/5p2/1p1n4/8/2pQ1Q2/P1P1PPPP/RNB1KBNR w KQ - 0 16", Move {
-//             piece_moved: Piece::Queen,
-//             captures: true,
-//             to_file: File::_D,
-//             to_rank: Rank::_5,
-//             from_file: File::_D,
-//             from_rank: Rank::_3,
-//             checks: true,
-//             mates: true,
-//             nag: NAG::None,
-//             promoted_to: Piece::Queen,
-//         }, "r2Q1bkr/p5pp/5p2/1p1Q4/8/2p2Q2/P1P1PPPP/RNB1KBNR b"),
-//     }
-// }
+        test_3: ("r2Q1bkr/p5pp/5p2/1p1n4/8/2pQ1Q2/P1P1PPPP/RNB1KBNR w KQ - 0 16", Move {
+            piece_moved: Piece::Queen,
+            captures: true,
+            to_file: File::_D,
+            to_rank: Rank::_5,
+            from_file: Some(File::_D),
+            from_rank: Some(Rank::_3),
+            checks: true,
+            mates: true,
+            nag: NAG::None,
+            promoted_to: Some(Piece::Queen),
+        }, "r2Q1bkr/p5pp/5p2/1p1Q4/8/2p2Q2/P1P1PPPP/RNB1KBNR b"),
+    }
+}
