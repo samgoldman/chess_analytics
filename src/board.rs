@@ -105,21 +105,27 @@ impl Board {
             Path::empty()
         };
 
+        println!("path: {:?}", path);
+
         // Note: assume target is occupied, we're just checking if the attacker is applying check to the target
         // TODO: properly unwrap
-        match self.board.get(&attacker_cell).unwrap().piece {
-            Piece::Pawn => {
-                if self.board.get(&attacker_cell).unwrap().player == Player::White {
-                    file_diff.abs() == 1 && rank_diff == 1
-                } else {
-                    file_diff.abs() == 1 && rank_diff == -1
+        if self.board.contains_key(&attacker_cell) {
+            match self.board.get(&attacker_cell).unwrap().piece {
+                Piece::Pawn => {
+                    if self.board.get(&attacker_cell).unwrap().player == Player::White {
+                        file_diff.abs() == 1 && rank_diff == 1
+                    } else {
+                        file_diff.abs() == 1 && rank_diff == -1
+                    }
                 }
+                Piece::Bishop => is_diagonal && !is_orthogonal && self.is_path_clear(path),
+                Piece::Knight => rank_diff.abs() + file_diff.abs() == 3 && !is_orthogonal,
+                Piece::Rook => !is_diagonal && is_orthogonal && self.is_path_clear(path),
+                Piece::Queen => (is_diagonal || is_orthogonal) && self.is_path_clear(path),
+                Piece::King => false,
             }
-            Piece::Bishop => is_diagonal && !is_orthogonal && self.is_path_clear(path),
-            Piece::Knight => rank_diff.abs() + file_diff.abs() == 3 && !is_orthogonal,
-            Piece::Rook => !is_diagonal && is_orthogonal && self.is_path_clear(path),
-            Piece::Queen => (is_diagonal || is_orthogonal) && self.is_path_clear(path),
-            Piece::King => false,
+        } else {
+            panic!("does_piece_check_loc: no piece in attacker location");
         }
     }
 
@@ -703,75 +709,77 @@ mod test_find_king_loc {
     }
 }
 
-// #[cfg(test)]
-// mod test_does_piece_check_loc {
-//     use super::*;
+#[cfg(test)]
+mod test_does_piece_check_loc {
+    use super::*;
 
-//     macro_rules! tests {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             fn $name() {
-//                 let (board, attacker, target, expected) = $value;
-//                 assert_eq!(expected, Board::from_fen(board).unwrap().does_piece_check_loc(attacker, target));
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, attacker, target, expected) = $value;
+                assert_eq!(expected, Board::from_fen(board).unwrap().does_piece_check_loc(Cell::from_indices(attacker), Cell::from_indices(target)));
+            }
+        )*
+        }
+    }
 
-//     tests! {
-//         test_pawn_1: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (4, 4), true),
-//         test_pawn_2: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (4, 2), true),
-//         test_pawn_3: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (2, 2), false),
-//         test_pawn_4: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (1, 6), true),
-//         test_pawn_5: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (1, 4), true),
-//         test_pawn_6: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (2, 4), false),
-//         test_king_1: ("8/8/8/8/5k2/2K5/8/8 w - - 0 1", (2, 2), (3, 3), false),
-//         test_king_2: ("8/8/8/8/5k2/2K5/8/8 w - - 0 1", (3, 5), (3, 3), false),
-//         test_king_3: ("8/8/8/8/5k2/2K5/8/8 w - - 0 1", (3, 5), (2, 5), false),
-//         test_queen_1: ("8/8/2q5/8/8/8/3Q4/8 w - - 0 1", (1, 3), (2, 4), true),
-//         test_queen_2: ("8/8/2q5/8/8/8/3Q4/8 w - - 0 1", (5, 2), (2, 4), false),
-//         test_queen_3: ("8/8/2q5/8/8/8/3Q4/8 w - - 0 1", (5, 2), (5, 7), true),
-//         test_queen_4: ("8/8/2q5/8/8/4P3/3Q4/8 w - - 0 1", (1, 3), (3, 5), false),
-//         test_bishop_1: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (2, 2), (3, 3), true), // does_piece_check_loc is not supposed to check for a king
-//         test_bishop_2: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (5, 6), (0, 4), false),
-//         test_bishop_3: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (2, 2), (0, 4), true),
-//         test_bishop_4: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (5, 6), (1, 6), false),
-//         test_bishop_5: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (2, 2), (4, 4), false),
-//         test_bishop_6: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (5, 6), (7, 4), true),
-//         test_knight_1: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (4, 6), true),
-//         test_knight_2: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (4, 4), true),
-//         test_knight_3: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (6, 3), false),
-//         test_knight_4: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (1, 1), false),
-//         test_knight_5: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (3, 3), true),
-//         test_knight_6: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (6, 0), true),
-//         test_knight_7: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (3, 2), false),
-//         test_knight_8: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (6, 3), false),
-//         test_knight_9: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (5, 5), false),
-//         test_rook_1: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (1, 3), (2, 4), false),
-//         test_rook_2: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (5, 2), (2, 4), false),
-//         test_rook_3: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (5, 2), (5, 7), true),
-//         test_rook_4: ("8/8/2r5/8/8/4P3/3R4/8 w - - 0 1", (1, 3), (3, 5), false),
-//     }
+    // TODO: convert to actual cells
+    tests! {
+        test_pawn_1: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (4, 4), true),
+        test_pawn_2: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (4, 2), true),
+        test_pawn_3: ("8/8/8/8/3P4/8/8/8 w - - 0 1", (3, 3), (2, 2), false),
+        test_pawn_4: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (1, 6), true),
+        test_pawn_5: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (1, 4), true),
+        test_pawn_6: ("8/8/8/8/8/5p2/8/8 w - - 0 1", (2, 5), (2, 4), false),
+        test_king_1: ("8/8/8/8/5k2/2K5/8/8 w - - 0 1", (2, 2), (3, 3), false),
+        test_king_2: ("8/8/8/8/5k2/2K5/8/8 w - - 0 1", (3, 5), (3, 3), false),
+        test_king_3: ("8/8/8/8/5k2/2K5/8/8 w - - 0 1", (3, 5), (2, 5), false),
+        test_queen_1: ("8/8/2q5/8/8/8/3Q4/8 w - - 0 1", (1, 3), (2, 4), true),
+        test_queen_2: ("8/8/2q5/8/8/8/3Q4/8 w - - 0 1", (5, 2), (2, 4), false),
+        test_queen_3: ("8/8/2q5/8/8/8/3Q4/8 w - - 0 1", (5, 2), (5, 7), true),
+        test_queen_4: ("8/8/2q5/8/8/4P3/3Q4/8 w - - 0 1", (1, 3), (3, 5), false),
+        test_bishop_1: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (2, 2), (3, 3), true), // does_piece_check_loc is not supposed to check for a king
+        test_bishop_2: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (5, 6), (0, 4), false),
+        test_bishop_3: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (2, 2), (0, 4), true),
+        test_bishop_4: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (5, 6), (1, 6), false),
+        test_bishop_5: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (2, 2), (4, 4), false),
+        test_bishop_6: ("8/8/5Nb1/8/3q4/2B5/6k1/8 w - - 0 1", (5, 6), (7, 4), true),
+        test_knight_1: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (4, 6), true),
+        test_knight_2: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (4, 4), true),
+        test_knight_3: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (6, 3), false),
+        test_knight_4: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (6, 5), (1, 1), false),
+        test_knight_5: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (3, 3), true),
+        test_knight_6: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (6, 0), true),
+        test_knight_7: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (3, 2), false),
+        test_knight_8: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (6, 3), false),
+        test_knight_9: ("8/5N2/2n5/4R1k1/2K5/8/8/8 w - - 0 1", (5, 2), (5, 5), false),
+        test_rook_1: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (1, 3), (2, 4), false),
+        test_rook_2: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (5, 2), (2, 4), false),
+        test_rook_3: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (5, 2), (5, 7), true),
+        test_rook_4: ("8/8/2r5/8/8/4P3/3R4/8 w - - 0 1", (1, 3), (3, 5), false),
+    }
 
-//     macro_rules! tests_panic {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             #[should_panic(expected="does_piece_check_loc: no piece in attacker location")]
-//             fn $name() {
-//                 let (board, attacker, target) = $value;
-//                 Board::from_fen(board).unwrap().does_piece_check_loc(attacker, target);
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests_panic {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            #[should_panic(expected="does_piece_check_loc: no piece in attacker location")]
+            fn $name() {
+                let (board, attacker, target) = $value;
+                Board::from_fen(board).unwrap().does_piece_check_loc(Cell::from_indices(attacker), Cell::from_indices(target));
+            }
+        )*
+        }
+    }
 
-//     tests_panic! {
-//         test_empty_board: ("8/8/8/8/8/8/8/8 w - - 0 1", (0, 0), (1, 1)),
-//         test_initial_board_1: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", (2, 2), (1, 1)),
-//     }
-// }
+    // TODO: convert to actual cells
+    tests_panic! {
+        test_empty_board: ("8/8/8/8/8/8/8/8 w - - 0 1", (0, 0), (1, 1)),
+        test_initial_board_1: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", (2, 2), (1, 1)),
+    }
+}
 
 // #[cfg(test)]
 // mod test_find_player_piece_locs {

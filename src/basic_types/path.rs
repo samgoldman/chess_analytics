@@ -1,7 +1,7 @@
-// use crate::general_utils::get_unit_value;
 use crate::basic_types::cell::Cell;
 use crate::basic_types::file::File;
 use crate::basic_types::rank::Rank;
+use crate::general_utils::get_unit_value;
 use std::iter;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -29,23 +29,22 @@ impl Path {
             || (rank_diff == 0 && file_diff != 0)
             || (rank_diff.abs() == file_diff.abs())
         {
-            // let rank_inc = get_unit_value(rank_diff);
-            // let file_inc = get_unit_value(file_diff);
+            let rank_inc = get_unit_value(rank_diff);
+            let file_inc = get_unit_value(file_diff);
 
             Path(
                 iter::repeat(1)
                     .take(i32::max(rank_diff.abs(), file_diff.abs()) as usize - 1)
                     .enumerate()
-                    .map(|(_i, _)| {
-                        Cell {
-                            file: File::_A,
-                            rank: Rank::_1,
-                        }
-                        // TODO
-                        // (
-                        //     (from_cell.rank as i32 + (rank_inc as i32 * (i + 1) as i32)) as usize,
-                        //     (from_cell.file as i32 + (file_inc as i32 * (i + 1) as i32)) as usize,
-                        // )
+                    .map(|(i, _)| Cell {
+                        rank: Rank::from_pgn(
+                            (from_cell.rank as i32 + (rank_inc as i32 * (i + 1) as i32))
+                                .to_string()
+                                .as_ref(),
+                        ),
+                        file: File::from_int(
+                            (from_cell.file as i32 + (file_inc as i32 * (i + 1) as i32)) as u32,
+                        ),
                     })
                     .collect::<Vec<Cell>>(),
             )
