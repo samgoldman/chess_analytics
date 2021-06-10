@@ -626,32 +626,35 @@ mod test_toggle_to_move {
     }
 }
 
-// #[cfg(test)]
-// mod test_is_path_clear {
-//     use super::*;
+#[cfg(test)]
+mod test_is_path_clear {
+    use super::*;
 
-//     macro_rules! tests {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             fn $name() {
-//                 let (board, input, expected) = $value;
-//                 assert_eq!(expected, Board::from_fen(board).unwrap().is_path_clear(Path::from_vec(input)));
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, input, expected) = $value;
+                assert_eq!(expected, Board::from_fen(board).unwrap().is_path_clear(Path::from_vec(input.iter().map(|indices| {
+                    Cell::from_indices(*indices)
+                }).collect())));
+            }
+        )*
+        }
+    }
 
-//     tests! {
-//         test_empty_path: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", vec![], true),
-//         test_non_empty_path_1: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", vec![(0, 0), (0, 1), (0, 2)], false),
-//         test_empty_path_1: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", vec![(2, 4), (3, 4), (4, 4), (5, 4)], true),
-//         test_non_empty_path_2: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", vec![(7, 0), (7, 1), (7, 2)], false),
-//         test_empty_path_2: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", vec![(4, 4), (5, 5)], true),
-//         test_non_empty_path_3: ("r1bqkb1r/pp1npppp/2p2N2/8/2P5/3P4/PP3PPP/R1BQKBNR b KQkq - 0 6", vec![(0, 1), (1, 2), (2, 3), (3, 4)], false),
-//         test_empty_path_3: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 w - - 5 17", vec![(1, 3), (2, 3), (3, 3), (4, 3), (5, 3)], true),
-//     }
-// }
+    // TODO: convert to actual cells
+    tests! {
+        test_empty_path: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", vec![], true),
+        test_non_empty_path_1: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", vec![(0, 0), (0, 1), (0, 2)], false),
+        test_empty_path_1: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", vec![(2, 4), (3, 4), (4, 4), (5, 4)], true),
+        test_non_empty_path_2: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", vec![(7, 0), (7, 1), (7, 2)], false),
+        test_empty_path_2: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", vec![(4, 4), (5, 5)], true),
+        test_non_empty_path_3: ("r1bqkb1r/pp1npppp/2p2N2/8/2P5/3P4/PP3PPP/R1BQKBNR b KQkq - 0 6", vec![(0, 1), (1, 2), (2, 3), (3, 4)], false),
+        test_empty_path_3: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 w - - 5 17", vec![(1, 3), (2, 3), (3, 3), (4, 3), (5, 3)], true),
+    }
+}
 
 // #[cfg(test)]
 // mod test_find_king_loc {

@@ -16,10 +16,10 @@ impl Path {
         self.0.iter()
     }
 
-    // TODO: cleanup?
-    // pub fn from_vec(vec: Vec<Cell>) -> Self {
-    //     Path(vec)
-    // }
+    #[cfg(test)]
+    pub fn from_vec(vec: Vec<Cell>) -> Self {
+        Path(vec)
+    }
 
     pub fn generate_path(from_cell: Cell, to_cell: Cell) -> Self {
         let rank_diff = (to_cell.rank as i32) - from_cell.rank as i32;
