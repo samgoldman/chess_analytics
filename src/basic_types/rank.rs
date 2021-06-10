@@ -28,10 +28,6 @@ impl Rank {
         }
     }
 
-    pub fn as_index(&self) -> usize {
-        *self as usize - 1
-    }
-
     // pub fn as_integer(&self) -> u8 {
     //     *self as u8
     // }
@@ -91,33 +87,5 @@ mod test_rank_from_pgn {
         test_from_pgn_invalid_3: "h", "Unrecognized rank: h",
         test_from_pgn_invalid_4: "abcd", "Unrecognized rank: abcd",
         test_from_pgn_invalid_5: "1234", "Unrecognized rank: 1234",
-    }
-}
-
-#[cfg(test)]
-mod test_rank_as_index {
-    use super::*;
-
-    macro_rules! tests_as_index {
-        ($($name:ident: $value:expr,)*) => {
-        $(
-            #[test]
-            fn $name() {
-                let (input, expected) = $value;
-                assert_eq!(expected, input.as_index());
-            }
-        )*
-        }
-    }
-
-    tests_as_index! {
-        test_from_pgn_1: (Rank::_1, 0),
-        test_from_pgn_2: (Rank::_2, 1),
-        test_from_pgn_3: (Rank::_3, 2),
-        test_from_pgn_4: (Rank::_4, 3),
-        test_from_pgn_5: (Rank::_5, 4),
-        test_from_pgn_6: (Rank::_6, 5),
-        test_from_pgn_7: (Rank::_7, 6),
-        test_from_pgn_8: (Rank::_8, 7),
     }
 }

@@ -21,7 +21,7 @@ impl Board {
     pub fn to_fen(&self) -> String {
         let mut fen = String::default();
 
-        for rank in Rank::iter() {
+        for rank in Rank::iter().rev() {
             let mut blanks = 0;
 
             for file in File::iter() {
@@ -54,7 +54,7 @@ impl Board {
                 fen += &blanks.to_string();
             }
 
-            if rank != Rank::_8 {
+            if rank != Rank::_1 {
                 fen += "/";
             }
         }
@@ -269,8 +269,8 @@ impl Board {
                 };
                 let found_piece = self.board.get(&cell).unwrap();
 
-                let rank_diff = (dest_cell.rank.as_index() as i32) - cell.rank as i32;
-                let file_diff = (dest_cell.file.as_index() as i32) - cell.file as i32;
+                let rank_diff = dest_cell.rank as i32 - cell.rank as i32;
+                let file_diff = dest_cell.file as i32 - cell.file as i32;
 
                 if found_piece.piece == piece && found_piece.player == self.to_move {
                     if piece == Piece::Pawn {
@@ -422,7 +422,7 @@ impl Board {
                     }
 
                     for (rank, fen_rank) in ranks.iter().enumerate() {
-                        let mut file = 0;
+                        let mut file = 1;
                         for c in fen_rank.chars() {
                             if c.is_digit(10) {
                                 file += c.to_digit(10).unwrap();
@@ -438,8 +438,8 @@ impl Board {
 
                                 board.set_piece(
                                     Cell {
-                                        rank: Rank::from_pgn((7 - rank).to_string().as_ref()),
-                                        file: File::from_pgn(file.to_string().as_ref()),
+                                        rank: Rank::from_pgn((8 - rank).to_string().as_ref()),
+                                        file: File::from_int(file),
                                     },
                                     piece,
                                 );
@@ -552,29 +552,29 @@ impl Default for Board {
 //     }
 // }
 
-// #[cfg(test)]
-// mod test_to_fen {
-//     use super::*;
+#[cfg(test)]
+mod test_to_fen {
+    use super::*;
 
-//     macro_rules! tests {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             fn $name() {
-//                 let (input, expected) = $value;
-//                 assert_eq!(expected, Board::from_fen(input).unwrap().to_fen());
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, Board::from_fen(input).unwrap().to_fen());
+            }
+        )*
+        }
+    }
 
-//     tests! {
-//         test_initial_white: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"),
-//         test_initial_black: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b"),
-//         test_other_1: ("r1bqkb1r/pp1npppp/2p2N2/8/2PP4/8/PP3PPP/R1BQKBNR b KQkq - 0 6", "r1bqkb1r/pp1npppp/2p2N2/8/2PP4/8/PP3PPP/R1BQKBNR b"),
-//         test_other_2: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 w - - 5 17", "r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 w"),
-//     }
-// }
+    tests! {
+        test_initial_white: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"),
+        test_initial_black: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b"),
+        test_other_1: ("r1bqkb1r/pp1npppp/2p2N2/8/2PP4/8/PP3PPP/R1BQKBNR b KQkq - 0 6", "r1bqkb1r/pp1npppp/2p2N2/8/2PP4/8/PP3PPP/R1BQKBNR b"),
+        test_other_2: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 w - - 5 17", "r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR1K1 w"),
+    }
+}
 
 // #[cfg(test)]
 // mod test_cell_empty {

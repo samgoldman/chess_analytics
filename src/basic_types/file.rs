@@ -27,8 +27,18 @@ impl File {
         }
     }
 
-    pub fn as_index(&self) -> usize {
-        *self as usize - 1
+    pub fn from_int(val: u32) -> Self {
+        match val {
+            1 => File::_A,
+            2 => File::_B,
+            3 => File::_C,
+            4 => File::_D,
+            5 => File::_E,
+            6 => File::_F,
+            7 => File::_G,
+            8 => File::_H,
+            u => panic!("Unrecognized file: {}", u),
+        }
     }
 }
 
@@ -77,33 +87,5 @@ mod test_file_from_pgn {
         test_from_pgn_invalid_3: "H", "Unrecognized file: H",
         test_from_pgn_invalid_4: "abcd", "Unrecognized file: abcd",
         test_from_pgn_invalid_5: "1234", "Unrecognized file: 1234",
-    }
-}
-
-#[cfg(test)]
-mod test_file_as_index {
-    use super::*;
-
-    macro_rules! tests_as_index {
-        ($($name:ident: $value:expr,)*) => {
-        $(
-            #[test]
-            fn $name() {
-                let (input, expected) = $value;
-                assert_eq!(expected, input.as_index());
-            }
-        )*
-        }
-    }
-
-    tests_as_index! {
-        test_from_pgn_a: (File::_A, 0),
-        test_from_pgn_b: (File::_B, 1),
-        test_from_pgn_c: (File::_C, 2),
-        test_from_pgn_d: (File::_D, 3),
-        test_from_pgn_e: (File::_E, 4),
-        test_from_pgn_f: (File::_F, 5),
-        test_from_pgn_g: (File::_G, 6),
-        test_from_pgn_h: (File::_H, 7),
     }
 }
