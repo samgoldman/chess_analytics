@@ -656,51 +656,52 @@ mod test_is_path_clear {
     }
 }
 
-// #[cfg(test)]
-// mod test_find_king_loc {
-//     use super::*;
+#[cfg(test)]
+mod test_find_king_loc {
+    use super::*;
 
-//     macro_rules! tests {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             fn $name() {
-//                 let (board, input, expected) = $value;
-//                 assert_eq!(expected, Board::from_fen(board).unwrap().find_king_loc(input));
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, input, expected) = $value;
+                assert_eq!(Cell::from_indices(expected), Board::from_fen(board).unwrap().find_king_loc(input));
+            }
+        )*
+        }
+    }
 
-//     tests! {
-//         test_board_1_white: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Player::White, (0, 4)),
-//         test_board_1_black: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Player::Black, (7, 4)),
-//         test_board_2_white: ("r1bq1b1r/pp1npppp/2p2N2/4k3/2PP4/7K/PP3PPP/R1BQ1BNR b KQkq - 0 6", Player::White, (2, 7)),
-//         test_board_2_black: ("r1bq1b1r/pp1npppp/2p2N2/4k3/2PP4/7K/PP3PPP/R1BQ1BNR b KQkq - 0 6", Player::Black, (4, 4)),
-//         test_board_3_white: ("r2rb1kK/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::White, (7, 7)),
-//         test_board_3_black: ("r2rb1kK/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::Black, (7, 6)),
-//         test_missing_white_black: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::Black, (7, 6)),
-//         test_missing_black_white: ("r2rb11K/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::White, (7, 7)),
-//     }
+    // TODO: convert to actual cells
+    tests! {
+        test_board_1_white: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Player::White, (0, 4)),
+        test_board_1_black: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Player::Black, (7, 4)),
+        test_board_2_white: ("r1bq1b1r/pp1npppp/2p2N2/4k3/2PP4/7K/PP3PPP/R1BQ1BNR b KQkq - 0 6", Player::White, (2, 7)),
+        test_board_2_black: ("r1bq1b1r/pp1npppp/2p2N2/4k3/2PP4/7K/PP3PPP/R1BQ1BNR b KQkq - 0 6", Player::Black, (4, 4)),
+        test_board_3_white: ("r2rb1kK/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::White, (7, 7)),
+        test_board_3_black: ("r2rb1kK/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::Black, (7, 6)),
+        test_missing_white_black: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::Black, (7, 6)),
+        test_missing_black_white: ("r2rb11K/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::White, (7, 7)),
+    }
 
-//     macro_rules! tests_panic {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             #[should_panic(expected="find_king_loc: king not found on board")]
-//             fn $name() {
-//                 let (board, input) = $value;
-//                 Board::from_fen(board).unwrap().find_king_loc(input);
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests_panic {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            #[should_panic(expected="find_king_loc: king not found on board")]
+            fn $name() {
+                let (board, input) = $value;
+                Board::from_fen(board).unwrap().find_king_loc(input);
+            }
+        )*
+        }
+    }
 
-//     tests_panic! {
-//         test_missing_white_white: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::White),
-//         test_missing_black_black: ("r2rb11K/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::Black),
-//     }
-// }
+    tests_panic! {
+        test_missing_white_white: ("r2rb1k1/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::White),
+        test_missing_black_black: ("r2rb11K/pp2qpbp/2n2np1/6N1/4P3/2N1B1PP/PPP1QPB1/3RR3 w - - 5 17", Player::Black),
+    }
+}
 
 // #[cfg(test)]
 // mod test_does_piece_check_loc {
