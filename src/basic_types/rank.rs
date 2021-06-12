@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use strum_macros::EnumIter;
 // use std::ops;
 
@@ -31,6 +32,18 @@ impl Rank {
     // pub fn as_integer(&self) -> u8 {
     //     *self as u8
     // }
+}
+
+impl Ord for Rank {
+    fn cmp(&self, other: &Self) -> Ordering {
+        (*self as usize).cmp(&(*other as usize))
+    }
+}
+
+impl PartialOrd for Rank {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 // impl ops::Sub<Rank> for u8 {

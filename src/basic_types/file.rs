@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use strum_macros::EnumIter;
 
 #[derive(PartialEq, Clone, Debug, Copy, Eq, EnumIter, Hash)]
@@ -39,6 +40,18 @@ impl File {
             8 => File::_H,
             u => panic!("Unrecognized file: {}", u),
         }
+    }
+}
+
+impl Ord for File {
+    fn cmp(&self, other: &Self) -> Ordering {
+        (*self as usize).cmp(&(*other as usize))
+    }
+}
+
+impl PartialOrd for File {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
