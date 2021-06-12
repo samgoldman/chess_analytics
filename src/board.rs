@@ -162,7 +162,10 @@ impl Board {
         if piece == Piece::Pawn {
             if diff_file != 0 && self.is_cell_empty(&to_cell) {
                 // En passant
-                self.clear(from_cell);
+                self.clear(Cell {
+                    file: to_cell.file,
+                    rank: from_cell.rank,
+                });
             }
         } else if piece == Piece::King {
             // Check for castling
@@ -806,35 +809,35 @@ mod test_find_player_piece_locs {
     }
 }
 
-// #[cfg(test)]
-// mod test_execute_move {
-//     use super::*;
+#[cfg(test)]
+mod test_execute_move {
+    use super::*;
 
-//     macro_rules! tests {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             fn $name() {
-//                 let (board, piece, from, to, expected) = $value;
-//                 let mut board = Board::from_fen(board).unwrap();
-//                 board.execute_move(piece, Cell::from_indices(from), Cell::from_indices(to));
-//                 assert_eq!(expected, board.to_fen());
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, piece, from, to, expected) = $value;
+                let mut board = Board::from_fen(board).unwrap();
+                board.execute_move(piece, Cell::from_indices(from), Cell::from_indices(to));
+                assert_eq!(expected, board.to_fen());
+            }
+        )*
+        }
+    }
 
-//     tests! {
-//         test_en_passant: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Pawn, (4, 1), (5, 2), "r3kb1r/pp1ppppp/2P2n2/8/6B1/2P5/P2PPPPP/RNBQK2R w"),
-//         test_queenside: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::King, (7, 4), (7, 2), "2kr1b1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w"),
-//         test_kingside: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::King, (0, 4), (0, 6), "r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQ1RK1 w"),
-//         test_bishop_cap: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Bishop, (3, 6), (6, 3), "r3kb1r/pp1Bpppp/5n2/1Pp5/8/2P5/P2PPPPP/RNBQK2R w"),
-//         test_king_normal: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::King, (0, 4), (0, 5), "r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQ1K1R w"),
-//         test_knight_cap: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Knight, (5, 5), (3, 6), "r3kb1r/pp1ppppp/8/1Pp5/6n1/2P5/P2PPPPP/RNBQK2R w"),
-//         test_pawn_jump:  ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Pawn, (1, 0), (3, 0), "r3kb1r/pp1ppppp/5n2/1Pp5/P5B1/2P5/3PPPPP/RNBQK2R w"),
-//         test_pawn_normal: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Pawn, (1, 0), (2, 0), "r3kb1r/pp1ppppp/5n2/1Pp5/6B1/P1P5/3PPPPP/RNBQK2R w"),
-//     }
-// }
+    tests! {
+        test_en_passant: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Pawn, (4, 1), (5, 2), "r3kb1r/pp1ppppp/2P2n2/8/6B1/2P5/P2PPPPP/RNBQK2R w"),
+        test_queenside: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::King, (7, 4), (7, 2), "2kr1b1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w"),
+        test_kingside: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::King, (0, 4), (0, 6), "r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQ1RK1 w"),
+        test_bishop_cap: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Bishop, (3, 6), (6, 3), "r3kb1r/pp1Bpppp/5n2/1Pp5/8/2P5/P2PPPPP/RNBQK2R w"),
+        test_king_normal: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::King, (0, 4), (0, 5), "r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQ1K1R w"),
+        test_knight_cap: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Knight, (5, 5), (3, 6), "r3kb1r/pp1ppppp/8/1Pp5/6n1/2P5/P2PPPPP/RNBQK2R w"),
+        test_pawn_jump:  ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Pawn, (1, 0), (3, 0), "r3kb1r/pp1ppppp/5n2/1Pp5/P5B1/2P5/3PPPPP/RNBQK2R w"),
+        test_pawn_normal: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Pawn, (1, 0), (2, 0), "r3kb1r/pp1ppppp/5n2/1Pp5/6B1/P1P5/3PPPPP/RNBQK2R w"),
+    }
+}
 
 #[cfg(test)]
 mod test_is_in_check {
