@@ -72,3 +72,13 @@ pub fn get_filter_steps(filter_input: Vec<Vec<FilterInput>>) -> FilterFn {
         false
     })
 }
+
+#[cfg(test)]
+mod test_get_filter_factories {
+    use super::*;
+
+    #[test]
+    fn test_count() {
+        assert_eq!(13, get_filter_factories().len());
+    }
+}
