@@ -105,8 +105,6 @@ impl Board {
             Path::empty()
         };
 
-        println!("path: {:?}", path);
-
         // Note: assume target is occupied, we're just checking if the attacker is applying check to the target
         // TODO: properly unwrap
         if self.board.contains_key(&attacker_cell) {
@@ -202,7 +200,6 @@ impl Board {
 
     pub fn find_origin(&self, piece: Piece, dest: Cell, from: PartialCell) -> Cell {
         let possible_origins = self.find_possible_origins(piece, dest, from);
-        let dest_file = dest.rank;
 
         let filtered_origins = possible_origins
             .iter()
@@ -221,10 +218,10 @@ impl Board {
                 !test_board.is_in_check(self.to_move)
             })
             .filter(|possible_origin| {
-                let diff_file = dest_file as i32 - possible_origin.file as i32;
-
                 if piece == Piece::Pawn {
-                    if self.is_cell_empty(&dest) {
+                    let diff_file = dest.file as i32 - possible_origin.file as i32;
+
+                    if !self.is_cell_empty(&dest) {
                         diff_file != 0 // If capturing, must be diagonal
                     } else {
                         true
@@ -960,160 +957,158 @@ mod test_is_in_check {
     }
 }
 
-// #[cfg(test)]
-// mod test_find_possible_origins {
-//     use super::*;
+#[cfg(test)]
+mod test_find_possible_origins {
+    use super::*;
 
-//     macro_rules! tests {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             fn $name() {
-//                 let (board, piece, dest, from, expected): (&str, Piece, (Rank, File), (Rank, File), Vec<(Rank, File)>) = $value;
-//                 let board = Board::from_fen(board).unwrap();
-//                 let actual_expected: Vec<(usize, usize)> = expected.iter().map(|location| (location.0.as_index(), location.1.as_index())).collect();
-//                 assert_eq!(actual_expected, board.find_possible_origins(piece, dest, from));
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, piece, dest, from, expected): (&str, Piece, Cell, PartialCell, Vec<Cell>) = $value;
+                let board = Board::from_fen(board).unwrap();
+                assert_eq!(expected, board.find_possible_origins(piece, dest, from));
+            }
+        )*
+        }
+    }
 
-//     tests! {
-//         test_pawn_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), vec![(Rank::_4, File::_A)]),
-//         test_pawn_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), vec![(Rank::_6, File::_B)]),
-//         test_pawn_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_4, File::_B), (Rank::_NA, File::_NA), vec![(Rank::_3, File::_B), (Rank::_3, File::_C)]),
-//         test_pawn_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_4, File::_B), (Rank::_NA, File::_B), vec![(Rank::_3, File::_B)]),
-//         test_pawn_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_5, File::_B), (Rank::_NA, File::_B), vec![]),
+    tests! {
+        test_pawn_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_A, Rank::_5), partial_cell!(None, None), vec![cell!(File::_A, Rank::_4)]),
+        test_pawn_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, cell!(File::_A, Rank::_5), partial_cell!(None, None), vec![cell!(File::_B, Rank::_6)]),
+        test_pawn_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_4), partial_cell!(None, None), vec![cell!(File::_B, Rank::_3), cell!(File::_C, Rank::_3)]),
+        test_pawn_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_4), partial_cell!(Some(File::_B), None), vec![cell!(File::_B, Rank::_3)]),
+        test_pawn_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_5), partial_cell!(Some(File::_B), None), vec![]),
 
-//         test_bishop_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, (Rank::_5, File::_G), (Rank::_NA, File::_NA), vec![(Rank::_4, File::_F), (Rank::_6, File::_H)]),
-//         test_bishop_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, (Rank::_5, File::_G), (Rank::_4, File::_NA), vec![(Rank::_4, File::_F)]),
-//         test_bishop_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, (Rank::_5, File::_G), (Rank::_NA, File::_H), vec![(Rank::_6, File::_H)]),
-//         test_bishop_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_NA, File::_NA), vec![(Rank::_5, File::_C), (Rank::_8, File::_D)]),
-//         test_bishop_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_8, File::_NA), vec![(Rank::_8, File::_D)]),
-//         test_bishop_6: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_NA, File::_C), vec![(Rank::_5, File::_C)]),
+        test_bishop_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(None, None), vec![cell!(File::_F, Rank::_4), cell!(File::_H, Rank::_6)]),
+        test_bishop_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(None, Some(Rank::_4)), vec![cell!(File::_F, Rank::_4)]),
+        test_bishop_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(Some(File::_H), None), vec![cell!(File::_H, Rank::_6)]),
+        test_bishop_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, cell!(File::_E, Rank::_7), partial_cell!(None, None), vec![cell!(File::_C, Rank::_5), cell!(File::_D, Rank::_8)]),
+        test_bishop_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, cell!(File::_E, Rank::_7), partial_cell!(None, Some(Rank::_8)), vec![cell!(File::_D, Rank::_8)]),
+        test_bishop_6: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, cell!(File::_E, Rank::_7), partial_cell!(Some(File::_C), None), vec![cell!(File::_C, Rank::_5)]),
 
-//         test_knight_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_1, File::_A), (Rank::_NA, File::_NA), vec![]),
-//         test_knight_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_6, File::_F), (Rank::_NA, File::_NA), vec![(Rank::_5, File::_H), (Rank::_7, File::_H)]),
-//         test_knight_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_6, File::_F), (Rank::_NA, File::_H), vec![(Rank::_5, File::_H), (Rank::_7, File::_H)]),
-//         test_knight_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_6, File::_F), (Rank::_7, File::_NA), vec![(Rank::_7, File::_H)]),
-//         test_knight_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_3, File::_G), (Rank::_NA, File::_NA), vec![(Rank::_5, File::_H)]),
-//         test_knight_6: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_NA, File::_NA), vec![(Rank::_1, File::_A), (Rank::_4, File::_B), (Rank::_4, File::_D)]),
-//         test_knight_7: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_4, File::_NA), vec![(Rank::_4, File::_B), (Rank::_4, File::_D)]),
-//         test_knight_8: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_1, File::_NA), vec![(Rank::_1, File::_A)]),
-//         test_knight_9: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_4, File::_D), vec![(Rank::_4, File::_D)]),
+        test_knight_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, cell!(File::_A, Rank::_1), partial_cell!(None, None), vec![]),
+        test_knight_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, cell!(File::_F, Rank::_6), partial_cell!(None, None), vec![cell!(File::_H, Rank::_5), cell!(File::_H, Rank::_7)]),
+        test_knight_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, cell!(File::_F, Rank::_6), partial_cell!(Some(File::_H), None), vec![cell!(File::_H, Rank::_5), cell!(File::_H, Rank::_7)]),
+        test_knight_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, cell!(File::_F, Rank::_6), partial_cell!(None, Some(Rank::_7)), vec![cell!(File::_H, Rank::_7)]),
+        test_knight_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, cell!(File::_G, Rank::_3), partial_cell!(None, None), vec![cell!(File::_H, Rank::_5)]),
+        test_knight_6: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, cell!(File::_C, Rank::_2), partial_cell!(None, None), vec![cell!(File::_A, Rank::_1), cell!(File::_B, Rank::_4), cell!(File::_D, Rank::_4)]),
+        test_knight_7: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, cell!(File::_C, Rank::_2), partial_cell!(None, Some(Rank::_4)), vec![cell!(File::_B, Rank::_4), cell!(File::_D, Rank::_4)]),
+        test_knight_8: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, cell!(File::_C, Rank::_2), partial_cell!(None, Some(Rank::_1)), vec![cell!(File::_A, Rank::_1)]),
+        test_knight_9: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, cell!(File::_C, Rank::_2), partial_cell!(Some(File::_D), Some(Rank::_4)), vec![cell!(File::_D, Rank::_4)]),
 
-//         test_rook_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, (Rank::_8, File::_H), (Rank::_NA, File::_NA), vec![(Rank::_8, File::_E)]),
-//         test_rook_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, (Rank::_5, File::_E), (Rank::_NA, File::_NA), vec![(Rank::_5, File::_F), (Rank::_8, File::_E)]),
-//         test_rook_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, (Rank::_5, File::_E), (Rank::_NA, File::_F), vec![(Rank::_5, File::_F)]),
-//         test_rook_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Rook, (Rank::_6, File::_G), (Rank::_NA, File::_NA), vec![(Rank::_6, File::_C)]),
-//         test_rook_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Rook, (Rank::_2, File::_F), (Rank::_NA, File::_NA), vec![(Rank::_2, File::_B)]),
+        test_rook_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, cell!(File::_H, Rank::_8), partial_cell!(None, None), vec![cell!(File::_E, Rank::_8)]),
+        test_rook_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, cell!(File::_E, Rank::_5), partial_cell!(None, None), vec![cell!(File::_F, Rank::_5), cell!(File::_E, Rank::_8)]),
+        test_rook_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, cell!(File::_E, Rank::_5), partial_cell!(Some(File::_F), None), vec![cell!(File::_F, Rank::_5)]),
+        test_rook_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Rook, cell!(File::_G, Rank::_6), partial_cell!(None, None), vec![cell!(File::_C, Rank::_6)]),
+        test_rook_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Rook, cell!(File::_F, Rank::_2), partial_cell!(None, None), vec![cell!(File::_B, Rank::_2)]),
 
-//         test_queen_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_8, File::_H), (Rank::_8, File::_NA), vec![]),
-//         test_queen_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_2, File::_G), (Rank::_NA, File::_NA), vec![(Rank::_2, File::_D), (Rank::_3, File::_G)]),
-//         test_queen_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_3, File::_E), (Rank::_NA, File::_NA), vec![(Rank::_2, File::_D), (Rank::_3, File::_G)]),
-//         test_queen_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_3, File::_E), (Rank::_3, File::_NA), vec![(Rank::_3, File::_G)]),
-//         test_queen_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_4, File::_F), (Rank::_1, File::_NA), vec![]),
-//         test_queen_6: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, (Rank::_1, File::_A), (Rank::_NA, File::_NA), vec![(Rank::_1, File::_G), (Rank::_6, File::_A)]),
-//         test_queen_7: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, (Rank::_4, File::_C), (Rank::_NA, File::_NA), vec![(Rank::_6, File::_A)]),
-//         test_queen_8: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, (Rank::_6, File::_G), (Rank::_NA, File::_NA), vec![(Rank::_1, File::_G), (Rank::_6, File::_A)]),
-//         test_queen_9: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, (Rank::_6, File::_G), (Rank::_1, File::_NA), vec![(Rank::_1, File::_G)]),
-//         test_queen_10: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, (Rank::_6, File::_G), (Rank::_6, File::_NA), vec![(Rank::_6, File::_A)]),
+        test_queen_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, cell!(File::_H, Rank::_8), partial_cell!(None, Some(Rank::_8)), vec![]),
+        test_queen_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, cell!(File::_G, Rank::_2), partial_cell!(None, None), vec![cell!(File::_D, Rank::_2), cell!(File::_G, Rank::_3)]),
+        test_queen_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, cell!(File::_E, Rank::_3), partial_cell!(None, None), vec![cell!(File::_D, Rank::_2), cell!(File::_G, Rank::_3)]),
+        test_queen_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, cell!(File::_E, Rank::_3), partial_cell!(None, Some(Rank::_3)), vec![cell!(File::_G, Rank::_3)]),
+        test_queen_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, cell!(File::_F, Rank::_4), partial_cell!(None, Some(Rank::_1)), vec![]),
+        test_queen_6: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, cell!(File::_A, Rank::_1), partial_cell!(None, None), vec![cell!(File::_G, Rank::_1), cell!(File::_A, Rank::_6)]),
+        test_queen_7: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, cell!(File::_C, Rank::_4), partial_cell!(None, None), vec![cell!(File::_A, Rank::_6)]),
+        test_queen_8: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, cell!(File::_G, Rank::_6), partial_cell!(None, None), vec![cell!(File::_G, Rank::_1), cell!(File::_A, Rank::_6)]),
+        test_queen_9: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, cell!(File::_G, Rank::_6), partial_cell!(None, Some(Rank::_1)), vec![cell!(File::_G, Rank::_1)]),
+        test_queen_10: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, cell!(File::_G, Rank::_6), partial_cell!(None, Some(Rank::_6)), vec![cell!(File::_A, Rank::_6)]),
 
-//         test_king_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, (Rank::_8, File::_H), (Rank::_NA, File::_NA), vec![(Rank::_7, File::_G)]),
-//         test_king_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, (Rank::_7, File::_F), (Rank::_NA, File::_NA), vec![(Rank::_7, File::_G)]),
-//         test_king_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, (Rank::_6, File::_F), (Rank::_NA, File::_NA), vec![(Rank::_7, File::_G)]),
-//         test_king_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::King, (Rank::_5, File::_F), (Rank::_NA, File::_NA), vec![(Rank::_6, File::_F)]),
-//         test_king_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::King, (Rank::_7, File::_G), (Rank::_NA, File::_NA), vec![(Rank::_6, File::_F)]),
-//     }
-// }
+        test_king_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, cell!(File::_H, Rank::_8), partial_cell!(None, None), vec![cell!(File::_G, Rank::_7)]),
+        test_king_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, cell!(File::_F, Rank::_7), partial_cell!(None, None), vec![cell!(File::_G, Rank::_7)]),
+        test_king_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, cell!(File::_F, Rank::_6), partial_cell!(None, None), vec![cell!(File::_G, Rank::_7)]),
+        test_king_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::King, cell!(File::_F, Rank::_5), partial_cell!(None, None), vec![cell!(File::_F, Rank::_6)]),
+        test_king_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::King, cell!(File::_G, Rank::_7), partial_cell!(None, None), vec![cell!(File::_F, Rank::_6)]),
+    }
+}
 
-// #[cfg(test)]
-// mod test_find_origin {
-//     use super::*;
+#[cfg(test)]
+mod test_find_origin {
+    use super::*;
 
-//     macro_rules! tests {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             fn $name() {
-//                 let (board, piece, dest, from, expected): (&str, Piece, (Rank, File), (Rank, File), (Rank, File)) = $value;
-//                 let board = Board::from_fen(board).unwrap();
-//                 let actual_expected = (expected.0.as_index(), expected.1.as_index());
-//                 assert_eq!(actual_expected, board.find_origin(piece, dest, from));
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board, piece, dest, from, expected): (&str, Piece, Cell, PartialCell, Cell) = $value;
+                let board = Board::from_fen(board).unwrap();
+                assert_eq!(expected, board.find_origin(piece, dest, from));
+            }
+        )*
+        }
+    }
 
-//     tests! {
-//         test_pawn_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), (Rank::_4, File::_A)),
-//         test_pawn_2: ("k2bR3/2pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, (Rank::_5, File::_A), (Rank::_NA, File::_NA), (Rank::_6, File::_B)),
-//         test_pawn_3: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_4, File::_B), (Rank::_NA, File::_B), (Rank::_3, File::_B)),
-//         test_pawn_4: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/Pq1n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_4, File::_B), (Rank::_NA, File::_NA), (Rank::_3, File::_C)),
+    tests! {
+        test_pawn_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_A, Rank::_5), partial_cell!(None, None), cell!(File::_A, Rank::_4)),
+        test_pawn_2: ("k2bR3/2pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, cell!(File::_A, Rank::_5), partial_cell!(None, None), cell!(File::_B, Rank::_6)),
+        test_pawn_3: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_4), partial_cell!(Some(File::_B), None), cell!(File::_B, Rank::_3)),
+        test_pawn_4: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/Pq1n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_4), partial_cell!(None, None), cell!(File::_C, Rank::_3)),
 
-//         test_bishop_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, (Rank::_5, File::_G), (Rank::_4, File::_NA), (Rank::_4, File::_F)),
-//         test_bishop_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, (Rank::_5, File::_G), (Rank::_NA, File::_H), (Rank::_6, File::_H)),
-//         test_bishop_3: ("3bR3/k1pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_NA, File::_NA), (Rank::_8, File::_D)),
-//         test_bishop_4: ("3bR3/k1pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_8, File::_NA), (Rank::_8, File::_D)),
-//         test_bishop_5: ("3bR3/k1pP2KN/qpr3pB/2b1pR1N/P1n2B1P/1PP1npQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, (Rank::_7, File::_E), (Rank::_NA, File::_C), (Rank::_5, File::_C)),
+        test_bishop_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(None, Some(Rank::_4)), cell!(File::_F, Rank::_4)),
+        test_bishop_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(Some(File::_H), None), cell!(File::_H, Rank::_6)),
+        test_bishop_3: ("3bR3/k1pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, cell!(File::_E, Rank::_7), partial_cell!(None, None), cell!(File::_D, Rank::_8)),
+        test_bishop_4: ("3bR3/k1pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, cell!(File::_E, Rank::_7), partial_cell!(None, Some(Rank::_8)), cell!(File::_D, Rank::_8)),
+        test_bishop_5: ("3bR3/k1pP2KN/qpr3pB/2b1pR1N/P1n2B1P/1PP1npQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, cell!(File::_E, Rank::_7), partial_cell!(Some(File::_C), None), cell!(File::_C, Rank::_5)),
 
-//         test_knight_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_6, File::_F), (Rank::_7, File::_NA), (Rank::_7, File::_H)),
-//         test_knight_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_3, File::_G), (Rank::_NA, File::_NA), (Rank::_5, File::_H)),
-//         test_knight_3: ("3bR3/2pP2KN/qprk2pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_1, File::_NA), (Rank::_1, File::_A)),
-//         test_knight_4: ("1k1bR3/2pP2KN/qpr3pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_4, File::_D), (Rank::_4, File::_D)),
-//         test_knight_5: ("3bR3/2pP2KN/qprb2pB/k3pR1N/Pn3B1P/1P2PpQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, (Rank::_2, File::_C), (Rank::_NA, File::_NA), (Rank::_1, File::_A)),
+        test_knight_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, cell!(File::_F, Rank::_6), partial_cell!(None, Some(Rank::_7)), cell!(File::_H, Rank::_7)),
+        test_knight_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, cell!(File::_G, Rank::_3), partial_cell!(None, None), cell!(File::_H, Rank::_5)),
+        test_knight_3: ("3bR3/2pP2KN/qprk2pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, cell!(File::_C, Rank::_2), partial_cell!(None, Some(Rank::_1)), cell!(File::_A, Rank::_1)),
+        test_knight_4: ("1k1bR3/2pP2KN/qpr3pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, cell!(File::_C, Rank::_2), partial_cell!(Some(File::_D), Some(Rank::_4)), cell!(File::_D, Rank::_4)),
+        test_knight_5: ("3bR3/2pP2KN/qprb2pB/k3pR1N/Pn3B1P/1P2PpQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, cell!(File::_C, Rank::_2), partial_cell!(None, None), cell!(File::_A, Rank::_1)),
 
-//         test_rook_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, (Rank::_8, File::_H), (Rank::_NA, File::_NA), (Rank::_8, File::_E)),
-//         test_rook_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, (Rank::_5, File::_E), (Rank::_NA, File::_F), (Rank::_5, File::_F)),
-//         test_rook_3: ("2nbR1p1/2pP2K1/qpr3NB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/k5q1 b - - 0 1", Piece::Rook, (Rank::_6, File::_G), (Rank::_NA, File::_NA), (Rank::_6, File::_C)),
-//         test_rook_4: ("k2bR3/2pP2KN/qprn2pB/b3pR1N/P2n1B1P/1P3pQ1/1r1QPP1B/6q1 b - - 0 1", Piece::Rook, (Rank::_2, File::_C), (Rank::_NA, File::_B), (Rank::_2, File::_B)),
+        test_rook_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, cell!(File::_H, Rank::_8), partial_cell!(None, None), cell!(File::_E, Rank::_8)),
+        test_rook_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, cell!(File::_E, Rank::_5), partial_cell!(Some(File::_F), None), cell!(File::_F, Rank::_5)),
+        test_rook_3: ("2nbR1p1/2pP2K1/qpr3NB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/k5q1 b - - 0 1", Piece::Rook, cell!(File::_G, Rank::_6), partial_cell!(None, None), cell!(File::_C, Rank::_6)),
+        test_rook_4: ("k2bR3/2pP2KN/qprn2pB/b3pR1N/P2n1B1P/1P3pQ1/1r1QPP1B/6q1 b - - 0 1", Piece::Rook, cell!(File::_C, Rank::_2), partial_cell!(Some(File::_B), None), cell!(File::_B, Rank::_2)),
 
-//         test_queen_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_2, File::_G), (Rank::_NA, File::_NA), (Rank::_3, File::_G)),
-//         test_queen_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_3, File::_E), (Rank::_NA, File::_NA), (Rank::_2, File::_D)),
-//         test_queen_3: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/P2n1B1P/1PP3Q1/1r1QPp1B/6q1 w - - 0 1", Piece::Queen, (Rank::_3, File::_E), (Rank::_3, File::_NA), (Rank::_3, File::_G)),
-//         test_queen_4: ("3bR3/2pP2KN/qprk2pB/1Pb1pR1N/Pn1n1B1P/2P2pQ1/1rnQPN1B/6q1 b - - 0 1", Piece::Queen, (Rank::_1, File::_A), (Rank::_NA, File::_NA), (Rank::_1, File::_G)),
-//         test_queen_5: ("3bR3/2pP2KN/qprk2pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Queen, (Rank::_4, File::_C), (Rank::_NA, File::_NA), (Rank::_6, File::_A)),
-//         test_queen_6: ("3bR3/1rpP1pKN/q6B/1pbkpR1N/Pn1n1B1P/1PP2p2/1r1QPQ1B/n3N1q1 b - - 0 1", Piece::Queen, (Rank::_6, File::_G), (Rank::_1, File::_NA), (Rank::_1, File::_G)),
-//         test_queen_7: ("3bR3/1rpP1pKN/q6B/1pbkpR1N/Pn1n1B1P/1PP2p2/1r1QPQ1B/n3N1q1 b - - 0 1", Piece::Queen, (Rank::_6, File::_G), (Rank::_6, File::_NA), (Rank::_6, File::_A)),
+        test_queen_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, cell!(File::_G, Rank::_2), partial_cell!(None, None), cell!(File::_G, Rank::_3)),
+        test_queen_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, cell!(File::_E, Rank::_3), partial_cell!(None, None), cell!(File::_D, Rank::_2)),
+        test_queen_3: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/P2n1B1P/1PP3Q1/1r1QPp1B/6q1 w - - 0 1", Piece::Queen, cell!(File::_E, Rank::_3), partial_cell!(None, Some(Rank::_3)), cell!(File::_G, Rank::_3)),
+        test_queen_4: ("3bR3/2pP2KN/qprk2pB/1Pb1pR1N/Pn1n1B1P/2P2pQ1/1rnQPN1B/6q1 b - - 0 1", Piece::Queen, cell!(File::_A, Rank::_1), partial_cell!(None, None), cell!(File::_G, Rank::_1)),
+        test_queen_5: ("3bR3/2pP2KN/qprk2pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Queen, cell!(File::_C, Rank::_4), partial_cell!(None, None), cell!(File::_A, Rank::_6)),
+        test_queen_6: ("3bR3/1rpP1pKN/q6B/1pbkpR1N/Pn1n1B1P/1PP2p2/1r1QPQ1B/n3N1q1 b - - 0 1", Piece::Queen, cell!(File::_G, Rank::_6), partial_cell!(None, Some(Rank::_1)), cell!(File::_G, Rank::_1)),
+        test_queen_7: ("3bR3/1rpP1pKN/q6B/1pbkpR1N/Pn1n1B1P/1PP2p2/1r1QPQ1B/n3N1q1 b - - 0 1", Piece::Queen, cell!(File::_G, Rank::_6), partial_cell!(None, Some(Rank::_6)), cell!(File::_A, Rank::_6)),
 
-//         test_king_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, (Rank::_8, File::_H), (Rank::_NA, File::_NA), (Rank::_7, File::_G)),
-//         test_king_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, (Rank::_8, File::_G), (Rank::_NA, File::_NA), (Rank::_7, File::_G)),
-//         test_king_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, (Rank::_8, File::_F), (Rank::_NA, File::_NA), (Rank::_7, File::_G)),
-//         test_king_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::King, (Rank::_5, File::_F), (Rank::_NA, File::_NA), (Rank::_6, File::_F)),
-//         test_king_5: ("3bR3/2pP2KN/qprk2pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::King, (Rank::_5, File::_D), (Rank::_NA, File::_NA), (Rank::_6, File::_D)),
-//     }
+        test_king_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, cell!(File::_H, Rank::_8), partial_cell!(None, None), cell!(File::_G, Rank::_7)),
+        test_king_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, cell!(File::_G, Rank::_8), partial_cell!(None, None), cell!(File::_G, Rank::_7)),
+        test_king_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, cell!(File::_F, Rank::_8), partial_cell!(None, None), cell!(File::_G, Rank::_7)),
+        test_king_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::King, cell!(File::_F, Rank::_5), partial_cell!(None, None), cell!(File::_F, Rank::_6)),
+        test_king_5: ("3bR3/2pP2KN/qprk2pB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::King, cell!(File::_D, Rank::_5), partial_cell!(None, None), cell!(File::_D, Rank::_6)),
+    }
 
-//     macro_rules! panic_tests {
-//         ($($name:ident: $value:expr; $panic:literal,)*) => {
-//         $(
-//             #[test]
-//             #[should_panic(expected=$panic)]
-//             fn $name() {
-//                 let (board, piece, dest, from): (&str, Piece, (Rank, File), (Rank, File)) = $value;
-//                 let board = Board::from_fen(board).unwrap();
-//                 board.find_origin(piece, dest, from);
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! panic_tests {
+        ($($name:ident: $value:expr; $panic:literal,)*) => {
+        $(
+            #[test]
+            #[should_panic(expected=$panic)]
+            fn $name() {
+                let (board, piece, dest, from): (&str, Piece, Cell, PartialCell) = $value;
+                let board = Board::from_fen(board).unwrap();
+                board.find_origin(piece, dest, from);
+            }
+        )*
+        }
+    }
 
-//     panic_tests! {
-//         test_panic_pawn_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, (Rank::_5, File::_B), (Rank::_NA, File::_B)); "No possible origins found",
+    panic_tests! {
+        test_panic_pawn_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_5), partial_cell!(Some(File::_B), None)); "No possible origins found",
 
-//         test_panic_bishop_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, (Rank::_5, File::_G), (Rank::_NA, File::_NA)); "Too many possible origins",
+        test_panic_bishop_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(None, None)); "Too many possible origins",
 
-//         test_panic_knight_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_1, File::_A), (Rank::_NA, File::_NA)); "No possible origins found",
-//         test_panic_knight_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_6, File::_F), (Rank::_NA, File::_NA)); "Too many possible origins",
-//         test_panic_knight_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, (Rank::_6, File::_F), (Rank::_NA, File::_H)); "Too many possible origins",
+        test_panic_knight_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, cell!(File::_A, Rank::_1), partial_cell!(None, None)); "No possible origins found",
+        test_panic_knight_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, cell!(File::_F, Rank::_6), partial_cell!(None, None)); "Too many possible origins",
+        test_panic_knight_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Knight, cell!(File::_F, Rank::_6), partial_cell!(Some(File::_H), None)); "Too many possible origins",
 
-//         test_panic_rook_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, (Rank::_5, File::_E), (Rank::_NA, File::_NA)); "Too many possible origins",
+        test_panic_rook_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, cell!(File::_E, Rank::_5), partial_cell!(None, None)); "Too many possible origins",
 
-//         test_panic_queen_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_8, File::_H), (Rank::_8, File::_NA)); "No possible origins found",
-//         test_panic_queen_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, (Rank::_4, File::_F), (Rank::_1, File::_NA)); "No possible origins found",
-//         test_panic_queen_3: ("3b1R2/2pP2KN/q1rnk1pB/4pR1N/P4B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, (Rank::_6, File::_B), (Rank::_NA, File::_NA)); "Too many possible origins",
+        test_panic_queen_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, cell!(File::_H, Rank::_8), partial_cell!(None, Some(Rank::_8))); "No possible origins found",
+        test_panic_queen_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, cell!(File::_F, Rank::_4), partial_cell!(None, Some(Rank::_1))); "No possible origins found",
+        test_panic_queen_3: ("3b1R2/2pP2KN/q1rnk1pB/4pR1N/P4B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, cell!(File::_B, Rank::_6), partial_cell!(None, None)); "Too many possible origins",
 
-//     }
-// }
+    }
+}
 
 #[cfg(test)]
 mod test_move_piece {
