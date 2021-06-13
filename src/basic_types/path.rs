@@ -64,23 +64,26 @@ mod test_generate_path {
             #[test]
             fn $name() {
                 let (from, to, expected) = $value;
-                assert_eq!(Path(expected.iter().map(|indices| {
-                    Cell::from_indices(*indices)
-                }).collect()), Path::generate_path(Cell::from_indices(from), Cell::from_indices(to)));
+                assert_eq!(Path::from_vec(expected), Path::generate_path(from, to));
             }
         )*
         }
     }
 
     tests! {
-        test_0_0_to_7_7: ((0, 0), (7, 7), vec![(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6)]),
-        test_2_3_to_6_3: ((2, 3), (6, 3), vec![(3, 3), (4, 3), (5, 3)]),
-        test_7_5_to_7_3: ((7, 5), (7, 3), vec![(7, 4)]),
+        test_1: (cell!(File::_A, Rank::_1), cell!(File::_H, Rank::_8), vec![cell!(File::_B, Rank::_2),
+            cell!(File::_C, Rank::_3),
+            cell!(File::_D, Rank::_4),
+            cell!(File::_E, Rank::_5),
+            cell!(File::_F, Rank::_6),
+            cell!(File::_G, Rank::_7)]),
+        test_2: (cell!(File::_D, Rank::_3), cell!(File::_D, Rank::_7), vec![cell!(File::_D, Rank::_4), cell!(File::_D, Rank::_5), cell!(File::_D, Rank::_6)]),
+        test_3: (cell!(File::_F, Rank::_8), cell!(File::_D, Rank::_8), vec![cell!(File::_E, Rank::_8)]),
     }
 
     #[test]
     #[should_panic(expected = "generate_path: non linear path requested")]
     fn test_non_linear_path() {
-        Path::generate_path(Cell::from_indices((1, 0)), Cell::from_indices((7, 3)));
+        Path::generate_path(cell!(File::_A, Rank::_2), cell!(File::_D, Rank::_8));
     }
 }

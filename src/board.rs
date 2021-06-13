@@ -170,26 +170,14 @@ impl Board {
             if diff_file == 2 {
                 self.execute_move(
                     Piece::Rook,
-                    Cell {
-                        rank: from_cell.rank,
-                        file: File::_H,
-                    },
-                    Cell {
-                        rank: to_cell.rank,
-                        file: File::_F,
-                    },
+                    cell!(File::_H, from_cell.rank),
+                    cell!(File::_F, to_cell.rank),
                 );
             } else if diff_file == -2 {
                 self.execute_move(
                     Piece::Rook,
-                    Cell {
-                        rank: from_cell.rank,
-                        file: File::_A,
-                    },
-                    Cell {
-                        rank: to_cell.rank,
-                        file: File::_D,
-                    },
+                    cell!(File::_A, from_cell.rank),
+                    cell!(File::_D, to_cell.rank),
                 );
             }
         }
@@ -344,10 +332,10 @@ impl Board {
         // If there's a from rank and file, just make the move
         let from_cell =
             if move_description.from_rank.is_some() && move_description.from_file.is_some() {
-                Cell {
-                    rank: move_description.from_rank.unwrap(),
-                    file: move_description.from_file.unwrap(),
-                }
+                cell!(
+                    move_description.from_file.unwrap(),
+                    move_description.from_rank.unwrap()
+                )
             } else {
                 self.find_origin(
                     piece_moved,
