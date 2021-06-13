@@ -78,7 +78,7 @@ bin!(site_bin, "site", _params, {
 });
 
 bin!(time_control_bin, "timeControl", _params, {
-    use crate::game_wrapper::TimeControl;
+    use crate::basic_types::time_control::TimeControl;
 
     Box::new(move |game| match game.time_control() {
         TimeControl::UltraBullet => "UltraBullet".to_string(),

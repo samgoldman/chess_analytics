@@ -6,6 +6,7 @@ use crate::basic_types::partial_cell::PartialCell;
 use crate::basic_types::piece::Piece;
 use crate::basic_types::rank::Rank;
 use crate::basic_types::termination::Termination;
+use crate::basic_types::time_control::TimeControl;
 use crate::board::Board;
 use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList};
 use crate::chess_utils::*;
@@ -61,16 +62,6 @@ impl Move {
     }
 }
 
-#[derive(PartialEq, Clone)]
-pub enum TimeControl {
-    UltraBullet,
-    Bullet,
-    Blitz,
-    Rapid,
-    Classical,
-    Correspondence,
-}
-
 #[derive(Clone)]
 pub struct GameWrapper {
     year: u16,
@@ -117,22 +108,10 @@ impl GameWrapper {
     // as defined here: https://lichess.org/faq#time-controls
     // Games with 0 for both values are assumed to be correspondence
     fn get_time_control_category(game: Game) -> TimeControl {
-        let estimated_duration =
-            (game.time_control_main() as u32) + (40 * game.time_control_increment() as u32);
-
-        if estimated_duration == 0 {
-            TimeControl::Correspondence
-        } else if estimated_duration < 29 {
-            TimeControl::UltraBullet
-        } else if estimated_duration < 179 {
-            TimeControl::Bullet
-        } else if estimated_duration < 479 {
-            TimeControl::Blitz
-        } else if estimated_duration < 1499 {
-            TimeControl::Rapid
-        } else {
-            TimeControl::Classical
-        }
+        TimeControl::from_base_and_increment(
+            game.time_control_main(),
+            game.time_control_increment() as u16,
+        )
     }
 
     // Extract move data and create a move object from it
