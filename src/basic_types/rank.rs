@@ -102,3 +102,33 @@ mod test_rank_from_pgn {
         test_from_pgn_invalid_5: "1234", "Unrecognized rank: 1234",
     }
 }
+
+#[cfg(test)]
+mod test_ord_fns {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (a, b, expected) = $value;
+                assert_eq!(expected, a.cmp(&b));
+                assert_eq!(Some(expected), a.partial_cmp(&b));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: (Rank::_1, Rank::_1, Ordering::Equal),
+        test_2: (Rank::_3, Rank::_3, Ordering::Equal),
+        test_3: (Rank::_8, Rank::_8, Ordering::Equal),
+        test_4: (Rank::_1, Rank::_6, Ordering::Less),
+        test_5: (Rank::_2, Rank::_3, Ordering::Less),
+        test_6: (Rank::_3, Rank::_7, Ordering::Less),
+        test_7: (Rank::_7, Rank::_1, Ordering::Greater),
+        test_8: (Rank::_6, Rank::_5, Ordering::Greater),
+        test_9: (Rank::_3, Rank::_2, Ordering::Greater),
+    }
+}
