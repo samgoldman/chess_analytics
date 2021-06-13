@@ -14,6 +14,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 
+#[macro_use]
 mod basic_types;
 mod bins;
 mod board;

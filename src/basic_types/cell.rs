@@ -2,6 +2,16 @@ use crate::basic_types::file::File;
 use crate::basic_types::rank::Rank;
 use std::cmp::Ordering;
 
+#[macro_export]
+macro_rules! cell {
+    ($file:expr, $rank:expr) => {
+        Cell {
+            file: $file,
+            rank: $rank,
+        }
+    };
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Cell {
     pub file: File,
@@ -11,10 +21,10 @@ pub struct Cell {
 impl Cell {
     #[cfg(test)]
     pub fn from_indices((rank, file): (usize, usize)) -> Self {
-        Cell {
-            file: File::from_int((file + 1) as u32),
-            rank: Rank::from_pgn((rank + 1).to_string().as_ref()),
-        }
+        cell!(
+            File::from_int((file + 1) as u32),
+            Rank::from_pgn((rank + 1).to_string().as_ref())
+        )
     }
 }
 

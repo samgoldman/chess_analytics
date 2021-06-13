@@ -7,6 +7,26 @@ use std::convert::TryInto;
 #[cfg(test)]
 use std::iter;
 
+#[macro_export]
+macro_rules! white {
+    ($piece:expr) => {
+        PlayerPiece {
+            player: Player::White,
+            piece: $piece,
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! black {
+    ($piece:expr) => {
+        PlayerPiece {
+            player: Player::Black,
+            piece: $piece,
+        }
+    };
+}
+
 #[derive(PartialEq, Clone, Debug, Copy, Eq)]
 pub struct PlayerPiece {
     pub piece: Piece,
