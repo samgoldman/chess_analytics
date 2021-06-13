@@ -70,8 +70,8 @@ pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
     for expected_move in opening {
         let actual_move = moves_iter.next().unwrap();
 
-        if expected_move.to_file != actual_move.to_file
-            || expected_move.to_rank != actual_move.to_rank
+        if expected_move.to.file != actual_move.to.file
+            || expected_move.to.rank != actual_move.to.rank
             || expected_move.from.file != actual_move.from.file
             || expected_move.from.rank != actual_move.from.rank
             || expected_move.piece_moved != actual_move.piece_moved

@@ -1,3 +1,4 @@
+use crate::basic_types::cell::Cell;
 use crate::basic_types::file::File;
 use crate::basic_types::game_result::GameResult;
 use crate::basic_types::nag::NAG;
@@ -14,8 +15,7 @@ use std::time::Duration;
 #[derive(PartialEq, Clone, Debug)]
 pub struct Move {
     pub from: PartialCell,
-    pub to_file: File,
-    pub to_rank: Rank,
+    pub to: Cell,
 
     // Metadata
     pub piece_moved: Piece,
@@ -39,8 +39,10 @@ impl Move {
                 file: Some(from_file),
                 rank: Some(from_rank),
             },
-            to_file,
-            to_rank,
+            to: Cell {
+                file: to_file,
+                rank: to_rank,
+            },
             piece_moved,
             captures: false,
             checks: false,
@@ -167,8 +169,7 @@ impl GameWrapper {
                 rank: from_rank,
             },
             // TODO handle unwraps more gracefully
-            to_file: to_file.unwrap(),
-            to_rank: to_rank.unwrap(),
+            to: cell!(to_file.unwrap(), to_rank.unwrap()),
             piece_moved: piece_moved.unwrap(),
             captures,
             checks,

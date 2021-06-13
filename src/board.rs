@@ -332,22 +332,14 @@ impl Board {
         let from_cell = if move_description.from.is_fully_defined() {
             move_description.from.to_cell()
         } else {
-            self.find_origin(
-                piece_moved,
-                cell!(move_description.to_file, move_description.to_rank),
-                move_description.from,
-            )
+            self.find_origin(piece_moved, move_description.to, move_description.from)
         };
 
-        new_board.execute_move(
-            piece_moved,
-            from_cell,
-            cell!(move_description.to_file, move_description.to_rank),
-        );
+        new_board.execute_move(piece_moved, from_cell, move_description.to);
 
         if move_description.promoted_to.is_some() {
             new_board.set_piece(
-                cell!(move_description.to_file, move_description.to_rank),
+                move_description.to,
                 PlayerPiece {
                     piece: move_description.promoted_to.unwrap(),
                     player: new_board.to_move,
@@ -1114,8 +1106,7 @@ mod test_move_piece {
         test_1: ("rnbqr1k1/pp3pbp/2p2np1/3P4/3NP3/2N2P2/PP2B1PP/R1BQ1R1K b - - 0 11", Move {
             piece_moved: Piece::Pawn,
             captures: true,
-            to_file: File::_D,
-            to_rank: Rank::_5,
+            to: cell!(File::_D, Rank::_5),
             from: partial_cell!(None, None),
             checks: false,
             mates: false,
@@ -1126,8 +1117,7 @@ mod test_move_piece {
         test_2: ("8/2KP1p2/6p1/5pk1/3r4/2R5/6P1/8 w - - 1 53", Move {
             piece_moved: Piece::Pawn,
             captures: false,
-            to_file: File::_D,
-            to_rank: Rank::_8,
+            to: cell!(File::_D, Rank::_8),
             from: partial_cell!(None, None),
             checks: false,
             mates: false,
@@ -1138,8 +1128,7 @@ mod test_move_piece {
         test_3: ("r2Q1bkr/p5pp/5p2/1p1n4/8/2pQ1Q2/P1P1PPPP/RNB1KBNR w KQ - 0 16", Move {
             piece_moved: Piece::Queen,
             captures: true,
-            to_file: File::_D,
-            to_rank: Rank::_5,
+            to: cell!(File::_D, Rank::_5),
             from: partial_cell!(Some(File::_D), Some(Rank::_3)),
             checks: true,
             mates: true,

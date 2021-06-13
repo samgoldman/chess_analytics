@@ -152,7 +152,7 @@ filter!(
                 last_move.piece_moved == Piece::King
                     && last_move.from.file.unwrap() == File::_E
                     && last_move.mates
-                    && last_move.to_file == File::_C
+                    && last_move.to.file == File::_C
             }
         })
     }
