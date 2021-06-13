@@ -329,12 +329,7 @@ impl Board {
 
         let piece_moved = move_description.piece_moved;
 
-        // If there's a from rank and file, just make the move
-        let from_rank_defined = move_description.from.rank.is_some();
-        let from_file_defined = move_description.from.file.is_some();
-        let fully_defined_from = from_file_defined && from_rank_defined;
-
-        let from_cell = if fully_defined_from {
+        let from_cell = if move_description.from.is_fully_defined() {
             move_description.from.to_cell()
         } else {
             self.find_origin(

@@ -25,4 +25,8 @@ impl PartialCell {
             rank: self.rank.unwrap(),
         }
     }
+
+    pub fn is_fully_defined(self) -> bool {
+        self.file.is_some() && self.rank.is_some()
+    }
 }
