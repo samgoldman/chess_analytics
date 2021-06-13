@@ -23,7 +23,7 @@ impl Cell {
     pub fn from_indices((rank, file): (usize, usize)) -> Self {
         cell!(
             File::from_int((file + 1) as u32),
-            Rank::from_pgn((rank + 1).to_string().as_ref())
+            Rank::from_int((rank + 1) as u32)
         )
     }
 }

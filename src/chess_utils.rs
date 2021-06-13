@@ -119,183 +119,189 @@ pub fn parse_movetext(movetext: &str) -> Vec<Move> {
             let to_file = File::from_pgn(&dest[1]);
             let to_rank = Rank::from_pgn(&dest[2]);
 
-            Move::new_to_from(from_file, from_rank, to_file, to_rank, piece_moved)
+            Move::new_to_from(
+                from_file,
+                from_rank,
+                to_file.unwrap(),
+                to_rank.unwrap(),
+                piece_moved,
+            )
         })
         .collect()
 }
 
-// #[cfg(test)]
-// mod test_parse_movetext {
-//     use super::*;
-//     use crate::game_wrapper::Move;
+#[cfg(test)]
+mod test_parse_movetext {
+    use super::*;
+    use crate::game_wrapper::Move;
 
-//     macro_rules! test_movetext {
-//         ($test_name:ident, $movetext:literal, $expected:expr) => {
-//             #[test]
-//             fn $test_name() {
-//                 assert_eq!(parse_movetext(&$movetext), $expected);
-//             }
-//         };
-//     }
+    macro_rules! test_movetext {
+        ($test_name:ident, $movetext:literal, $expected:expr) => {
+            #[test]
+            fn $test_name() {
+                assert_eq!(parse_movetext(&$movetext), $expected);
+            }
+        };
+    }
 
-//     test_movetext!(empty_movetext, "", vec![]);
-//     test_movetext!(only_move_number, "1. ", vec![]);
-//     test_movetext!(
-//         pawn_simple_1,
-//         "1. a1",
-//         vec![Move::new_to(File::_A, Rank::_1, Piece::Pawn)]
-//     );
-//     test_movetext!(
-//         pawn_simple_2,
-//         "a1",
-//         vec![Move::new_to(File::_A, Rank::_1, Piece::Pawn)]
-//     );
-//     test_movetext!(
-//         pawn_simple_3,
-//         "a3+", // Right now the parser doesn't support checks (will just ignore)
-//         vec![Move::new_to(File::_A, Rank::_3, Piece::Pawn)]
-//     );
-//     test_movetext!(
-//         pawn_simple_4,
-//         "g8=P", // parse will ignore promotion
-//         vec![Move::new_to(File::_G, Rank::_8, Piece::Pawn)]
-//     );
-//     test_movetext!(
-//         pawn_capture,
-//         "exd6",
-//         vec![Move::new_to_from(
-//             File::_E,
-//             Rank::_NA,
-//             File::_D,
-//             Rank::_6,
-//             Piece::Pawn
-//         )]
-//     );
-//     test_movetext!(
-//         knight_simple,
-//         "1. Na1",
-//         vec![Move::new_to(File::_A, Rank::_1, Piece::Knight)]
-//     );
-//     test_movetext!(
-//         bishop_simple,
-//         "1. Ba1",
-//         vec![Move::new_to(File::_A, Rank::_1, Piece::Bishop)]
-//     );
-//     test_movetext!(
-//         rook_simple,
-//         "1. Ra1?",
-//         vec![Move::new_to(File::_A, Rank::_1, Piece::Rook)]
-//     );
-//     test_movetext!(
-//         queen_simple,
-//         "1. Qa1!?",
-//         vec![Move::new_to(File::_A, Rank::_1, Piece::Queen)]
-//     );
-//     test_movetext!(
-//         king_simple,
-//         "1. Ka1??",
-//         vec![Move::new_to(File::_A, Rank::_1, Piece::King)]
-//     );
-//     test_movetext!(
-//         two_moves,
-//         "1. Kxf5 Qdd3",
-//         vec![
-//             Move::new_to(File::_F, Rank::_5, Piece::King),
-//             Move::new_to_from(File::_D, Rank::_NA, File::_D, Rank::_3, Piece::Queen)
-//         ]
-//     );
-// }
+    test_movetext!(empty_movetext, "", vec![]);
+    test_movetext!(only_move_number, "1. ", vec![]);
+    test_movetext!(
+        pawn_simple_1,
+        "1. a1",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Pawn)]
+    );
+    test_movetext!(
+        pawn_simple_2,
+        "a1",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Pawn)]
+    );
+    test_movetext!(
+        pawn_simple_3,
+        "a3+", // Right now the parser doesn't support checks (will just ignore)
+        vec![Move::new_to(File::_A, Rank::_3, Piece::Pawn)]
+    );
+    test_movetext!(
+        pawn_simple_4,
+        "g8=P", // parse will ignore promotion
+        vec![Move::new_to(File::_G, Rank::_8, Piece::Pawn)]
+    );
+    test_movetext!(
+        pawn_capture,
+        "exd6",
+        vec![Move::new_to_from(
+            Some(File::_E),
+            None,
+            File::_D,
+            Rank::_6,
+            Piece::Pawn
+        )]
+    );
+    test_movetext!(
+        knight_simple,
+        "1. Na1",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Knight)]
+    );
+    test_movetext!(
+        bishop_simple,
+        "1. Ba1",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Bishop)]
+    );
+    test_movetext!(
+        rook_simple,
+        "1. Ra1?",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Rook)]
+    );
+    test_movetext!(
+        queen_simple,
+        "1. Qa1!?",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::Queen)]
+    );
+    test_movetext!(
+        king_simple,
+        "1. Ka1??",
+        vec![Move::new_to(File::_A, Rank::_1, Piece::King)]
+    );
+    test_movetext!(
+        two_moves,
+        "1. Kxf5 Qdd3",
+        vec![
+            Move::new_to(File::_F, Rank::_5, Piece::King),
+            Move::new_to_from(Some(File::_D), None, File::_D, Rank::_3, Piece::Queen)
+        ]
+    );
+}
 
-// #[cfg(test)]
-// mod test_int_to_file {
-//     use super::*;
+#[cfg(test)]
+mod test_int_to_file {
+    use super::*;
 
-//     macro_rules! tests {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             fn $name() {
-//                 let (input, expected) = $value;
-//                 assert_eq!(expected, int_to_file(input));
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, int_to_file(input));
+            }
+        )*
+        }
+    }
 
-//     tests! {
-//         test_0x20: (0x20, File::_NA),
-//         test_0x31: (0x31, File::_A),
-//         test_0x02: (0x02, File::_B),
-//         test_0x13: (0x13, File::_C),
-//         test_0xe4: (0xe4, File::_D),
-//         test_0xf5: (0xf5, File::_E),
-//         test_0x86: (0x86, File::_F),
-//         test_0x97: (0x97, File::_G),
-//         test_0x58: (0x58, File::_H),
-//     }
+    tests! {
+        test_0x20: (0x20, None),
+        test_0x31: (0x31, Some(File::_A)),
+        test_0x02: (0x02, Some(File::_B)),
+        test_0x13: (0x13, Some(File::_C)),
+        test_0xe4: (0xe4, Some(File::_D)),
+        test_0xf5: (0xf5, Some(File::_E)),
+        test_0x86: (0x86, Some(File::_F)),
+        test_0x97: (0x97, Some(File::_G)),
+        test_0x58: (0x58,Some( File::_H)),
+    }
 
-//     macro_rules! test_panics {
-//         ($($name:ident: $value:expr, $panic_str:literal, )*) => {
-//         $(
-//             #[test]
-//             #[should_panic(expected=$panic_str)]
-//             fn $name() {
-//                 int_to_file($value);
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! test_panics {
+        ($($name:ident: $value:expr, $panic_str:literal, )*) => {
+        $(
+            #[test]
+            #[should_panic(expected=$panic_str)]
+            fn $name() {
+                int_to_file($value);
+            }
+        )*
+        }
+    }
 
-//     test_panics! {
-//         test_0x0f: 0x0f, "File not recognized: 0x0f",
-//         test_0xff: 0xff, "File not recognized: 0xff",
-//         test_0x0e: 0x0e, "File not recognized: 0x0e",
-//     }
-// }
+    test_panics! {
+        test_0x0f: 0x0f, "File not recognized: 0x0f",
+        test_0xff: 0xff, "File not recognized: 0xff",
+        test_0x0e: 0x0e, "File not recognized: 0x0e",
+    }
+}
 
-// #[cfg(test)]
-// mod test_int_to_rank {
-//     use super::*;
+#[cfg(test)]
+mod test_int_to_rank {
+    use super::*;
 
-//     macro_rules! tests {
-//         ($($name:ident: $value:expr,)*) => {
-//         $(
-//             #[test]
-//             fn $name() {
-//                 let (input, expected) = $value;
-//                 assert_eq!(expected, int_to_rank(input));
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, int_to_rank(input));
+            }
+        )*
+        }
+    }
 
-//     tests! {
-//         test_0x00: (0x00, Rank::_NA),
-//         test_0x14: (0x14, Rank::_1),
-//         test_0x28: (0x28, Rank::_2),
-//         test_0x39: (0x39, Rank::_3),
-//         test_0x4a: (0x4a, Rank::_4),
-//         test_0x5b: (0x5b, Rank::_5),
-//         test_0x6d: (0x6d, Rank::_6),
-//         test_0x7e: (0x7e, Rank::_7),
-//         test_0x8f: (0x8f, Rank::_8),
-//     }
+    tests! {
+        test_0x00: (0x00, None),
+        test_0x14: (0x14, Some(Rank::_1)),
+        test_0x28: (0x28, Some(Rank::_2)),
+        test_0x39: (0x39, Some(Rank::_3)),
+        test_0x4a: (0x4a, Some(Rank::_4)),
+        test_0x5b: (0x5b, Some(Rank::_5)),
+        test_0x6d: (0x6d, Some(Rank::_6)),
+        test_0x7e: (0x7e, Some(Rank::_7)),
+        test_0x8f: (0x8f, Some(Rank::_8)),
+    }
 
-//     macro_rules! test_panics {
-//         ($($name:ident: $value:expr, $panic_str:literal, )*) => {
-//         $(
-//             #[test]
-//             #[should_panic(expected=$panic_str)]
-//             fn $name() {
-//                 int_to_rank($value);
-//             }
-//         )*
-//         }
-//     }
+    macro_rules! test_panics {
+        ($($name:ident: $value:expr, $panic_str:literal, )*) => {
+        $(
+            #[test]
+            #[should_panic(expected=$panic_str)]
+            fn $name() {
+                int_to_rank($value);
+            }
+        )*
+        }
+    }
 
-//     test_panics! {
-//         test_0x0f0: 0xf1, "Rank not recognized: 0xf1",
-//         test_0xff0: 0xa3, "Rank not recognized: 0xa3",
-//         test_0x0e0: 0xff, "Rank not recognized: 0xff",
-//     }
-// }
+    test_panics! {
+        test_0xf1: 0xf1, "Rank not recognized: 0xf1",
+        test_0xa3: 0xa3, "Rank not recognized: 0xa3",
+        test_0xff: 0xff, "Rank not recognized: 0xff",
+    }
+}

@@ -28,21 +28,15 @@ pub struct Move {
 
 impl Move {
     pub fn new_to_from(
-        from_file: File,
-        from_rank: Rank,
+        from_file: Option<File>,
+        from_rank: Option<Rank>,
         to_file: File,
         to_rank: Rank,
         piece_moved: Piece,
     ) -> Self {
         Move {
-            from: PartialCell {
-                file: Some(from_file),
-                rank: Some(from_rank),
-            },
-            to: Cell {
-                file: to_file,
-                rank: to_rank,
-            },
+            from: partial_cell!(from_file, from_rank),
+            to: cell!(to_file, to_rank),
             piece_moved,
             captures: false,
             checks: false,
@@ -52,21 +46,19 @@ impl Move {
         }
     }
 
-    // #[cfg(test)]
-    // pub fn new_to(to_file: File, to_rank: Rank, piece_moved: Piece) -> Self {
-    //     Move {
-    //         from_file: None,
-    //         from_rank: None,
-    //         to_file,
-    //         to_rank,
-    //         piece_moved,
-    //         captures: false,
-    //         checks: false,
-    //         mates: false,
-    //         nag: NAG::None,
-    //         promoted_to: None,
-    //     }
-    // }
+    #[cfg(test)]
+    pub fn new_to(to_file: File, to_rank: Rank, piece_moved: Piece) -> Self {
+        Move {
+            from: partial_cell!(None, None),
+            to: cell!(to_file, to_rank),
+            piece_moved,
+            captures: false,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None,
+        }
+    }
 }
 
 #[derive(PartialEq, Clone)]

@@ -15,16 +15,17 @@ pub enum Rank {
 }
 
 impl Rank {
-    pub fn from_pgn(rank_str: &str) -> Self {
+    pub fn from_pgn(rank_str: &str) -> Option<Self> {
         match rank_str {
-            "1" => Rank::_1,
-            "2" => Rank::_2,
-            "3" => Rank::_3,
-            "4" => Rank::_4,
-            "5" => Rank::_5,
-            "6" => Rank::_6,
-            "7" => Rank::_7,
-            "8" => Rank::_8,
+            "" => None,
+            "1" => Some(Rank::_1),
+            "2" => Some(Rank::_2),
+            "3" => Some(Rank::_3),
+            "4" => Some(Rank::_4),
+            "5" => Some(Rank::_5),
+            "6" => Some(Rank::_6),
+            "7" => Some(Rank::_7),
+            "8" => Some(Rank::_8),
             u => panic!("Unrecognized rank: {}", u),
         }
     }
@@ -90,14 +91,15 @@ mod test_rank_from_pgn {
     }
 
     tests_nominal_from_pgn! {
-        test_from_pgn_1: ("1", Rank::_1),
-        test_from_pgn_2: ("2", Rank::_2),
-        test_from_pgn_3: ("3", Rank::_3),
-        test_from_pgn_4: ("4", Rank::_4),
-        test_from_pgn_5: ("5", Rank::_5),
-        test_from_pgn_6: ("6", Rank::_6),
-        test_from_pgn_7: ("7", Rank::_7),
-        test_from_pgn_8: ("8", Rank::_8),
+        test_from_pgn_0: ("", None),
+        test_from_pgn_1: ("1", Some(Rank::_1)),
+        test_from_pgn_2: ("2", Some(Rank::_2)),
+        test_from_pgn_3: ("3", Some(Rank::_3)),
+        test_from_pgn_4: ("4", Some(Rank::_4)),
+        test_from_pgn_5: ("5", Some(Rank::_5)),
+        test_from_pgn_6: ("6", Some(Rank::_6)),
+        test_from_pgn_7: ("7", Some(Rank::_7)),
+        test_from_pgn_8: ("8", Some(Rank::_8)),
     }
 
     macro_rules! tests_panic_from_pgn {

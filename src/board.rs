@@ -406,10 +406,7 @@ impl Board {
                                 };
 
                                 board.set_piece(
-                                    cell!(
-                                        File::from_int(file),
-                                        Rank::from_pgn((8 - rank).to_string().as_ref())
-                                    ),
+                                    cell!(File::from_int(file), Rank::from_int(8 - rank as u32)),
                                     piece,
                                 );
                                 file += 1;

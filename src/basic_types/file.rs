@@ -14,16 +14,17 @@ pub enum File {
 }
 
 impl File {
-    pub fn from_pgn(file_str: &str) -> Self {
+    pub fn from_pgn(file_str: &str) -> Option<Self> {
         match file_str {
-            "a" => File::_A,
-            "b" => File::_B,
-            "c" => File::_C,
-            "d" => File::_D,
-            "e" => File::_E,
-            "f" => File::_F,
-            "g" => File::_G,
-            "h" => File::_H,
+            "" => None,
+            "a" => Some(File::_A),
+            "b" => Some(File::_B),
+            "c" => Some(File::_C),
+            "d" => Some(File::_D),
+            "e" => Some(File::_E),
+            "f" => Some(File::_F),
+            "g" => Some(File::_G),
+            "h" => Some(File::_H),
             u => panic!("Unrecognized file: {}", u),
         }
     }
@@ -76,14 +77,15 @@ mod test_file_from_pgn {
     }
 
     tests_nominal_from_pgn! {
-        test_from_pgn_a: ("a", File::_A),
-        test_from_pgn_b: ("b", File::_B),
-        test_from_pgn_c: ("c", File::_C),
-        test_from_pgn_d: ("d", File::_D),
-        test_from_pgn_e: ("e", File::_E),
-        test_from_pgn_f: ("f", File::_F),
-        test_from_pgn_g: ("g", File::_G),
-        test_from_pgn_h: ("h", File::_H),
+        test_from_pgn_none: ("", None),
+        test_from_pgn_a: ("a", Some(File::_A)),
+        test_from_pgn_b: ("b", Some(File::_B)),
+        test_from_pgn_c: ("c", Some(File::_C)),
+        test_from_pgn_d: ("d", Some(File::_D)),
+        test_from_pgn_e: ("e", Some(File::_E)),
+        test_from_pgn_f: ("f", Some(File::_F)),
+        test_from_pgn_g: ("g", Some(File::_G)),
+        test_from_pgn_h: ("h", Some(File::_H)),
     }
 
     macro_rules! tests_panic_from_pgn {
