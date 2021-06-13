@@ -2,7 +2,6 @@ use crate::basic_types::cell::Cell;
 use crate::basic_types::file::File;
 use crate::basic_types::rank::Rank;
 use crate::general_utils::get_unit_value;
-use std::iter;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Path(Vec<Cell>);
@@ -33,20 +32,18 @@ impl Path {
             let file_inc = get_unit_value(file_diff);
 
             Path(
-                iter::repeat(1)
-                    .take(i32::max(rank_diff.abs(), file_diff.abs()) as usize - 1)
-                    .enumerate()
-                    .map(|(i, _)| Cell {
+                (1..i32::max(rank_diff.abs(), file_diff.abs()))
+                    .map(|i| Cell {
                         rank: Rank::from_pgn(
-                            (from_cell.rank as i32 + (rank_inc as i32 * (i + 1) as i32))
+                            (from_cell.rank as i32 + (rank_inc as i32 * i))
                                 .to_string()
                                 .as_ref(),
                         ),
                         file: File::from_int(
-                            (from_cell.file as i32 + (file_inc as i32 * (i + 1) as i32)) as u32,
+                            (from_cell.file as i32 + (file_inc as i32 * i)) as u32,
                         ),
                     })
-                    .collect::<Vec<Cell>>(),
+                    .collect(),
             )
         } else {
             panic!("generate_path: non linear path requested");
