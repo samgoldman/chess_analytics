@@ -41,6 +41,10 @@ impl File {
             u => panic!("Unrecognized file: {}", u),
         }
     }
+
+    pub fn shift(&self, shift: i32) -> Self {
+        File::from_int((*self as i32 + shift) as u32)
+    }
 }
 
 impl Ord for File {
@@ -177,5 +181,34 @@ mod test_ord_fns {
         test_7: (File::_G, File::_D, Ordering::Greater),
         test_8: (File::_F, File::_E, Ordering::Greater),
         test_9: (File::_C, File::_B, Ordering::Greater),
+    }
+}
+
+#[cfg(test)]
+mod test_shift {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (a, shift, expected) = $value;
+                assert_eq!(expected, a.shift(shift));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: (File::_A, 0, File::_A),
+        test_2: (File::_C, 0, File::_C),
+        test_3: (File::_H, 0, File::_H),
+        test_4: (File::_A, 4, File::_E),
+        test_5: (File::_A, 5, File::_F),
+        test_6: (File::_C, 1, File::_D),
+        test_7: (File::_G, -3, File::_D),
+        test_8: (File::_F, -1, File::_E),
+        test_9: (File::_C, -1, File::_B),
     }
 }

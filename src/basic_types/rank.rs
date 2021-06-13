@@ -29,6 +29,24 @@ impl Rank {
         }
     }
 
+    pub fn from_int(val: u32) -> Self {
+        match val {
+            1 => Rank::_1,
+            2 => Rank::_2,
+            3 => Rank::_3,
+            4 => Rank::_4,
+            5 => Rank::_5,
+            6 => Rank::_6,
+            7 => Rank::_7,
+            8 => Rank::_8,
+            u => panic!("Unrecognized rank: {}", u),
+        }
+    }
+
+    pub fn shift(&self, shift: i32) -> Self {
+        Rank::from_int((*self as i32 + shift) as u32)
+    }
+
     // pub fn as_integer(&self) -> u8 {
     //     *self as u8
     // }
@@ -104,6 +122,53 @@ mod test_rank_from_pgn {
 }
 
 #[cfg(test)]
+mod test_rank_from_int {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, Rank::from_int(input));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_from_pgn_a: (1, Rank::_1),
+        test_from_pgn_b: (2, Rank::_2),
+        test_from_pgn_c: (3, Rank::_3),
+        test_from_pgn_d: (4, Rank::_4),
+        test_from_pgn_e: (5, Rank::_5),
+        test_from_pgn_f: (6, Rank::_6),
+        test_from_pgn_g: (7, Rank::_7),
+        test_from_pgn_h: (8, Rank::_8),
+    }
+
+    macro_rules! panic_tests {
+        ($($name:ident: $input:expr, $panic_str:expr,)*) => {
+        $(
+            #[test]
+            #[should_panic(expected = $panic_str)]
+            fn $name() {
+                Rank::from_int($input);
+            }
+        )*
+        }
+    }
+
+    panic_tests! {
+        test_from_pgn_invalid_1: 0, "Unrecognized rank: 0",
+        test_from_pgn_invalid_2: 9, "Unrecognized rank: 9",
+        test_from_pgn_invalid_3: 54656, "Unrecognized rank: 54656",
+        test_from_pgn_invalid_4: u32::MAX, "Unrecognized rank: 4294967295",
+    }
+}
+
+#[cfg(test)]
 mod test_ord_fns {
     use super::*;
 
@@ -130,5 +195,34 @@ mod test_ord_fns {
         test_7: (Rank::_7, Rank::_1, Ordering::Greater),
         test_8: (Rank::_6, Rank::_5, Ordering::Greater),
         test_9: (Rank::_3, Rank::_2, Ordering::Greater),
+    }
+}
+
+#[cfg(test)]
+mod test_shift {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (a, shift, expected) = $value;
+                assert_eq!(expected, a.shift(shift));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: (Rank::_1, 0, Rank::_1),
+        test_2: (Rank::_3, 0, Rank::_3),
+        test_3: (Rank::_8, 0, Rank::_8),
+        test_4: (Rank::_1, 4, Rank::_5),
+        test_5: (Rank::_2, 5, Rank::_7),
+        test_6: (Rank::_3, 1, Rank::_4),
+        test_7: (Rank::_7, -3, Rank::_4),
+        test_8: (Rank::_6, -1, Rank::_5),
+        test_9: (Rank::_3, -1, Rank::_2),
     }
 }

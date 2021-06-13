@@ -1,6 +1,4 @@
 use crate::basic_types::cell::Cell;
-use crate::basic_types::file::File;
-use crate::basic_types::rank::Rank;
 use crate::general_utils::get_unit_value;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -34,14 +32,8 @@ impl Path {
             Path(
                 (1..i32::max(rank_diff.abs(), file_diff.abs()))
                     .map(|i| Cell {
-                        rank: Rank::from_pgn(
-                            (from_cell.rank as i32 + (rank_inc as i32 * i))
-                                .to_string()
-                                .as_ref(),
-                        ),
-                        file: File::from_int(
-                            (from_cell.file as i32 + (file_inc as i32 * i)) as u32,
-                        ),
+                        rank: from_cell.rank.shift(rank_inc as i32 * i),
+                        file: from_cell.file.shift(file_inc as i32 * i),
                     })
                     .collect(),
             )
@@ -54,6 +46,8 @@ impl Path {
 #[cfg(test)]
 mod test_generate_path {
     use super::*;
+    use crate::basic_types::file::File;
+    use crate::basic_types::rank::Rank;
 
     macro_rules! tests {
         ($($name:ident: $value:expr,)*) => {
