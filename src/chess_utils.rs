@@ -72,8 +72,8 @@ pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
 
         if expected_move.to_file != actual_move.to_file
             || expected_move.to_rank != actual_move.to_rank
-            || expected_move.from_file != actual_move.from_file
-            || expected_move.from_rank != actual_move.from_rank
+            || expected_move.from.file != actual_move.from.file
+            || expected_move.from.rank != actual_move.from.rank
             || expected_move.piece_moved != actual_move.piece_moved
         {
             return false;

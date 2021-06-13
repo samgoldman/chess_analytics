@@ -150,7 +150,7 @@ filter!(
                 let last_move = moves.iter().last().unwrap();
 
                 last_move.piece_moved == Piece::King
-                    && last_move.from_file.unwrap() == File::_E
+                    && last_move.from.file.unwrap() == File::_E
                     && last_move.mates
                     && last_move.to_file == File::_C
             }

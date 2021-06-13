@@ -330,22 +330,19 @@ impl Board {
         let piece_moved = move_description.piece_moved;
 
         // If there's a from rank and file, just make the move
-        let from_cell =
-            if move_description.from_rank.is_some() && move_description.from_file.is_some() {
-                cell!(
-                    move_description.from_file.unwrap(),
-                    move_description.from_rank.unwrap()
-                )
-            } else {
-                self.find_origin(
-                    piece_moved,
-                    cell!(move_description.to_file, move_description.to_rank),
-                    PartialCell {
-                        rank: move_description.from_rank,
-                        file: move_description.from_file,
-                    },
-                )
-            };
+        let from_rank_defined = move_description.from.rank.is_some();
+        let from_file_defined = move_description.from.file.is_some();
+        let fully_defined_from = from_file_defined && from_rank_defined;
+
+        let from_cell = if fully_defined_from {
+            move_description.from.to_cell()
+        } else {
+            self.find_origin(
+                piece_moved,
+                cell!(move_description.to_file, move_description.to_rank),
+                move_description.from,
+            )
+        };
 
         new_board.execute_move(
             piece_moved,
@@ -1124,8 +1121,7 @@ mod test_move_piece {
             captures: true,
             to_file: File::_D,
             to_rank: Rank::_5,
-            from_file: None,
-            from_rank: None,
+            from: partial_cell!(None, None),
             checks: false,
             mates: false,
             nag: NAG::None,
@@ -1137,8 +1133,7 @@ mod test_move_piece {
             captures: false,
             to_file: File::_D,
             to_rank: Rank::_8,
-            from_file: None,
-            from_rank: None,
+            from: partial_cell!(None, None),
             checks: false,
             mates: false,
             nag: NAG::None,
@@ -1150,8 +1145,7 @@ mod test_move_piece {
             captures: true,
             to_file: File::_D,
             to_rank: Rank::_5,
-            from_file: Some(File::_D),
-            from_rank: Some(Rank::_3),
+            from: partial_cell!(Some(File::_D), Some(Rank::_3)),
             checks: true,
             mates: true,
             nag: NAG::None,

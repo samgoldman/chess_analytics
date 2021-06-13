@@ -1,6 +1,7 @@
 use crate::basic_types::file::File;
 use crate::basic_types::game_result::GameResult;
 use crate::basic_types::nag::NAG;
+use crate::basic_types::partial_cell::PartialCell;
 use crate::basic_types::piece::Piece;
 use crate::basic_types::rank::Rank;
 use crate::basic_types::termination::Termination;
@@ -12,8 +13,7 @@ use std::time::Duration;
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct Move {
-    pub from_file: Option<File>,
-    pub from_rank: Option<Rank>,
+    pub from: PartialCell,
     pub to_file: File,
     pub to_rank: Rank,
 
@@ -35,8 +35,10 @@ impl Move {
         piece_moved: Piece,
     ) -> Self {
         Move {
-            from_file: Some(from_file),
-            from_rank: Some(from_rank),
+            from: PartialCell {
+                file: Some(from_file),
+                rank: Some(from_rank),
+            },
             to_file,
             to_rank,
             piece_moved,
@@ -160,8 +162,10 @@ impl GameWrapper {
         let promoted_to = extract_piece(metadata >> 9);
 
         Move {
-            from_file,
-            from_rank,
+            from: PartialCell {
+                file: from_file,
+                rank: from_rank,
+            },
             // TODO handle unwraps more gracefully
             to_file: to_file.unwrap(),
             to_rank: to_rank.unwrap(),
