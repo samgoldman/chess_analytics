@@ -29,14 +29,16 @@ impl Path {
             let rank_inc = get_unit_value(rank_diff);
             let file_inc = get_unit_value(file_diff);
 
-            Path(
-                (1..i32::max(rank_diff.abs(), file_diff.abs()))
-                    .map(|i| Cell {
-                        rank: from_cell.rank.shift(rank_inc as i32 * i),
-                        file: from_cell.file.shift(file_inc as i32 * i),
-                    })
-                    .collect(),
-            )
+            let length = i32::max(rank_diff.abs(), file_diff.abs());
+            let mapped = (1..length).map(|i| {
+                cell!(
+                    from_cell.file.shift(file_inc as i32 * i),
+                    from_cell.rank.shift(rank_inc as i32 * i)
+                )
+            });
+            let path_vector = mapped.collect();
+
+            Path(path_vector)
         } else {
             panic!("generate_path: non linear path requested");
         }
