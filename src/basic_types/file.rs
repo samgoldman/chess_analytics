@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 #[derive(PartialEq, Clone, Debug, Copy, Eq, EnumIter, Hash)]
@@ -45,6 +46,10 @@ impl File {
 
     pub fn shift(&self, shift: i32) -> Self {
         File::from_int((*self as i32 + shift) as u32)
+    }
+
+    pub fn all_files() -> Vec<File> {
+        File::iter().collect()
     }
 }
 

@@ -9,7 +9,6 @@ use crate::basic_types::rank::Rank;
 use crate::game_wrapper::Move;
 use itertools::Itertools;
 use std::collections::HashMap;
-use strum::IntoEnumIterator;
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct Board {
@@ -21,11 +20,11 @@ impl Board {
     pub fn to_fen(&self) -> String {
         let mut fen = String::default();
 
-        for rank in Rank::iter().rev() {
+        for rank in Rank::all_ranks().iter().rev() {
             let mut blanks = 0;
 
-            for file in File::iter() {
-                let cell = Cell { file, rank };
+            for file in File::all_files() {
+                let cell = cell!(file, *rank);
 
                 if !self.board.contains_key(&cell) {
                     blanks += 1;
@@ -54,7 +53,7 @@ impl Board {
                 fen += &blanks.to_string();
             }
 
-            if rank != Rank::_1 {
+            if *rank != Rank::_1 {
                 fen += "/";
             }
         }
@@ -236,15 +235,8 @@ impl Board {
         dest_cell: Cell,
         from_cell: PartialCell,
     ) -> Vec<Cell> {
-        let search_ranks = match from_cell.rank {
-            Some(from_rank) => vec![from_rank],
-            None => Rank::iter().collect::<Vec<Rank>>(),
-        };
-
-        let search_files = match from_cell.file {
-            Some(from_file) => vec![from_file],
-            None => File::iter().collect::<Vec<File>>(),
-        };
+        let search_ranks = from_cell.possible_ranks();
+        let search_files = from_cell.possible_files();
 
         let search_cells = (search_ranks.iter()).cartesian_product(search_files.iter());
 
@@ -405,10 +397,10 @@ impl Board {
                                     },
                                 };
 
-                                board.set_piece(
-                                    cell!(File::from_int(file), Rank::from_int(8 - rank as u32)),
-                                    piece,
-                                );
+                                let piece_file = File::from_int(file);
+                                let piece_rank = Rank::from_int(8 - rank as u32);
+
+                                board.set_piece(cell!(piece_file, piece_rank), piece);
                                 file += 1;
                             }
                         }

@@ -29,4 +29,18 @@ impl PartialCell {
     pub fn is_fully_defined(self) -> bool {
         self.file.is_some() && self.rank.is_some()
     }
+
+    pub fn possible_ranks(&self) -> Vec<Rank> {
+        match self.rank {
+            Some(from_rank) => vec![from_rank],
+            None => Rank::all_ranks(),
+        }
+    }
+
+    pub fn possible_files(&self) -> Vec<File> {
+        match self.file {
+            Some(from_file) => vec![from_file],
+            None => File::all_files(),
+        }
+    }
 }

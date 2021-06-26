@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
+use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
+
 // use std::ops;
 
 #[derive(PartialEq, Clone, Debug, Copy, Eq, EnumIter, Hash)]
@@ -46,6 +48,10 @@ impl Rank {
 
     pub fn shift(&self, shift: i32) -> Self {
         Rank::from_int((*self as i32 + shift) as u32)
+    }
+
+    pub fn all_ranks() -> Vec<Rank> {
+        Rank::iter().collect()
     }
 
     // pub fn as_integer(&self) -> u8 {
