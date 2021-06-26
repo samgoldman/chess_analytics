@@ -316,9 +316,7 @@ impl Board {
             .collect()
     }
 
-    pub fn move_piece(&self, move_description: Move) -> Board {
-        let mut new_board = self.clone();
-
+    pub fn move_piece(&mut self, move_description: Move) {
         let piece_moved = move_description.piece_moved;
 
         let from_cell = if move_description.from.is_fully_defined() {
@@ -327,21 +325,19 @@ impl Board {
             self.find_origin(piece_moved, move_description.to, move_description.from)
         };
 
-        new_board.execute_move(piece_moved, from_cell, move_description.to);
+        self.execute_move(piece_moved, from_cell, move_description.to);
 
         if move_description.promoted_to.is_some() {
-            new_board.set_piece(
+            self.set_piece(
                 move_description.to,
                 PlayerPiece {
                     piece: move_description.promoted_to.unwrap(),
-                    player: new_board.to_move,
+                    player: self.to_move,
                 },
             )
         }
 
-        new_board.toggle_to_move();
-
-        new_board
+        self.toggle_to_move();
     }
 
     pub fn set_piece(&mut self, cell: Cell, piece: PlayerPiece) {
@@ -1083,9 +1079,9 @@ mod test_move_piece {
             #[test]
             fn $name() {
                 let (initial_board_fen, the_move, expected_board_fen): (&str, Move, &str) = $value;
-                let initial_board = Board::from_fen(initial_board_fen).unwrap();
-                let new_board = initial_board.move_piece(the_move);
-                assert_eq!(expected_board_fen, new_board.to_fen());
+                let mut initial_board = Board::from_fen(initial_board_fen).unwrap();
+                initial_board.move_piece(the_move);
+                assert_eq!(expected_board_fen, initial_board.to_fen());
             }
         )*
         }

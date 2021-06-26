@@ -326,7 +326,8 @@ impl GameWrapper {
         for (i, a_move) in self.moves.iter().enumerate() {
             let prev_board = boards[i].clone();
 
-            let new_board = prev_board.move_piece(a_move.clone());
+            let mut new_board = prev_board.clone();
+            new_board.move_piece(a_move.clone());
             boards.push(new_board);
         }
 
