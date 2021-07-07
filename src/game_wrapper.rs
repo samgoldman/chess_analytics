@@ -293,6 +293,11 @@ impl GameWrapper {
         self.result
     }
 
+    #[cfg(test)]
+    pub fn set_result(&mut self, result: GameResult) {
+        self.result = result;
+    }
+
     pub fn termination(&self) -> Termination {
         self.termination
     }

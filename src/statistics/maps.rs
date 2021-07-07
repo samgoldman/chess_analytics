@@ -224,3 +224,71 @@ pub fn get_map(name: &str, params: Vec<String>) -> Result<MapFn, String> {
 
     Err(format!("Match not found for map '{}'", name))
 }
+
+#[cfg(test)]
+mod test_maps {
+    use super::*;
+    use crate::basic_types::game_result::GameResult;
+
+    #[test]
+    fn test_game_count_1() {
+        let game = GameWrapper::default();
+        let map_fn = get_map("gameCount", vec![]).unwrap();
+        assert_eq!((map_fn)(&game), 1);
+    }
+
+    #[test]
+    fn test_nonexistant_map() {
+        let x = get_map("non_existent", vec!["test".to_string()]);
+
+        match x {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, "Match not found for map 'non_existent'"),
+        }
+    }
+
+    #[test]
+    fn test_result_count_white() {
+        let mut game = GameWrapper::default();
+        let map_fn = get_map("resultCount", vec!["WhiteVictory".to_string()]).unwrap();
+
+        game.set_result(GameResult::White);
+        assert_eq!((map_fn)(&game), 1);
+
+        game.set_result(GameResult::Black);
+        assert_eq!((map_fn)(&game), 0);
+
+        game.set_result(GameResult::Draw);
+        assert_eq!((map_fn)(&game), 0);
+    }
+
+    #[test]
+    fn test_result_count_black() {
+        let mut game = GameWrapper::default();
+        let map_fn = get_map("resultCount", vec!["BlackVictory".to_string()]).unwrap();
+
+        game.set_result(GameResult::White);
+        assert_eq!((map_fn)(&game), 0);
+
+        game.set_result(GameResult::Black);
+        assert_eq!((map_fn)(&game), 1);
+
+        game.set_result(GameResult::Draw);
+        assert_eq!((map_fn)(&game), 0);
+    }
+
+    #[test]
+    fn test_result_count_draw() {
+        let mut game = GameWrapper::default();
+        let map_fn = get_map("resultCount", vec!["Draw".to_string()]).unwrap();
+
+        game.set_result(GameResult::White);
+        assert_eq!((map_fn)(&game), 0);
+
+        game.set_result(GameResult::Black);
+        assert_eq!((map_fn)(&game), 0);
+
+        game.set_result(GameResult::Draw);
+        assert_eq!((map_fn)(&game), 1);
+    }
+}
