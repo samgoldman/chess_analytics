@@ -289,3 +289,32 @@ mod tests_player_elo_filter {
     test_player_elo_filter!(max_both_5, "max", "Both", "3000", 600, 0, true);
     test_player_elo_filter!(max_both_6, "max", "Both", "3000", 3000, 2999, true);
 }
+
+#[cfg(test)]
+mod test_eval_available_filter {
+    use super::*;
+
+    #[test]
+    fn test_eval_not_available_filter() {
+        let mut game = GameWrapper::default();
+        let filter_fn = eval_available_filter::factory(vec!["not_available".to_string()]);
+
+        game.set_eval_available(false);
+        assert_eq!(filter_fn(&game), true);
+
+        game.set_eval_available(true);
+        assert_eq!(filter_fn(&game), false);
+    }
+
+    #[test]
+    fn test_eval_is_available_filter() {
+        let mut game = GameWrapper::default();
+        let filter_fn = eval_available_filter::factory(vec!["available".to_string()]);
+
+        game.set_eval_available(true);
+        assert_eq!(filter_fn(&game), true);
+
+        game.set_eval_available(false);
+        assert_eq!(filter_fn(&game), false);
+    }
+}

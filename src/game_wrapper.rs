@@ -279,6 +279,11 @@ impl GameWrapper {
         self.eval_available
     }
 
+    #[cfg(test)]
+    pub fn set_eval_available(&mut self, eval_available: bool) {
+        self.eval_available = eval_available;
+    }
+
     #[allow(dead_code)]
     pub fn eval_mate_in(&self) -> &Vec<i16> {
         &self.eval_mate_in
