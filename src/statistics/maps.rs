@@ -291,4 +291,19 @@ mod test_maps {
         game.set_result(GameResult::Draw);
         assert_eq!((map_fn)(&game), 1);
     }
+
+    #[test]
+    fn test_result_count_star() {
+        let mut game = GameWrapper::default();
+        let map_fn = get_map("resultCount", vec!["Star".to_string()]).unwrap();
+
+        game.set_result(GameResult::White);
+        assert_eq!((map_fn)(&game), 0);
+
+        game.set_result(GameResult::Black);
+        assert_eq!((map_fn)(&game), 0);
+
+        game.set_result(GameResult::Draw);
+        assert_eq!((map_fn)(&game), 0);
+    }
 }
