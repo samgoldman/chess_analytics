@@ -349,3 +349,31 @@ mod test_extract_piece {
         test_0xf: 0xf, "Piece not recognized: 0x0f",
     }
 }
+
+#[cfg(test)]
+mod test_get_game_elo {
+    use super::*;
+    use crate::game_wrapper::GameWrapper;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (white_rating, black_rating, expected) = $value;
+                let mut test_game = GameWrapper::default();
+                test_game.set_white_rating(white_rating);
+                test_game.set_black_rating(black_rating);
+
+                assert_eq!(get_game_elo(&test_game), expected);
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: (600, 600, 600),
+        test_2: (2000, 1000, 1500),
+        test_3: (600, 1200, 900),
+    }
+}
