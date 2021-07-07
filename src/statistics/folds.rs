@@ -74,3 +74,51 @@ pub fn get_fold_get_result(name: &str) -> FoldGetResultFn {
         _ => panic!("FoldFn not found for {}", name),
     }
 }
+
+#[cfg(test)]
+mod test_fold_fns {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (fn_name, input_array, expected_array) = $value;
+                let mut data = vec![];
+
+                let fold_fn = get_fold_add_point(fn_name);
+                let fold_res_fn = get_fold_get_result(fn_name);
+
+                assert_eq!(input_array.len(), expected_array.len());
+
+                for (input, expected) in input_array.iter().zip(expected_array) {
+                    (fold_fn)(*input, &mut data);
+                    assert_eq!((fold_res_fn)(&data), expected);
+                }
+            }
+        )*
+        }
+    }
+
+    tests! {
+        avg_1: ("avg", [1, 1, 2, 3, 5], [1.0, 1.0, 4.0/3.0, 7.0/4.0, 12.0/5.0]),
+        sum_1: ("sum", [1, 1, 2, 3, 5], [1.0, 2.0, 4.0,     7.0,     12.0]),
+        max_1: ("max", [0, 3, 2, 5, 3], [0.0, 3.0, 3.0,     5.0,     5.0]),
+        max_2: ("max", [9, 3, 2, 5, 3], [9.0, 9.0, 9.0,     9.0,     9.0]),
+        min_1: ("min", [1, 1, 2, 3, 5], [1.0, 1.0, 1.0,     1.0,     1.0]),
+        min_2: ("min", [9, 3, 2, 5, 3], [9.0, 3.0, 2.0,     2.0,     2.0]),
+    }
+
+    #[test]
+    #[should_panic]
+    fn panic_1() {
+        let _x = get_fold_add_point("fdsfsdf");
+    }
+
+    #[test]
+    #[should_panic]
+    fn panic_2() {
+        let _x = get_fold_get_result("fasdfasd");
+    }
+}
