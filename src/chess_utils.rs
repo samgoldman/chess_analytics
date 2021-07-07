@@ -44,7 +44,7 @@ pub fn extract_piece(raw_metadata: u16) -> Option<Piece> {
         4 => Some(Piece::Rook),
         5 => Some(Piece::Queen),
         6 => Some(Piece::King),
-        _ => panic!("Piece not recognized: {:x}", raw_metadata),
+        _ => panic!("Piece not recognized: 0x{:02x}", raw_metadata),
     }
 }
 
@@ -303,5 +303,49 @@ mod test_int_to_rank {
         test_0xf1: 0xf1, "Rank not recognized: 0xf1",
         test_0xa3: 0xa3, "Rank not recognized: 0xa3",
         test_0xff: 0xff, "Rank not recognized: 0xff",
+    }
+}
+
+#[cfg(test)]
+mod test_extract_piece {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, extract_piece(input));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_0x00: (0x00, None),
+        test_0x1: (0x1, Some(Piece::Pawn)),
+        test_0x2: (0x2, Some(Piece::Knight)),
+        test_0x3: (0x3, Some(Piece::Bishop)),
+        test_0x4: (0x4, Some(Piece::Rook)),
+        test_0x5: (0x5, Some(Piece::Queen)),
+        test_0x6: (0x6, Some(Piece::King)),
+    }
+
+    macro_rules! test_panics {
+        ($($name:ident: $value:expr, $panic_str:literal, )*) => {
+        $(
+            #[test]
+            #[should_panic(expected=$panic_str)]
+            fn $name() {
+                extract_piece($value);
+            }
+        )*
+        }
+    }
+
+    test_panics! {
+        test_0x7: 0x7, "Piece not recognized: 0x07",
+        test_0xf: 0xf, "Piece not recognized: 0x0f",
     }
 }
