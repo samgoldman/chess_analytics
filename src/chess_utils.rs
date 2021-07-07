@@ -307,6 +307,30 @@ mod test_int_to_rank {
 }
 
 #[cfg(test)]
+mod test_extract_coordinate {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, extract_coordinate(input));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_0x00: (0x00, (None, None)),
+        test_0x01: (0x01, (Some(File::_A), None)),
+        test_0x20: (0x20, (None, Some(Rank::_2))),
+        test_0x53: (0x53, (Some(File::_C), Some(Rank::_5))),
+    }
+}
+
+#[cfg(test)]
 mod test_extract_piece {
     use super::*;
 
