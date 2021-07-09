@@ -105,7 +105,7 @@ map!(generic_opening_count, "openingCount", params, {
 });
 
 // Requires at least one parameter: the movetexts for openings to ignore
-map!(opeing_is_not_count, "openingIsNotCount", params, {
+map!(opening_is_not_count, "openingIsNotCount", params, {
     use crate::chess_utils::{has_opening, parse_movetext};
 
     Box::new(move |game| {
@@ -206,7 +206,7 @@ fn get_map_factories() -> Vec<(String, MapFactoryFn)> {
         include_map!(nag_count_map),
         include_map!(generic_opening_count),
         include_map!(average_move_time_map),
-        include_map!(opeing_is_not_count),
+        include_map!(opening_is_not_count),
         include_map!(eco_category_map),
         include_map!(first_capture_map),
         include_map!(first_check_map),
