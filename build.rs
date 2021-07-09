@@ -27,7 +27,7 @@ fn prepend_file<P: AsRef<Path>>(data: &[u8], file_path: &P) -> io::Result<()> {
     // Open source file for reading
     let mut src = File::open(&file_path)?;
     // Write the data to prepend
-    tmp.write_all(&data)?;
+    tmp.write_all(data)?;
     // Copy the rest of the source file
     io::copy(&mut src, &mut tmp)?;
     fs::remove_file(&file_path)?;
