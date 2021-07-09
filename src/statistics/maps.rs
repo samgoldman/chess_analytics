@@ -31,7 +31,7 @@ map!(game_count_map, "gameCount", _params, {
 
 // Requires 1 parameter. If 1st parameter is "Mate", only counts mates
 map!(mate_count_map, "checkCount", params, {
-    let only_mate = params[0] == "Mate";
+    let only_mate = !params.is_empty() && params[0] == "Mate";
     Box::new(move |game| {
         if only_mate {
             match game.moves().last() {
@@ -228,7 +228,13 @@ pub fn get_map(name: &str, params: Vec<String>) -> Result<MapFn, String> {
 #[cfg(test)]
 mod test_maps {
     use super::*;
+    use crate::basic_types::cell::Cell;
+    use crate::basic_types::file::File;
     use crate::basic_types::game_result::GameResult;
+    use crate::basic_types::nag::NAG;
+    use crate::basic_types::partial_cell::PartialCell;
+    use crate::basic_types::piece::Piece;
+    use crate::basic_types::rank::Rank;
 
     #[test]
     fn test_game_count_1() {
@@ -305,5 +311,90 @@ mod test_maps {
 
         game.set_result(GameResult::Draw);
         assert_eq!((map_fn)(&game), 0);
+    }
+
+    #[test]
+    fn test_check_count_map_mates_only() {
+        let mut game = GameWrapper::default();
+        let map_fn = get_map("checkCount", vec!["Mate".to_string()]).unwrap();
+        let mut moves = vec![];
+
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn)(&game), 0);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_A, Rank::_1),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: true,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None,
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn)(&game), 0);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: true,
+            nag: NAG::None,
+            promoted_to: None,
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn)(&game), 1);
+    }
+
+    #[test]
+    fn test_check_count_map_all() {
+        let mut game = GameWrapper::default();
+        let map_fn = get_map("checkCount", vec![]).unwrap();
+        let mut moves = vec![];
+
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn)(&game), 0);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_A, Rank::_1),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: true,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None,
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn)(&game), 1);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None,
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn)(&game), 1);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: true,
+            nag: NAG::None,
+            promoted_to: None,
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn)(&game), 2);
     }
 }

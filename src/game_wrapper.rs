@@ -271,6 +271,11 @@ impl GameWrapper {
         &self.moves
     }
 
+    #[cfg(test)]
+    pub fn set_moves(&mut self, moves: Vec<Move>) {
+        self.moves = moves;
+    }
+
     pub fn clock(&self) -> &Vec<Duration> {
         &self.clock
     }
