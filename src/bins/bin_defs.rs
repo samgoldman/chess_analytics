@@ -117,3 +117,49 @@ bin!(black_bin, "black", _params, {
 bin!(termination_bin, "termination", _params, {
     Box::new(move |game| format!("{:?}", game.termination()))
 });
+
+#[cfg(test)]
+mod test_simple_bins {
+    use super::*;
+    use crate::game_wrapper::GameWrapper;
+
+    #[test]
+    fn test_white_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn = white_bin::factory(vec![]);
+
+        game.set_white("test1");
+        game.set_black("abc123");
+        assert_eq!(bin_fn(&game), "test1");
+
+        game.set_white("abc123");
+        game.set_black("test1");
+        assert_eq!(bin_fn(&game), "abc123");
+    }
+
+    #[test]
+    fn test_black_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn = black_bin::factory(vec![]);
+
+        game.set_black("test1");
+        game.set_white("abc123");
+        assert_eq!(bin_fn(&game), "test1");
+
+        game.set_black("abc123");
+        game.set_white("test1");
+        assert_eq!(bin_fn(&game), "abc123");
+    }
+
+    #[test]
+    fn test_site_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn = site_bin::factory(vec![]);
+
+        game.set_site("site1");
+        assert_eq!(bin_fn(&game), "site1");
+
+        game.set_site("siteA");
+        assert_eq!(bin_fn(&game), "siteA");
+    }
+}

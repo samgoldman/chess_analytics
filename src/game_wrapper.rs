@@ -221,12 +221,27 @@ impl GameWrapper {
         &self.site
     }
 
+    #[cfg(test)]
+    pub fn set_site(&mut self, site: &str) {
+        self.site = site.to_string();
+    }
+
     pub fn white(&self) -> &str {
         &self.white
     }
 
+    #[cfg(test)]
+    pub fn set_white(&mut self, white: &str) {
+        self.white = white.to_string();
+    }
+
     pub fn black(&self) -> &str {
         &self.black
+    }
+
+    #[cfg(test)]
+    pub fn set_black(&mut self, black: &str) {
+        self.black = black.to_string();
     }
 
     pub fn white_rating(&self) -> u16 {
