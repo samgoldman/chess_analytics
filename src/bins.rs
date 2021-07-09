@@ -52,3 +52,38 @@ fn get_bin(name: &str, parameters: Vec<String>) -> BinFn {
 pub fn get_selected_bins(bin_input: BinInput) -> BinFn {
     get_bin(&bin_input.name, bin_input.parameters)
 }
+
+#[cfg(test)]
+mod test_bin_getters {
+    use super::*;
+
+    #[test]
+    fn test_okay() {
+        // Not actually testing the results, just that they don't panic
+        let _x = get_selected_bins(BinInput {
+            name: "white".to_string(),
+            parameters: vec![],
+        });
+        let _x = get_selected_bins(BinInput {
+            name: "year".to_string(),
+            parameters: vec!["jfjdls".to_string()],
+        });
+        let _x = get_selected_bins(BinInput {
+            name: "rawTimeControl".to_string(),
+            parameters: vec![],
+        });
+        let _x = get_selected_bins(BinInput {
+            name: "rawTimeControl".to_string(),
+            parameters: vec!["MainOnly".to_string()],
+        });
+    }
+
+    #[test]
+    #[should_panic(expected = "Match not found for bin 'non-existent'")]
+    fn test_panic() {
+        let _x = get_selected_bins(BinInput {
+            name: "non-existent".to_string(),
+            parameters: vec![],
+        });
+    }
+}

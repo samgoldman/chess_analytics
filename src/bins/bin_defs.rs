@@ -92,7 +92,7 @@ bin!(time_control_bin, "timeControl", _params, {
 
 // Params: MainOnly ignores the increment
 bin!(raw_time_control_bin, "rawTimeControl", params, {
-    let main_only = params[0] == "MainOnly";
+    let main_only = !params.is_empty() && params[0] == "MainOnly";
     Box::new(move |game| {
         if main_only {
             format!("{:03}", game.time_control_main())
