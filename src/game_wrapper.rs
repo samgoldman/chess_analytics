@@ -209,12 +209,27 @@ impl GameWrapper {
         self.year
     }
 
+    #[cfg(test)]
+    pub fn set_year(&mut self, year: u16) {
+        self.year = year;
+    }
+
     pub fn month(&self) -> u8 {
         self.month
     }
 
+    #[cfg(test)]
+    pub fn set_month(&mut self, month: u8) {
+        self.month = month;
+    }
+
     pub fn day(&self) -> u8 {
         self.day
+    }
+
+    #[cfg(test)]
+    pub fn set_day(&mut self, day: u8) {
+        self.day = day;
     }
 
     pub fn site(&self) -> &str {

@@ -162,4 +162,40 @@ mod test_simple_bins {
         game.set_site("siteA");
         assert_eq!(bin_fn(&game), "siteA");
     }
+
+    #[test]
+    fn test_year_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn = year_bin::factory(vec![]);
+
+        game.set_year(2020);
+        assert_eq!(bin_fn(&game), "2020");
+
+        game.set_year(2000);
+        assert_eq!(bin_fn(&game), "2000");
+    }
+
+    #[test]
+    fn test_month_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn = month_bin::factory(vec![]);
+
+        game.set_month(2);
+        assert_eq!(bin_fn(&game), "02");
+
+        game.set_month(10);
+        assert_eq!(bin_fn(&game), "10");
+    }
+
+    #[test]
+    fn test_day_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn = day_bin::factory(vec![]);
+
+        game.set_day(9);
+        assert_eq!(bin_fn(&game), "09");
+
+        game.set_day(31);
+        assert_eq!(bin_fn(&game), "31");
+    }
 }
