@@ -1,3 +1,7 @@
+#![feature(custom_inner_attributes)]
+#![clippy::cognitive_complexity = "20"]
+#![deny(clippy::cognitive_complexity)]
+
 use bzip2::read::BzDecoder;
 use clap::{App, Arg};
 use glob::glob;

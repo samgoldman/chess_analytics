@@ -13,7 +13,7 @@ fn main() -> io::Result<()> {
     .expect("flatc");
 
     let file_path = Path::new("target/flatbuffers/chess_generated.rs");
-    let data = "// Force clippy and checks to ignore this file\n#![allow(clippy::all)]\n#![allow(unknown_lints)]\n#![allow(unused_imports)]\n\n";
+    let data = "// Force clippy and checks to ignore this file\n#![allow(clippy::all)]\n#![allow(unknown_lints)]\n#![allow(unused_imports)]\n#![allow(clippy::cognitive_complexity)]\n\n";
     prepend_file(data.as_bytes(), &file_path)?;
     Ok(())
 }
