@@ -82,3 +82,31 @@ mod test_get_filter_factories {
         assert_eq!(13, get_filter_factories().len());
     }
 }
+
+#[cfg(test)]
+mod test_get_filter {
+    use super::*;
+
+    #[test]
+    fn test_valid() {
+        match get_filter(
+            "playerElo",
+            vec!["a".to_string(), "1".to_string(), "2".to_string()],
+        ) {
+            Ok(_) => assert!(true),
+            Err(_) => assert!(false),
+        }
+        match get_filter("queensideCastleMate", vec![]) {
+            Ok(_) => assert!(true),
+            Err(_) => assert!(false),
+        }
+    }
+
+    #[test]
+    fn test_invalid() {
+        match get_filter("invalid-filter", vec![]) {
+            Ok(_) => assert!(false),
+            Err(_) => assert!(true),
+        }
+    }
+}
