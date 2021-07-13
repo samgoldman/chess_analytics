@@ -122,6 +122,7 @@ bin!(termination_bin, "termination", _params, {
 mod test_simple_bins {
     use super::*;
     use crate::basic_types::termination::Termination;
+    use crate::basic_types::time_control::TimeControl;
     use crate::game_wrapper::GameWrapper;
 
     #[test]
@@ -237,5 +238,29 @@ mod test_simple_bins {
 
         game.set_termination(Termination::Unterminated);
         assert_eq!(bin_fn(&game), "Unterminated");
+    }
+
+    #[test]
+    fn test_time_control_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn = time_control_bin::factory(vec![]);
+
+        game.set_time_control(TimeControl::UltraBullet);
+        assert_eq!(bin_fn(&game), "UltraBullet");
+
+        game.set_time_control(TimeControl::Bullet);
+        assert_eq!(bin_fn(&game), "Bullet");
+
+        game.set_time_control(TimeControl::Blitz);
+        assert_eq!(bin_fn(&game), "Blitz");
+
+        game.set_time_control(TimeControl::Rapid);
+        assert_eq!(bin_fn(&game), "Rapid");
+
+        game.set_time_control(TimeControl::Classical);
+        assert_eq!(bin_fn(&game), "Classical");
+
+        game.set_time_control(TimeControl::Correspondence);
+        assert_eq!(bin_fn(&game), "Correspondence");
     }
 }

@@ -289,6 +289,11 @@ impl GameWrapper {
         &self.time_control
     }
 
+    #[cfg(test)]
+    pub fn set_time_control(&mut self, time_control: TimeControl) {
+        self.time_control = time_control;
+    }
+
     pub fn eco_category(&self) -> char {
         self.eco_category
     }
