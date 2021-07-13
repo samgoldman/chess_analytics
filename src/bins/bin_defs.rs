@@ -78,16 +78,7 @@ bin!(site_bin, "site", _params, {
 });
 
 bin!(time_control_bin, "timeControl", _params, {
-    use crate::basic_types::time_control::TimeControl;
-
-    Box::new(move |game| match game.time_control() {
-        TimeControl::UltraBullet => "UltraBullet".to_string(),
-        TimeControl::Bullet => "Bullet".to_string(),
-        TimeControl::Blitz => "Blitz".to_string(),
-        TimeControl::Rapid => "Rapid".to_string(),
-        TimeControl::Classical => "Classical".to_string(),
-        TimeControl::Correspondence => "Correspondence".to_string(),
-    })
+    Box::new(move |game| format!("{:?}", game.time_control()))
 });
 
 // Params: MainOnly ignores the increment
