@@ -75,10 +75,7 @@ mod test_process {
 
         let input = "a".to_string();
 
-        mock_step
-            .expect_process()
-            .withf_st(|_| true)
-            .times(0);
+        mock_step.expect_process().withf_st(|_| true).times(0);
         mock_step
             .expect_get_input_type()
             .times(1)
