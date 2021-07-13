@@ -3,7 +3,6 @@
 #![deny(clippy::cognitive_complexity)]
 
 use bzip2::read::BzDecoder;
-use clap::{App, Arg};
 use glob::glob;
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use itertools::Itertools;
@@ -18,6 +17,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 
+mod arguments;
 #[macro_use]
 mod basic_types;
 mod bins;
@@ -33,6 +33,7 @@ mod statistics;
 mod workflow;
 mod workflow_step;
 
+use arguments::CONFIGURATION;
 use bins::*;
 use filters::get_filter_steps;
 use game_wrapper::GameWrapper;
@@ -45,36 +46,9 @@ extern crate lazy_static;
 extern crate clap;
 
 fn main() {
-    let matches = App::new("Chess Statistics")
-        .version("0.1.0")
-        .author("Sam Goldman")
-        .about("Stats from lichess flatbuffers")
-        .arg(
-            Arg::new("glob")
-                .long("glob")
-                .takes_value(true)
-                .required(true)
-                .required(true),
-        )
-        .arg(Arg::new("workflow").long("workflow").takes_value(true))
-        .arg(
-            Arg::new("column_fields")
-                .long("column_fields")
-                .takes_value(true)
-                .multiple(true)
-                .default_values(&["0", "-1"]),
-        )
-        .arg(
-            Arg::new("logger_level")
-                .long("logger_level")
-                .takes_value(true)
-                .default_value("warn"),
-        )
-        .get_matches();
-
     SimpleLogger::new()
         .with_level(
-            LevelFilter::from_str(matches.value_of("logger_level").unwrap())
+            LevelFilter::from_str(CONFIGURATION.value_of("logger_level").unwrap())
                 .unwrap_or(LevelFilter::Warn),
         )
         .init()
@@ -82,8 +56,8 @@ fn main() {
 
     let db = Arc::new(Mutex::new(HashMap::new()));
 
-    let input_steps = parse_workflow(matches.value_of("workflow").unwrap());
-    let column_fields = matches.values_of_t_or_exit::<i32>("column_fields");
+    let input_steps = parse_workflow(CONFIGURATION.value_of("workflow").unwrap());
+    let column_fields = CONFIGURATION.values_of_t_or_exit::<i32>("column_fields");
 
     let analysis_steps: Vec<(String, StatisticDefinition)> = input_steps
         .analysis_steps
@@ -106,7 +80,7 @@ fn main() {
 
     let filter = get_filter_steps(input_steps.filters);
 
-    let entries: Vec<PathBuf> = glob(matches.value_of("glob").unwrap())
+    let entries: Vec<PathBuf> = glob(CONFIGURATION.value_of("glob").unwrap())
         .expect("Failed to read glob pattern")
         .map(Result::unwrap)
         .collect();
