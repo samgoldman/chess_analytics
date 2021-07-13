@@ -21,7 +21,7 @@ impl<'a> WorkflowProcessor<'a> {
         let actual_input_type = input.type_id();
 
         if self.step.get_input_type() != actual_input_type {
-            panic!("WorkflowProcessor: actual input type ({:?}) doesn't match expected input type ({:?})", actual_input_type, self.step.get_input_type());
+            panic!("WorkflowProcessor: actual input type doesn't match expected input type");
         }
 
         let result = self.step.process(input);
@@ -43,6 +43,7 @@ mod test_process {
     lazy_static! {
         static ref TYPE_STR: TypeId = "str".type_id();
         static ref TYPE_STRING: TypeId = "String".to_string().type_id();
+        static ref TYPE_VEC_STR: TypeId = vec!["str"].type_id();
     }
 
     #[test]
@@ -61,6 +62,27 @@ mod test_process {
             .expect_get_input_type()
             .times(1)
             .return_const(*TYPE_STRING);
+
+        let test_wp = WorkflowProcessor::new(&mock_step, vec![]);
+
+        test_wp.process(&input);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_bad_workflow() {
+        let mut mock_step = MockStep::new();
+
+        let input = "a".to_string();
+
+        mock_step
+            .expect_process()
+            .withf_st(|_| true)
+            .times(0);
+        mock_step
+            .expect_get_input_type()
+            .times(1)
+            .return_const(*TYPE_VEC_STR);
 
         let test_wp = WorkflowProcessor::new(&mock_step, vec![]);
 
