@@ -121,6 +121,7 @@ bin!(termination_bin, "termination", _params, {
 #[cfg(test)]
 mod test_simple_bins {
     use super::*;
+    use crate::basic_types::termination::Termination;
     use crate::game_wrapper::GameWrapper;
 
     #[test]
@@ -197,5 +198,44 @@ mod test_simple_bins {
 
         game.set_day(31);
         assert_eq!(bin_fn(&game), "31");
+    }
+
+    #[test]
+    fn test_termination_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn = termination_bin::factory(vec![]);
+
+        game.set_termination(Termination::Normal);
+        assert_eq!(bin_fn(&game), "Normal");
+
+        game.set_termination(Termination::TimeForfeit);
+        assert_eq!(bin_fn(&game), "TimeForfeit");
+
+        game.set_termination(Termination::Abandoned);
+        assert_eq!(bin_fn(&game), "Abandoned");
+
+        game.set_termination(Termination::RulesInfraction);
+        assert_eq!(bin_fn(&game), "RulesInfraction");
+
+        game.set_termination(Termination::Unterminated);
+        assert_eq!(bin_fn(&game), "Unterminated");
+
+        // Make sure no paramters are being used
+        let bin_fn = termination_bin::factory(vec!["Normal".to_string()]);
+
+        game.set_termination(Termination::Normal);
+        assert_eq!(bin_fn(&game), "Normal");
+
+        game.set_termination(Termination::TimeForfeit);
+        assert_eq!(bin_fn(&game), "TimeForfeit");
+
+        game.set_termination(Termination::Abandoned);
+        assert_eq!(bin_fn(&game), "Abandoned");
+
+        game.set_termination(Termination::RulesInfraction);
+        assert_eq!(bin_fn(&game), "RulesInfraction");
+
+        game.set_termination(Termination::Unterminated);
+        assert_eq!(bin_fn(&game), "Unterminated");
     }
 }

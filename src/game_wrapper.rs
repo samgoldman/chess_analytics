@@ -342,6 +342,11 @@ impl GameWrapper {
         self.termination
     }
 
+    #[cfg(test)]
+    pub fn set_termination(&mut self, termination: Termination) {
+        self.termination = termination;
+    }
+
     #[allow(dead_code)]
     pub fn white_diff(&self) -> i16 {
         self.white_diff
