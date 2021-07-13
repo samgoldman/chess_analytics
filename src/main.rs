@@ -33,7 +33,7 @@ mod statistics;
 mod workflow;
 mod workflow_step;
 
-use arguments::CONFIGURATION;
+use arguments::get_configuration;
 use bins::*;
 use filters::get_filter_steps;
 use game_wrapper::GameWrapper;
@@ -48,7 +48,7 @@ extern crate clap;
 fn main() {
     SimpleLogger::new()
         .with_level(
-            LevelFilter::from_str(CONFIGURATION.value_of("logger_level").unwrap())
+            LevelFilter::from_str(get_configuration().value_of("logger_level").unwrap())
                 .unwrap_or(LevelFilter::Warn),
         )
         .init()
@@ -56,8 +56,8 @@ fn main() {
 
     let db = Arc::new(Mutex::new(HashMap::new()));
 
-    let input_steps = parse_workflow(CONFIGURATION.value_of("workflow").unwrap());
-    let column_fields = CONFIGURATION.values_of_t_or_exit::<i32>("column_fields");
+    let input_steps = parse_workflow(get_configuration().value_of("workflow").unwrap());
+    let column_fields = get_configuration().values_of_t_or_exit::<i32>("column_fields");
 
     let analysis_steps: Vec<(String, StatisticDefinition)> = input_steps
         .analysis_steps
@@ -80,7 +80,7 @@ fn main() {
 
     let filter = get_filter_steps(input_steps.filters);
 
-    let entries: Vec<PathBuf> = glob(CONFIGURATION.value_of("glob").unwrap())
+    let entries: Vec<PathBuf> = glob(get_configuration().value_of("glob").unwrap())
         .expect("Failed to read glob pattern")
         .map(Result::unwrap)
         .collect();
