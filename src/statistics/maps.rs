@@ -127,7 +127,7 @@ map!(result_map, "resultCount", params, {
         "BlackVictory" => GameResult::Black,
         _ => GameResult::Star,
     };
-    Box::new(move |game| if game.result() == expected { 1 } else { 0 })
+    Box::new(move |game| (game.result() == expected) as i16)
 });
 
 // Requires no parameters
