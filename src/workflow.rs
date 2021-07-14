@@ -34,8 +34,7 @@ pub struct Workflow {
 }
 
 pub fn parse_workflow(filename: &str) -> Workflow {
-    let definition = read_to_string(filename).unwrap();
-    serde_json::from_str(&definition).unwrap()
+    serde_json::from_str(&read_to_string(filename).unwrap()).unwrap()
 }
 
 #[cfg(test)]
