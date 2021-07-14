@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub enum GameResult {
     White = 0,
@@ -14,6 +16,16 @@ impl GameResult {
             2 => Some(GameResult::Draw),
             255 => Some(GameResult::Star),
             _ => None,
+        }
+    }
+}
+
+impl fmt::Display for GameResult {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self == &GameResult::Star {
+            write!(f, "?")
+        } else {
+            write!(f, "{:?}", self)
         }
     }
 }
