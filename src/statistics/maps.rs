@@ -151,11 +151,8 @@ map!(promotion_count_map, "promotionCount", params, {
         game.moves()
             .iter()
             .map(|move_data| {
-                if move_data.promoted_to.is_some() && move_data.promoted_to.unwrap() == expected {
-                    1
-                } else {
-                    0
-                }
+                (move_data.promoted_to.is_some() && move_data.promoted_to.unwrap() == expected)
+                    as i16
             })
             .sum()
     })
@@ -174,7 +171,7 @@ map!(nag_count_map, "nagCount", params, {
     Box::new(move |game| {
         game.moves()
             .iter()
-            .map(|move_data| if move_data.nag == expected { 1 } else { 0 })
+            .map(|move_data| (move_data.nag == expected) as i16)
             .sum()
     })
 });
