@@ -462,4 +462,194 @@ mod test_maps {
         assert_eq!((map_fn_first_cap)(&game), 1);
         assert_eq!((map_fn_first_check)(&game), 2);
     }
+
+    #[test]
+    fn test_rating_diff() {
+        let mut game = GameWrapper::default();
+        let map_fn = get_map("ratingDiff", vec![]).unwrap();
+
+        assert_eq!((map_fn)(&game), 0);
+
+        game.set_white_rating(100);
+        game.set_black_rating(500);
+
+        assert_eq!((map_fn)(&game), 400);
+    }
+
+    #[test]
+    fn test_has_eval_map() {
+        let mut game = GameWrapper::default();
+        let map_fn = get_map("hasEval", vec![]).unwrap();
+
+        assert_eq!((map_fn)(&game), 0);
+
+        game.set_eval_available(true);
+        game.set_black_rating(500);
+
+        assert_eq!((map_fn)(&game), 1);
+    }
+
+    #[test]
+    fn test_promotion_count() {
+        let mut game = GameWrapper::default();
+        let map_fn_knight = get_map("promotionCount", vec!["Knight".to_string()]).unwrap();
+        let map_fn_bishop = get_map("promotionCount", vec!["Bishop".to_string()]).unwrap();
+        let map_fn_rook = get_map("promotionCount", vec!["Rook".to_string()]).unwrap();
+        let map_fn_queen = get_map("promotionCount", vec!["Queen".to_string()]).unwrap();
+        let mut moves = vec![];
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_A, Rank::_1),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: true,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: Some(Piece::Knight),
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn_knight)(&game), 1);
+        assert_eq!((map_fn_bishop)(&game), 0);
+        assert_eq!((map_fn_rook)(&game), 0);
+        assert_eq!((map_fn_queen)(&game), 0);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: Some(Piece::Knight),
+        });
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: Some(Piece::Queen),
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn_knight)(&game), 2);
+        assert_eq!((map_fn_bishop)(&game), 0);
+        assert_eq!((map_fn_rook)(&game), 0);
+        assert_eq!((map_fn_queen)(&game), 1);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: true,
+            nag: NAG::None,
+            promoted_to: Some(Piece::Rook),
+        });
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: true,
+            nag: NAG::None,
+            promoted_to: Some(Piece::Bishop),
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn_knight)(&game), 2);
+        assert_eq!((map_fn_bishop)(&game), 1);
+        assert_eq!((map_fn_rook)(&game), 1);
+        assert_eq!((map_fn_queen)(&game), 1);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_promotion_count_panic() {
+        let _map_fn = get_map("promotionCount", vec!["bad".to_string()]);
+    }
+
+    #[test]
+    fn test_nag_count() {
+        let mut game = GameWrapper::default();
+        let map_fn_questionable = get_map("nagCount", vec!["Questionable".to_string()]).unwrap();
+        let map_fn_mistake = get_map("nagCount", vec!["Mistake".to_string()]).unwrap();
+        let map_fn_blunder = get_map("nagCount", vec!["Blunder".to_string()]).unwrap();
+        let mut moves = vec![];
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_A, Rank::_1),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: true,
+            mates: false,
+            nag: NAG::Questionable,
+            promoted_to: Some(Piece::Knight),
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn_questionable)(&game), 1);
+        assert_eq!((map_fn_mistake)(&game), 0);
+        assert_eq!((map_fn_blunder)(&game), 0);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: false,
+            nag: NAG::Questionable,
+            promoted_to: Some(Piece::Knight),
+        });
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: false,
+            nag: NAG::Mistake,
+            promoted_to: Some(Piece::Queen),
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn_questionable)(&game), 2);
+        assert_eq!((map_fn_mistake)(&game), 1);
+        assert_eq!((map_fn_blunder)(&game), 0);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: true,
+            nag: NAG::Blunder,
+            promoted_to: Some(Piece::Rook),
+        });
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: true,
+            nag: NAG::None,
+            promoted_to: Some(Piece::Bishop),
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn_questionable)(&game), 2);
+        assert_eq!((map_fn_mistake)(&game), 1);
+        assert_eq!((map_fn_blunder)(&game), 1);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_nag_count_panic() {
+        let _map_fn = get_map("nagCount", vec!["bad".to_string()]);
+    }
 }
