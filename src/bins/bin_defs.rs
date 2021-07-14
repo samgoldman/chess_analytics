@@ -112,6 +112,7 @@ bin!(termination_bin, "termination", _params, {
 #[cfg(test)]
 mod test_simple_bins {
     use super::*;
+    use crate::basic_types::game_result::GameResult;
     use crate::basic_types::termination::Termination;
     use crate::basic_types::time_control::TimeControl;
     use crate::game_wrapper::GameWrapper;
@@ -253,5 +254,62 @@ mod test_simple_bins {
 
         game.set_time_control(TimeControl::Correspondence);
         assert_eq!(bin_fn(&game), "Correspondence");
+    }
+
+    #[test]
+    fn test_result_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn = result_bin::factory(vec![]);
+
+        game.set_result(GameResult::White);
+        assert_eq!(bin_fn(&game), "White");
+
+        game.set_result(GameResult::Black);
+        assert_eq!(bin_fn(&game), "Black");
+
+        game.set_result(GameResult::Draw);
+        assert_eq!(bin_fn(&game), "Draw");
+
+        game.set_result(GameResult::Star);
+        assert_eq!(bin_fn(&game), "?");
+    }
+
+    #[test]
+    fn test_game_elo_bin() {
+        let mut game = GameWrapper::default();
+
+        let bin_fn = game_elo_bin::factory(vec!["100".to_string()]);
+        game.set_white_rating(200);
+        game.set_black_rating(300);
+        assert_eq!(bin_fn(&game), "0200");
+
+        let bin_fn = game_elo_bin::factory(vec!["600".to_string()]);
+        game.set_white_rating(2450);
+        game.set_black_rating(2950);
+        assert_eq!(bin_fn(&game), "2400");
+    }
+
+    #[test]
+    fn test_eco_cat_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn = eco_category_bin::factory(vec![]);
+
+        game.set_eco_category('A');
+        assert_eq!(bin_fn(&game), "A");
+
+        game.set_eco_category('E');
+        assert_eq!(bin_fn(&game), "E");
+    }
+
+    #[test]
+    fn test_eco_subcat_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn = eco_subcategory_bin::factory(vec![]);
+
+        game.set_eco_subcategory(42);
+        assert_eq!(bin_fn(&game), "42");
+
+        game.set_eco_subcategory(9);
+        assert_eq!(bin_fn(&game), "9");
     }
 }

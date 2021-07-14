@@ -298,8 +298,18 @@ impl GameWrapper {
         self.eco_category
     }
 
+    #[cfg(test)]
+    pub fn set_eco_category(&mut self, eco_category: char) {
+        self.eco_category = eco_category;
+    }
+
     pub fn eco_subcategory(&self) -> u8 {
         self.eco_subcategory
+    }
+
+    #[cfg(test)]
+    pub fn set_eco_subcategory(&mut self, eco_subcategory: u8) {
+        self.eco_subcategory = eco_subcategory;
     }
 
     pub fn moves(&self) -> &Vec<Move> {
