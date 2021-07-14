@@ -397,4 +397,69 @@ mod test_maps {
         game.set_moves(moves.clone());
         assert_eq!((map_fn)(&game), 2);
     }
+
+    #[test]
+    fn test_move_related() {
+        // Two in one test
+        let mut game = GameWrapper::default();
+        let map_fn_num_moves = get_map("numMoves", vec![]).unwrap();
+        let map_fn_num_caps = get_map("numCaptures", vec![]).unwrap();
+        let map_fn_first_cap = get_map("firstCapture", vec![]).unwrap();
+        let map_fn_first_check = get_map("firstCheck", vec![]).unwrap();
+        let mut moves = vec![];
+
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn_num_moves)(&game), 0);
+        assert_eq!((map_fn_num_caps)(&game), 0);
+        assert_eq!((map_fn_first_cap)(&game), 0);
+        assert_eq!((map_fn_first_check)(&game), 0);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_A, Rank::_1),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None,
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn_num_moves)(&game), 1);
+        assert_eq!((map_fn_num_caps)(&game), 0);
+        assert_eq!((map_fn_first_cap)(&game), 0);
+        assert_eq!((map_fn_first_check)(&game), 0);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: true,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None,
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn_num_moves)(&game), 2);
+        assert_eq!((map_fn_num_caps)(&game), 1);
+        assert_eq!((map_fn_first_cap)(&game), 1);
+        assert_eq!((map_fn_first_check)(&game), 0);
+
+        moves.push(Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_G, Rank::_3),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: true,
+            mates: true,
+            nag: NAG::None,
+            promoted_to: None,
+        });
+        game.set_moves(moves.clone());
+        assert_eq!((map_fn_num_moves)(&game), 3);
+        assert_eq!((map_fn_num_caps)(&game), 1);
+        assert_eq!((map_fn_first_cap)(&game), 1);
+        assert_eq!((map_fn_first_check)(&game), 2);
+    }
 }
