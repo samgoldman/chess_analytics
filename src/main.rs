@@ -4,5 +4,5 @@ use chess_analytics::run;
 use std::env;
 
 fn main() {
-    run(env::args())
+    println!("{}", run(env::args()));
 }

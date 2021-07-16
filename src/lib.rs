@@ -45,10 +45,12 @@ use workflow::parse_workflow;
 extern crate lazy_static;
 extern crate clap;
 
-pub fn run<T>(args: T)
+pub fn run<T>(args: T) -> String
 where
     T: Iterator<Item = String>,
 {
+    let mut result_str = String::default();
+
     let config = parse_args(args);
     SimpleLogger::new()
         .with_level(
@@ -56,7 +58,7 @@ where
                 .unwrap_or(LevelFilter::Warn),
         )
         .init()
-        .unwrap();
+        .unwrap_or(());
 
     let db = Arc::new(Mutex::new(HashMap::new()));
 
@@ -176,16 +178,17 @@ where
             .map(|entry| get_elements(entry.0, &column_fields, true))
             .collect(),
     );
-    println!(
-        "Bin\t{}",
+    result_str += format!(
+        "Bin\t{}\n",
         columns
             .iter()
             .map(|x| x.iter().map(|y| y.1.clone()).join("."))
             .join("\t")
-    );
+    )
+    .as_ref();
 
     for row in rows {
-        print!("{}\t", row.iter().map(|x| x.1.clone()).join("."));
+        result_str += format!("{}\t", row.iter().map(|x| x.1.clone()).join(".")).as_ref();
         for stat in &columns {
             let path: Vec<String> = vec![stat.clone(), row.clone()]
                 .into_iter()
@@ -199,11 +202,13 @@ where
                 let fold_fn = &data.0;
 
                 let result = (fold_fn)(&data.1);
-                print!("{:.4}\t", result);
+                result_str += format!("{:.4}\t", result).as_ref();
             } else {
-                print!("{:.4}\t", 0.0);
+                result_str += format!("{:.4}\t", 0.0).as_ref();
             }
         }
-        println!();
+        result_str += "\n";
     }
+
+    result_str
 }
