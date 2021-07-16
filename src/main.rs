@@ -137,29 +137,6 @@ fn main() {
             {
                 let mut db = db.lock().unwrap();
                 filtered_games.iter().for_each(|game| {
-                    // let mut mutable_game = (*game).clone();
-
-                    // panic::set_hook(Box::new(|_info| {
-                    //     // do nothing
-                    // }));
-
-                    // let result = panic::catch_unwind(|| {
-                    //     mutable_game.build_boards()
-                    // });
-
-                    // match result {
-                    //     Ok(res) => {
-                    //         mutable_game.boards = res;
-                    //         println!("{}", mutable_game.boards.last().unwrap().to_fen());
-                    //     },
-                    //     Err(_) => {
-                    //         // println!("{}: failed", game.site());
-                    //     },
-                    // }
-
-                    // TODO
-                    // println!("{}", game.boards.last().unwrap().to_fen());
-
                     let bin_path: Vec<String> = selected_bins.iter().map(|bin| bin(game)).collect();
 
                     for statistic_def in &analysis_steps {
