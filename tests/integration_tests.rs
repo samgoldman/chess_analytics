@@ -28,6 +28,17 @@ fn simple_count_10_uncompressed() -> Result<(), Box<dyn std::error::Error>> {
     ]
     .iter()
     .map(|x| x.to_string()));
+
+    assert_eq!(res, "Bin	gameCount.sum\n\t10.0000\t\n");
+    let res = run(vec![
+        "chess_analytics",
+        "--glob",
+        "tests/data/10_games_000000_bin",
+        "--workflow",
+        "tests/workflows/simple_count.json",
+    ]
+    .iter()
+    .map(|x| x.to_string()));
     assert_eq!(res, "Bin	gameCount.sum\n\t10.0000\t\n");
 
     Ok(())
