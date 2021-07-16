@@ -385,17 +385,16 @@ impl GameWrapper {
         }
     }
 
+    #[allow(clippy::needless_return)] // Allow for coverage
     pub fn build_boards(&self) -> Vec<Board> {
         self.moves
             .iter()
-            .fold(vec![Board::default()], |boards, curr_move| {
-                let mut mut_boards = boards;
-
-                let mut new_board = mut_boards.last().unwrap().clone();
+            .fold(vec![Board::default()], |mut boards, curr_move| {
+                let mut new_board = boards.last().unwrap().clone();
                 new_board.move_piece(*curr_move);
-                mut_boards.push(new_board);
+                boards.push(new_board);
 
-                mut_boards
+                return boards;
             })
     }
 }
