@@ -1,7 +1,6 @@
 use clap::{App, Arg, ArgMatches};
-use std::env;
 
-fn parse_args<T>(args: T) -> ArgMatches
+pub fn parse_args<T>(args: T) -> ArgMatches
 where
     T: Iterator<Item = String>,
 {
@@ -33,25 +32,9 @@ where
         .unwrap()
 }
 
-pub fn get_configuration() -> ArgMatches {
-    lazy_static! {
-        pub static ref CONFIGURATION: ArgMatches = parse_args(env::args());
-    }
-
-    CONFIGURATION.clone()
-}
-
 #[cfg(test)]
 mod test_parse_args {
     use super::*;
-
-    #[test]
-    #[should_panic]
-    fn test_static() {
-        // This should panic because we're not passing in any arguments
-        // Should probably change behavior in the future, but good for now
-        let _x = get_configuration();
-    }
 
     macro_rules! tests {
         ($($name:ident: $value:expr,)*) => {
