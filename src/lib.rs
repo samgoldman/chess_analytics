@@ -6,15 +6,11 @@ use bzip2::read::BzDecoder;
 use glob::glob;
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use itertools::Itertools;
-use log::LevelFilter;
-use log::{info, trace};
 use rayon::prelude::*;
-use simple_logger::SimpleLogger;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
-use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 
 mod arguments;
@@ -52,14 +48,6 @@ where
     let mut result_str = String::default();
 
     let config = parse_args(args);
-    SimpleLogger::new()
-        .with_level(
-            LevelFilter::from_str(config.value_of("logger_level").unwrap())
-                .unwrap_or(LevelFilter::Warn),
-        )
-        .init()
-        .unwrap_or(());
-
     let db = Arc::new(Mutex::new(HashMap::new()));
 
     let input_steps = parse_workflow(config.value_of("workflow").unwrap());
@@ -75,14 +63,12 @@ where
             )
         })
         .collect();
-    info!("Loaded {} analysis steps", analysis_steps.len());
 
     let selected_bins: Vec<BinFn> = input_steps
         .bins
         .iter()
         .map(|bin_input| get_selected_bins(bin_input.clone()))
         .collect();
-    info!("Loaded {} bins", selected_bins.len());
 
     let filter = get_filter_steps(input_steps.filters);
 
@@ -90,7 +76,6 @@ where
         .expect("Failed to read glob pattern")
         .map(Result::unwrap)
         .collect();
-    info!("Found {} files via glob", entries.len());
 
     let progress_bar = ProgressBar::new(entries.len() as u64);
     progress_bar.set_style(
@@ -102,8 +87,6 @@ where
         .par_iter()
         .progress_with(progress_bar)
         .for_each(|entry| {
-            trace!("Starting to process entry: {:?}", entry);
-
             let mut file = File::open(entry).unwrap();
             let mut data = Vec::new();
 
@@ -114,31 +97,18 @@ where
             };
 
             if compressed {
-                trace!("Attempting to decompress entry: {:?}", entry);
                 let mut decompressor = BzDecoder::new(file);
                 decompressor.read_to_end(&mut data).unwrap();
-                trace!("Decompressed and read entry: {:?}", entry);
             } else {
-                trace!("Reading uncompressed entry: {:?}", entry);
                 file.read_to_end(&mut data).unwrap();
-                trace!("Read uncompressed entry: {:?}", entry);
             }
 
             let games = GameWrapper::from_game_list_data(data);
-            trace!("Read {} games from entry: {:?}", games.len(), entry);
 
             let filtered_games = games
                 .par_iter()
                 .filter(|x| filter(x))
                 .collect::<Vec<&GameWrapper>>();
-
-            info!("Filtered games for entry {:?}", entry);
-            trace!(
-                "Filtering games from {:?} resulted in {} games (out of {} original games)",
-                entry,
-                filtered_games.len(),
-                games.len()
-            );
 
             {
                 let mut db = db.lock().unwrap();

@@ -9,3 +9,4 @@ lcov.info
 *.sh
 *.tvs
 results/
+*.log
