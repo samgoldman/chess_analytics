@@ -401,3 +401,33 @@ mod test_get_game_elo {
         test_3: (600, 1200, 900),
     }
 }
+
+#[cfg(test)]
+mod test_has_opening {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board_moves, opening_moves, expected) = $value;
+                let mut test_game = GameWrapper::default();
+                test_game.set_moves(board_moves);
+
+                assert_eq!(has_opening(&test_game, &opening_moves), expected);
+            }
+        )*
+        }
+    }
+
+    lazy_static! {
+        static ref MOVE_1: Move = Move::new_to(File::_A, Rank::_1, Piece::Pawn);
+    }
+
+    tests! {
+        test_both_empty: (vec![], vec![], true),
+        test_opening_empty: (vec![*MOVE_1], vec![], true),
+        test_game_empty: (vec![], vec![*MOVE_1], false),
+    }
+}

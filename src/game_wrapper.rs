@@ -13,7 +13,7 @@ use crate::chess_utils::*;
 use itertools::izip;
 use std::time::Duration;
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Copy)]
 pub struct Move {
     pub from: PartialCell,
     pub to: Cell,
@@ -392,7 +392,7 @@ impl GameWrapper {
             let prev_board = boards[i].clone();
 
             let mut new_board = prev_board.clone();
-            new_board.move_piece(a_move.clone());
+            new_board.move_piece(*a_move);
             boards.push(new_board);
         }
 
