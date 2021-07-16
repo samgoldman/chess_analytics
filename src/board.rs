@@ -88,6 +88,7 @@ impl Board {
 
     pub fn does_piece_check_loc(&self, attacker_cell: Cell, target_cell: Cell) -> bool {
         // let  = attacker_location;
+        // TODO use fns
         let rank_diff = (target_cell.rank as i32) - (attacker_cell.rank as i32);
         let file_diff = (target_cell.file as i32) - (attacker_cell.file as i32);
 
@@ -153,6 +154,7 @@ impl Board {
     }
 
     pub fn execute_move(&mut self, piece: Piece, from_cell: Cell, to_cell: Cell) {
+        // TODO use fns
         let diff_file = to_cell.file as i32 - from_cell.file as i32;
 
         // Special cases
@@ -211,7 +213,7 @@ impl Board {
                     if !self.is_cell_empty(&dest) {
                         diff_file != 0 // If capturing, must be diagonal
                     } else {
-                        true
+                        diff_file == 0 // If not capturing, must not be diagonal
                     }
                 } else {
                     true
@@ -261,14 +263,14 @@ impl Board {
                 if found_piece.piece == piece && found_piece.player == self.to_move {
                     if piece == Piece::Pawn {
                         if self.to_move == Player::White {
-                            if (cell.rank as i32 == 1 && rank_diff == 2 && file_diff == 0)
+                            if (cell.rank == Rank::_2 && rank_diff == 2 && file_diff == 0)
                                 || (rank_diff == 1 && file_diff.abs() <= 1)
                             {
                                 Some(cell)
                             } else {
                                 None
                             }
-                        } else if (cell.rank as i32 == 6 && rank_diff == -2 && file_diff == 0)
+                        } else if (cell.rank == Rank::_7 && rank_diff == -2 && file_diff == 0)
                             || (rank_diff == -1 && file_diff.abs() <= 1)
                         {
                             Some(cell)
@@ -937,6 +939,7 @@ mod test_find_possible_origins {
         test_pawn_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_4), partial_cell!(None, None), vec![cell!(File::_B, Rank::_3), cell!(File::_C, Rank::_3)]),
         test_pawn_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_4), partial_cell!(Some(File::_B), None), vec![cell!(File::_B, Rank::_3)]),
         test_pawn_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_5), partial_cell!(Some(File::_B), None), vec![]),
+        test_pawn_6: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_E, Rank::_4), partial_cell!(None, None), vec![cell!(File::_E, Rank::_2)]),
 
         test_bishop_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(None, None), vec![cell!(File::_F, Rank::_4), cell!(File::_H, Rank::_6)]),
         test_bishop_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(None, Some(Rank::_4)), vec![cell!(File::_F, Rank::_4)]),
@@ -999,7 +1002,7 @@ mod test_find_origin {
 
     tests! {
         test_pawn_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_A, Rank::_5), partial_cell!(None, None), cell!(File::_A, Rank::_4)),
-        test_pawn_2: ("k2bR3/2pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, cell!(File::_A, Rank::_5), partial_cell!(None, None), cell!(File::_B, Rank::_6)),
+        test_pawn_2: ("k2bR3/2pP2KN/qprn2pB/P1b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, cell!(File::_A, Rank::_5), partial_cell!(None, None), cell!(File::_B, Rank::_6)),
         test_pawn_3: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_4), partial_cell!(Some(File::_B), None), cell!(File::_B, Rank::_3)),
         test_pawn_4: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/Pq1n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_4), partial_cell!(None, None), cell!(File::_C, Rank::_3)),
 

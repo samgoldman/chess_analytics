@@ -430,3 +430,34 @@ impl Default for GameWrapper {
         }
     }
 }
+
+#[cfg(test)]
+mod test_build_boards {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (moves, expected_fens) = $value;
+
+                let mut test_game = GameWrapper::default();
+                test_game.set_moves(moves);
+
+                let actual_boards = test_game.build_boards();
+                let actual_fens: Vec<String> = actual_boards.iter().map(|board| board.to_fen()).collect();
+
+                assert_eq!(actual_fens.len(), expected_fens.len());
+                assert_eq!(actual_fens, expected_fens.iter().map(|fen| fen.to_string()).collect::<Vec<String>>());
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_no_moves: (vec![], vec!["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"]),
+        test_one_move: (vec![Move::new_to(File::_A, Rank::_4, Piece::Pawn)], vec!["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w", "rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b"]),
+        test_two_moves: (vec![Move::new_to(File::_F, Rank::_3, Piece::Knight), Move::new_to(File::_D, Rank::_6, Piece::Pawn)], vec!["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w", "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b", "rnbqkbnr/ppp1pppp/3p4/8/8/5N2/PPPPPPPP/RNBQKB1R w"]),
+    }
+}
