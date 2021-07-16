@@ -386,17 +386,17 @@ impl GameWrapper {
     }
 
     pub fn build_boards(&self) -> Vec<Board> {
-        let mut boards = vec![Board::default()];
+        self.moves
+            .iter()
+            .fold(vec![Board::default()], |boards, curr_move| {
+                let mut mut_boards = boards;
 
-        for (i, a_move) in self.moves.iter().enumerate() {
-            let prev_board = boards[i].clone();
+                let mut new_board = mut_boards.last().unwrap().clone();
+                new_board.move_piece(*curr_move);
+                mut_boards.push(new_board);
 
-            let mut new_board = prev_board.clone();
-            new_board.move_piece(*a_move);
-            boards.push(new_board);
-        }
-
-        boards
+                mut_boards
+            })
     }
 }
 
