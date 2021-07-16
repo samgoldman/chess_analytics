@@ -423,11 +423,24 @@ mod test_has_opening {
 
     lazy_static! {
         static ref MOVE_1: Move = Move::new_to(File::_A, Rank::_1, Piece::Pawn);
+        static ref MOVE_2: Move = Move::new_to(File::_G, Rank::_2, Piece::Pawn);
+        static ref MOVE_3: Move = Move::new_to(File::_D, Rank::_3, Piece::Pawn);
+        static ref MOVE_4: Move = Move::new_to_from(
+            Some(File::_C),
+            Some(Rank::_3),
+            File::_F,
+            Rank::_7,
+            Piece::Pawn
+        );
     }
 
     tests! {
         test_both_empty: (vec![], vec![], true),
         test_opening_empty: (vec![*MOVE_1], vec![], true),
         test_game_empty: (vec![], vec![*MOVE_1], false),
+        test_match_1: (vec![*MOVE_1, *MOVE_2, *MOVE_3, *MOVE_4], vec![*MOVE_1, *MOVE_2], true),
+        test_match_2: (vec![*MOVE_3, *MOVE_2, *MOVE_3, *MOVE_4], vec![*MOVE_3, *MOVE_2, *MOVE_3, *MOVE_4], true),
+        test_no_match_1: (vec![*MOVE_1, *MOVE_2, *MOVE_3, *MOVE_4], vec![*MOVE_1, *MOVE_4], false),
+        test_no_match_2: (vec![*MOVE_1, *MOVE_2, *MOVE_3, *MOVE_4], vec![*MOVE_2, *MOVE_2, *MOVE_3], false),
     }
 }
