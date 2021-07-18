@@ -318,3 +318,112 @@ mod test_eval_available_filter {
         assert_eq!(filter_fn(&game), false);
     }
 }
+
+#[cfg(test)]
+mod test_game_elo_filter {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (white_rating, black_rating, threshold_type, threshold, expected) = $value;
+                let mut game = GameWrapper::default();
+                game.set_white_rating(white_rating);
+                game.set_black_rating(black_rating);
+
+                let filter_fn = game_elo_filter::factory(vec![threshold_type.to_string(), format!("{:?}", threshold)]);
+                assert_eq!(expected, (filter_fn)(&game));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: (500, 1500, "min", 500, true),
+        test_2: (500, 1500, "max", 500, false),
+        test_3: (2500, 1500, "min", 1900, true),
+        test_4: (2500, 1500, "max", 1900, false),
+        test_5: (2100, 1900, "min", 2000, true),
+        test_6: (1900, 2100, "max", 2000, true),
+    }
+}
+
+#[cfg(test)]
+mod test_year_filter {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (actual_year, filter_year, expected) = $value;
+                let mut game = GameWrapper::default();
+                game.set_year(actual_year);
+
+                let filter_fn = year_filter::factory(vec![filter_year.to_string()]);
+                assert_eq!(expected, (filter_fn)(&game));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_true: (2013, 2013, true),
+        test_false: (2020, 2021, false),
+    }
+}
+
+#[cfg(test)]
+mod test_month_filter {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (actual_month, filter_month, expected) = $value;
+                let mut game = GameWrapper::default();
+                game.set_month(actual_month);
+
+                let filter_fn = month_filter::factory(vec![filter_month.to_string()]);
+                assert_eq!(expected, (filter_fn)(&game));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_true: (6, "06", true),
+        test_false: (5, 12, false),
+    }
+}
+
+#[cfg(test)]
+mod test_day_filter {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (actual_day, filter_day, expected) = $value;
+                let mut game = GameWrapper::default();
+                game.set_day(actual_day);
+
+                let filter_fn = day_filter::factory(vec![filter_day.to_string()]);
+                assert_eq!(expected, (filter_fn)(&game));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_true: (2, "02", true),
+        test_false: (21, 31, false),
+    }
+}
