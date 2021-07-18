@@ -427,3 +427,72 @@ mod test_day_filter {
         test_false: (21, 31, false),
     }
 }
+
+#[cfg(test)]
+mod test_final_piece_count {
+    use super::*;
+    use crate::basic_types::cell::Cell;
+    use crate::basic_types::file::File;
+    use crate::basic_types::nag::NAG;
+    use crate::basic_types::partial_cell::PartialCell;
+    use crate::basic_types::piece::Piece;
+    use crate::basic_types::rank::Rank;
+    use crate::game_wrapper::Move;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (moves, player, comparison, threshold, expected) = $value;
+                let mut game = GameWrapper::default();
+                game.set_moves(moves);
+
+                let filter_fn = final_piece_count_filter::factory(vec![player.to_string(), comparison.to_string(), threshold.to_string()]);
+                assert_eq!(expected, (filter_fn)(&game));
+            }
+        )*
+        }
+    }
+
+    lazy_static! {
+        static ref MOVE_1: Move = Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_A, Rank::_1),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: true,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None,
+        };
+        static ref MOVE_2: Move = Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_A, Rank::_1),
+            piece_moved: Piece::Pawn,
+            captures: true,
+            checks: true,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None,
+        };
+    }
+
+    tests! {
+        test_1: (vec![], "White", "min", 0, true),
+        test_2: (vec![], "Black", "min", 16, true),
+        test_3: (vec![], "Both", "min", 32, true),
+        test_4: (vec![], "Both", "max", 32, true),
+        test_5: (vec![], "Both", "min", 33, false),
+        test_6: (vec![*MOVE_1, *MOVE_1, *MOVE_1, *MOVE_1, *MOVE_1], "Both", "min", 32, true),
+        test_7: (vec![*MOVE_1, *MOVE_1, *MOVE_1, *MOVE_1, *MOVE_1], "Both", "min", 33, false),
+        test_8: (vec![*MOVE_2, *MOVE_1], "Both", "min", 32, false),
+        test_9: (vec![*MOVE_2, *MOVE_1], "Both", "min", 31, true),
+        test_10: (vec![*MOVE_2, *MOVE_1], "Black", "min", 16, false),
+        test_11: (vec![*MOVE_2, *MOVE_1], "Black", "min", 15, true),
+        test_12: (vec![*MOVE_1, *MOVE_2], "Both", "min", 32, false),
+        test_13: (vec![*MOVE_1, *MOVE_2], "Both", "min", 31, true),
+        test_14: (vec![*MOVE_1, *MOVE_2], "White", "min", 16, false),
+        test_15: (vec![*MOVE_1, *MOVE_2], "White", "min", 15, true),
+    }
+}
