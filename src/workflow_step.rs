@@ -178,7 +178,9 @@ mod test_process {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(
+        expected = "WorkflowProcessor: actual input type doesn't match expected input type"
+    )]
     fn test_bad_workflow() {
         let mut mock_step = MockStep::new();
 
@@ -187,6 +189,9 @@ mod test_process {
         mock_step.expect_process().withf_st(|_| true).times(0);
         mock_step
             .expect_get_input_type()
+            .return_const(*TYPE_VEC_STR);
+        mock_step
+            .expect_get_output_type()
             .return_const(*TYPE_VEC_STR);
 
         let test_wp = WorkflowProcessor::new(&mock_step, vec![]).unwrap();
