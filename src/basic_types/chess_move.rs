@@ -91,3 +91,31 @@ impl Move {
         }
     }
 }
+
+#[cfg(test)]
+mod test_convert {
+    use super::*;
+
+    #[test]
+    fn test_1() {
+        let data = 0b0010_0101_0000_0111;
+        let meta = 0b0000_0001_1001_0101;
+
+        assert_eq!(
+            Move {
+                from: PartialCell {
+                    file: Some(File::_G),
+                    rank: None,
+                },
+                to: cell!(File::_E, Rank::_2),
+                piece_moved: Piece::Queen,
+                captures: false,
+                checks: true,
+                mates: false,
+                nag: NAG::Questionable,
+                promoted_to: None,
+            },
+            Move::convert_from_binary_move_data((data, meta))
+        );
+    }
+}
