@@ -34,7 +34,7 @@ map!(mate_count_map, "checkCount", params, {
     let only_mate = !params.is_empty() && params[0] == "Mate";
     Box::new(move |game| {
         if only_mate {
-            match game.moves().last() {
+            match game.moves.last() {
                 Some(last_move) => {
                     if last_move.mates {
                         1
@@ -46,7 +46,7 @@ map!(mate_count_map, "checkCount", params, {
             }
         } else {
             let mut count = 0;
-            for move_data in game.moves() {
+            for move_data in game.moves.clone() {
                 if move_data.checks || move_data.mates {
                     count += 1;
                 }
@@ -58,17 +58,17 @@ map!(mate_count_map, "checkCount", params, {
 
 // Requires no parameters
 map!(num_moves_map, "numMoves", _params, {
-    Box::new(|game| game.moves().len() as i16)
+    Box::new(|game| game.moves.len() as i16)
 });
 
 // Requires no parameters
 map!(num_captures_map, "numCaptures", _params, {
-    Box::new(|game| game.moves().iter().filter(|c| c.captures).count() as i16)
+    Box::new(|game| game.moves.iter().filter(|c| c.captures).count() as i16)
 });
 
 map!(first_capture_map, "firstCapture", _params, {
     Box::new(|game| {
-        for (i, move_data) in game.moves().iter().enumerate() {
+        for (i, move_data) in game.moves.iter().enumerate() {
             if move_data.captures {
                 return i as i16;
             }
@@ -80,7 +80,7 @@ map!(first_capture_map, "firstCapture", _params, {
 
 map!(first_check_map, "firstCheck", _params, {
     Box::new(|game| {
-        for (i, move_data) in game.moves().iter().enumerate() {
+        for (i, move_data) in game.moves.iter().enumerate() {
             if move_data.checks || move_data.mates {
                 return i as i16;
             }
@@ -92,7 +92,7 @@ map!(first_check_map, "firstCheck", _params, {
 
 // Requires no parameters
 map!(rating_diff_map, "ratingDiff", _params, {
-    Box::new(|game| (game.white_rating() as i16 - game.black_rating() as i16).abs())
+    Box::new(|game| (game.white_rating as i16 - game.black_rating as i16).abs())
 });
 
 // Requires 1 parameter: the movetext that defines the opening
@@ -127,12 +127,12 @@ map!(result_map, "resultCount", params, {
         "BlackVictory" => GameResult::Black,
         _ => GameResult::Star,
     };
-    Box::new(move |game| (game.result() == expected) as i16)
+    Box::new(move |game| (game.result == expected) as i16)
 });
 
 // Requires no parameters
 map!(has_eval_map, "hasEval", _params, {
-    Box::new(|game| game.eval_available() as i16)
+    Box::new(|game| game.eval_available as i16)
 });
 
 // Requires 1 parameter: the promotion type being counted
@@ -148,7 +148,7 @@ map!(promotion_count_map, "promotionCount", params, {
     };
 
     Box::new(move |game| {
-        game.moves()
+        game.moves
             .iter()
             .map(|move_data| {
                 (move_data.promoted_to.is_some() && move_data.promoted_to.unwrap() == expected)
@@ -169,7 +169,7 @@ map!(nag_count_map, "nagCount", params, {
         _ => panic!(),
     };
     Box::new(move |game| {
-        game.moves()
+        game.moves
             .iter()
             .map(|move_data| (move_data.nag == expected) as i16)
             .sum()
@@ -179,15 +179,15 @@ map!(nag_count_map, "nagCount", params, {
 // Requires no parameters
 map!(average_move_time_map, "averageMoveTime", _params, {
     Box::new(|game| {
-        ((0..game.moves().len())
+        ((0..game.moves.len())
             .map(|m| game.move_time(m))
             .sum::<u32>()
-            / game.moves().len() as u32) as i16
+            / game.moves.len() as u32) as i16
     })
 });
 
 map!(eco_category_map, "ecoCategory", params, {
-    Box::new(move |game| (format!("{}", game.eco_category()) == params[0]) as i16)
+    Box::new(move |game| (format!("{}", game.eco_category) == params[0]) as i16)
 });
 
 fn get_map_factories() -> Vec<(String, MapFactoryFn)> {
@@ -255,13 +255,13 @@ mod test_maps {
         let mut game = GameWrapper::default();
         let map_fn = get_map("resultCount", vec!["WhiteVictory".to_string()]).unwrap();
 
-        game.set_result(GameResult::White);
+        game.result = GameResult::White;
         assert_eq!((map_fn)(&game), 1);
 
-        game.set_result(GameResult::Black);
+        game.result = GameResult::Black;
         assert_eq!((map_fn)(&game), 0);
 
-        game.set_result(GameResult::Draw);
+        game.result = GameResult::Draw;
         assert_eq!((map_fn)(&game), 0);
     }
 
@@ -270,13 +270,13 @@ mod test_maps {
         let mut game = GameWrapper::default();
         let map_fn = get_map("resultCount", vec!["BlackVictory".to_string()]).unwrap();
 
-        game.set_result(GameResult::White);
+        game.result = GameResult::White;
         assert_eq!((map_fn)(&game), 0);
 
-        game.set_result(GameResult::Black);
+        game.result = GameResult::Black;
         assert_eq!((map_fn)(&game), 1);
 
-        game.set_result(GameResult::Draw);
+        game.result = GameResult::Draw;
         assert_eq!((map_fn)(&game), 0);
     }
 
@@ -285,13 +285,13 @@ mod test_maps {
         let mut game = GameWrapper::default();
         let map_fn = get_map("resultCount", vec!["Draw".to_string()]).unwrap();
 
-        game.set_result(GameResult::White);
+        game.result = GameResult::White;
         assert_eq!((map_fn)(&game), 0);
 
-        game.set_result(GameResult::Black);
+        game.result = GameResult::Black;
         assert_eq!((map_fn)(&game), 0);
 
-        game.set_result(GameResult::Draw);
+        game.result = GameResult::Draw;
         assert_eq!((map_fn)(&game), 1);
     }
 
@@ -300,13 +300,13 @@ mod test_maps {
         let mut game = GameWrapper::default();
         let map_fn = get_map("resultCount", vec!["Star".to_string()]).unwrap();
 
-        game.set_result(GameResult::White);
+        game.result = GameResult::White;
         assert_eq!((map_fn)(&game), 0);
 
-        game.set_result(GameResult::Black);
+        game.result = GameResult::Black;
         assert_eq!((map_fn)(&game), 0);
 
-        game.set_result(GameResult::Draw);
+        game.result = GameResult::Draw;
         assert_eq!((map_fn)(&game), 0);
     }
 
@@ -316,7 +316,7 @@ mod test_maps {
         let map_fn = get_map("checkCount", vec!["Mate".to_string()]).unwrap();
         let mut moves = vec![];
 
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 0);
 
         moves.push(Move {
@@ -329,7 +329,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: None,
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 0);
 
         moves.push(Move {
@@ -342,7 +342,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: None,
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 1);
     }
 
@@ -352,7 +352,7 @@ mod test_maps {
         let map_fn = get_map("checkCount", vec![]).unwrap();
         let mut moves = vec![];
 
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 0);
 
         moves.push(Move {
@@ -365,7 +365,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: None,
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 1);
 
         moves.push(Move {
@@ -378,7 +378,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: None,
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 1);
 
         moves.push(Move {
@@ -391,7 +391,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: None,
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 2);
     }
 
@@ -405,7 +405,7 @@ mod test_maps {
         let map_fn_first_check = get_map("firstCheck", vec![]).unwrap();
         let mut moves = vec![];
 
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn_num_moves)(&game), 0);
         assert_eq!((map_fn_num_caps)(&game), 0);
         assert_eq!((map_fn_first_cap)(&game), 0);
@@ -421,7 +421,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: None,
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn_num_moves)(&game), 1);
         assert_eq!((map_fn_num_caps)(&game), 0);
         assert_eq!((map_fn_first_cap)(&game), 0);
@@ -437,7 +437,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: None,
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn_num_moves)(&game), 2);
         assert_eq!((map_fn_num_caps)(&game), 1);
         assert_eq!((map_fn_first_cap)(&game), 1);
@@ -453,7 +453,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: None,
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn_num_moves)(&game), 3);
         assert_eq!((map_fn_num_caps)(&game), 1);
         assert_eq!((map_fn_first_cap)(&game), 1);
@@ -467,8 +467,8 @@ mod test_maps {
 
         assert_eq!((map_fn)(&game), 0);
 
-        game.set_white_rating(100);
-        game.set_black_rating(500);
+        game.white_rating = 100;
+        game.black_rating = 500;
 
         assert_eq!((map_fn)(&game), 400);
     }
@@ -480,8 +480,8 @@ mod test_maps {
 
         assert_eq!((map_fn)(&game), 0);
 
-        game.set_eval_available(true);
-        game.set_black_rating(500);
+        game.eval_available = true;
+        game.black_rating = 500;
 
         assert_eq!((map_fn)(&game), 1);
     }
@@ -505,7 +505,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: Some(Piece::Knight),
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn_knight)(&game), 1);
         assert_eq!((map_fn_bishop)(&game), 0);
         assert_eq!((map_fn_rook)(&game), 0);
@@ -531,7 +531,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: Some(Piece::Queen),
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn_knight)(&game), 2);
         assert_eq!((map_fn_bishop)(&game), 0);
         assert_eq!((map_fn_rook)(&game), 0);
@@ -557,7 +557,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: Some(Piece::Bishop),
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn_knight)(&game), 2);
         assert_eq!((map_fn_bishop)(&game), 1);
         assert_eq!((map_fn_rook)(&game), 1);
@@ -588,7 +588,7 @@ mod test_maps {
             nag: NAG::Questionable,
             promoted_to: Some(Piece::Knight),
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn_questionable)(&game), 1);
         assert_eq!((map_fn_mistake)(&game), 0);
         assert_eq!((map_fn_blunder)(&game), 0);
@@ -613,7 +613,7 @@ mod test_maps {
             nag: NAG::Mistake,
             promoted_to: Some(Piece::Queen),
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn_questionable)(&game), 2);
         assert_eq!((map_fn_mistake)(&game), 1);
         assert_eq!((map_fn_blunder)(&game), 0);
@@ -638,7 +638,7 @@ mod test_maps {
             nag: NAG::None,
             promoted_to: Some(Piece::Bishop),
         });
-        game.set_moves(moves.clone());
+        game.moves = moves.clone();
         assert_eq!((map_fn_questionable)(&game), 2);
         assert_eq!((map_fn_mistake)(&game), 1);
         assert_eq!((map_fn_blunder)(&game), 1);

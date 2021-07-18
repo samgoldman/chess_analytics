@@ -40,19 +40,19 @@ filter!(game_elo_filter, "gameElo", params, {
 // Requires one parameter: the year
 filter!(year_filter, "year", params, {
     let year: u32 = params[0].parse::<u32>().unwrap();
-    Box::new(move |game| game.year() as u32 == year)
+    Box::new(move |game| game.year as u32 == year)
 });
 
 // Requires one parameter: the month
 filter!(month_filter, "month", params, {
     let month: u32 = params[0].parse::<u32>().unwrap();
-    Box::new(move |game| game.month() as u32 == month)
+    Box::new(move |game| game.month as u32 == month)
 });
 
 // Requires one parameter: the day
 filter!(day_filter, "day", params, {
     let day: u32 = params[0].parse::<u32>().unwrap();
-    Box::new(move |game| game.day() as u32 == day)
+    Box::new(move |game| game.day as u32 == day)
 });
 
 // Requires two parameters:
@@ -64,7 +64,7 @@ filter!(moves_count_filter, "moveCount", params, {
 
     let thresh: u32 = params[1].parse::<u32>().unwrap();
     Box::new(move |game| -> bool {
-        let num_moves = game.moves().len() as u32;
+        let num_moves = game.moves.len() as u32;
         comparison(num_moves, thresh) == thresh
     })
 });
@@ -96,11 +96,11 @@ filter!(player_elo_filter, "playerElo", params, {
             check_black = true;
         }
 
-        if check_white && comparison(game.white_rating(), threshold_elo) != threshold_elo {
+        if check_white && comparison(game.white_rating, threshold_elo) != threshold_elo {
             return false;
         }
 
-        if check_black && comparison(game.black_rating(), threshold_elo) != threshold_elo {
+        if check_black && comparison(game.black_rating, threshold_elo) != threshold_elo {
             return false;
         }
 
@@ -112,7 +112,7 @@ filter!(player_elo_filter, "playerElo", params, {
 filter!(mate_occurs_filter, "mate", params, {
     let mate_occurs = params[0] != "does_not_occur";
     Box::new(move |game| -> bool {
-        let moves = game.moves().iter();
+        let moves = game.moves.iter();
         mate_occurs == (moves.last().unwrap().mates)
     })
 });
@@ -122,14 +122,14 @@ filter!(site_matches_any_filter, "siteMatchesAny", params, {
     Box::new(move |game| -> bool {
         params
             .iter()
-            .any(|allowed_site| allowed_site.contains(game.site()))
+            .any(|allowed_site| allowed_site.contains(&game.site))
     })
 });
 
 // Requires one parameter: either "available" or "not_available"
 filter!(eval_available_filter, "eval", params, {
     let want_available = params[0] == "available";
-    Box::new(move |game| -> bool { want_available == game.eval_available() })
+    Box::new(move |game| -> bool { want_available == game.eval_available })
 });
 
 // Requires no parameters
@@ -142,7 +142,7 @@ filter!(
             use crate::basic_types::file::File;
             use crate::basic_types::piece::Piece;
 
-            let moves = game.moves();
+            let moves = game.moves.clone();
 
             if moves.is_empty() {
                 false
@@ -181,7 +181,7 @@ filter!(final_fen_search_filter, "finalFenMatchesAny", params, {
                     .any(|allowed_fen| allowed_fen.contains(&actual_fen))
             }
             Err(err) => {
-                println!("{} failed with: {:?}", game.site(), err);
+                println!("{} failed with: {:?}", game.site, err);
                 false
             }
         }
@@ -199,7 +199,7 @@ filter!(final_piece_count_filter, "finalPieceCount", params, {
             let mut white_piece_count = 16;
             let mut black_piece_count = 16;
 
-            for (i, m) in game.moves().iter().enumerate() {
+            for (i, m) in game.moves.iter().enumerate() {
                 let player = i % 2;
 
                 if m.captures {
@@ -234,8 +234,8 @@ mod tests_player_elo_filter {
             #[test]
             fn $test_name() {
                 let mut test_game = GameWrapper::default();
-                test_game.set_white_rating($white_rating);
-                test_game.set_black_rating($black_rating);
+                test_game.white_rating = $white_rating;
+                test_game.black_rating = $black_rating;
 
                 let fun = player_elo_filter::factory(vec![
                     $min_max.to_string(),
@@ -299,10 +299,10 @@ mod test_eval_available_filter {
         let mut game = GameWrapper::default();
         let filter_fn = eval_available_filter::factory(vec!["not_available".to_string()]);
 
-        game.set_eval_available(false);
+        game.eval_available = false;
         assert_eq!(filter_fn(&game), true);
 
-        game.set_eval_available(true);
+        game.eval_available = true;
         assert_eq!(filter_fn(&game), false);
     }
 
@@ -311,10 +311,10 @@ mod test_eval_available_filter {
         let mut game = GameWrapper::default();
         let filter_fn = eval_available_filter::factory(vec!["available".to_string()]);
 
-        game.set_eval_available(true);
+        game.eval_available = true;
         assert_eq!(filter_fn(&game), true);
 
-        game.set_eval_available(false);
+        game.eval_available = false;
         assert_eq!(filter_fn(&game), false);
     }
 }
@@ -330,8 +330,8 @@ mod test_game_elo_filter {
             fn $name() {
                 let (white_rating, black_rating, threshold_type, threshold, expected) = $value;
                 let mut game = GameWrapper::default();
-                game.set_white_rating(white_rating);
-                game.set_black_rating(black_rating);
+                game.white_rating = white_rating;
+                game.black_rating = black_rating;
 
                 let filter_fn = game_elo_filter::factory(vec![threshold_type.to_string(), format!("{:?}", threshold)]);
                 assert_eq!(expected, (filter_fn)(&game));
@@ -361,7 +361,7 @@ mod test_year_filter {
             fn $name() {
                 let (actual_year, filter_year, expected) = $value;
                 let mut game = GameWrapper::default();
-                game.set_year(actual_year);
+                game.year = actual_year;
 
                 let filter_fn = year_filter::factory(vec![filter_year.to_string()]);
                 assert_eq!(expected, (filter_fn)(&game));
@@ -387,7 +387,7 @@ mod test_month_filter {
             fn $name() {
                 let (actual_month, filter_month, expected) = $value;
                 let mut game = GameWrapper::default();
-                game.set_month(actual_month);
+                game.month = actual_month;
 
                 let filter_fn = month_filter::factory(vec![filter_month.to_string()]);
                 assert_eq!(expected, (filter_fn)(&game));
@@ -413,7 +413,7 @@ mod test_day_filter {
             fn $name() {
                 let (actual_day, filter_day, expected) = $value;
                 let mut game = GameWrapper::default();
-                game.set_day(actual_day);
+                game.day = actual_day;
 
                 let filter_fn = day_filter::factory(vec![filter_day.to_string()]);
                 assert_eq!(expected, (filter_fn)(&game));
@@ -446,7 +446,7 @@ mod test_final_piece_count {
             fn $name() {
                 let (moves, player, comparison, threshold, expected) = $value;
                 let mut game = GameWrapper::default();
-                game.set_moves(moves);
+                game.moves = moves;
 
                 let filter_fn = final_piece_count_filter::factory(vec![player.to_string(), comparison.to_string(), threshold.to_string()]);
                 assert_eq!(expected, (filter_fn)(&game));

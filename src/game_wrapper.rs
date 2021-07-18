@@ -64,29 +64,29 @@ impl Move {
 
 #[derive(Clone)]
 pub struct GameWrapper {
-    year: u16,
-    month: u8,
-    day: u8,
-    site: String,
-    white: String,
-    black: String,
-    white_rating: u16,
-    black_rating: u16,
-    time_control_main: u16,
-    time_control_increment: u8,
-    time_control: TimeControl,
-    eco_category: char,
-    eco_subcategory: u8,
-    moves: Vec<Move>,
-    clock: Vec<Duration>,
-    eval_available: bool,
-    eval_mate_in: Vec<i16>,
-    eval_advantage: Vec<f32>,
-    result: GameResult,
-    termination: Termination,
-    white_diff: i16,
-    black_diff: i16,
-    boards: Vec<Board>,
+    pub year: u16,
+    pub month: u8,
+    pub day: u8,
+    pub site: String,
+    pub white: String,
+    pub black: String,
+    pub white_rating: u16,
+    pub black_rating: u16,
+    pub time_control_main: u16,
+    pub time_control_increment: u8,
+    pub time_control: TimeControl,
+    pub eco_category: char,
+    pub eco_subcategory: u8,
+    pub moves: Vec<Move>,
+    pub clock: Vec<Duration>,
+    pub eval_available: bool,
+    pub eval_mate_in: Vec<i16>,
+    pub eval_advantage: Vec<f32>,
+    pub result: GameResult,
+    pub termination: Termination,
+    pub white_diff: i16,
+    pub black_diff: i16,
+    pub boards: Vec<Board>,
 }
 
 impl GameWrapper {
@@ -205,183 +205,16 @@ impl GameWrapper {
         }
     }
 
-    pub fn year(&self) -> u16 {
-        self.year
-    }
-
-    #[cfg(test)]
-    pub fn set_year(&mut self, year: u16) {
-        self.year = year;
-    }
-
-    pub fn month(&self) -> u8 {
-        self.month
-    }
-
-    #[cfg(test)]
-    pub fn set_month(&mut self, month: u8) {
-        self.month = month;
-    }
-
-    pub fn day(&self) -> u8 {
-        self.day
-    }
-
-    #[cfg(test)]
-    pub fn set_day(&mut self, day: u8) {
-        self.day = day;
-    }
-
-    pub fn site(&self) -> &str {
-        &self.site
-    }
-
-    #[cfg(test)]
-    pub fn set_site(&mut self, site: &str) {
-        self.site = site.to_string();
-    }
-
-    pub fn white(&self) -> &str {
-        &self.white
-    }
-
-    #[cfg(test)]
-    pub fn set_white(&mut self, white: &str) {
-        self.white = white.to_string();
-    }
-
-    pub fn black(&self) -> &str {
-        &self.black
-    }
-
-    #[cfg(test)]
-    pub fn set_black(&mut self, black: &str) {
-        self.black = black.to_string();
-    }
-
-    pub fn white_rating(&self) -> u16 {
-        self.white_rating
-    }
-
-    #[cfg(test)]
-    pub fn set_white_rating(&mut self, rating: u16) {
-        self.white_rating = rating;
-    }
-
-    pub fn black_rating(&self) -> u16 {
-        self.black_rating
-    }
-
-    #[cfg(test)]
-    pub fn set_black_rating(&mut self, rating: u16) {
-        self.black_rating = rating;
-    }
-
-    pub fn time_control_main(&self) -> u16 {
-        self.time_control_main
-    }
-
-    pub fn time_control_increment(&self) -> u8 {
-        self.time_control_increment
-    }
-
-    pub fn time_control(&self) -> &TimeControl {
-        &self.time_control
-    }
-
-    #[cfg(test)]
-    pub fn set_time_control(&mut self, time_control: TimeControl) {
-        self.time_control = time_control;
-    }
-
-    pub fn eco_category(&self) -> char {
-        self.eco_category
-    }
-
-    #[cfg(test)]
-    pub fn set_eco_category(&mut self, eco_category: char) {
-        self.eco_category = eco_category;
-    }
-
-    pub fn eco_subcategory(&self) -> u8 {
-        self.eco_subcategory
-    }
-
-    #[cfg(test)]
-    pub fn set_eco_subcategory(&mut self, eco_subcategory: u8) {
-        self.eco_subcategory = eco_subcategory;
-    }
-
-    pub fn moves(&self) -> &Vec<Move> {
-        &self.moves
-    }
-
-    #[cfg(test)]
-    pub fn set_moves(&mut self, moves: Vec<Move>) {
-        self.moves = moves;
-    }
-
-    pub fn clock(&self) -> &Vec<Duration> {
-        &self.clock
-    }
-
-    pub fn eval_available(&self) -> bool {
-        self.eval_available
-    }
-
-    #[cfg(test)]
-    pub fn set_eval_available(&mut self, eval_available: bool) {
-        self.eval_available = eval_available;
-    }
-
-    #[allow(dead_code)]
-    pub fn eval_mate_in(&self) -> &Vec<i16> {
-        &self.eval_mate_in
-    }
-
-    #[allow(dead_code)]
-    pub fn eval_advantage(&self) -> &Vec<f32> {
-        &self.eval_advantage
-    }
-
-    pub fn result(&self) -> GameResult {
-        self.result
-    }
-
-    #[cfg(test)]
-    pub fn set_result(&mut self, result: GameResult) {
-        self.result = result;
-    }
-
-    pub fn termination(&self) -> Termination {
-        self.termination
-    }
-
-    #[cfg(test)]
-    pub fn set_termination(&mut self, termination: Termination) {
-        self.termination = termination;
-    }
-
-    #[allow(dead_code)]
-    pub fn white_diff(&self) -> i16 {
-        self.white_diff
-    }
-
-    #[allow(dead_code)]
-    pub fn black_diff(&self) -> i16 {
-        self.black_diff
-    }
-
     pub fn clock_available(&self) -> bool {
-        !self.clock().is_empty()
+        !self.clock.is_empty()
     }
 
     pub fn move_time(&self, move_num: usize) -> u32 {
-        if move_num == 0 || move_num == 1 || move_num == self.clock().len() {
+        if move_num == 0 || move_num == 1 || move_num == self.clock.len() {
             0
         } else {
-            (self.clock()[(move_num - 2)] - self.clock()[move_num]).as_secs() as u32
-                + self.time_control_increment() as u32
+            (self.clock[(move_num - 2)] - self.clock[move_num]).as_secs() as u32
+                + self.time_control_increment as u32
         }
     }
 
@@ -442,7 +275,7 @@ mod test_build_boards {
                 let (moves, expected_fens) = $value;
 
                 let mut test_game = GameWrapper::default();
-                test_game.set_moves(moves);
+                test_game.moves = moves;
 
                 let actual_boards = test_game.build_boards();
                 let actual_fens: Vec<String> = actual_boards.iter().map(|board| board.to_fen()).collect();

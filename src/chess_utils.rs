@@ -56,7 +56,7 @@ pub fn extract_coordinate(raw_coord: u16) -> (Option<File>, Option<Rank>) {
 
 pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
-    let moves = game.moves();
+    let moves = game.moves.clone();
 
     // Verify this game has enough moves for the given opening
     if moves.len() < opening.len() {
@@ -86,7 +86,7 @@ pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
 
 // Game elo is the average of the two player's ratings
 pub fn get_game_elo(game: &GameWrapper) -> u32 {
-    (game.white_rating() + game.black_rating()) as u32 / 2
+    (game.white_rating + game.black_rating) as u32 / 2
 }
 
 // For now this only parses the piece being moved, and the to/from coordinates
@@ -386,8 +386,8 @@ mod test_get_game_elo {
             fn $name() {
                 let (white_rating, black_rating, expected) = $value;
                 let mut test_game = GameWrapper::default();
-                test_game.set_white_rating(white_rating);
-                test_game.set_black_rating(black_rating);
+                test_game.white_rating = white_rating;
+                test_game.black_rating = black_rating;
 
                 assert_eq!(get_game_elo(&test_game), expected);
             }
@@ -413,7 +413,7 @@ mod test_has_opening {
             fn $name() {
                 let (board_moves, opening_moves, expected) = $value;
                 let mut test_game = GameWrapper::default();
-                test_game.set_moves(board_moves);
+                test_game.moves = board_moves;
 
                 assert_eq!(has_opening(&test_game, &opening_moves), expected);
             }
