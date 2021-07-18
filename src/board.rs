@@ -1,11 +1,4 @@
-use crate::basic_types::cell::Cell;
-use crate::basic_types::file::File;
-use crate::basic_types::partial_cell::PartialCell;
-use crate::basic_types::path::Path;
-use crate::basic_types::piece::Piece;
-use crate::basic_types::player::Player;
-use crate::basic_types::player_piece::*;
-use crate::basic_types::rank::Rank;
+use crate::basic_types::*;
 use crate::game_wrapper::Move;
 use itertools::Itertools;
 use std::collections::HashMap;
@@ -1073,7 +1066,7 @@ mod test_find_origin {
 #[cfg(test)]
 mod test_move_piece {
     use super::*;
-    use crate::basic_types::nag::NAG;
+    use crate::basic_types::NAG;
     use crate::game_wrapper::Move;
 
     macro_rules! tests {

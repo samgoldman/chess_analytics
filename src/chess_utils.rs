@@ -1,6 +1,6 @@
-use crate::basic_types::file::File;
-use crate::basic_types::piece::Piece;
-use crate::basic_types::rank::Rank;
+use crate::basic_types::File;
+use crate::basic_types::Piece;
+use crate::basic_types::Rank;
 use crate::game_wrapper::{GameWrapper, Move};
 use regex::Regex;
 

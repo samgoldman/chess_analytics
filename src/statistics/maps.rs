@@ -120,7 +120,7 @@ map!(opening_is_not_count, "openingIsNotCount", params, {
 
 // Requires 1 parameter: Draw, WhiteVictory, BlackVictory. Anything else in GameResult::Star
 map!(result_map, "resultCount", params, {
-    use crate::basic_types::game_result::GameResult;
+    use crate::basic_types::GameResult;
     let expected = match params[0].as_ref() {
         "Draw" => GameResult::Draw,
         "WhiteVictory" => GameResult::White,
@@ -137,7 +137,7 @@ map!(has_eval_map, "hasEval", _params, {
 
 // Requires 1 parameter: the promotion type being counted
 map!(promotion_count_map, "promotionCount", params, {
-    use crate::basic_types::piece::Piece;
+    use crate::basic_types::Piece;
 
     let expected = match params[0].as_ref() {
         "Knight" => Piece::Knight,
@@ -160,7 +160,7 @@ map!(promotion_count_map, "promotionCount", params, {
 
 // Requires 1 parameter: the NAG type being counted
 map!(nag_count_map, "nagCount", params, {
-    use crate::basic_types::nag::NAG;
+    use crate::basic_types::NAG;
 
     let expected = match params[0].as_ref() {
         "Questionable" => NAG::Questionable,
@@ -225,13 +225,7 @@ pub fn get_map(name: &str, params: Vec<String>) -> Result<MapFn, String> {
 #[cfg(test)]
 mod test_maps {
     use super::*;
-    use crate::basic_types::cell::Cell;
-    use crate::basic_types::file::File;
-    use crate::basic_types::game_result::GameResult;
-    use crate::basic_types::nag::NAG;
-    use crate::basic_types::partial_cell::PartialCell;
-    use crate::basic_types::piece::Piece;
-    use crate::basic_types::rank::Rank;
+    use crate::basic_types::*;
 
     #[test]
     fn test_game_count_1() {
@@ -327,7 +321,7 @@ mod test_maps {
             checks: true,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: None::<Piece>,
         });
         game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 0);
@@ -340,7 +334,7 @@ mod test_maps {
             checks: false,
             mates: true,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: None::<Piece>,
         });
         game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 1);
@@ -363,7 +357,7 @@ mod test_maps {
             checks: true,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: None::<Piece>,
         });
         game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 1);
@@ -376,7 +370,7 @@ mod test_maps {
             checks: false,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: None::<Piece>,
         });
         game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 1);
@@ -389,7 +383,7 @@ mod test_maps {
             checks: false,
             mates: true,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: None::<Piece>,
         });
         game.moves = moves.clone();
         assert_eq!((map_fn)(&game), 2);
@@ -419,7 +413,7 @@ mod test_maps {
             checks: false,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: None::<Piece>,
         });
         game.moves = moves.clone();
         assert_eq!((map_fn_num_moves)(&game), 1);
@@ -435,7 +429,7 @@ mod test_maps {
             checks: false,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: None::<Piece>,
         });
         game.moves = moves.clone();
         assert_eq!((map_fn_num_moves)(&game), 2);
@@ -451,7 +445,7 @@ mod test_maps {
             checks: true,
             mates: true,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: None::<Piece>,
         });
         game.moves = moves.clone();
         assert_eq!((map_fn_num_moves)(&game), 3);

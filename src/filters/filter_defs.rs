@@ -139,8 +139,8 @@ filter!(
     _params,
     {
         Box::new(move |game| -> bool {
-            use crate::basic_types::file::File;
-            use crate::basic_types::piece::Piece;
+            use crate::basic_types::File;
+            use crate::basic_types::Piece;
 
             let moves = game.moves.clone();
 
@@ -431,12 +431,7 @@ mod test_day_filter {
 #[cfg(test)]
 mod test_final_piece_count {
     use super::*;
-    use crate::basic_types::cell::Cell;
-    use crate::basic_types::file::File;
-    use crate::basic_types::nag::NAG;
-    use crate::basic_types::partial_cell::PartialCell;
-    use crate::basic_types::piece::Piece;
-    use crate::basic_types::rank::Rank;
+    use crate::basic_types::*;
     use crate::game_wrapper::Move;
 
     macro_rules! tests {
@@ -464,7 +459,7 @@ mod test_final_piece_count {
             checks: true,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: None::<Piece>,
         };
         static ref MOVE_2: Move = Move {
             from: partial_cell!(None, None),
@@ -474,7 +469,7 @@ mod test_final_piece_count {
             checks: true,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: None::<Piece>,
         };
     }
 

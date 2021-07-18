@@ -1,12 +1,4 @@
-use crate::basic_types::cell::Cell;
-use crate::basic_types::file::File;
-use crate::basic_types::game_result::GameResult;
-use crate::basic_types::nag::NAG;
-use crate::basic_types::partial_cell::PartialCell;
-use crate::basic_types::piece::Piece;
-use crate::basic_types::rank::Rank;
-use crate::basic_types::termination::Termination;
-use crate::basic_types::time_control::TimeControl;
+use crate::basic_types::*;
 use crate::board::Board;
 use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList};
 use crate::chess_utils::*;

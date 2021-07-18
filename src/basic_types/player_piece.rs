@@ -1,5 +1,5 @@
-use crate::basic_types::piece::Piece;
-use crate::basic_types::player::Player;
+use crate::basic_types::Piece;
+use crate::basic_types::Player;
 
 #[cfg(test)]
 use std::convert::TryInto;
