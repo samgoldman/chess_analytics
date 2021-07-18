@@ -84,3 +84,25 @@ D	1.0000
 
     Ok(())
 }
+
+#[test]
+fn eco_count_filter_white_elo() -> Result<(), Box<dyn std::error::Error>> {
+    let res = run(vec![
+        "chess_analytics",
+        "--glob",
+        "tests/data/10_games_000000.bin",
+        "--workflow",
+        "tests/workflows/basic_eco_filter_white_elo.json",
+    ]
+    .iter()
+    .map(|x| x.to_string()));
+
+    assert_eq!(
+        res,
+        "Bin	gameCount.sum
+B	1.0000	
+"
+    );
+
+    Ok(())
+}
