@@ -1,0 +1,22 @@
+{
+    "filters": [
+    ],
+    "analysis_steps": [
+        {
+          "map": {
+            "name": "gameCount",
+            "display_name": "gameCount",
+            "parameters": []
+          },
+          "folds": [
+            "sum"
+          ]
+        }
+    ],
+    "bins": [
+      {
+        "name": "ecoCategory",
+        "parameters": []
+      }
+    ]
+}

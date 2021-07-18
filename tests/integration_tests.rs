@@ -59,3 +59,28 @@ fn simple_count_10000_compressed() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+#[test]
+fn eco_count_no_filter() -> Result<(), Box<dyn std::error::Error>> {
+    let res = run(vec![
+        "chess_analytics",
+        "--glob",
+        "tests/data/10_games_000000.bin.bz2",
+        "--workflow",
+        "tests/workflows/basic_eco_no_filter.json",
+    ]
+    .iter()
+    .map(|x| x.to_string()));
+
+    assert_eq!(
+        res,
+        "Bin	gameCount.sum
+A	2.0000	
+B	2.0000	
+C	5.0000	
+D	1.0000	
+"
+    );
+
+    Ok(())
+}
