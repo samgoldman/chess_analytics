@@ -13,6 +13,7 @@ use crate::chess_utils::*;
 use itertools::izip;
 use std::time::Duration;
 
+// TODO move to own file
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub struct Move {
     pub from: PartialCell,

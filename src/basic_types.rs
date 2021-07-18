@@ -13,3 +13,5 @@ pub mod player_piece;
 pub mod rank;
 pub mod termination;
 pub mod time_control;
+
+pub use piece::Piece;

@@ -18,6 +18,8 @@ pub struct StatisticDefinition<'a> {
     pub folds: Vec<FoldDefinition<'a>>,
 }
 
+// TODO confirm
+#[cfg(not(tarpaulin_include))] // This file won't exist soon
 pub fn convert_to_stat_def(input: &AnalyzeInput) -> StatisticDefinition {
     StatisticDefinition {
         name: input.map.name.as_ref(),

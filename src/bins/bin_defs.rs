@@ -58,9 +58,7 @@ bin!(final_fen_bin, "finalFen", _params, {
             // do nothing
         }));
 
-        let result = panic::catch_unwind(|| game.build_boards());
-
-        match result {
+        match panic::catch_unwind(|| game.build_boards()) {
             Ok(res) => res.last().unwrap().clone().to_fen(),
             Err(_) => "Failed to parse".to_string(),
         }
@@ -105,10 +103,14 @@ bin!(termination_bin, "termination", _params, {
 #[cfg(test)]
 mod test_simple_bins {
     use super::*;
+    use crate::basic_types::file::File;
     use crate::basic_types::game_result::GameResult;
+    use crate::basic_types::rank::Rank;
     use crate::basic_types::termination::Termination;
     use crate::basic_types::time_control::TimeControl;
+    use crate::basic_types::Piece;
     use crate::game_wrapper::GameWrapper;
+    use crate::game_wrapper::Move;
 
     #[test]
     fn test_white_bin() {
@@ -304,5 +306,66 @@ mod test_simple_bins {
 
         game.eco_subcategory = 9;
         assert_eq!(bin_fn(&game), "9");
+    }
+
+    #[test]
+    fn test_game_length() {
+        let mut game = GameWrapper::default();
+        let bin_fn = game_length_bin::factory(vec![]);
+
+        assert_eq!(bin_fn(&game), "0");
+
+        game.moves
+            .push(Move::new_to(File::_A, Rank::_1, Piece::Pawn));
+        assert_eq!(bin_fn(&game), "1");
+    }
+
+    #[test]
+    fn test_final_fen() {
+        let mut game = GameWrapper::default();
+        let bin_fn = final_fen_bin::factory(vec![]);
+
+        assert_eq!(
+            bin_fn(&game),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
+        );
+
+        game.moves
+            .push(Move::new_to(File::_A, Rank::_3, Piece::Pawn));
+        assert_eq!(
+            bin_fn(&game),
+            "rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b"
+        );
+
+        game.moves
+            .push(Move::new_to(File::_C, Rank::_6, Piece::Knight));
+        assert_eq!(
+            bin_fn(&game),
+            "r1bqkbnr/pppppppp/2n5/8/8/P7/1PPPPPPP/RNBQKBNR w"
+        );
+
+        game.moves
+            .push(Move::new_to(File::_D, Rank::_3, Piece::Queen));
+        assert_eq!(bin_fn(&game), "Failed to parse");
+    }
+
+    #[test]
+    fn test_raw_time_control_bin() {
+        let mut game = GameWrapper::default();
+        let bin_fn_main = raw_time_control_bin::factory(vec!["MainOnly".to_string()]);
+        let bin_fn_inc1 = raw_time_control_bin::factory(vec!["Incr".to_string()]);
+        let bin_fn_inc2 = raw_time_control_bin::factory(vec![]);
+
+        game.time_control_main = 60;
+        game.time_control_increment = 50;
+        assert_eq!(bin_fn_main(&game), "060");
+        assert_eq!(bin_fn_inc1(&game), "0060+050");
+        assert_eq!(bin_fn_inc2(&game), "0060+050");
+
+        game.time_control_main = 500;
+        game.time_control_increment = 0;
+        assert_eq!(bin_fn_main(&game), "500");
+        assert_eq!(bin_fn_inc1(&game), "0500+000");
+        assert_eq!(bin_fn_inc2(&game), "0500+000");
     }
 }
