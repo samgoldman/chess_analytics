@@ -10,3 +10,4 @@ lcov.info
 *.tvs
 results/
 *.log
+tarpaulin-report.html
