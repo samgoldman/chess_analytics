@@ -1,10 +1,11 @@
 #[macro_use]
 mod cell;
+mod chess_move;
 mod file;
 mod game_result;
 mod nag;
 #[macro_use]
-mod partial_cell;
+pub mod partial_cell;
 mod path;
 mod piece;
 mod player;
@@ -15,6 +16,7 @@ mod termination;
 mod time_control;
 
 pub use cell::Cell;
+pub use chess_move::Move;
 pub use file::File;
 pub use game_result::GameResult;
 pub use nag::NAG;

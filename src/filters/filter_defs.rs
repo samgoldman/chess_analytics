@@ -432,7 +432,6 @@ mod test_day_filter {
 mod test_final_piece_count {
     use super::*;
     use crate::basic_types::*;
-    use crate::game_wrapper::Move;
 
     macro_rules! tests {
         ($($name:ident: $value:expr,)*) => {

@@ -105,7 +105,6 @@ mod test_simple_bins {
     use super::*;
     use crate::basic_types::*;
     use crate::game_wrapper::GameWrapper;
-    use crate::game_wrapper::Move;
 
     #[test]
     fn test_white_bin() {

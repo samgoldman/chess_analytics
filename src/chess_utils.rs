@@ -1,7 +1,5 @@
-use crate::basic_types::File;
-use crate::basic_types::Piece;
-use crate::basic_types::Rank;
-use crate::game_wrapper::{GameWrapper, Move};
+use crate::basic_types::*;
+use crate::game_wrapper::GameWrapper;
 use regex::Regex;
 
 fn int_to_file(int: u16) -> Option<File> {
@@ -133,7 +131,6 @@ pub fn parse_movetext(movetext: &str) -> Vec<Move> {
 #[cfg(test)]
 mod test_parse_movetext {
     use super::*;
-    use crate::game_wrapper::Move;
 
     macro_rules! test_movetext {
         ($test_name:ident, $movetext:literal, $expected:expr) => {

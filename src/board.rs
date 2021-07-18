@@ -1,5 +1,4 @@
 use crate::basic_types::*;
-use crate::game_wrapper::Move;
 use itertools::Itertools;
 use std::collections::HashMap;
 
@@ -1066,8 +1065,6 @@ mod test_find_origin {
 #[cfg(test)]
 mod test_move_piece {
     use super::*;
-    use crate::basic_types::NAG;
-    use crate::game_wrapper::Move;
 
     macro_rules! tests {
         ($($name:ident: $value:expr,)*) => {
