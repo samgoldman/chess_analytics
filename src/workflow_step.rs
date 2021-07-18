@@ -17,6 +17,10 @@ pub struct WorkflowProcessor<'a> {
 
 #[allow(dead_code)] // TODO: remove
 impl<'a> WorkflowProcessor<'a> {
+    pub fn get_input_type(&self) -> TypeId {
+        self.step.get_input_type()
+    }
+
     pub fn process(&self, input: &dyn Any) {
         let actual_input_type = input.type_id();
         let expected_type_id = self.step.get_input_type();
@@ -32,8 +36,64 @@ impl<'a> WorkflowProcessor<'a> {
         }
     }
 
-    pub fn new(step: &'a (dyn Step + 'static), substeps: Vec<&'a WorkflowProcessor<'a>>) -> Self {
-        WorkflowProcessor { step, substeps }
+    pub fn new(
+        step: &'a (dyn Step + 'static),
+        substeps: Vec<&'a WorkflowProcessor<'a>>,
+    ) -> Result<Self, String> {
+        let step_output_type = step.get_output_type();
+
+        if substeps
+            .iter()
+            .all(|&substep| substep.get_input_type() == step_output_type)
+        {
+            Ok(WorkflowProcessor { step, substeps })
+        } else {
+            Err("Step output type does not match substep input type(s)".to_string())
+        }
+    }
+}
+
+#[cfg(test)]
+mod test_new {
+    use super::*;
+
+    lazy_static! {
+        static ref TYPE_STR: TypeId = TypeId::of::<&str>();
+        static ref TYPE_STRING: TypeId = TypeId::of::<String>();
+        static ref TYPE_VEC_STR: TypeId = TypeId::of::<Vec<&str>>();
+        static ref TYPE_U32: TypeId = TypeId::of::<u32>();
+        static ref TYPE_U16: TypeId = TypeId::of::<u16>();
+    }
+
+    // Reject if step output doesn't match each step input
+    #[test]
+    fn test_non_matching_1() {
+        let mut mock_step_child_1 = MockStep::new();
+        let mut mock_step_child_2 = MockStep::new();
+        let mut mock_step_parent = MockStep::new();
+
+        mock_step_parent
+            .expect_get_output_type()
+            .return_const(*TYPE_STRING);
+
+        mock_step_child_1
+            .expect_get_input_type()
+            .return_const(*TYPE_U32);
+
+        mock_step_child_1
+            .expect_get_output_type()
+            .return_const(*TYPE_U16);
+
+        mock_step_child_2
+            .expect_get_output_type()
+            .return_const(*TYPE_U16);
+
+        let test_wp_child_1 = WorkflowProcessor::new(&mock_step_child_1, vec![]).unwrap();
+        let test_wp_child_2 = WorkflowProcessor::new(&mock_step_child_2, vec![]).unwrap();
+        match WorkflowProcessor::new(&mock_step_parent, vec![&test_wp_child_1, &test_wp_child_2]) {
+            Ok(_) => assert!(false),
+            Err(msg) => assert_eq!(msg, "Step output type does not match substep input type(s)"),
+        }
     }
 }
 
@@ -46,6 +106,7 @@ mod test_process {
         static ref TYPE_STRING: TypeId = TypeId::of::<String>();
         static ref TYPE_VEC_STR: TypeId = TypeId::of::<Vec<&str>>();
         static ref TYPE_U32: TypeId = TypeId::of::<u32>();
+        static ref TYPE_U16: TypeId = TypeId::of::<u16>();
     }
 
     #[test]
@@ -57,14 +118,13 @@ mod test_process {
 
         mock_step
             .expect_process()
-            .times(1)
             .returning(move |_| Box::new(output.clone()));
+        mock_step.expect_get_input_type().return_const(*TYPE_STRING);
         mock_step
-            .expect_get_input_type()
-            .times(1)
+            .expect_get_output_type()
             .return_const(*TYPE_STRING);
 
-        let test_wp = WorkflowProcessor::new(&mock_step, vec![]);
+        let test_wp = WorkflowProcessor::new(&mock_step, vec![]).unwrap();
 
         test_wp.process(&input);
     }
@@ -80,35 +140,39 @@ mod test_process {
 
         mock_step_parent
             .expect_process()
-            .times(1)
             .returning(move |_| Box::new(parent_ouput.clone()));
         mock_step_parent
             .expect_get_input_type()
-            .times(1)
             .return_const(*TYPE_STRING);
+        mock_step_parent
+            .expect_get_output_type()
+            .return_const(*TYPE_U32);
 
         mock_step_child_1
             .expect_process()
-            .times(1)
             .returning(move |_| Box::new(1 as i16));
         mock_step_child_1
             .expect_get_input_type()
-            .times(1)
             .return_const(*TYPE_U32);
+        mock_step_child_1
+            .expect_get_output_type()
+            .return_const(*TYPE_U16);
 
         mock_step_child_2
             .expect_process()
-            .times(1)
             .returning(move |_| Box::new(2 as i16));
         mock_step_child_2
             .expect_get_input_type()
-            .times(1)
             .return_const(*TYPE_U32);
+        mock_step_child_2
+            .expect_get_output_type()
+            .return_const(*TYPE_U16);
 
-        let test_wp_child_1 = WorkflowProcessor::new(&mock_step_child_1, vec![]);
-        let test_wp_child_2 = WorkflowProcessor::new(&mock_step_child_2, vec![]);
+        let test_wp_child_1 = WorkflowProcessor::new(&mock_step_child_1, vec![]).unwrap();
+        let test_wp_child_2 = WorkflowProcessor::new(&mock_step_child_2, vec![]).unwrap();
         let test_wp_parent =
-            WorkflowProcessor::new(&mock_step_parent, vec![&test_wp_child_1, &test_wp_child_2]);
+            WorkflowProcessor::new(&mock_step_parent, vec![&test_wp_child_1, &test_wp_child_2])
+                .unwrap();
 
         test_wp_parent.process(&parent_input);
     }
@@ -123,10 +187,9 @@ mod test_process {
         mock_step.expect_process().withf_st(|_| true).times(0);
         mock_step
             .expect_get_input_type()
-            .times(1)
             .return_const(*TYPE_VEC_STR);
 
-        let test_wp = WorkflowProcessor::new(&mock_step, vec![]);
+        let test_wp = WorkflowProcessor::new(&mock_step, vec![]).unwrap();
 
         test_wp.process(&input);
     }

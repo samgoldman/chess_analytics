@@ -100,6 +100,7 @@ impl Board {
         // Note: assume target is occupied, we're just checking if the attacker is applying check to the target
         // TODO: properly unwrap
         if self.board.contains_key(&attacker_cell) {
+            // TODO move logic to piece
             match self.board.get(&attacker_cell).unwrap().piece {
                 Piece::Pawn => {
                     if self.board.get(&attacker_cell).unwrap().player == Player::White {
@@ -252,6 +253,7 @@ impl Board {
                 let rank_diff = dest_cell.rank as i32 - cell.rank as i32;
                 let file_diff = dest_cell.file as i32 - cell.file as i32;
 
+                // TODO migrate piece logic to piece type
                 if found_piece.piece == piece && found_piece.player == self.to_move {
                     if piece == Piece::Pawn {
                         if self.to_move == Player::White {
@@ -843,6 +845,7 @@ mod test_find_player_piece_locs {
         }
     }
 
+    // TODO: convert to actual cells
     tests! {
         test_white_1: ("3N4/r2n4/1k3B2/2K1b2q/6p1/1Q2R3/2N3K1/4p3 w - - 0 1", Player::White, vec![(1, 2), (1, 6), (2, 1), (2, 4), (4, 2), (5, 5), (7, 3)]),
         test_black_1: ("3N4/r2n4/1k3B2/2K1b2q/6p1/1Q2R3/2N3K1/4p3 w - - 0 1", Player::Black, vec![(0, 4), (3, 6), (4, 4), (4, 7), (5, 1), (6, 0), (6, 3)]),
@@ -867,6 +870,7 @@ mod test_execute_move {
         }
     }
 
+    // TODO: convert to actual cells
     tests! {
         test_en_passant: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::Pawn, (4, 1), (5, 2), "r3kb1r/pp1ppppp/2P2n2/8/6B1/2P5/P2PPPPP/RNBQK2R w"),
         test_queenside: ("r3kb1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w KQkq - 0 1", Piece::King, (7, 4), (7, 2), "2kr1b1r/pp1ppppp/5n2/1Pp5/6B1/2P5/P2PPPPP/RNBQK2R w"),
