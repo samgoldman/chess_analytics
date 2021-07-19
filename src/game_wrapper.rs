@@ -38,12 +38,8 @@ impl GameWrapper {
     }
 
     fn from_game_list(game_list: GameList) -> Vec<GameWrapper> {
-        game_list
-            .games()
-            .unwrap()
-            .iter()
-            .map(GameWrapper::new)
-            .collect()
+        let games = game_list.games().unwrap();
+        games.iter().map(GameWrapper::new).collect()
     }
 
     fn get_time_control_category(game: Game) -> TimeControl {
@@ -194,5 +190,30 @@ mod test_build_boards {
         test_no_moves: (vec![], vec!["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"]),
         test_one_move: (vec![Move::new_to(File::_A, Rank::_4, Piece::Pawn)], vec!["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w", "rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b"]),
         test_two_moves: (vec![Move::new_to(File::_F, Rank::_3, Piece::Knight), Move::new_to(File::_D, Rank::_6, Piece::Pawn)], vec!["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w", "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b", "rnbqkbnr/ppp1pppp/3p4/8/8/5N2/PPPPPPPP/RNBQKB1R w"]),
+    }
+}
+
+#[cfg(test)]
+// Note: doing as UT not int due to coverage
+mod test_game_wrapper_from_games {
+    use super::*;
+
+    use bzip2::read::BzDecoder;
+    use std::fs::File;
+    use std::io::prelude::*;
+
+    #[test]
+    fn test_from_10() {
+        let file = File::open("tests/data/10_games_000000.bin.bz2").unwrap();
+        let mut data = Vec::new();
+
+        // Assume uncompressed unless extension is "bz2"
+        let mut decompressor = BzDecoder::new(file);
+        decompressor.read_to_end(&mut data).unwrap();
+
+        let games = GameWrapper::from_game_list_data(data);
+
+        assert_eq!(games.len(), 10);
+        // TODO more assertions for correctness
     }
 }
