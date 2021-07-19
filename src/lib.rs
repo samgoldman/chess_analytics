@@ -148,14 +148,12 @@ where
             .map(|entry| get_elements(entry.0, &column_fields, true))
             .collect(),
     );
-    result_str += format!(
-        "Bin\t{}\n",
-        columns
-            .iter()
-            .map(|x| x.iter().map(|y| y.1.clone()).join("."))
-            .join("\t")
-    )
-    .as_ref();
+    let header = columns
+        .iter()
+        .map(|x| x.iter().map(|y| y.1.clone()).join("."))
+        .join("\t");
+
+    result_str += format!("Bin\t{}\n", header).as_ref();
 
     for row in rows {
         result_str += format!("{}\t", row.iter().map(|x| x.1.clone()).join(".")).as_ref();
@@ -173,8 +171,6 @@ where
 
                 let result = (fold_fn)(&data.1);
                 result_str += format!("{:.4}\t", result).as_ref();
-            } else {
-                result_str += format!("{:.4}\t", 0.0).as_ref();
             }
         }
         result_str += "\n";
