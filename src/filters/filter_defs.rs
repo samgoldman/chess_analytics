@@ -607,3 +607,30 @@ mod test_mate_occurs {
         test_10: (vec![*MOVE_2], "does_not_occur", 0, false),
     }
 }
+
+#[cfg(test)]
+mod test_site_matches_any_filter {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (site, params, expected) = $value;
+                let mut game = GameWrapper::default();
+                game.site = site.to_string();
+
+                let filter_fn = site_matches_any_filter::factory(params.iter().map(|x| x.to_string()).collect::<Vec<String>>());
+                assert_eq!(expected, (filter_fn)(&game));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: ("siteA", vec!["siteB", "siteC"], false),
+        test_2: ("siteA", vec!["siteA", "siteB", "siteC"], true),
+        test_3: ("siteC", vec!["siteA", "siteB", "siteC"], true),
+    }
+}
