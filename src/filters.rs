@@ -44,6 +44,8 @@ fn get_filter(name: &str, parameters: Vec<String>) -> Result<FilterFn, String> {
     Err(format!("Match not found for filter '{}'", name))
 }
 
+// TODO confirm
+#[cfg(not(tarpaulin_include))] // This file won't exist soon
 pub fn get_filter_steps(filter_input: Vec<Vec<FilterInput>>) -> FilterFn {
     let mut filter_steps = vec![];
 
