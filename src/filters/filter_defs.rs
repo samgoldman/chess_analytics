@@ -150,6 +150,7 @@ filter!(
                 let last_move = moves.iter().last().unwrap();
 
                 last_move.piece_moved == Piece::King
+                    && last_move.from.file.is_some()
                     && last_move.from.file.unwrap() == File::_E
                     && last_move.mates
                     && last_move.to.file == File::_C
@@ -605,6 +606,67 @@ mod test_mate_occurs {
         test_8: (vec![*MOVE_1, *MOVE_2], "does_not_occur", 0, false),
         test_9: (vec![*MOVE_2], "occurs", 0, true),
         test_10: (vec![*MOVE_2], "does_not_occur", 0, false),
+    }
+}
+
+#[cfg(test)]
+mod test_queenside_mate_filter {
+    use super::*;
+    use crate::basic_types::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (moves, expected) = $value;
+                let mut game = GameWrapper::default();
+                game.moves = moves;
+
+                let filter_fn = queenside_castle_mate_filter::factory(vec![]);
+                assert_eq!(expected, (filter_fn)(&game));
+            }
+        )*
+        }
+    }
+
+    lazy_static! {
+        static ref MOVE_1: Move = Move {
+            from: partial_cell!(Some(File::_E), None),
+            to: cell!(File::_C, Rank::_1),
+            piece_moved: Piece::King,
+            captures: false,
+            checks: true,
+            mates: true,
+            nag: NAG::None,
+            promoted_to: None::<Piece>,
+        };
+        static ref MOVE_2: Move = Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_A, Rank::_1),
+            piece_moved: Piece::King,
+            captures: false,
+            checks: true,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None::<Piece>,
+        };
+        static ref MOVE_3: Move = Move {
+            from: partial_cell!(None, None),
+            to: cell!(File::_A, Rank::_1),
+            piece_moved: Piece::King,
+            captures: true,
+            checks: true,
+            mates: true,
+            nag: NAG::None,
+            promoted_to: None::<Piece>,
+        };
+    }
+
+    tests! {
+        test_1: (vec![], false),
+        test_2: (vec![*MOVE_2, *MOVE_3, *MOVE_2], false),
+        test_3: (vec![*MOVE_2, *MOVE_3, *MOVE_1], true),
     }
 }
 

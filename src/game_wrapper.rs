@@ -46,9 +46,6 @@ impl GameWrapper {
             .collect()
     }
 
-    // Convert initial time + increment time to one of the time control categories
-    // as defined here: https://lichess.org/faq#time-controls
-    // Games with 0 for both values are assumed to be correspondence
     fn get_time_control_category(game: Game) -> TimeControl {
         TimeControl::from_base_and_increment(
             game.time_control_main(),

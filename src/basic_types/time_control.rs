@@ -16,6 +16,9 @@ const BLITZ_THRESHOLD: u32 = 479;
 const RAPID_THRESHOLD: u32 = 1499;
 
 impl TimeControl {
+    // Convert initial time + increment time to one of the time control categories
+    // as defined here: https://lichess.org/faq#time-controls
+    // Games with 0 for both values are assumed to be correspondence
     pub fn from_base_and_increment(base_time: u16, increment: u16) -> Self {
         let estimated_duration = base_time as u32 + EXPECTED_NUMBER_OF_MOVES * increment as u32;
 
