@@ -696,3 +696,23 @@ mod test_site_matches_any_filter {
         test_3: ("siteC", vec!["siteA", "siteB", "siteC"], true),
     }
 }
+
+#[cfg(test)]
+mod test_clock_available_filter {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn test() {
+        let mut game = GameWrapper::default();
+        game.clock = vec![];
+
+        let filter_fn = clock_available_filter::factory(vec![]);
+
+        assert_eq!(filter_fn(&game), false);
+
+        game.clock.push(Duration::from_secs(42));
+
+        assert_eq!(filter_fn(&game), true);
+    }
+}

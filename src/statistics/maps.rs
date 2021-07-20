@@ -179,10 +179,10 @@ map!(nag_count_map, "nagCount", params, {
 // Requires no parameters
 map!(average_move_time_map, "averageMoveTime", _params, {
     Box::new(|game| {
-        ((0..game.moves.len())
+        ((0..game.clock.len())
             .map(|m| game.move_time(m))
             .sum::<u32>()
-            / game.moves.len() as u32) as i16
+            / game.clock.len() as u32) as i16
     })
 });
 
@@ -642,5 +642,94 @@ mod test_maps {
     #[should_panic]
     fn test_nag_count_panic() {
         let _map_fn = get_map("nagCount", vec!["bad".to_string()]);
+    }
+}
+
+#[cfg(test)]
+mod test_opening_count_map {
+    use super::*;
+    use crate::basic_types::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board_moves, opening, expected) = $value;
+                let mut test_game = GameWrapper::default();
+                test_game.moves = board_moves;
+
+                let map_fn = get_map("openingCount", vec![opening.to_string()]).unwrap();
+
+                assert_eq!((map_fn)(&test_game), expected);
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: (vec![], "1. a3", 0),
+        test_2: (vec![Move::new_to(File::_A, Rank::_3, Piece::Pawn)], "1. a3", 1),
+        test_3: (vec![Move::new_to(File::_A, Rank::_5, Piece::Pawn)], "1. a3", 0),
+        test_4: (vec![Move::new_to(File::_A, Rank::_3, Piece::Pawn), Move::new_to(File::_C, Rank::_3, Piece::Knight)], "1. a3 Nc3", 1),
+    }
+}
+
+#[cfg(test)]
+mod test_opening_is_not {
+    use super::*;
+    use crate::basic_types::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (board_moves, openings, expected) = $value;
+                let mut test_game = GameWrapper::default();
+                test_game.moves = board_moves;
+
+                let map_fn = get_map("openingIsNotCount", openings.iter().map(|x| x.to_string()).collect()).unwrap();
+
+                assert_eq!((map_fn)(&test_game), expected);
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: (vec![], vec!["1. a3"], 1),
+        test_2: (vec![Move::new_to(File::_A, Rank::_3, Piece::Pawn)], vec!["1. a3"], 0),
+        test_3: (vec![Move::new_to(File::_A, Rank::_5, Piece::Pawn)], vec!["1. a3", "1. a5"], 0),
+        test_4: (vec![Move::new_to(File::_B, Rank::_5, Piece::Pawn)], vec!["1. a3", "1. a5"], 1),
+    }
+}
+
+#[cfg(test)]
+mod test_svg_move_time_map {
+    use super::*;
+    use std::time::Duration;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (times, expected): (Vec<u64>, i16) = $value;
+                let mut test_game = GameWrapper::default();
+                test_game.clock = times.iter().map(|&x| Duration::from_secs(x)).collect();
+
+                let map_fn = get_map("averageMoveTime", vec![]).unwrap();
+
+                assert_eq!((map_fn)(&test_game), expected);
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: (vec![120, 120], 0),
+        test_2: (vec![60, 60, 54, 52], 3),
+        test_3: (vec![3600, 3600, 3500, 3550, 3425, 3475], 50),
     }
 }
