@@ -706,7 +706,7 @@ mod test_opening_is_not {
 }
 
 #[cfg(test)]
-mod test_svg_move_time_map {
+mod test_avg_move_time_map {
     use super::*;
     use std::time::Duration;
 
@@ -731,5 +731,34 @@ mod test_svg_move_time_map {
         test_1: (vec![120, 120], 0),
         test_2: (vec![60, 60, 54, 52], 3),
         test_3: (vec![3600, 3600, 3500, 3550, 3425, 3475], 50),
+    }
+}
+
+#[cfg(test)]
+mod test_eco_category_map {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (actual_category, wanted_category, expected) = $value;
+                let mut test_game = GameWrapper::default();
+                test_game.eco_category = actual_category;
+
+                let map_fn = get_map("ecoCategory", vec![wanted_category.to_string()]).unwrap();
+
+                assert_eq!((map_fn)(&test_game), expected);
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: ('A', "A", 1),
+        test_2: ('A', "B", 0),
+        test_3: ('B', "A", 0),
+        test_5: ('C', "C", 1),
     }
 }

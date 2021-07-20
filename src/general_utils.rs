@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use std::fmt::Display;
+use std::time::Duration;
 
 /// Returns the min/max described by the provided string
 ///
@@ -55,6 +56,10 @@ pub fn get_elements<T: Display>(
 
 pub fn dedup_and_sort(vector: Vec<Vec<(usize, String)>>) -> Vec<Vec<(usize, String)>> {
     vector.into_iter().unique().sorted().collect()
+}
+
+pub fn hours_min_sec_to_duration((hours, minutes, seconds): (u8, u8, u8)) -> Duration {
+    Duration::from_secs((hours as u64) * 3600 + (minutes as u64) * 60 + (seconds as u64))
 }
 
 #[cfg(test)]
@@ -169,4 +174,17 @@ mod test_get_elements {
         true,
         vec![(1, "b".to_string()), (4, "e".to_string())]
     );
+}
+
+#[cfg(test)]
+mod test_hours_min_sec_to_duration {
+    use super::*;
+
+    #[test]
+    fn test() {
+        assert_eq!(
+            hours_min_sec_to_duration((1, 2, 3)),
+            Duration::from_secs(3723)
+        );
+    }
 }

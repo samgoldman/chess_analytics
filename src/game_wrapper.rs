@@ -1,6 +1,7 @@
 use crate::basic_types::*;
 use crate::board::Board;
 use crate::chess_flatbuffers::chess::{root_as_game_list, Game, GameList};
+use crate::general_utils::hours_min_sec_to_duration;
 use itertools::izip;
 use std::time::Duration;
 
@@ -50,6 +51,13 @@ impl GameWrapper {
     }
 
     fn new(game: Game) -> GameWrapper {
+        let clock_components = izip!(
+            game.clock_hours().unwrap_or(&[]).to_vec(),
+            game.clock_minutes().unwrap_or(&[]).to_vec(),
+            game.clock_seconds().unwrap_or(&[]).to_vec()
+        );
+        let clock = clock_components.map(hours_min_sec_to_duration).collect();
+
         GameWrapper {
             year: game.year(),
             month: game.month(),
@@ -71,22 +79,7 @@ impl GameWrapper {
                     .map(Move::convert_from_binary_move_data)
                     .collect()
             }),
-            clock: {
-                izip!(
-                    game.clock_hours().unwrap_or(&[]).to_vec(),
-                    game.clock_minutes().unwrap_or(&[]).to_vec(),
-                    game.clock_seconds().unwrap_or(&[]).to_vec()
-                )
-                .map(|(h, m, s)| {
-                    Duration::from_secs(
-                        (h as u64) * 3600
-                            + (m as u64) * 60
-                            + (s as u64)
-                            + game.time_control_increment() as u64,
-                    )
-                })
-                .collect()
-            },
+            clock,
             eval_available: game.eval_available(),
             eval_mate_in: match game.eval_mate_in() {
                 Some(eval_mate_in) => eval_mate_in.iter().collect::<Vec<i16>>(),
