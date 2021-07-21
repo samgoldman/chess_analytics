@@ -165,27 +165,12 @@ filter!(clock_available_filter, "clockAvailable", _params, {
 });
 
 filter!(final_fen_search_filter, "finalFenMatchesAny", params, {
-    use std::panic;
-
     Box::new(move |game| -> bool {
-        panic::set_hook(Box::new(|_info| {
-            // do nothing
-        }));
+        let result = game.build_boards();
 
-        let result = panic::catch_unwind(|| game.build_boards());
-
-        match result {
-            Ok(res) => {
-                let actual_fen = res.last().unwrap().clone().to_fen();
-                params
-                    .iter()
-                    .any(|allowed_fen| allowed_fen.contains(&actual_fen))
-            }
-            Err(err) => {
-                println!("{} failed with: {:?}", game.site, err);
-                false
-            }
-        }
+        let actual_fen = result.last().unwrap().clone().to_fen();
+        let matched = params.iter().any(|fen| fen.contains(&actual_fen));
+        matched
     })
 });
 
@@ -317,6 +302,24 @@ mod test_eval_available_filter {
 
         game.eval_available = false;
         assert_eq!(filter_fn(&game), false);
+    }
+}
+
+#[cfg(test)]
+mod test_final_fen_filter {
+    use super::*;
+
+    #[test]
+    fn test_empty() {
+        let game = GameWrapper::default();
+
+        let filter_fn = final_fen_search_filter::factory(vec![]);
+        assert_eq!(false, (filter_fn)(&game));
+
+        let filter_fn = final_fen_search_filter::factory(vec![
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w".to_string(),
+        ]);
+        assert_eq!(true, (filter_fn)(&game));
     }
 }
 

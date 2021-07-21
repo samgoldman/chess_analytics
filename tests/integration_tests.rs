@@ -106,3 +106,26 @@ B	1.0000
 
     Ok(())
 }
+
+#[test]
+fn final_fen_filter_10_games() -> Result<(), Box<dyn std::error::Error>> {
+    let res = run(vec![
+        "chess_analytics",
+        "--glob",
+        "tests/data/10_games_000000.bin",
+        "--workflow",
+        "tests/workflows/final_fen_10_games.json",
+    ]
+    .iter()
+    .map(|x| x.to_string()));
+
+    assert_eq!(
+        res,
+        "Bin	gameCount.avg
+https://lichess.org/a9tcp02g	1.0000	
+https://lichess.org/j1dkb5dw	1.0000	
+"
+    );
+
+    Ok(())
+}
