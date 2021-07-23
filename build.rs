@@ -4,7 +4,6 @@ use mktemp::Temp;
 use std::{fs, fs::File, io, io::prelude::*, io::BufReader, io::Write, path::Path};
 
 fn generate_chess_flatbuff() -> Result<(), std::io::Error> {
-    println!("cargo:rerun-if-changed=chess_flat_buffer/chess.fbs");
     run(flatc_rust::Args {
         inputs: &[Path::new("chess_flat_buffer/chess.fbs")],
         out_dir: Path::new("target/flatbuffers/"),
@@ -46,6 +45,7 @@ fn generate_steps_module() -> Result<(), std::io::Error> {
                 use_declarations += format!("use {}::{};\n", step_mod_name, struct_name).as_ref();
                 names += format!("\t\t\t\t{},\n", name).as_ref();
                 funcs += format!("\t\t\t\tBox::new({}::new),\n", struct_name).as_ref();
+                println!("cargo:rerun-if-changed=./src/steps/{}.rs", step_mod_name);
             }
         }
     }
@@ -80,6 +80,8 @@ pub fn get_step_by_name_and_params<'a>(name: &str, params: Vec<&'a str>) -> &'a 
 }
 
 fn main() -> io::Result<()> {
+    println!("cargo:rerun-if-changed=./build.rs");
+    println!("cargo:rerun-if-changed=./Cargo.lock");
     generate_chess_flatbuff()?;
 
     generate_steps_module()?;
