@@ -8,6 +8,7 @@ pub struct Board {
     to_move: Player,
 }
 
+// TODO investigate no-panic
 impl Board {
     pub fn to_fen(&self) -> String {
         let mut fen = String::default();
@@ -78,6 +79,7 @@ impl Board {
             .any(|opposing_piece_loc| self.does_piece_check_loc(*opposing_piece_loc, king_loc))
     }
 
+    // TODO convert to Ok/Err
     pub fn does_piece_check_loc(&self, attacker_cell: Cell, target_cell: Cell) -> bool {
         // let  = attacker_location;
         // TODO use fns
@@ -116,6 +118,7 @@ impl Board {
                 Piece::King => false,
             }
         } else {
+            // TODO convert to Ok/Err
             panic!("does_piece_check_loc: no piece in attacker location");
         }
     }
@@ -135,6 +138,7 @@ impl Board {
             .collect()
     }
 
+    // TODO convert to Ok/Err
     pub fn find_king_loc(&self, player: Player) -> Cell {
         for cell in self.board.keys() {
             let piece = self.board.get(cell).unwrap();
@@ -143,9 +147,11 @@ impl Board {
             }
         }
 
+        // TODO convert to Ok/Err
         panic!("find_king_loc: king not found on board");
     }
 
+    // TODO convert to Ok/Err
     pub fn execute_move(&mut self, piece: Piece, from_cell: Cell, to_cell: Cell) {
         // TODO use fns
         let diff_file = to_cell.file as i32 - from_cell.file as i32;
@@ -180,6 +186,7 @@ impl Board {
         self.clear(from_cell);
     }
 
+    // TODO convert to Ok/Err
     pub fn find_origin(&self, piece: Piece, dest: Cell, from: PartialCell) -> Cell {
         let possible_origins = self.find_possible_origins(piece, dest, from);
 
@@ -215,8 +222,10 @@ impl Board {
             .collect::<Vec<&Cell>>();
 
         if filtered_origins.is_empty() {
+            // TODO convert to Ok/Err
             panic!("No possible origins found");
         } else if filtered_origins.len() > 1 {
+            // TODO convert to Ok/Err
             panic!("Too many possible origins found: {:?}", filtered_origins);
         } else {
             *filtered_origins[0]
@@ -312,6 +321,7 @@ impl Board {
             .collect()
     }
 
+    // TODO convert to Ok/Err
     pub fn move_piece(&mut self, move_description: Move) {
         let piece_moved = move_description.piece_moved;
 

@@ -1,3 +1,4 @@
 ignore = [
-    "src/../target/flatbuffers/chess_generated.rs"
+    "src/../target/flatbuffers/chess_generated.rs",
+    "src/steps.rs"
 ]

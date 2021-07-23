@@ -5,5 +5,5 @@ use std::env;
 
 #[cfg(not(tarpaulin_include))]
 fn main() {
-    println!("{}", run(env::args()));
+    run(env::args());
 }

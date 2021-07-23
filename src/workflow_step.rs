@@ -9,13 +9,11 @@ pub trait Step {
     fn get_output_type(&self) -> TypeId;
 }
 
-#[allow(dead_code)] // TODO: remove
 pub struct WorkflowProcessor<'a> {
     step: &'a dyn Step,
     substeps: Vec<&'a WorkflowProcessor<'a>>,
 }
 
-#[allow(dead_code)] // TODO: remove
 impl<'a> WorkflowProcessor<'a> {
     pub fn get_input_type(&self) -> TypeId {
         self.step.get_input_type()
