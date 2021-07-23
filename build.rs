@@ -4,7 +4,7 @@ use mktemp::Temp;
 use std::{fs, fs::File, io, io::prelude::*, io::BufReader, io::Write, path::Path};
 
 fn generate_chess_flatbuff() -> Result<(), std::io::Error> {
-    println!("Running flatc...";)
+    println!("Running flatc...");
     run(flatc_rust::Args {
         inputs: &[Path::new("chess_flat_buffer/chess.fbs")],
         out_dir: Path::new("target/flatbuffers/"),
