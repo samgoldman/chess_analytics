@@ -9,8 +9,8 @@ mod arguments;
 mod basic_types;
 mod board;
 #[allow(non_snake_case)]
-#[path = "../target/flatbuffers/chess_generated.rs"]
-mod chess_flatbuffers;
+#[path = "../target/flatbuffers/mod.rs"]
+mod chess;
 mod chess_utils;
 mod game_wrapper;
 mod general_utils;

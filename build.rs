@@ -4,22 +4,21 @@ use mktemp::Temp;
 use std::{fs, fs::File, io, io::prelude::*, io::BufReader, io::Write, path::Path};
 
 fn generate_chess_flatbuff() -> Result<(), std::io::Error> {
-    println!("Running flatc...");
     run(flatc_rust::Args {
         inputs: &[Path::new("chess_flat_buffer/chess.fbs")],
         out_dir: Path::new("target/flatbuffers/"),
         ..Default::default()
     })
     .expect("flatc");
-    println!("Ran flac.");
 
-    println!("Modifying file");
-    let file_path = Path::new("target/flatbuffers/chess_generated.rs");
     let data = "// Force clippy and checks to ignore this file\n#![allow(clippy::all)]\n#![allow(unknown_lints)]\n#![allow(unused_imports)]\n#![allow(clippy::cognitive_complexity)]\n\n";
 
-    println!("Calling prepend");
+    let file_path = Path::new("target/flatbuffers/mod.rs");
     prepend_file(data.as_bytes(), &file_path)?;
-    println!("Prepend done");
+    let file_path = Path::new("target/flatbuffers/chess/game_generated.rs");
+    prepend_file(data.as_bytes(), &file_path)?;
+    let file_path = Path::new("target/flatbuffers/chess/game_list_generated.rs");
+    prepend_file(data.as_bytes(), &file_path)?;
 
     Ok(())
 }
@@ -89,13 +88,9 @@ fn main() -> io::Result<()> {
     println!("cargo:rerun-if-changed=./build.rs");
     println!("cargo:rerun-if-changed=./Cargo.lock");
 
-    println!("Calling generate_chess_flatbuff...");
     generate_chess_flatbuff()?;
-    println!("Called generate_chess_flatbuff.");
 
-    println!("Calling generate_chess_flatbuff...");
     generate_steps_module()?;
-    println!("Called generate_chess_flatbuff.");
 
     Ok(())
 }
