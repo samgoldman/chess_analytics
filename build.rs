@@ -80,7 +80,6 @@ pub fn get_step_by_name_and_params<'a>(name: &str, params: Vec<&'a str>) -> &'a 
 }
 
 fn main() -> io::Result<()> {
-    println!("cargo:rerun-if-changed=src/steps.rs");
     generate_chess_flatbuff()?;
 
     generate_steps_module()?;
