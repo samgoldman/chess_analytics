@@ -22,7 +22,7 @@ jobs:
         with:
           command: check
       - uses: actions/upload-artifact@v2
-        if: ${{ always() }}
+        if: ${{ failure() }}
         with:
           name: check-archive
           path: ./
