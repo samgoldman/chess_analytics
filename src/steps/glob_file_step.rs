@@ -1,27 +1,43 @@
 use crate::workflow_step::Step;
 
-use clap::ArgMatches;
+use glob::glob;
 use std::any::*;
+use std::path::PathBuf;
 
-pub struct GlobFileStep {}
+pub struct GlobFileStep<'a> {
+    glob_string: &'a str,
+}
 
 /// chess_analytics_build::register_step_builder "GlobFileStep" GlobFileStep
-impl<'a> GlobFileStep {
-    pub fn new(_configuration: Vec<&'a str>) -> &'a dyn Step {
-        &(GlobFileStep {})
+impl<'a> GlobFileStep<'a> {
+    pub fn new(configuration: Vec<&'static str>) -> Result<Box<dyn Step>, String> {
+        if configuration.len() != 0 {
+            return Err("GlobFileStep: invalid configuration".to_string());
+        }
+
+        let step = GlobFileStep {
+            glob_string: configuration.get(0).unwrap(),
+        };
+
+        Ok(Box::new(step))
     }
 }
 
-impl Step for GlobFileStep {
+impl<'a> Step for GlobFileStep<'a> {
     fn process(&self, _input: &dyn Any) -> Box<dyn Any> {
-        Box::new(())
+        let files: Vec<PathBuf> = glob(self.glob_string)
+            .expect("Failed to read glob pattern")
+            .map(Result::unwrap)
+            .collect();
+
+        Box::new(files)
     }
 
     fn get_input_type(&self) -> TypeId {
-        TypeId::of::<ArgMatches>()
+        TypeId::of::<()>()
     }
 
     fn get_output_type(&self) -> TypeId {
-        TypeId::of::<Vec<String>>()
+        TypeId::of::<Vec<PathBuf>>()
     }
 }

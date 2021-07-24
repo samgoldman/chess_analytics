@@ -48,8 +48,8 @@ fn generate_steps_module() -> Result<(), std::io::Error> {
                 let step_mod_name = path.file_stem().unwrap().to_str().unwrap();
                 mod_declarations += format!("mod {};\n", step_mod_name).as_ref();
                 use_declarations += format!("use {}::{};\n", step_mod_name, struct_name).as_ref();
-                names += format!("\t\t\t\t{},\n", name).as_ref();
-                funcs += format!("\t\t\t\tBox::new({}::new),\n", struct_name).as_ref();
+                names += format!("\t\t{},\n", name).as_ref();
+                funcs += format!("\t\tBox::new({}::new),\n", struct_name).as_ref();
                 println!("cargo:rerun-if-changed=./src/steps/{}.rs", step_mod_name);
             }
         }
@@ -66,17 +66,21 @@ use std::iter::FromIterator;
 use itertools::izip;
 
 {}
-
-pub fn get_step_by_name_and_params<'a>(name: &str, params: Vec<&'a str>) -> &'a dyn Step {{
+pub fn get_step_by_name_and_params<'a>(name: &str, params: Vec<&'static str>) -> Result<Box<dyn Step>, String> {{
     let names = vec![
 {}    ];
 
-    let funcs: Vec<Box<dyn Fn(Vec<&'a str>) -> &'a dyn Step>> = vec![
+    let funcs: Vec<Box<dyn Fn(Vec<&'static str>) -> Result<Box<dyn Step>, String>>> = vec![
 {}    ];
 
     let builders = HashMap::<_, _>::from_iter(izip!(names, funcs));
 
-    builders.get(name).unwrap()(params)
+    let result = builders.get(name);
+
+    match result {{
+        Some(step) => (step)(params),
+        None => Err(format!(\"Step with name '{{}}' not found\", name)),
+    }}
 }}",
         mod_declarations, use_declarations, names, funcs
     )?;

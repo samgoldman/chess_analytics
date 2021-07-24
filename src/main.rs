@@ -4,6 +4,8 @@ use chess_analytics::run;
 use std::env;
 
 #[cfg(not(tarpaulin_include))]
-fn main() {
-    run(env::args());
+fn main() -> Result<(), String> {
+    run(env::args())?;
+
+    Ok(())
 }

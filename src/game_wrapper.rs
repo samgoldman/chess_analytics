@@ -1,8 +1,8 @@
 use crate::basic_types::*;
 use crate::board::Board;
-use crate::chess::chess::GameList;
-use crate::chess::chess::Game;
 use crate::chess::chess::root_as_game_list;
+use crate::chess::chess::Game;
+use crate::chess::chess::GameList;
 use crate::general_utils::hours_min_sec_to_duration;
 use itertools::izip;
 use std::time::Duration;

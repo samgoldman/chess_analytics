@@ -20,14 +20,19 @@ mod workflow_step;
 #[macro_use]
 extern crate lazy_static;
 
+use workflow_step::WorkflowProcessor;
+
 // TODO: global: investigate no-panic
 // TODO: global: Ok/Err
 // TODO: global: currently count 23 calls to panic!()
 
-pub fn run<T>(_args: T)
+pub fn run<T>(_args: T) -> Result<(), String>
 where
     T: Iterator<Item = String>,
 {
     // let _config = parse_args(args);
-    let _x = steps::get_step_by_name_and_params("GlobFileStep", vec![]);
+    let x = steps::get_step_by_name_and_params("GlobFileStep", vec!["test"])?;
+    let _wf = WorkflowProcessor::new(&*x, vec![]);
+
+    Ok(())
 }

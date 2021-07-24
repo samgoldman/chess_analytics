@@ -21,16 +21,16 @@ regex = "1.4.2"
 clap = "3.0.0-beta.2"
 glob = "0.3.0"
 bzip2 = "0.4.1"
-rayon = "1.5"
-serde = { version = "1.0", features = ["derive"] }
-serde_yaml = "0.8.15"
-serde_json = "1.0"
-indicatif = {version = "*", features = ["rayon"]}
+#rayon = "1.5"
+#serde = { version = "1.0", features = ["derive"] }
+#serde_yaml = "0.8.15"
+#serde_json = "1.0"
+#indicatif = {version = "*", features = ["rayon"]}
 itertools = "0.10.0"
 strum = "0.21.0"
 strum_macros = "0.21"
 mockall = "0.10.2"
-no-panic = "0.1.15"
+#no-panic = "0.1.15"
 
 [dev-dependencies]
 assert_cmd = "0.10"
