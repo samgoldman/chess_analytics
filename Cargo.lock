@@ -93,6 +93,7 @@ dependencies = [
  "lazy_static",
  "mktemp",
  "mockall",
+ "no-panic",
  "predicates",
  "regex",
  "strum",
@@ -318,6 +319,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e7e25b214433f669161f414959594216d8e6ba83b6679d3db96899c0b4639033"
 dependencies = [
  "cfg-if",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "no-panic"
+version = "0.1.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b884e0f4a7a80970539a7757902675ce503d98615f5b564564b4bd0236f7f36"
+dependencies = [
  "proc-macro2",
  "quote",
  "syn",

@@ -13,11 +13,11 @@ pub struct GlobFileStep<'a> {
 impl<'a> GlobFileStep<'a> {
     pub fn new(configuration: Vec<&'static str>) -> Result<Box<dyn Step>, String> {
         if configuration.len() == 0 {
-            return Err(format!("GlobFileStep: invalid configuration"));
+            return Err("GlobFileStep: invalid configuration".to_string());
         }
 
         let step = GlobFileStep {
-            glob_string: "", //configuration.get(0).unwrap_or(&""),
+            glob_string: configuration.get(0).unwrap_or(&""),
         };
 
         Ok(Box::new(step))
@@ -31,7 +31,8 @@ impl<'a> Step for GlobFileStep<'a> {
             .map(Result::unwrap)
             .collect();
 
-        Box::new(files)
+        let return_value: Box<Vec<PathBuf>> = Box::new(files);
+        return_value
     }
 
     fn get_input_type(&self) -> TypeId {
@@ -51,7 +52,47 @@ mod test_glob_file_test {
     fn invalid_configuration() {
         let new_step = GlobFileStep::new(vec![]);
 
-        // TODO - verify
         assert!(new_step.is_err());
+    }
+
+    #[test]
+    fn test_get_input_type() {
+        let new_step = GlobFileStep::new(vec![""]).unwrap();
+
+        assert_eq!(new_step.get_input_type(), TypeId::of::<()>())
+    }
+
+    #[test]
+    fn valid_configuration_1() {
+        let new_step = GlobFileStep::new(vec!["tests/data/10_games_000000.bin"]).unwrap();
+
+        let raw_output = new_step.process(&"");
+        assert_eq!((&*raw_output).type_id(), new_step.get_output_type());
+        assert_eq!((&*raw_output).type_id(), TypeId::of::<Vec<PathBuf>>());
+
+        let mut output = vec![];
+        match (&*raw_output).downcast_ref::<Vec<PathBuf>>() {
+            Some(downcast) => output = downcast.clone(),
+            None => assert!(false)
+        }
+
+        assert_eq!(output.len(), 1);
+    }
+
+    #[test]
+    fn valid_configuration_2() {
+        let new_step = GlobFileStep::new(vec!["tests/data/10_games_000000*"]).unwrap();
+
+        let raw_output = new_step.process(&"");
+        assert_eq!((&*raw_output).type_id(), new_step.get_output_type());
+        assert_eq!((&*raw_output).type_id(), TypeId::of::<Vec<PathBuf>>());
+
+        let mut output = vec![];
+        match (&*raw_output).downcast_ref::<Vec<PathBuf>>() {
+            Some(downcast) => output = downcast.clone(),
+            None => assert!(false)
+        }
+
+        assert_eq!(output.len(), 3);
     }
 }
