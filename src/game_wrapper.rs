@@ -212,3 +212,48 @@ mod test_game_wrapper_from_games {
         // TODO more assertions for correctness
     }
 }
+
+#[cfg(test)]
+mod test_clock_available {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn test() {
+        let mut game = GameWrapper::default();
+        game.clock = vec![];
+
+        assert_eq!(game.clock_available(), false);
+
+        game.clock.push(Duration::from_secs(42));
+
+        assert_eq!(game.clock_available(), true);
+    }
+}
+
+#[cfg(test)]
+mod test_move_timep {
+    use super::*;
+    use std::time::Duration;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (times, move_num, expected) = $value;
+                let mut test_game = GameWrapper::default();
+                test_game.clock = times.iter().map(|&x| Duration::from_secs(x)).collect();
+
+                assert_eq!(test_game.move_time(move_num), expected);
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_1: (vec![120, 120], 0, 0),
+        test_2: (vec![60, 60, 54, 52], 2, 6),
+        test_3: (vec![3600, 3600, 3500, 3550, 3425, 3475], 5, 75),
+    }
+}

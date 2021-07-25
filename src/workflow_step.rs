@@ -1,9 +1,10 @@
 use mockall::predicate::*;
 use mockall::*;
 use std::any::{Any, TypeId};
+use std::fmt;
 
 #[automock]
-pub trait Step {
+pub trait Step: fmt::Debug {
     fn process(&self, input: &dyn Any) -> Box<dyn Any>;
     fn get_input_type(&self) -> TypeId;
     fn get_output_type(&self) -> TypeId;
