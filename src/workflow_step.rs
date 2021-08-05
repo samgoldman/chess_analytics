@@ -3,9 +3,12 @@ use mockall::*;
 use std::any::{Any, TypeId};
 use std::fmt;
 
+pub type BoxedStep = Box<dyn Step>;
+pub type StepFactory = Box<dyn Fn(Vec<&'static str>) -> Result<BoxedStep, String>>;
+
 #[automock]
 pub trait Step: fmt::Debug {
-    fn process(&self, input: &dyn Any) -> Box<dyn Any>;
+    fn process(&self, input: &dyn Any) -> Result<Box<dyn Any>, String>;
     fn get_input_type(&self) -> TypeId;
     fn get_output_type(&self) -> TypeId;
 }
@@ -20,7 +23,7 @@ impl<'a> WorkflowProcessor<'a> {
         self.step.get_input_type()
     }
 
-    pub fn process(&self, input: &dyn Any) {
+    pub fn process(&self, input: &dyn Any) -> Result<(), String> {
         let actual_input_type = input.type_id();
         let expected_type_id = self.step.get_input_type();
 
@@ -28,11 +31,15 @@ impl<'a> WorkflowProcessor<'a> {
             panic!("WorkflowProcessor: actual input type doesn't match expected input type");
         }
 
-        let result = self.step.process(input);
+        let step_result = self.step.process(input);
+
+        let step_data = step_result?;
 
         for substep in self.substeps.iter() {
-            substep.process(&(*result));
+            substep.process(&(*step_data))?;
         }
+
+        Ok(())
     }
 
     pub fn new(
@@ -117,7 +124,7 @@ mod test_process {
 
         mock_step
             .expect_process()
-            .returning(move |_| Box::new(output.clone()));
+            .returning(move |_| Ok(Box::new(output.clone())));
         mock_step.expect_get_input_type().return_const(*TYPE_STRING);
         mock_step
             .expect_get_output_type()
@@ -125,7 +132,7 @@ mod test_process {
 
         let test_wp = WorkflowProcessor::new(&mock_step, vec![]).unwrap();
 
-        test_wp.process(&input);
+        test_wp.process(&input).unwrap();
     }
 
     #[test]
@@ -139,7 +146,7 @@ mod test_process {
 
         mock_step_parent
             .expect_process()
-            .returning(move |_| Box::new(parent_ouput.clone()));
+            .returning(move |_| Ok(Box::new(parent_ouput.clone())));
         mock_step_parent
             .expect_get_input_type()
             .return_const(*TYPE_STRING);
@@ -149,7 +156,7 @@ mod test_process {
 
         mock_step_child_1
             .expect_process()
-            .returning(move |_| Box::new(1 as i16));
+            .returning(move |_| Ok(Box::new(1 as i16)));
         mock_step_child_1
             .expect_get_input_type()
             .return_const(*TYPE_U32);
@@ -159,7 +166,7 @@ mod test_process {
 
         mock_step_child_2
             .expect_process()
-            .returning(move |_| Box::new(2 as i16));
+            .returning(move |_| Ok(Box::new(2 as i16)));
         mock_step_child_2
             .expect_get_input_type()
             .return_const(*TYPE_U32);
@@ -173,7 +180,7 @@ mod test_process {
             WorkflowProcessor::new(&mock_step_parent, vec![&test_wp_child_1, &test_wp_child_2])
                 .unwrap();
 
-        test_wp_parent.process(&parent_input);
+        test_wp_parent.process(&parent_input).unwrap();
     }
 
     #[test]
@@ -195,6 +202,6 @@ mod test_process {
 
         let test_wp = WorkflowProcessor::new(&mock_step, vec![]).unwrap();
 
-        test_wp.process(&input);
+        test_wp.process(&input).unwrap();
     }
 }

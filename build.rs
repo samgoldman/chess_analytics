@@ -24,7 +24,7 @@ fn generate_chess_flatbuff() -> Result<(), std::io::Error> {
 }
 
 fn generate_steps_module() -> Result<(), std::io::Error> {
-    let mut module = fs::File::create(format!("src/steps.rs"))?;
+    let mut module = fs::File::create("src/steps.rs".to_string())?;
 
     let mut mod_declarations = String::default();
     let mut use_declarations = String::default();
@@ -42,14 +42,14 @@ fn generate_steps_module() -> Result<(), std::io::Error> {
         for line in reader.lines() {
             let line = line?;
             if (&line).starts_with("/// chess_analytics_build::register_step_builder ") {
-                let split: Vec<&str> = (&line).split(" ").collect();
+                let split: Vec<&str> = (&line).split(' ').collect();
                 let name = split[2];
                 let struct_name = split[3];
                 let step_mod_name = path.file_stem().unwrap().to_str().unwrap();
                 mod_declarations += format!("mod {};\n", step_mod_name).as_ref();
                 use_declarations += format!("use {}::{};\n", step_mod_name, struct_name).as_ref();
                 names += format!("\t\t{},\n", name).as_ref();
-                funcs += format!("\t\tBox::new({}::new),\n", struct_name).as_ref();
+                funcs += format!("\t\tBox::new({}::try_new),\n", struct_name).as_ref();
                 println!("cargo:rerun-if-changed=./src/steps/{}.rs", step_mod_name);
             }
         }
@@ -59,21 +59,20 @@ fn generate_steps_module() -> Result<(), std::io::Error> {
         module,
         "// THIS FILE AUTO-GENERATED --- DO NOT MODIFY
 {}
-use crate::workflow_step::Step;
+use crate::workflow_step::*;
 
 use std::collections::HashMap;
-use std::iter::FromIterator;
 use itertools::izip;
 
 {}
-pub fn get_step_by_name_and_params<'a>(name: &str, params: Vec<&'static str>) -> Result<Box<dyn Step>, String> {{
+pub fn get_step_by_name_and_params(name: &str, params: Vec<&'static str>) -> Result<BoxedStep, String> {{
     let names = vec![
 {}    ];
 
-    let funcs: Vec<Box<dyn Fn(Vec<&'static str>) -> Result<Box<dyn Step>, String>>> = vec![
+    let funcs: Vec<StepFactory> = vec![
 {}    ];
 
-    let builders = HashMap::<_, _>::from_iter(izip!(names, funcs));
+    let builders = izip!(names, funcs).collect::<HashMap<_, _>>();
 
     let result = builders.get(name);
 
