@@ -32,13 +32,13 @@ impl<'a> Step for GlobFileStep<'a> {
         let file_glob = if let Ok(file_glob) = glob_result {
             file_glob
         } else {
-            return Err(format!("Could not process glob: {}", self.glob_string))
+            return Err(format!("Could not process glob: {}", self.glob_string));
         };
-            
+
         let files = file_glob.map(Result::unwrap).collect();
 
         let return_value: Box<Vec<PathBuf>> = Box::new(files);
-        return Ok(return_value)
+        return Ok(return_value);
     }
 
     fn get_input_type(&self) -> TypeId {
@@ -79,7 +79,7 @@ mod test_glob_file_test {
         let mut output = vec![];
         match (&*raw_output).downcast_ref::<Vec<PathBuf>>() {
             Some(downcast) => output = downcast.clone(),
-            None => assert!(false)
+            None => assert!(false),
         }
 
         assert_eq!(output.len(), 1);
@@ -96,7 +96,7 @@ mod test_glob_file_test {
         let mut output = vec![];
         match (&*raw_output).downcast_ref::<Vec<PathBuf>>() {
             Some(downcast) => output = downcast.clone(),
-            None => assert!(false)
+            None => assert!(false),
         }
 
         assert_eq!(output.len(), 3);
