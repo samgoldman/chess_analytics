@@ -56,3 +56,16 @@ mod test_game_result_from_u8 {
         test_from_u8_125: (125, None),
     }
 }
+
+#[cfg(test)]
+mod test_display {
+    use super::*;
+
+    #[test]
+    fn test() {
+        assert_eq!(GameResult::White.to_string(), "White".to_string());
+        assert_eq!(GameResult::Black.to_string(), "Black".to_string());
+        assert_eq!(GameResult::Draw.to_string(), "Draw".to_string());
+        assert_eq!(GameResult::Star.to_string(), "?".to_string());
+    }
+}

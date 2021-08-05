@@ -101,4 +101,14 @@ mod test_glob_file_test {
 
         assert_eq!(output.len(), 3);
     }
+
+    #[test]
+    fn invalid_glob() {
+        let new_step = GlobFileStep::try_new(vec!["*****"]).unwrap();
+
+        match new_step.process(&"") {
+            Err(_) => assert!(true),
+            Ok(_) => assert!(false),
+        }
+    }
 }
