@@ -9,9 +9,7 @@ pub struct CountFilesStep {}
 /// chess_analytics_build::register_step_builder "CountFilesStep" CountFilesStep
 impl CountFilesStep {
     pub fn try_new(_configuration: Vec<&'static str>) -> Result<Box<dyn Step>, String> {
-        let step = CountFilesStep {};
-
-        Ok(Box::new(step))
+        Ok(Box::new(CountFilesStep {}))
     }
 }
 
@@ -100,5 +98,17 @@ mod test_file_count_step {
         }
 
         assert_eq!(output, 0);
+    }
+
+    #[test]
+    fn test_bad_input() {
+        let mut new_step = CountFilesStep::try_new(vec![]).unwrap();
+
+        let input: Vec<String> = vec![];
+        let raw_output = new_step.process(&input).unwrap_err();
+        assert_eq!(
+            raw_output,
+            "CountFilesStep: Could not downcast input!".to_string()
+        );
     }
 }
