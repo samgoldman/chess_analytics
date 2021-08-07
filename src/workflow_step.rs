@@ -8,22 +8,22 @@ pub type StepFactory = Box<dyn Fn(Vec<&'static str>) -> Result<BoxedStep, String
 
 #[automock]
 pub trait Step: fmt::Debug {
-    fn process(&self, input: &dyn Any) -> Result<Box<dyn Any>, String>;
+    fn process(&mut self, input: &dyn Any) -> Result<Box<dyn Any>, String>;
     fn get_input_type(&self) -> TypeId;
     fn get_output_type(&self) -> TypeId;
 }
 
-pub struct WorkflowProcessor<'a> {
-    step: &'a dyn Step,
-    substeps: Vec<&'a WorkflowProcessor<'a>>,
+pub struct WorkflowProcessor {
+    step: Box<dyn Step>,
+    substeps: Vec<WorkflowProcessor>,
 }
 
-impl<'a> WorkflowProcessor<'a> {
+impl WorkflowProcessor {
     pub fn get_input_type(&self) -> TypeId {
         self.step.get_input_type()
     }
 
-    pub fn process(&self, input: &dyn Any) -> Result<(), String> {
+    pub fn process(&mut self, input: &dyn Any) -> Result<(), String> {
         let actual_input_type = input.type_id();
         let expected_type_id = self.step.get_input_type();
 
@@ -35,7 +35,7 @@ impl<'a> WorkflowProcessor<'a> {
 
         let step_data = step_result?;
 
-        for substep in self.substeps.iter() {
+        for substep in self.substeps.iter_mut() {
             substep.process(&(*step_data))?;
         }
 
@@ -43,14 +43,14 @@ impl<'a> WorkflowProcessor<'a> {
     }
 
     pub fn new(
-        step: &'a (dyn Step + 'static),
-        substeps: Vec<&'a WorkflowProcessor<'a>>,
+        step: Box<dyn Step + 'static>,
+        substeps: Vec<WorkflowProcessor>,
     ) -> Result<Self, String> {
         let step_output_type = step.get_output_type();
 
         if substeps
             .iter()
-            .all(|&substep| substep.get_input_type() == step_output_type)
+            .all(|substep| substep.get_input_type() == step_output_type)
         {
             Ok(WorkflowProcessor { step, substeps })
         } else {
@@ -94,9 +94,12 @@ mod test_new {
             .expect_get_output_type()
             .return_const(*TYPE_U16);
 
-        let test_wp_child_1 = WorkflowProcessor::new(&mock_step_child_1, vec![]).unwrap();
-        let test_wp_child_2 = WorkflowProcessor::new(&mock_step_child_2, vec![]).unwrap();
-        match WorkflowProcessor::new(&mock_step_parent, vec![&test_wp_child_1, &test_wp_child_2]) {
+        let test_wp_child_1 = WorkflowProcessor::new(Box::new(mock_step_child_1), vec![]).unwrap();
+        let test_wp_child_2 = WorkflowProcessor::new(Box::new(mock_step_child_2), vec![]).unwrap();
+        match WorkflowProcessor::new(
+            Box::new(mock_step_parent),
+            vec![test_wp_child_1, test_wp_child_2],
+        ) {
             Ok(_) => assert!(false),
             Err(msg) => assert_eq!(msg, "Step output type does not match substep input type(s)"),
         }
@@ -130,7 +133,7 @@ mod test_process {
             .expect_get_output_type()
             .return_const(*TYPE_STRING);
 
-        let test_wp = WorkflowProcessor::new(&mock_step, vec![]).unwrap();
+        let mut test_wp = WorkflowProcessor::new(Box::new(mock_step), vec![]).unwrap();
 
         test_wp.process(&input).unwrap();
     }
@@ -174,11 +177,13 @@ mod test_process {
             .expect_get_output_type()
             .return_const(*TYPE_U16);
 
-        let test_wp_child_1 = WorkflowProcessor::new(&mock_step_child_1, vec![]).unwrap();
-        let test_wp_child_2 = WorkflowProcessor::new(&mock_step_child_2, vec![]).unwrap();
-        let test_wp_parent =
-            WorkflowProcessor::new(&mock_step_parent, vec![&test_wp_child_1, &test_wp_child_2])
-                .unwrap();
+        let test_wp_child_1 = WorkflowProcessor::new(Box::new(mock_step_child_1), vec![]).unwrap();
+        let test_wp_child_2 = WorkflowProcessor::new(Box::new(mock_step_child_2), vec![]).unwrap();
+        let mut test_wp_parent = WorkflowProcessor::new(
+            Box::new(mock_step_parent),
+            vec![test_wp_child_1, test_wp_child_2],
+        )
+        .unwrap();
 
         test_wp_parent.process(&parent_input).unwrap();
     }
@@ -200,7 +205,7 @@ mod test_process {
             .expect_get_output_type()
             .return_const(*TYPE_VEC_STR);
 
-        let test_wp = WorkflowProcessor::new(&mock_step, vec![]).unwrap();
+        let mut test_wp = WorkflowProcessor::new(Box::new(mock_step), vec![]).unwrap();
 
         test_wp.process(&input).unwrap();
     }

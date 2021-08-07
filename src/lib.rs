@@ -31,8 +31,18 @@ where
     T: Iterator<Item = String>,
 {
     // let _config = parse_args(args);
-    let x = steps::get_step_by_name_and_params("GlobFileStep", vec!["test"])?;
-    let _wf = WorkflowProcessor::new(&*x, vec![]);
+    let x = steps::get_step_by_name_and_params(
+        "GlobFileStep",
+        vec!["/data/data_scratch/lichess_data/rust_conversions_v3/**/*.*"],
+    )?;
+    let y = steps::get_step_by_name_and_params("CountFilesStep", vec![])?;
+    let z = steps::get_step_by_name_and_params("UsizePrintStep", vec!["Num files"])?;
+    let z2 = steps::get_step_by_name_and_params("UsizePrintStep", vec!["File count"])?;
+    let print_wf = WorkflowProcessor::new(z, vec![])?;
+    let print_wf2 = WorkflowProcessor::new(z2, vec![])?;
+    let count_wf = WorkflowProcessor::new(y, vec![print_wf, print_wf2])?;
+    let mut glob_wf = WorkflowProcessor::new(x, vec![count_wf])?;
+    glob_wf.process(&())?;
 
     Ok(())
 }

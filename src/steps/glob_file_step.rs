@@ -26,7 +26,7 @@ impl<'a> GlobFileStep<'a> {
 
 impl<'a> Step for GlobFileStep<'a> {
     #[allow(clippy::needless_return)] // Allow for coverage
-    fn process(&self, _input: &dyn Any) -> Result<Box<dyn Any>, String> {
+    fn process(&mut self, _input: &dyn Any) -> Result<Box<dyn Any>, String> {
         let glob_result = glob(self.glob_string);
 
         let file_glob = if let Ok(file_glob) = glob_result {
@@ -70,7 +70,7 @@ mod test_glob_file_test {
 
     #[test]
     fn valid_configuration_1() {
-        let new_step = GlobFileStep::try_new(vec!["tests/data/10_games_000000.bin"]).unwrap();
+        let mut new_step = GlobFileStep::try_new(vec!["tests/data/10_games_000000.bin"]).unwrap();
 
         let raw_output = new_step.process(&"").unwrap();
         assert_eq!((&*raw_output).type_id(), new_step.get_output_type());
@@ -87,7 +87,7 @@ mod test_glob_file_test {
 
     #[test]
     fn valid_configuration_2() {
-        let new_step = GlobFileStep::try_new(vec!["tests/data/10_games_000000*"]).unwrap();
+        let mut new_step = GlobFileStep::try_new(vec!["tests/data/10_games_000000*"]).unwrap();
 
         let raw_output = new_step.process(&"").unwrap();
         assert_eq!((&*raw_output).type_id(), new_step.get_output_type());
@@ -104,7 +104,7 @@ mod test_glob_file_test {
 
     #[test]
     fn invalid_glob() {
-        let new_step = GlobFileStep::try_new(vec!["*****"]).unwrap();
+        let mut new_step = GlobFileStep::try_new(vec!["*****"]).unwrap();
 
         match new_step.process(&"") {
             Err(_) => assert!(true),
