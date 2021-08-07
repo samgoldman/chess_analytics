@@ -31,21 +31,21 @@ impl<'a> LabelledPrintStep<'a> {
     }
 }
 
+macro_rules! downcast_attempt {
+    ($type:ident, $input:ident) => {
+        if $type == TypeId::of::<usize>() {
+            (&*$input).downcast_ref::<usize>()
+        } else {
+            panic!()
+        }
+    };
+}
+
 impl<'a> Step for LabelledPrintStep<'a> {
     #[allow(clippy::needless_return)] // Allow for coverage
     fn process(&mut self, raw_input: &dyn Any) -> Result<Box<dyn Any>, String> {
-        macro_rules! downcast_attempt {
-            ($type:ident) => {
-                if $type == TypeId::of::<usize>() {
-                    (&*raw_input).downcast_ref::<usize>()
-                } else {
-                    panic!()
-                }
-            };
-        }
-
         let input_type = self.input_type;
-        let downcast_attempt = downcast_attempt!(input_type);
+        let downcast_attempt = downcast_attempt!(input_type, raw_input);
         match downcast_attempt {
             Some(downcast) => {
                 writeln!(self.destination, "{}: {}", self.label, downcast).unwrap();
