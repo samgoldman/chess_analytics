@@ -37,12 +37,12 @@ where
 {
     let config_path_string = match args.nth(1) {
         Some(path) => path,
-        None => return Err("First argument must be a path".to_string()),
+        None => return Err("First argument (configuration path) is required".to_string()),
     };
 
     let file = match File::open(config_path_string) {
         Ok(file) => file,
-        Err(_) => return Err("Could not open configuration file".to_string()),
+        Err(err) => return Err(format!("Could not open configuration file: {:?}", err)),
     };
 
     let mut config_doc_deserializer = serde_yaml::Deserializer::from_reader(file);
@@ -53,7 +53,7 @@ where
 
     let config_data = match Value::deserialize(document) {
         Ok(data) => data,
-        Err(_) => return Err("Could not deserialize document into yaml values".to_string()),
+        Err(err) => return Err(format!("Could not deserialize document into yaml values: {:?}", err)),
     };
 
     let steps_data = match config_data.get("steps") {

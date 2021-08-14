@@ -14,7 +14,7 @@ pub struct StepDescription<'a> {
 }
 
 impl<'a> StepDescription<'a> {
-    pub fn to_step(&self) -> Result<BoxedStep, String> {
+    fn to_step(&self) -> Result<BoxedStep, String> {
         get_step_by_name_and_params(self.step_type.to_string(), self.parameters.iter().map(|s| s.to_string()).collect())
     }
 }
@@ -40,16 +40,11 @@ impl<'a> WorkflowProcessorDescription<'a> {
         }
 
         let step = self.step_description.to_step()?;
-        let children_results = self
+        let children = self
             .realized_children
             .iter()
             .map(|child| child.to_workflow())
-            .collect::<Vec<Result<WorkflowProcessor, String>>>();
-
-        let mut children = vec![];
-        for child_result in children_results {
-            children.push(child_result?);
-        }
+            .collect::<Result<Vec<WorkflowProcessor>, String>>()?;
 
         WorkflowProcessor::new(step, children)
     }
@@ -61,7 +56,7 @@ pub struct WorkflowProcessor {
 }
 
 impl WorkflowProcessor {
-    pub fn get_input_type(&self) -> TypeId {
+    fn get_input_type(&self) -> TypeId {
         self.step.get_input_type()
     }
 
@@ -84,7 +79,7 @@ impl WorkflowProcessor {
         Ok(())
     }
 
-    pub fn new(
+    fn new(
         step: Box<dyn Step + 'static>,
         children: Vec<WorkflowProcessor>,
     ) -> Result<Self, String> {
