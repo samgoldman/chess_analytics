@@ -88,20 +88,23 @@ where
                 serde_yaml::Value::Sequence(param_seq) => param_seq
                     .iter()
                     .map(|entry| match entry {
-                        serde_yaml::Value::String(entry_str) => entry_str.to_string(),
+                        serde_yaml::Value::String(entry_str) => entry_str.as_ref(),
                         _ => panic!("params has non-string entry"),
                     })
-                    .collect::<Vec<String>>(),
+                    .collect::<Vec<&str>>(),
                 _ => return Err(format!("Params for step {:?} is not a sequence", step_name)),
             },
             None => vec![],
         };
 
-        let step = steps::get_step_by_name_and_params(step_type.to_string(), params)?;
+        let step = StepDescription {
+            step_type: step_type, 
+            parameters: params,
+        };
         steps.insert(step_name, step);
     }
 
-    let mut workflows: HashMap<String, workflow_step::WorkflowProcessor> = HashMap::new();
+    let mut workflows: HashMap<String, workflow_step::WorkflowProcessorDescription> = HashMap::new();
 
     let workflow_data = match config_data.get("workflows") {
         Some(workflows) => workflows,
@@ -138,12 +141,10 @@ where
                 serde_yaml::Value::Sequence(entry) => entry
                     .iter()
                     .map(|entry| match entry {
-                        serde_yaml::Value::String(entry) => {
-                            workflows.remove(&entry.to_string()).unwrap()
-                        }
+                        serde_yaml::Value::String(entry) => workflows.get(&entry.to_string()).unwrap().clone(),
                         _ => panic!("children has non-string entry"),
                     })
-                    .collect::<Vec<WorkflowProcessor>>(),
+                    .collect::<Vec<WorkflowProcessorDescription>>(),
                 _ => {
                     return Err(format!(
                         "Children for workflow {:?} is not a sequence",
@@ -154,12 +155,17 @@ where
             None => vec![],
         };
 
-        let step = steps.remove(&step_name).unwrap();
-        let wf = WorkflowProcessor::new(step, children).unwrap();
+        let step = steps.get(&step_name).unwrap().clone();
+        let wf = WorkflowProcessorDescription {
+            step_description: step,
+            realized_children: children,
+            unrealized_children: vec![],
+        };
         workflows.insert(workflow_name, wf);
     }
 
-    let mut wf_init = workflows.remove("INIT").unwrap();
+    let wf_init_description = workflows.remove("INIT").unwrap();
+    let mut wf_init = wf_init_description.to_workflow()?;
     wf_init.process(&())?;
 
     Ok(())

@@ -7,14 +7,15 @@ use std::fmt;
 pub type BoxedStep = Box<dyn Step>;
 pub type StepFactory = Box<dyn Fn(Vec<String>) -> Result<BoxedStep, String>>;
 
-pub struct StepDescription {
-    step_type: String,
-    parameters: Vec<String>,
+#[derive(Clone)]
+pub struct StepDescription<'a> {
+    pub step_type: &'a str,
+    pub parameters: Vec<&'a str>,
 }
 
-impl StepDescription {
+impl<'a> StepDescription<'a> {
     pub fn to_step(&self) -> Result<BoxedStep, String> {
-        get_step_by_name_and_params(self.step_type.clone(), self.parameters.clone())
+        get_step_by_name_and_params(self.step_type.to_string(), self.parameters.iter().map(|s| s.to_string()).collect())
     }
 }
 
@@ -25,13 +26,14 @@ pub trait Step: fmt::Debug {
     fn get_output_type(&self) -> TypeId;
 }
 
-pub struct WorkflowProcessorDescription {
-    step_description: StepDescription,
-    realized_children: Vec<WorkflowProcessorDescription>,
-    unrealized_children: Vec<String>,
+#[derive(Clone)]
+pub struct WorkflowProcessorDescription<'a> {
+    pub step_description: StepDescription<'a>,
+    pub realized_children: Vec<WorkflowProcessorDescription<'a>>,
+    pub unrealized_children: Vec<&'a str>,
 }
 
-impl WorkflowProcessorDescription {
+impl<'a> WorkflowProcessorDescription<'a> {
     pub fn to_workflow(&self) -> Result<WorkflowProcessor, String> {
         if !self.unrealized_children.is_empty() {
             return Err("Could not convert to workflow, has unrealized children".to_string());
