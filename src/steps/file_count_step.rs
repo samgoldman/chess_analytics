@@ -8,7 +8,7 @@ pub struct CountFilesStep {}
 
 /// chess_analytics_build::register_step_builder "CountFilesStep" CountFilesStep
 impl CountFilesStep {
-    pub fn try_new(_configuration: Vec<&'static str>) -> Result<Box<dyn Step>, String> {
+    pub fn try_new(_configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
         Ok(Box::new(CountFilesStep {}))
     }
 }

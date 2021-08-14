@@ -4,7 +4,7 @@ use std::any::{Any, TypeId};
 use std::fmt;
 
 pub type BoxedStep = Box<dyn Step>;
-pub type StepFactory = Box<dyn Fn(Vec<&'static str>) -> Result<BoxedStep, String>>;
+pub type StepFactory = Box<dyn Fn(Vec<String>) -> Result<BoxedStep, String>>;
 
 #[automock]
 pub trait Step: fmt::Debug {

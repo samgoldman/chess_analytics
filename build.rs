@@ -48,7 +48,7 @@ fn generate_steps_module() -> Result<(), std::io::Error> {
                 let step_mod_name = path.file_stem().unwrap().to_str().unwrap();
                 mod_declarations += format!("mod {};\n", step_mod_name).as_ref();
                 use_declarations += format!("use {}::{};\n", step_mod_name, struct_name).as_ref();
-                names += format!("        {},\n", name).as_ref();
+                names += format!("        {}.to_string(),\n", name).as_ref();
                 funcs += format!("        Box::new({}::try_new),\n", struct_name).as_ref();
                 println!("cargo:rerun-if-changed=./src/steps/{}.rs", step_mod_name);
             }
@@ -65,7 +65,7 @@ use std::collections::HashMap;
 use itertools::izip;
 
 {}
-pub fn get_step_by_name_and_params(name: &str, params: Vec<&'static str>) -> Result<BoxedStep, String> {{
+pub fn get_step_by_name_and_params(name: String, params: Vec<String>) -> Result<BoxedStep, String> {{
     let names = vec![
 {}    ];
 
@@ -74,7 +74,7 @@ pub fn get_step_by_name_and_params(name: &str, params: Vec<&'static str>) -> Res
 
     let builders = izip!(names, funcs).collect::<HashMap<_, _>>();
 
-    let result = builders.get(name);
+    let result = builders.get(&name);
 
     match result {{
         Some(step) => (step)(params),

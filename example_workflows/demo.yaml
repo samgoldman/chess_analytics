@@ -1,0 +1,25 @@
+steps:
+  glob_files:
+    type: "GlobFileStep"
+    params:
+      - "/data/data_scratch/lichess_data/rust_conversions_v3/**/*.*"
+  count_files:
+    type: "CountFilesStep"
+  print_results:
+    type: LabelledPrintStep
+    params:
+      - "usize"
+      - "File count" # Label
+
+workflows:
+  PRINTER:
+    step: print_results
+  COUNTER:
+    step: count_files
+    children:
+      - PRINTER
+      - PRINTER
+  INIT:
+    step: glob_files
+    children:
+      - COUNTER

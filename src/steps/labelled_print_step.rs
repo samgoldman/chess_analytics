@@ -4,7 +4,7 @@ use std::any::*;
 use std::io::Write;
 
 pub struct LabelledPrintStep<'a> {
-    label: &'a str,
+    label: String,
     destination: Box<dyn Write + 'a>,
     destination_description: String,
     passthrough: bool,
@@ -14,20 +14,22 @@ pub struct LabelledPrintStep<'a> {
 
 /// chess_analytics_build::register_step_builder "LabelledPrintStep" LabelledPrintStep
 impl<'a> LabelledPrintStep<'a> {
-    pub fn try_new(configuration: Vec<&'static str>) -> Result<Box<dyn Step>, String> {
-        let input_type_description = configuration.get(0).unwrap_or(&"usize").to_string();
+    pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
+        let input_type_description = configuration.get(0).unwrap_or(&format!("usize")).to_string();
         let input_type = match input_type_description.as_ref() {
             "usize" => TypeId::of::<usize>(),
             _ => TypeId::of::<usize>(), // Probably should just fail here
         };
 
+        let label = configuration.get(1).unwrap_or(&"Usize".to_string()).to_string();
+
         let step = LabelledPrintStep {
-            label: configuration.get(1).unwrap_or(&"Usize"),
+            label,
             destination: Box::new(std::io::stdout()),
             destination_description: "stdout".to_string(),
             passthrough: false,
             input_type,
-            input_type_description
+            input_type_description,
         };
 
         Ok(Box::new(step))
@@ -39,7 +41,7 @@ macro_rules! downcast_attempt {
         if $type == TypeId::of::<usize>() {
             (&*$input).downcast_ref::<usize>()
         } else {
-            panic!()
+            return Err("LabelledPrintStep: could not downcast".to_string());
         }
     };
 }
@@ -123,7 +125,7 @@ mod test_usize_print_step {
         expect_write_call!(mock_writer2, b"\n");
 
         let mut test_step = LabelledPrintStep {
-            label: "test",
+            label: "test".to_string(),
             destination: Box::new(mock_writer),
             destination_description: "mock_write".to_string(),
             passthrough: false,
@@ -133,7 +135,7 @@ mod test_usize_print_step {
 
         let _x = test_step.process(&(0 as usize));
 
-        test_step.label = "Label here";
+        test_step.label = "Label here".to_string();
         test_step.destination = Box::new(mock_writer2);
         let _x = test_step.process(&(255 as usize));
 

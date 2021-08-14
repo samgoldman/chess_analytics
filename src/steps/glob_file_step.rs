@@ -5,29 +5,31 @@ use std::any::*;
 use std::path::PathBuf;
 
 #[derive(Debug)]
-pub struct GlobFileStep<'a> {
-    glob_string: &'a str,
+pub struct GlobFileStep {
+    glob_string: String,
 }
 
 /// chess_analytics_build::register_step_builder "GlobFileStep" GlobFileStep
-impl<'a> GlobFileStep<'a> {
-    pub fn try_new(configuration: Vec<&'static str>) -> Result<Box<dyn Step>, String> {
+impl GlobFileStep {
+    pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
         if configuration.is_empty() {
             return Err("GlobFileStep: invalid configuration".to_string());
         }
 
+        let glob_string = configuration.get(0).unwrap_or(&format!("")).to_string();
+
         let step = GlobFileStep {
-            glob_string: configuration.get(0).unwrap_or(&""),
+            glob_string
         };
 
         Ok(Box::new(step))
     }
 }
 
-impl<'a> Step for GlobFileStep<'a> {
+impl Step for GlobFileStep {
     #[allow(clippy::needless_return)] // Allow for coverage
     fn process(&mut self, _input: &dyn Any) -> Result<Box<dyn Any>, String> {
-        let glob_result = glob(self.glob_string);
+        let glob_result = glob(&self.glob_string);
 
         let file_glob = if let Ok(file_glob) = glob_result {
             file_glob
@@ -63,14 +65,14 @@ mod test_glob_file_test {
 
     #[test]
     fn test_get_input_type() {
-        let new_step = GlobFileStep::try_new(vec![""]).unwrap();
+        let new_step = GlobFileStep::try_new(vec!["".to_string()]).unwrap();
 
         assert_eq!(new_step.get_input_type(), TypeId::of::<()>())
     }
 
     #[test]
     fn valid_configuration_1() {
-        let mut new_step = GlobFileStep::try_new(vec!["tests/data/10_games_000000.bin"]).unwrap();
+        let mut new_step = GlobFileStep::try_new(vec!["tests/data/10_games_000000.bin".to_string()]).unwrap();
 
         let raw_output = new_step.process(&"").unwrap();
         assert_eq!((&*raw_output).type_id(), new_step.get_output_type());
@@ -87,7 +89,7 @@ mod test_glob_file_test {
 
     #[test]
     fn valid_configuration_2() {
-        let mut new_step = GlobFileStep::try_new(vec!["tests/data/10_games_000000*"]).unwrap();
+        let mut new_step = GlobFileStep::try_new(vec!["tests/data/10_games_000000*".to_string()]).unwrap();
 
         let raw_output = new_step.process(&"").unwrap();
         assert_eq!((&*raw_output).type_id(), new_step.get_output_type());
@@ -104,7 +106,7 @@ mod test_glob_file_test {
 
     #[test]
     fn invalid_glob() {
-        let mut new_step = GlobFileStep::try_new(vec!["*****"]).unwrap();
+        let mut new_step = GlobFileStep::try_new(vec!["*****".to_string()]).unwrap();
 
         match new_step.process(&"") {
             Err(_) => assert!(true),
