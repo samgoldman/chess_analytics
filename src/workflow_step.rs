@@ -1,3 +1,4 @@
+use crate::steps::get_step_by_name_and_params;
 use mockall::predicate::*;
 use mockall::*;
 use std::any::{Any, TypeId};
@@ -6,6 +7,17 @@ use std::fmt;
 pub type BoxedStep = Box<dyn Step>;
 pub type StepFactory = Box<dyn Fn(Vec<String>) -> Result<BoxedStep, String>>;
 
+pub struct StepDescription {
+    step_type: String,
+    parameters: Vec<String>,
+}
+
+impl StepDescription {
+    pub fn to_step(&self) -> Result<BoxedStep, String> {
+        get_step_by_name_and_params(self.step_type.clone(), self.parameters.clone())
+    }
+}
+
 #[automock]
 pub trait Step: fmt::Debug {
     fn process(&mut self, input: &dyn Any) -> Result<Box<dyn Any>, String>;
@@ -13,9 +25,37 @@ pub trait Step: fmt::Debug {
     fn get_output_type(&self) -> TypeId;
 }
 
+pub struct WorkflowProcessorDescription {
+    step_description: StepDescription,
+    realized_children: Vec<WorkflowProcessorDescription>,
+    unrealized_children: Vec<String>,
+}
+
+impl WorkflowProcessorDescription {
+    pub fn to_workflow(&self) -> Result<WorkflowProcessor, String> {
+        if !self.unrealized_children.is_empty() {
+            return Err("Could not convert to workflow, has unrealized children".to_string());
+        }
+
+        let step = self.step_description.to_step()?;
+        let children_results = self
+            .realized_children
+            .iter()
+            .map(|child| child.to_workflow())
+            .collect::<Vec<Result<WorkflowProcessor, String>>>();
+
+        let mut children = vec![];
+        for child_result in children_results {
+            children.push(child_result?);
+        }
+
+        WorkflowProcessor::new(step, children)
+    }
+}
+
 pub struct WorkflowProcessor {
     step: Box<dyn Step>,
-    substeps: Vec<WorkflowProcessor>,
+    children: Vec<WorkflowProcessor>,
 }
 
 impl WorkflowProcessor {
@@ -35,7 +75,7 @@ impl WorkflowProcessor {
 
         let step_data = step_result?;
 
-        for substep in self.substeps.iter_mut() {
+        for substep in self.children.iter_mut() {
             substep.process(&(*step_data))?;
         }
 
@@ -44,15 +84,15 @@ impl WorkflowProcessor {
 
     pub fn new(
         step: Box<dyn Step + 'static>,
-        substeps: Vec<WorkflowProcessor>,
+        children: Vec<WorkflowProcessor>,
     ) -> Result<Self, String> {
         let step_output_type = step.get_output_type();
 
-        if substeps
+        if children
             .iter()
             .all(|substep| substep.get_input_type() == step_output_type)
         {
-            Ok(WorkflowProcessor { step, substeps })
+            Ok(WorkflowProcessor { step, children })
         } else {
             Err("Step output type does not match substep input type(s)".to_string())
         }
