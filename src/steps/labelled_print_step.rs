@@ -15,13 +15,19 @@ pub struct LabelledPrintStep<'a> {
 /// chess_analytics_build::register_step_builder "LabelledPrintStep" LabelledPrintStep
 impl<'a> LabelledPrintStep<'a> {
     pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
-        let input_type_description = configuration.get(0).unwrap_or(&format!("usize")).to_string();
+        let input_type_description = configuration
+            .get(0)
+            .unwrap_or(&"usize".to_string())
+            .to_string();
         let input_type = match input_type_description.as_ref() {
             "usize" => TypeId::of::<usize>(),
             _ => TypeId::of::<usize>(), // Probably should just fail here
         };
 
-        let label = configuration.get(1).unwrap_or(&"Usize".to_string()).to_string();
+        let label = configuration
+            .get(1)
+            .unwrap_or(&"Usize".to_string())
+            .to_string();
 
         let step = LabelledPrintStep {
             label,

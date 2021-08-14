@@ -18,9 +18,7 @@ impl GlobFileStep {
 
         let glob_string = configuration.get(0).unwrap_or(&format!("")).to_string();
 
-        let step = GlobFileStep {
-            glob_string
-        };
+        let step = GlobFileStep { glob_string };
 
         Ok(Box::new(step))
     }
@@ -72,7 +70,8 @@ mod test_glob_file_test {
 
     #[test]
     fn valid_configuration_1() {
-        let mut new_step = GlobFileStep::try_new(vec!["tests/data/10_games_000000.bin".to_string()]).unwrap();
+        let mut new_step =
+            GlobFileStep::try_new(vec!["tests/data/10_games_000000.bin".to_string()]).unwrap();
 
         let raw_output = new_step.process(&"").unwrap();
         assert_eq!((&*raw_output).type_id(), new_step.get_output_type());
@@ -89,7 +88,8 @@ mod test_glob_file_test {
 
     #[test]
     fn valid_configuration_2() {
-        let mut new_step = GlobFileStep::try_new(vec!["tests/data/10_games_000000*".to_string()]).unwrap();
+        let mut new_step =
+            GlobFileStep::try_new(vec!["tests/data/10_games_000000*".to_string()]).unwrap();
 
         let raw_output = new_step.process(&"").unwrap();
         assert_eq!((&*raw_output).type_id(), new_step.get_output_type());

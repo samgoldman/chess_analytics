@@ -18,7 +18,6 @@ workflows:
     step: count_files
     children:
       - PRINTER
-      - PRINTER
   INIT:
     step: glob_files
     children:
