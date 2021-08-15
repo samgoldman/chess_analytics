@@ -7,6 +7,7 @@
 use serde::Deserialize;
 use serde_yaml::Value;
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use std::fs::File;
 
 mod arguments;
@@ -21,11 +22,13 @@ mod game_wrapper;
 mod general_utils;
 mod steps;
 mod workflow_step;
+mod steps_manager;
 
 #[macro_use]
 extern crate lazy_static;
 
 use workflow_step::*;
+use steps_manager::*;
 
 // TODO: global: investigate no-panic
 // TODO: global: Ok/Err
@@ -61,8 +64,6 @@ where
         None => return Err("Could not find steps in configuration file".to_string()),
     };
 
-    let mut steps = HashMap::new();
-
     let steps_map = match steps_data.as_mapping() {
         Some(map) => map,
         None => return Err("Steps is not a map".to_string()),
@@ -88,85 +89,27 @@ where
                 serde_yaml::Value::Sequence(param_seq) => param_seq
                     .iter()
                     .map(|entry| match entry {
-                        serde_yaml::Value::String(entry_str) => entry_str.as_ref(),
+                        serde_yaml::Value::String(entry_str) => entry_str.to_string(),
                         _ => panic!("params has non-string entry"),
                     })
-                    .collect::<Vec<&str>>(),
+                    .collect::<Vec<String>>(),
                 _ => return Err(format!("Params for step {:?} is not a sequence", step_name)),
             },
             None => vec![],
         };
 
         let step = StepDescription {
-            step_type: step_type, 
+            step_type: step_type.to_string(), 
             parameters: params,
         };
-        steps.insert(step_name, step);
+        add_step_description(step_name, step);
     }
 
-    let mut workflows: HashMap<String, workflow_step::WorkflowProcessorDescription> = HashMap::new();
+    let init_desc = get_step_description("init".to_string());
+    let mut init = init_desc.to_step()?;
 
-    let workflow_data = match config_data.get("workflows") {
-        Some(workflows) => workflows,
-        None => return Err("Could not find workflows in configuration file".to_string()),
-    };
-
-    let workflow_map = match workflow_data.as_mapping() {
-        Some(map) => map,
-        None => return Err("Workflows is not a map".to_string()),
-    };
-
-    for (workflow_name, workflow_data) in workflow_map.iter() {
-        let workflow_name = workflow_name.as_str().unwrap().to_string();
-        let step_name = match workflow_data.get("step") {
-            Some(step) => match step {
-                serde_yaml::Value::String(step) => step.to_string(),
-                _ => {
-                    return Err(format!(
-                        "Step name for workflow {:?} is not a string",
-                        workflow_name
-                    ))
-                }
-            },
-            None => {
-                return Err(format!(
-                    "Step {:?} does not have a type field",
-                    workflow_name
-                ))
-            }
-        };
-
-        let children = match workflow_data.get("children") {
-            Some(children) => match children {
-                serde_yaml::Value::Sequence(entry) => entry
-                    .iter()
-                    .map(|entry| match entry {
-                        serde_yaml::Value::String(entry) => workflows.get(&entry.to_string()).unwrap().clone(),
-                        _ => panic!("children has non-string entry"),
-                    })
-                    .collect::<Vec<WorkflowProcessorDescription>>(),
-                _ => {
-                    return Err(format!(
-                        "Children for workflow {:?} is not a sequence",
-                        workflow_name
-                    ))
-                }
-            },
-            None => vec![],
-        };
-
-        let step = steps.get(&step_name).unwrap().clone();
-        let wf = WorkflowProcessorDescription {
-            step_description: step,
-            realized_children: children,
-            unrealized_children: vec![],
-        };
-        workflows.insert(workflow_name, wf);
-    }
-
-    let wf_init_description = workflows.remove("INIT").unwrap();
-    let mut wf_init = wf_init_description.to_workflow()?;
-    wf_init.process(&())?;
+    let data = Arc::new(Mutex::new(HashMap::new()));
+    init.process(data)?;
 
     Ok(())
 }

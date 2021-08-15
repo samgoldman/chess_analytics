@@ -10,17 +10,13 @@ steps:
     params:
       - "usize"
       - "File count" # Label
+  load_files:
+    type: Bz2DecompressStep
 
 workflows:
-  PRINTER:
-    step: print_results
-  COUNTER:
-    step: count_files
-    children:
-      - PRINTER
-      - PRINTER
-      - PRINTER
+  LOADER:
+    step: load_files
   INIT:
     step: glob_files
     children:
-      - COUNTER
+      - LOADER
