@@ -1,5 +1,4 @@
 use crate::workflow_step::*;
-use std::path::PathBuf;
 use crate::steps_manager::get_step_description;
 
 #[derive(Debug)]
@@ -24,12 +23,12 @@ impl<'a> Step for CountFilesStep {
             let mut unlocked_data = data.lock().unwrap();
             let raw_files = unlocked_data.remove("file_bufs").unwrap();
 
-            match (&*raw_files).downcast_ref::<Vec<PathBuf>>() {
-                Some(downcast) => {
-                    unlocked_data.insert("file_count".to_string(), Box::new(downcast.len()));
+            match raw_files {
+                SharedData::VecPathbuf(downcast) => {
+                    unlocked_data.insert("file_count".to_string(), SharedData::USize(downcast.len()));
                     Ok(())
                 },
-                None => Err("CountFilesStep: Could not downcast input!".to_string()),
+                _ => Err("CountFilesStep: Could not downcast input!".to_string()),
             }?;
         }
 

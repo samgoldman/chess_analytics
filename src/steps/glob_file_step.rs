@@ -21,7 +21,7 @@ impl GlobFileStep {
 
         let step = GlobFileStep {
             glob_string,
-            child: get_step_description(configuration.get(0).unwrap().clone()).to_step()?
+            child: get_step_description(configuration.get(1).unwrap().clone()).to_step()?
         };
 
         Ok(Box::new(step))
@@ -43,7 +43,7 @@ impl Step for GlobFileStep {
 
         {
             let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert("file_path_bufs".to_string(), Box::new(files));
+            unlocked_data.insert("file_path_bufs".to_string(), SharedData::VecPathbuf(files));
         }
 
         self.child.process(data)

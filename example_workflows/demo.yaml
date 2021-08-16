@@ -1,22 +1,22 @@
 steps:
-  glob_files:
+  init:
     type: "GlobFileStep"
     params:
       - "/data/data_scratch/lichess_data/rust_conversions_v3/**/*.*"
-  count_files:
-    type: "CountFilesStep"
+      - "parallel_step"
   print_results:
     type: LabelledPrintStep
     params:
       - "usize"
       - "File count" # Label
+  parallel_step:
+    type: ParallelStep
+    params:
+      - "load_files"
+      - "count_bytes"
   load_files:
     type: Bz2DecompressStep
-
-workflows:
-  LOADER:
-    step: load_files
-  INIT:
-    step: glob_files
-    children:
-      - LOADER
+  count_bytes:
+    type: RawByteCounterStep
+    params:
+      - "print_results"

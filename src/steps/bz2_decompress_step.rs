@@ -1,9 +1,9 @@
 use crate::workflow_step::*;
-use std::path::PathBuf;
 
 use std::fs::File;
 use std::io::Read;
 use bzip2::read::BzDecoder;
+use rayon::prelude::*;
 
 #[derive(Debug)]
 pub struct Bz2DecompressStep {}
@@ -22,18 +22,18 @@ impl<'a> Step for Bz2DecompressStep {
             unlocked_data.remove("file_path_bufs").unwrap()
         };
         
-        let paths = match bufs.downcast_ref::<Vec<PathBuf>>() {
-            Some(downcast) => downcast,
-            None => return Err("Bz2DecompressStep: Could not downcast input!".to_string()),
+        let paths = match bufs {
+            SharedData::VecPathbuf(downcast) => downcast,
+            _ => return Err("Bz2DecompressStep: Could not downcast input!".to_string()),
         };
 
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: Vec<Vec<u8>> = vec![];
-            unlocked_data.insert("raw_file_data".to_string(), Box::new(d));
+            unlocked_data.insert("raw_file_data".to_string(), SharedData::VecFileData(d));
         }
 
-        paths.iter().for_each(|path| {
+        paths.par_iter().for_each(|path| {
             let mut file = File::open(&path).expect("Could not open file");
             let mut file_data = Vec::new();
 
@@ -53,9 +53,9 @@ impl<'a> Step for Bz2DecompressStep {
             {
                 let mut unlocked_data = data.lock().unwrap();
                 let raw_file_data = unlocked_data.get_mut("raw_file_data").unwrap();
-                let file_data_vec = match raw_file_data.downcast_mut::<Vec<Vec<u8>>>() {
-                    Some(downcast) => downcast,
-                    None => panic!("Bz2DecompressStep: Could not downcast input!"), // TODO no panic
+                let file_data_vec = match raw_file_data {
+                    SharedData::VecFileData(downcast) => downcast,
+                    _ => panic!("Bz2DecompressStep: Could not downcast input!"), // TODO no panic
                 };
 
                 file_data_vec.push(file_data);
@@ -63,6 +63,12 @@ impl<'a> Step for Bz2DecompressStep {
             }
         });
 
+        {
+            let mut unlocked_data = data.lock().unwrap();
+            let d: bool = true;
+            unlocked_data.insert("done_reading_files".to_string(), SharedData::Bool(d));
+        }
+        
         Ok(())
     }
 }

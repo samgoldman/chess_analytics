@@ -1,41 +1,41 @@
 use crate::workflow_step::*;
 
-use std::any::*;
-use std::io::Write;
+// use std::any::*;
+// use std::io::Write;
 
-pub struct LabelledPrintStep<'a> {
-    label: String,
-    destination: Box<dyn Write + 'a>,
-    destination_description: String,
-    passthrough: bool,
-    input_type: TypeId,
-    input_type_description: String,
+pub struct LabelledPrintStep {
+    // label: String,
+    // destination: Box<dyn Write + 'a>,
+    // destination_description: String,
+    // passthrough: bool,
+    // input_type: TypeId,
+    // input_type_description: String,
 }
 
 /// chess_analytics_build::register_step_builder "LabelledPrintStep" LabelledPrintStep
-impl<'a> LabelledPrintStep<'a> {
-    pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
-        let input_type_description = configuration
-            .get(0)
-            .unwrap_or(&"usize".to_string())
-            .to_string();
-        let input_type = match input_type_description.as_ref() {
-            "usize" => TypeId::of::<usize>(),
-            _ => TypeId::of::<usize>(), // Probably should just fail here
-        };
+impl LabelledPrintStep {
+    pub fn try_new(_configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
+        // let input_type_description = configuration
+        //     .get(0)
+        //     .unwrap_or(&"usize".to_string())
+        //     .to_string();
+        // let input_type = match input_type_description.as_ref() {
+        //     "usize" => TypeId::of::<usize>(),
+        //     _ => TypeId::of::<usize>(), // Probably should just fail here
+        // };
 
-        let label = configuration
-            .get(1)
-            .unwrap_or(&"Usize".to_string())
-            .to_string();
+        // let label = configuration
+        //     .get(1)
+        //     .unwrap_or(&"Usize".to_string())
+        //     .to_string();
 
         let step = LabelledPrintStep {
-            label,
-            destination: Box::new(std::io::stdout()),
-            destination_description: "stdout".to_string(),
-            passthrough: false,
-            input_type,
-            input_type_description,
+            // label,
+            // destination: Box::new(std::io::stdout()),
+            // destination_description: "stdout".to_string(),
+            // passthrough: false,
+            // input_type,
+            // input_type_description,
         };
 
         Ok(Box::new(step))
@@ -52,7 +52,7 @@ impl<'a> LabelledPrintStep<'a> {
 //     };
 // }
 
-impl<'a> Step for LabelledPrintStep<'a> {
+impl<'a> Step for LabelledPrintStep {
     fn process(&mut self, _data: StepGeneric) -> Result<(), String> {
         // let input_type = self.input_type;
         // let downcast_attempt = downcast_attempt!(input_type, raw_input);
@@ -67,12 +67,11 @@ impl<'a> Step for LabelledPrintStep<'a> {
     }
 }
 
-impl<'a> std::fmt::Debug for LabelledPrintStep<'a> {
+impl std::fmt::Debug for LabelledPrintStep {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
-            "LabelledPrintStep {{label: {}, destination_description: {}, passthrough: {}, input_type_description: {}}}",
-            self.label, self.destination_description, self.passthrough, self.input_type_description,
+            "LabelledPrintStep TODO"
         )
     }
 }
