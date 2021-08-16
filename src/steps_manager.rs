@@ -1,6 +1,6 @@
 use crate::workflow_step::StepDescription;
-use std::sync::Mutex;
 use std::collections::HashMap;
+use std::sync::Mutex;
 
 lazy_static! {
     static ref BUILT_STEPS: Mutex<HashMap<String, StepDescription>> = Mutex::new(HashMap::new());

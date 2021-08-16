@@ -1,5 +1,5 @@
-use crate::workflow_step::*;
 use crate::steps_manager::get_step_description;
+use crate::workflow_step::*;
 
 use glob::glob;
 use std::path::PathBuf;
@@ -21,7 +21,7 @@ impl GlobFileStep {
 
         let step = GlobFileStep {
             glob_string,
-            child: get_step_description(configuration.get(1).unwrap().clone()).to_step()?
+            child: get_step_description(configuration.get(1).unwrap().clone()).to_step()?,
         };
 
         Ok(Box::new(step))

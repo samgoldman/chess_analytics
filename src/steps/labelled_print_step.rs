@@ -5,11 +5,11 @@ use crate::workflow_step::*;
 
 pub struct LabelledPrintStep {
     // label: String,
-    // destination: Box<dyn Write + 'a>,
-    // destination_description: String,
-    // passthrough: bool,
-    // input_type: TypeId,
-    // input_type_description: String,
+// destination: Box<dyn Write + 'a>,
+// destination_description: String,
+// passthrough: bool,
+// input_type: TypeId,
+// input_type_description: String,
 }
 
 /// chess_analytics_build::register_step_builder "LabelledPrintStep" LabelledPrintStep
@@ -69,9 +69,6 @@ impl<'a> Step for LabelledPrintStep {
 
 impl std::fmt::Debug for LabelledPrintStep {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(
-            f,
-            "LabelledPrintStep TODO"
-        )
+        write!(f, "LabelledPrintStep TODO")
     }
 }

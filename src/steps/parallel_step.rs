@@ -1,20 +1,21 @@
-use crate::workflow_step::*;
 use crate::steps_manager::get_step_description;
+use crate::workflow_step::*;
 use std::thread;
 // use std::sync::*;
 
 #[derive(Debug)]
 pub struct ParallelStep {
-    children: Vec<StepDescription>
+    children: Vec<StepDescription>,
 }
 
 /// chess_analytics_build::register_step_builder "ParallelStep" ParallelStep
 impl ParallelStep {
     pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
         Ok(Box::new(ParallelStep {
-            children: configuration.iter().map(|config_str| {
-                get_step_description(config_str.to_string())
-            }).collect()
+            children: configuration
+                .iter()
+                .map(|config_str| get_step_description(config_str.to_string()))
+                .collect(),
         }))
     }
 }
@@ -22,7 +23,6 @@ impl ParallelStep {
 impl<'a> Step for ParallelStep {
     #[allow(clippy::needless_return)] // Allow for coverage
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-
         // TODO make own step
         {
             let mut unlocked_data = data.lock().unwrap();
@@ -41,7 +41,10 @@ impl<'a> Step for ParallelStep {
         }
 
         for handle in handles {
-            handle.join()?;
+            match handle.join() {
+                Ok(_) => (),
+                Err(_) => return Err("Error joining threads in ParallelStep".to_string()),
+            }
         }
 
         Ok(())

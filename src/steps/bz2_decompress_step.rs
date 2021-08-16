@@ -1,9 +1,9 @@
 use crate::workflow_step::*;
 
-use std::fs::File;
-use std::io::Read;
 use bzip2::read::BzDecoder;
 use rayon::prelude::*;
+use std::fs::File;
+use std::io::Read;
 
 #[derive(Debug)]
 pub struct Bz2DecompressStep {}
@@ -17,11 +17,11 @@ impl Bz2DecompressStep {
 
 impl<'a> Step for Bz2DecompressStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-        let bufs = {   
+        let bufs = {
             let mut unlocked_data = data.lock().unwrap();
             unlocked_data.remove("file_path_bufs").unwrap()
         };
-        
+
         let paths = match bufs {
             SharedData::VecPathbuf(downcast) => downcast,
             _ => return Err("Bz2DecompressStep: Could not downcast input!".to_string()),
@@ -45,9 +45,12 @@ impl<'a> Step for Bz2DecompressStep {
 
             if compressed {
                 let mut decompressor = BzDecoder::new(file);
-                decompressor.read_to_end(&mut file_data).expect("Could not decompress file");
+                decompressor
+                    .read_to_end(&mut file_data)
+                    .expect("Could not decompress file");
             } else {
-                file.read_to_end(&mut file_data).expect("Could not read file");
+                file.read_to_end(&mut file_data)
+                    .expect("Could not read file");
             }
 
             {
@@ -59,7 +62,6 @@ impl<'a> Step for Bz2DecompressStep {
                 };
 
                 file_data_vec.push(file_data);
-        
             }
         });
 
@@ -68,7 +70,7 @@ impl<'a> Step for Bz2DecompressStep {
             let d: bool = true;
             unlocked_data.insert("done_reading_files".to_string(), SharedData::Bool(d));
         }
-        
+
         Ok(())
     }
 }

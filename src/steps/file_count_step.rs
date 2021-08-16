@@ -1,9 +1,9 @@
-use crate::workflow_step::*;
 use crate::steps_manager::get_step_description;
+use crate::workflow_step::*;
 
 #[derive(Debug)]
 pub struct CountFilesStep {
-    child: Box<dyn Step>
+    child: Box<dyn Step>,
 }
 
 /// chess_analytics_build::register_step_builder "CountFilesStep" CountFilesStep
@@ -11,7 +11,7 @@ impl CountFilesStep {
     pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
         Ok(Box::new(CountFilesStep {
             // TODO better error handling
-            child: get_step_description(configuration.get(0).unwrap().clone()).to_step()?
+            child: get_step_description(configuration.get(0).unwrap().clone()).to_step()?,
         }))
     }
 }
@@ -25,9 +25,10 @@ impl<'a> Step for CountFilesStep {
 
             match raw_files {
                 SharedData::VecPathbuf(downcast) => {
-                    unlocked_data.insert("file_count".to_string(), SharedData::USize(downcast.len()));
+                    unlocked_data
+                        .insert("file_count".to_string(), SharedData::USize(downcast.len()));
                     Ok(())
-                },
+                }
                 _ => Err("CountFilesStep: Could not downcast input!".to_string()),
             }?;
         }

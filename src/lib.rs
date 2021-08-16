@@ -7,8 +7,8 @@
 use serde::Deserialize;
 use serde_yaml::Value;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 use std::fs::File;
+use std::sync::{Arc, Mutex};
 
 mod arguments;
 #[macro_use]
@@ -21,14 +21,14 @@ mod chess_utils;
 mod game_wrapper;
 mod general_utils;
 mod steps;
-mod workflow_step;
 mod steps_manager;
+mod workflow_step;
 
 #[macro_use]
 extern crate lazy_static;
 
-use workflow_step::*;
 use steps_manager::*;
+use workflow_step::*;
 
 // TODO: global: investigate no-panic
 // TODO: global: Ok/Err
@@ -56,7 +56,12 @@ where
 
     let config_data = match Value::deserialize(document) {
         Ok(data) => data,
-        Err(err) => return Err(format!("Could not deserialize document into yaml values: {:?}", err)),
+        Err(err) => {
+            return Err(format!(
+                "Could not deserialize document into yaml values: {:?}",
+                err
+            ))
+        }
     };
 
     let steps_data = match config_data.get("steps") {
@@ -99,7 +104,7 @@ where
         };
 
         let step = StepDescription {
-            step_type: step_type.to_string(), 
+            step_type: step_type.to_string(),
             parameters: params,
         };
         add_step_description(step_name, step);

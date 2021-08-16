@@ -1,9 +1,9 @@
-use crate::workflow_step::*;
 use crate::steps_manager::get_step_description;
+use crate::workflow_step::*;
 
 #[derive(Debug)]
 pub struct RawByteCounterStep {
-    child: Box<dyn Step>
+    child: Box<dyn Step>,
 }
 
 /// chess_analytics_build::register_step_builder "RawByteCounterStep" RawByteCounterStep
@@ -11,7 +11,7 @@ impl RawByteCounterStep {
     pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
         Ok(Box::new(RawByteCounterStep {
             // TODO better error handling
-            child: get_step_description(configuration.get(0).unwrap().clone()).to_step()?
+            child: get_step_description(configuration.get(0).unwrap().clone()).to_step()?,
         }))
     }
 }
@@ -39,7 +39,6 @@ impl<'a> Step for RawByteCounterStep {
             if !still_reading_files {
                 break;
             }
-
 
             let mut unlocked_data = data.lock().unwrap();
             let raw_file_data = match unlocked_data.get_mut("raw_file_data") {
