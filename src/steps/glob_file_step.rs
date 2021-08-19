@@ -2,7 +2,6 @@ use crate::steps_manager::get_step_description;
 use crate::workflow_step::*;
 
 use glob::glob;
-use std::path::PathBuf;
 
 #[derive(Debug)]
 pub struct GlobFileStep {
@@ -39,11 +38,11 @@ impl Step for GlobFileStep {
             return Err(format!("Could not process glob: {}", self.glob_string));
         };
 
-        let files = file_glob.map(Result::unwrap).collect::<Vec<PathBuf>>();
+        let files: Vec<SharedData> = file_glob.map(Result::unwrap).map(|path| SharedData::SharedPathBuf(path)).collect();
 
         {
             let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert("file_path_bufs".to_string(), SharedData::VecPathbuf(files));
+            unlocked_data.insert("file_path_bufs".to_string(), SharedData::SharedVec(files));
         }
 
         self.child.process(data)

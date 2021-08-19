@@ -22,7 +22,7 @@ impl<'a> Step for RawByteCounterStep {
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: u64 = 0;
-            unlocked_data.insert("byte_counter".to_string(), SharedData::U64(d));
+            unlocked_data.insert("byte_counter".to_string(), SharedData::SharedU64(d));
         }
 
         loop {
@@ -31,7 +31,7 @@ impl<'a> Step for RawByteCounterStep {
                 let flag = unlocked_data.get("done_reading_files").unwrap();
 
                 match flag {
-                    SharedData::Bool(downcast) => !downcast,
+                    SharedData::SharedBool(downcast) => !downcast,
                     _ => return Err("RawByteCounterStep: Could not downcast input!".to_string()),
                 }
             };
@@ -46,14 +46,17 @@ impl<'a> Step for RawByteCounterStep {
                 None => continue,
             };
             let file_data_vec = match raw_file_data {
-                SharedData::VecFileData(downcast) => downcast,
-                _ => panic!("Bz2DecompressStep: Could not downcast input!"), // TODO no panic
+                SharedData::SharedVec(downcast) => downcast,
+                _ => panic!("RawByteCounterStep: Could not downcast input!"), // TODO no panic
             };
 
-            let file_data = file_data_vec.pop().unwrap_or(vec![]);
+            let file_data = match file_data_vec.pop().unwrap_or(SharedData::SharedVec(vec![])) {
+                SharedData::SharedFileData(data) => data,
+                _ => panic!(), // TODO
+            };
 
             let byte_counter = match unlocked_data.get_mut("byte_counter").unwrap() {
-                SharedData::U64(downcast) => downcast,
+                SharedData::SharedU64(downcast) => downcast,
                 _ => return Err("RawByteCounterStep: could not downcast".to_string()),
             };
             *byte_counter += file_data.len() as u64;

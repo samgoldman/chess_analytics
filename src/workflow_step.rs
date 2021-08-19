@@ -6,6 +6,7 @@ use std::fmt;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
+use crate::game_wrapper::GameWrapper;
 
 pub type BoxedStep = Box<dyn Step>;
 pub type StepFactory = Box<dyn Fn(Vec<String>) -> Result<BoxedStep, String>>;
@@ -13,11 +14,13 @@ pub type StepGeneric = Arc<Mutex<HashMap<String, SharedData>>>;
 
 #[derive(Clone, Debug)]
 pub enum SharedData {
-    U64(u64),
-    USize(usize),
-    VecPathbuf(Vec<PathBuf>),
-    VecFileData(Vec<Vec<u8>>),
-    Bool(bool),
+    SharedU64(u64),
+    SharedUSize(usize),
+    SharedPathBuf(PathBuf),
+    SharedFileData(Vec<u8>),
+    SharedBool(bool),
+    SharedGame(GameWrapper),
+    SharedVec(Vec<SharedData>),
 }
 
 #[derive(Clone, Debug)]

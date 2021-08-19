@@ -11,6 +11,7 @@ lcov.info
 results/
 *.log
 tarpaulin-report.html
+*.bin
 
 # Auto-generated files
 src/steps.rs

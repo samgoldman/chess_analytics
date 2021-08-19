@@ -5,6 +5,8 @@ use rayon::prelude::*;
 use std::fs::File;
 use std::io::Read;
 
+use std::time::Instant;
+
 #[derive(Debug)]
 pub struct Bz2DecompressStep {}
 
@@ -23,17 +25,21 @@ impl<'a> Step for Bz2DecompressStep {
         };
 
         let paths = match bufs {
-            SharedData::VecPathbuf(downcast) => downcast,
+            SharedData::SharedVec(vec) => vec,
             _ => return Err("Bz2DecompressStep: Could not downcast input!".to_string()),
         };
 
         {
             let mut unlocked_data = data.lock().unwrap();
-            let d: Vec<Vec<u8>> = vec![];
-            unlocked_data.insert("raw_file_data".to_string(), SharedData::VecFileData(d));
+            unlocked_data.insert("raw_file_data".to_string(), SharedData::SharedVec(vec![]));
         }
 
         paths.par_iter().for_each(|path| {
+            let path = match path {
+                SharedData::SharedPathBuf(buf) => buf,
+                _ => panic!("Bz2DecompressStep: Could not downcast input!"), // TODO don't panic
+            };
+
             let mut file = File::open(&path).expect("Could not open file");
             let mut file_data = Vec::new();
 
@@ -49,26 +55,37 @@ impl<'a> Step for Bz2DecompressStep {
                     .read_to_end(&mut file_data)
                     .expect("Could not decompress file");
             } else {
+
                 file.read_to_end(&mut file_data)
                     .expect("Could not read file");
+
+
             }
 
-            {
-                let mut unlocked_data = data.lock().unwrap();
+            {                
+                
+                let now = Instant::now();
+
+
+                let mut unlocked_data = data.lock().unwrap();      
+                
+                
+                // println!("{}", now.elapsed().as_nanos());
+
                 let raw_file_data = unlocked_data.get_mut("raw_file_data").unwrap();
-                let file_data_vec = match raw_file_data {
-                    SharedData::VecFileData(downcast) => downcast,
+                let file_data_vec: &mut Vec<SharedData> = match raw_file_data {
+                    SharedData::SharedVec(vec) => vec,
                     _ => panic!("Bz2DecompressStep: Could not downcast input!"), // TODO no panic
                 };
 
-                file_data_vec.push(file_data);
+                file_data_vec.push(SharedData::SharedFileData(file_data));
             }
         });
 
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: bool = true;
-            unlocked_data.insert("done_reading_files".to_string(), SharedData::Bool(d));
+            unlocked_data.insert("done_reading_files".to_string(), SharedData::SharedBool(d));
         }
 
         Ok(())

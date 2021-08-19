@@ -27,7 +27,9 @@ impl<'a> Step for ParallelStep {
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: bool = false;
-            unlocked_data.insert("done_reading_files".to_string(), SharedData::Bool(d));
+            unlocked_data.insert("done_reading_files".to_string(), SharedData::SharedBool(d));
+            let f: bool = false;
+            unlocked_data.insert("done_parsing_games".to_string(), SharedData::SharedBool(f));
         }
 
         let mut handles = vec![];
@@ -43,7 +45,7 @@ impl<'a> Step for ParallelStep {
         for handle in handles {
             match handle.join() {
                 Ok(_) => (),
-                Err(_) => return Err("Error joining threads in ParallelStep".to_string()),
+                Err(err) => panic!("{:?}", err),
             }
         }
 
