@@ -55,22 +55,16 @@ impl<'a> Step for Bz2DecompressStep {
                     .read_to_end(&mut file_data)
                     .expect("Could not decompress file");
             } else {
-
                 file.read_to_end(&mut file_data)
                     .expect("Could not read file");
-
-
             }
 
-            {                
-                
+            {
                 let now = Instant::now();
 
+                let mut unlocked_data = data.lock().unwrap();
 
-                let mut unlocked_data = data.lock().unwrap();      
-                
-                
-                // println!("{}", now.elapsed().as_nanos());
+                println!("{}", now.elapsed().as_nanos());
 
                 let raw_file_data = unlocked_data.get_mut("raw_file_data").unwrap();
                 let file_data_vec: &mut Vec<SharedData> = match raw_file_data {

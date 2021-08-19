@@ -3,7 +3,7 @@ use crate::workflow_step::*;
 pub struct LabelledPrintStep {
     label: String,
     field: String,
-    destination:  String,
+    destination: String,
     consume: bool,
 }
 
@@ -15,10 +15,7 @@ impl LabelledPrintStep {
             .unwrap_or(&"Usize".to_string())
             .to_string();
 
-        let field = configuration
-            .get(1)
-            .unwrap()
-            .to_string();
+        let field = configuration.get(1).unwrap().to_string();
 
         let step = LabelledPrintStep {
             label,

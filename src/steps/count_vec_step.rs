@@ -40,7 +40,9 @@ impl<'a> Step for CountVecStep {
             let break_flag = {
                 let unlocked_data = data.lock().unwrap();
                 // TODO update to not just unwrap while_false
-                let flag = unlocked_data.get(self.while_false.as_ref().unwrap()).unwrap_or(&SharedData::SharedBool(false));
+                let flag = unlocked_data
+                    .get(self.while_false.as_ref().unwrap())
+                    .unwrap_or(&SharedData::SharedBool(false));
 
                 match flag {
                     SharedData::SharedBool(downcast) => !!downcast,

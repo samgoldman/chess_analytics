@@ -1,3 +1,4 @@
+use crate::game_wrapper::GameWrapper;
 use crate::steps::get_step_by_name_and_params;
 use mockall::predicate::*;
 use mockall::*;
@@ -6,7 +7,6 @@ use std::fmt;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
-use crate::game_wrapper::GameWrapper;
 
 pub type BoxedStep = Box<dyn Step>;
 pub type StepFactory = Box<dyn Fn(Vec<String>) -> Result<BoxedStep, String>>;

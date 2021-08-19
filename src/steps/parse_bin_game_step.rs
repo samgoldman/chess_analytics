@@ -1,6 +1,6 @@
 // use crate::steps_manager::get_step_description;
-use crate::workflow_step::*;
 use crate::game_wrapper::*;
+use crate::workflow_step::*;
 use std::time::Instant;
 
 #[derive(Debug)]
@@ -20,7 +20,6 @@ impl ParseBinGame {
 
 impl<'a> Step for ParseBinGame {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-
         {
             let mut unlocked_data = data.lock().unwrap();
             let vec: Vec<SharedData> = vec![];
@@ -64,9 +63,10 @@ impl<'a> Step for ParseBinGame {
             };
 
             if !file_data.is_empty() {
-            
-
-                let mut games = GameWrapper::from_game_list_data(file_data).iter().map(|g| SharedData::SharedGame(g.clone())).collect::<Vec<SharedData>>();
+                let mut games = GameWrapper::from_game_list_data(file_data)
+                    .iter()
+                    .map(|g| SharedData::SharedGame(g.clone()))
+                    .collect::<Vec<SharedData>>();
 
                 {
                     let mut unlocked_data = data.lock().unwrap();
@@ -91,6 +91,6 @@ impl<'a> Step for ParseBinGame {
             unlocked_data.insert("done_parsing_games".to_string(), SharedData::SharedBool(d));
         }
 
-        Ok(())//self.child.process(data)
+        Ok(()) //self.child.process(data)
     }
 }

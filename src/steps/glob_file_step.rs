@@ -38,7 +38,10 @@ impl Step for GlobFileStep {
             return Err(format!("Could not process glob: {}", self.glob_string));
         };
 
-        let files: Vec<SharedData> = file_glob.map(Result::unwrap).map(|path| SharedData::SharedPathBuf(path)).collect();
+        let files: Vec<SharedData> = file_glob
+            .map(Result::unwrap)
+            .map(|path| SharedData::SharedPathBuf(path))
+            .collect();
 
         {
             let mut unlocked_data = data.lock().unwrap();
