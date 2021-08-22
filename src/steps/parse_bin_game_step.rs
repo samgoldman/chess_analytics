@@ -1,7 +1,6 @@
 // use crate::steps_manager::get_step_description;
 use crate::game_wrapper::*;
 use crate::workflow_step::*;
-use std::time::Instant;
 
 #[derive(Debug)]
 pub struct ParseBinGame {
@@ -26,12 +25,12 @@ impl<'a> Step for ParseBinGame {
             unlocked_data.insert("parsed_games".to_string(), SharedData::SharedVec(vec));
         }
         loop {
-            let still_reading_files = {
+            let done_reading_files = {
                 let unlocked_data = data.lock().unwrap();
                 let flag = unlocked_data.get("done_reading_files").unwrap();
 
                 match flag {
-                    SharedData::SharedBool(downcast) => !downcast,
+                    SharedData::SharedBool(downcast) => *downcast,
                     _ => return Err("ParseBinGame: Could not downcast input!".to_string()),
                 }
             };
@@ -80,11 +79,12 @@ impl<'a> Step for ParseBinGame {
                 }
             }
 
-            if !still_reading_files && remaining_files == 0 {
+            if done_reading_files && remaining_files == 0 {
                 break;
             }
         }
 
+        std::thread::sleep(std::time::Duration::from_secs(1));
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: bool = true;

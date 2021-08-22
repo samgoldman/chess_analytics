@@ -20,6 +20,8 @@ mod chess;
 mod chess_utils;
 mod game_wrapper;
 mod general_utils;
+#[macro_use]
+mod macros;
 mod steps;
 mod steps_manager;
 mod workflow_step;

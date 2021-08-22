@@ -1,7 +1,6 @@
 use crate::steps_manager::get_step_description;
 use crate::workflow_step::*;
 use std::thread;
-// use std::sync::*;
 
 #[derive(Debug)]
 pub struct ParallelStep {

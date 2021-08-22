@@ -2,9 +2,14 @@ steps:
   init:
     type: "GlobFileStep"
     params:
-      - "/data/data_scratch/lichess_data/rust_conversions_v3/2016-08/*.bin"
-      # - "./lichess_data/2016-08/*.bin"
+      - "/data/data_scratch/lichess_data/rust_conversions_v3/2014-01/*.bin"
       - "parallel_step"
+  print_results:
+    type: LabelledPrintStep
+    params:
+      - "Number of games"
+      - "count_games"
+      - "stdout"
   print_results:
     type: LabelledPrintStep
     params:
@@ -17,6 +22,7 @@ steps:
       - "load_files"
       - "parse_games"
       - "count_games"
+      # - "monitor"
   load_files:
     type: Bz2DecompressStep
   parse_games:
@@ -29,3 +35,7 @@ steps:
       - "count_games"
       - "true"
       - "done_parsing_games"
+  monitor:
+    type: MonitorStep
+  noop:
+    type: NoopStep

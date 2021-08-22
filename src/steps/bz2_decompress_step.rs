@@ -5,8 +5,6 @@ use rayon::prelude::*;
 use std::fs::File;
 use std::io::Read;
 
-use std::time::Instant;
-
 #[derive(Debug)]
 pub struct Bz2DecompressStep {}
 
@@ -60,11 +58,7 @@ impl<'a> Step for Bz2DecompressStep {
             }
 
             {
-                let now = Instant::now();
-
                 let mut unlocked_data = data.lock().unwrap();
-
-                println!("{}", now.elapsed().as_nanos());
 
                 let raw_file_data = unlocked_data.get_mut("raw_file_data").unwrap();
                 let file_data_vec: &mut Vec<SharedData> = match raw_file_data {

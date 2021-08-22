@@ -37,21 +37,9 @@ impl<'a> Step for CountVecStep {
         }
 
         loop {
-            let break_flag = {
-                let unlocked_data = data.lock().unwrap();
-                // TODO update to not just unwrap while_false
-                let flag = unlocked_data
-                    .get(self.while_false.as_ref().unwrap())
-                    .unwrap_or(&SharedData::SharedBool(false));
-
-                match flag {
-                    SharedData::SharedBool(downcast) => !!downcast,
-                    _ => return Err("CountVecStep: Could not downcast input!".to_string()),
-                }
-            };
-
             let count = {
                 let mut unlocked_data = data.lock().unwrap();
+
                 let data = match unlocked_data.get_mut(&self.field_to_count) {
                     Some(data) => data,
                     None => continue,
@@ -61,12 +49,11 @@ impl<'a> Step for CountVecStep {
                     _ => panic!("CountVecStep: Could not downcast input!"), // TODO no panic
                 };
 
-                let ret = vec_to_count.len() as u64;
+                let count = vec_to_count.len() as u64;
                 if self.consume {
                     vec_to_count.clear();
                 }
-
-                ret
+                count
             };
 
             let mut unlocked_data = data.lock().unwrap();
@@ -81,7 +68,17 @@ impl<'a> Step for CountVecStep {
                 *counter = count;
             }
 
-            if break_flag {
+
+            let flag = unlocked_data
+                .get(self.while_false.as_ref().unwrap())
+                .unwrap_or(&SharedData::SharedBool(false));
+
+            let flag = match flag {
+                SharedData::SharedBool(downcast) => *downcast,
+                _ => return Err("CountVecStep: Could not downcast input!".to_string()),
+            };
+
+            if flag {
                 break;
             }
         }

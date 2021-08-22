@@ -34,13 +34,16 @@ impl<'a> Step for LabelledPrintStep {
         let value = locked_data.get(&self.field);
 
         // TODO don't just use debug formatting
-        println!("{}: {:?}", self.label, value.unwrap());
+        match value {
+            Some(value) => println!("{}: {:?}", self.label, value),
+            None => {} // TODO For now fail silently
+        }
         Ok(())
     }
 }
 
 impl std::fmt::Debug for LabelledPrintStep {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "LabelledPrintStep TODO")
+        write!(f, "LabelledPrintStep TODO") // TODO
     }
 }
