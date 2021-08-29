@@ -29,10 +29,7 @@ impl<'a> Step for ParseBinGame {
                 let unlocked_data = data.lock().unwrap();
                 let flag = unlocked_data.get("done_reading_files").unwrap();
 
-                match flag {
-                    SharedData::SharedBool(downcast) => *downcast,
-                    _ => return Err("ParseBinGame: Could not downcast input!".to_string()),
-                }
+                flag.to_bool().unwrap()
             };
 
             let remaining_files;
@@ -43,10 +40,7 @@ impl<'a> Step for ParseBinGame {
                     Some(data) => data,
                     None => continue,
                 };
-                let file_data_vec = match raw_file_data {
-                    SharedData::SharedVec(downcast) => downcast,
-                    _ => panic!("ParseBinGame: Could not downcast input!"), // TODO no panic
-                };
+                let file_data_vec = raw_file_data.to_vec_mut().unwrap();
 
                 remaining_files = file_data_vec.len();
                 if remaining_files == 0 {
@@ -70,10 +64,7 @@ impl<'a> Step for ParseBinGame {
                 {
                     let mut unlocked_data = data.lock().unwrap();
                     let game_list = unlocked_data.get_mut("parsed_games").unwrap();
-                    let game_list: &mut Vec<SharedData> = match game_list {
-                        SharedData::SharedVec(vec) => vec,
-                        _ => panic!("ParseBinGame: Could not downcast input!"), // TODO no panic
-                    };
+                    let game_list: &mut Vec<SharedData> = game_list.to_vec_mut().unwrap();
 
                     game_list.append(&mut games);
                 }

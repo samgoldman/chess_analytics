@@ -36,6 +36,9 @@ fn generate_steps_module() -> Result<(), std::io::Error> {
     for path in paths {
         let path = path?.path();
 
+        if path.is_dir() {
+            continue;
+        }
         let file = fs::File::open(path.clone())?;
         let reader = BufReader::new(file);
 

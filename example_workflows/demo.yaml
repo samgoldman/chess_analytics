@@ -1,9 +1,7 @@
 steps:
   init:
     type: "GlobFileStep"
-    params:
-      - "/data/data_scratch/lichess_data/rust_conversions_v3/2014-01/*.bin"
-      - "parallel_step"
+    params: "--glob /data/data_scratch/lichess_data/rust_conversions_v3/2013-01/*.bin --child parallel_step"
   print_results:
     type: LabelledPrintStep
     params:

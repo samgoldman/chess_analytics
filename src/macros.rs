@@ -11,6 +11,24 @@ macro_rules! timed_data_lock {
     };
 }
 
+macro_rules! load_step_config {
+    ($name1:literal, $name2:literal, $configuration:ident) => {
+        {
+            // Test
+            let yml = load_yaml!($name2);
+            let arg_app = App::from(yml);
+
+            let mut configuration = $configuration.clone();
+            configuration.insert(0, $name1.to_string());
+
+            match arg_app.try_get_matches_from(configuration) {
+                Ok(matches) => matches,
+                Err(err) => return Err(format!("{}: bad configuration: {}", $name2, err)),
+            }
+        }
+    };
+}
+
 macro_rules! filter_template {
     ($logic:expr) => {
         fn process(&mut self, data: StepGeneric) -> Result<(), String> {
@@ -28,10 +46,7 @@ macro_rules! filter_template {
                         Some(data) => data,
                         None => continue,
                     };
-                    let vec_to_filter = match data {
-                        SharedData::SharedVec(vec) => vec,
-                        _ => panic!("Filter loop: Could not downcast input!"), // TODO no panic
-                    };
+                    let vec_to_filter = data.to_vec_mut().unwrap();
     
                     let ret = vec_to_filter.clone();
                     vec_to_filter.clear();
@@ -62,10 +77,7 @@ macro_rules! filter_template {
                         Some(data) => data,
                         None => continue,
                     };
-                    let vec_to_append = match data {
-                        SharedData::SharedVec(vec) => vec,
-                        _ => panic!("Filter loop: Could not downcast!"), // TODO no panic
-                    };
+                    let vec_to_append = data.to_vec_mut().unwrap();
 
                     vec_to_append.append(&mut output_games);
                 }
@@ -77,10 +89,7 @@ macro_rules! filter_template {
                         Some(data) => data,
                         None => continue,
                     };
-                    let vec_to_append = match data {
-                        SharedData::SharedVec(vec) => vec,
-                        _ => panic!("Filter loop: Could not downcast!"), // TODO no panic
-                    };
+                    let vec_to_append = data.to_vec_mut().unwrap();
 
                     vec_to_append.append(&mut discard_games);
                 }
@@ -91,10 +100,7 @@ macro_rules! filter_template {
                     .get(&self.flag_name)
                     .unwrap_or(&SharedData::SharedBool(false));
     
-                let flag = match flag {
-                    SharedData::SharedBool(downcast) => *downcast,
-                    _ => return Err("CountVecStep: Could not downcast input!".to_string()),
-                };
+                let flag = flag.to_bool().unwrap();
     
                 if flag {
                     break;

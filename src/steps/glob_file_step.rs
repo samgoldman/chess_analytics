@@ -1,6 +1,7 @@
 use crate::steps_manager::get_step_description;
 use crate::workflow_step::*;
 
+use clap::{App, load_yaml};
 use glob::glob;
 
 #[derive(Debug)]
@@ -12,15 +13,17 @@ pub struct GlobFileStep {
 /// chess_analytics_build::register_step_builder "GlobFileStep" GlobFileStep
 impl GlobFileStep {
     pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
-        if configuration.is_empty() {
-            return Err("GlobFileStep: invalid configuration".to_string());
-        }
+        let matches = load_step_config!("GlobFileStep", "step_arg_configs/glob_file_step.yaml", configuration);
 
-        let glob_string = configuration.get(0).unwrap_or(&format!("")).to_string();
+        // "glob" is required by args, so safe to unwrap
+        let glob_string = matches.value_of("glob").unwrap().to_string();
+
+        // "child" is required by args, so safe to unwrap
+        let child_string = matches.value_of("child").unwrap().to_string();
 
         let step = GlobFileStep {
             glob_string,
-            child: get_step_description(configuration.get(1).unwrap().clone()).to_step()?,
+            child: get_step_description(child_string).to_step()?,
         };
 
         Ok(Box::new(step))

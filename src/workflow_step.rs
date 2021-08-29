@@ -23,6 +23,64 @@ pub enum SharedData {
     SharedVec(Vec<SharedData>),
 }
 
+impl SharedData {
+    pub fn to_u64(&self) -> Option<u64> {
+        match self {
+            SharedData::SharedU64(val) => Some(*val),
+            _ => None,
+        }
+    }
+
+    pub fn to_u64_mut(&mut self) -> Option<&mut u64> {
+        match self {
+            SharedData::SharedU64(val) => Some(val),
+            _ => None,
+        }
+    }
+
+    pub fn to_usize_mut(&mut self) -> Option<&mut usize> {
+        match self {
+            SharedData::SharedUSize(val) => Some(val),
+            _ => None,
+        }
+    }
+
+    pub fn to_bool(&self) -> Option<bool> {
+        match self {
+            SharedData::SharedBool(val) => Some(*val),
+            _ => None,
+        }
+    }
+
+    pub fn to_bool_mut(&mut self) -> Option<&mut bool> {
+        match self {
+            SharedData::SharedBool(val) => Some(val),
+            _ => None,
+        }
+    }
+
+    pub fn to_game_mut(&mut self) -> Option<&mut GameWrapper> {
+        match self {
+            SharedData::SharedGame(val) => Some(val),
+            _ => None,
+        }
+    }
+
+    pub fn to_vec(&self) -> Option<Vec<SharedData>> {
+        match self {
+            SharedData::SharedVec(v) => Some(v.to_vec()),
+            _ => None,
+        }
+    }
+
+    pub fn to_vec_mut(&mut self) -> Option<&mut Vec<SharedData>> {
+        match self {
+            SharedData::SharedVec(v) => Some(v),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct StepDescription {
     pub step_type: String,

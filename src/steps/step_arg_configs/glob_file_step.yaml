@@ -1,0 +1,11 @@
+name: GlobFileStepp
+version: "1.0"
+args:
+  - glob:
+      long: glob
+      takes_value: true
+      required: true
+  - child:
+      long: child
+      takes_value: true
+      required: true

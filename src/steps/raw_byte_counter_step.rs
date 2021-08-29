@@ -55,10 +55,7 @@ impl<'a> Step for RawByteCounterStep {
                 _ => panic!(), // TODO
             };
 
-            let byte_counter = match unlocked_data.get_mut("byte_counter").unwrap() {
-                SharedData::SharedU64(downcast) => downcast,
-                _ => return Err("RawByteCounterStep: could not downcast".to_string()),
-            };
+            let byte_counter = unlocked_data.get_mut("byte_counter").unwrap().to_u64_mut().unwrap();
             *byte_counter += file_data.len() as u64;
         }
 

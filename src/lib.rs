@@ -100,6 +100,9 @@ where
                         _ => panic!("params has non-string entry"),
                     })
                     .collect::<Vec<String>>(),
+                serde_yaml::Value::String(param_string) => {
+                    param_string.split(" ").map(|s| s.to_string()).collect()
+                },
                 _ => return Err(format!("Params for step {:?} is not a sequence", step_name)),
             },
             None => vec![],

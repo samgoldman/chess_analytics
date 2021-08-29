@@ -26,20 +26,6 @@ impl MonitorStep {
     }
 }
 
-fn shared_as_vec(data: &SharedData) -> Option<Vec<SharedData>> {
-    match data {
-        SharedData::SharedVec(vec) => Some(vec.to_vec()),
-        _ => None,
-    }
-}
-
-fn shared_as_u64(data: &SharedData) -> Option<u64> {
-    match data {
-        SharedData::SharedU64(data) => Some(*data),
-        _ => None,
-    }
-}
-
 impl<'a> Step for MonitorStep {
     #[allow(clippy::needless_return)] // Allow for coverage
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
@@ -47,11 +33,11 @@ impl<'a> Step for MonitorStep {
             let monitored_data = {
                 let unlocked_data = data.lock().unwrap();
                 vec![
-                    (format!("{}: {}", "Pending Games", shared_as_vec(unlocked_data.get("parsed_games").unwrap_or(&SharedData::SharedVec(vec![SharedData::SharedBool(false)]))).unwrap().len())),
-                    (format!("{}: {}", "Pending Files", shared_as_vec(unlocked_data.get("raw_file_data").unwrap_or(&SharedData::SharedVec(vec![SharedData::SharedBool(false)]))).unwrap().len())),
-                    (format!("{}: {}", "Game Count", shared_as_u64(unlocked_data.get("count_games").unwrap_or(&SharedData::SharedU64(0))).unwrap())),
-                    (format!("{}: {:?}", "Done reading files", unlocked_data.get("done_reading_files").unwrap_or(&SharedData::SharedVec(vec![])))),
-                    (format!("{}: {:?}", "Done parsing games", unlocked_data.get("done_parsing_games").unwrap_or(&SharedData::SharedVec(vec![])))),
+                    (format!("{}: {}", "Pending Games", unlocked_data.get("parsed_games").unwrap_or(&SharedData::SharedVec(vec![])).to_vec().unwrap().len())),
+                    (format!("{}: {}", "Pending Files", unlocked_data.get("raw_file_data").unwrap_or(&SharedData::SharedVec(vec![])).to_vec().unwrap().len())),
+                    (format!("{}: {}", "Game Count", unlocked_data.get("count_games").unwrap_or(&SharedData::SharedU64(0)).to_u64().unwrap())),
+                    (format!("{}: {:?}", "Done reading files", unlocked_data.get("done_reading_files").unwrap_or(&SharedData::SharedBool(false)).to_bool())),
+                    (format!("{}: {:?}", "Done parsing games", unlocked_data.get("done_parsing_games").unwrap_or(&SharedData::SharedBool(false)).to_bool())),
                 ]
             };
 

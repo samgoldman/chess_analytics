@@ -44,10 +44,7 @@ impl<'a> Step for CountVecStep {
                     Some(data) => data,
                     None => continue,
                 };
-                let vec_to_count = match data {
-                    SharedData::SharedVec(vec) => vec,
-                    _ => panic!("CountVecStep: Could not downcast input!"), // TODO no panic
-                };
+                let vec_to_count = data.to_vec_mut().unwrap();
 
                 let count = vec_to_count.len() as u64;
                 if self.consume {
@@ -57,10 +54,7 @@ impl<'a> Step for CountVecStep {
             };
 
             let mut unlocked_data = data.lock().unwrap();
-            let counter = match unlocked_data.get_mut(&self.field_to_store).unwrap() {
-                SharedData::SharedU64(downcast) => downcast,
-                _ => return Err("CountVecStep: could not downcast".to_string()),
-            };
+            let counter = unlocked_data.get_mut(&self.field_to_store).unwrap().to_u64_mut().unwrap();
 
             if self.consume {
                 *counter += count;
@@ -73,10 +67,7 @@ impl<'a> Step for CountVecStep {
                 .get(self.while_false.as_ref().unwrap())
                 .unwrap_or(&SharedData::SharedBool(false));
 
-            let flag = match flag {
-                SharedData::SharedBool(downcast) => *downcast,
-                _ => return Err("CountVecStep: Could not downcast input!".to_string()),
-            };
+            let flag = flag.to_bool().unwrap();
 
             if flag {
                 break;

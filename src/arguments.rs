@@ -19,7 +19,7 @@ where
             Arg::new("column_fields")
                 .long("column_fields")
                 .takes_value(true)
-                .multiple(true)
+                .multiple_values(true)
                 .default_values(&["0", "-1"]),
         )
         .try_get_matches_from(args)
