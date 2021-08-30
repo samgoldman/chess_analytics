@@ -108,15 +108,6 @@ filter!(player_elo_filter, "playerElo", params, {
     })
 });
 
-// Requires one parameter: either "occurs" or "does_not_occur"
-filter!(mate_occurs_filter, "mate", params, {
-    let mate_occurs = params[0] != "does_not_occur";
-    Box::new(move |game| -> bool {
-        let last = game.moves.iter().last();
-        mate_occurs == (last.is_some() && last.unwrap().mates)
-    })
-});
-
 // Requires any parameters: the
 filter!(site_matches_any_filter, "siteMatchesAny", params, {
     Box::new(move |game| -> bool {
@@ -551,64 +542,6 @@ mod test_moves_count_filter {
         test_9: (vec![*MOVE_2, *MOVE_1], "max", 2, true),
         test_10: (vec![*MOVE_2, *MOVE_1], "min", 3, false),
         test_11: (vec![*MOVE_2, *MOVE_1], "max", 1, false),
-    }
-}
-
-#[cfg(test)]
-mod test_mate_occurs {
-    use super::*;
-    use crate::basic_types::*;
-
-    macro_rules! tests {
-        ($($name:ident: $value:expr,)*) => {
-        $(
-            #[test]
-            fn $name() {
-                let (moves, comparison, threshold, expected) = $value;
-                let mut game = GameWrapper::default();
-                game.moves = moves;
-
-                let filter_fn = mate_occurs_filter::factory(vec![comparison.to_string(), threshold.to_string()]);
-                assert_eq!(expected, (filter_fn)(&game));
-            }
-        )*
-        }
-    }
-
-    lazy_static! {
-        static ref MOVE_1: Move = Move {
-            from: partial_cell!(None, None),
-            to: cell!(File::_A, Rank::_1),
-            piece_moved: Piece::Pawn,
-            captures: false,
-            checks: true,
-            mates: false,
-            nag: NAG::None,
-            promoted_to: None::<Piece>,
-        };
-        static ref MOVE_2: Move = Move {
-            from: partial_cell!(None, None),
-            to: cell!(File::_A, Rank::_1),
-            piece_moved: Piece::Pawn,
-            captures: true,
-            checks: true,
-            mates: true,
-            nag: NAG::None,
-            promoted_to: None::<Piece>,
-        };
-    }
-
-    tests! {
-        test_1: (vec![], "occurs", 0, false),
-        test_2: (vec![], "does_not_occur", 0, true),
-        test_3: (vec![*MOVE_1], "occurs", 0, false),
-        test_4: (vec![*MOVE_1], "does_not_occur", 0, true),
-        test_5: (vec![*MOVE_1, *MOVE_1], "occurs", 0, false),
-        test_6: (vec![*MOVE_1, *MOVE_1], "does_not_occur", 0, true),
-        test_7: (vec![*MOVE_1, *MOVE_1, *MOVE_1, *MOVE_1, *MOVE_1, *MOVE_1, *MOVE_2], "occurs", 0, true),
-        test_8: (vec![*MOVE_1, *MOVE_2], "does_not_occur", 0, false),
-        test_9: (vec![*MOVE_2], "occurs", 0, true),
-        test_10: (vec![*MOVE_2], "does_not_occur", 0, false),
     }
 }
 

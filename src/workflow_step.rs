@@ -79,7 +79,29 @@ impl SharedData {
             _ => None,
         }
     }
+
+    pub fn to_path_buf(&self) -> Option<PathBuf> {
+        match self {
+            SharedData::SharedPathBuf(v) => Some(v.clone()),
+            _ => None,
+        }
+    }
 }
+
+impl std::fmt::Display for SharedData {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            SharedData::SharedU64(val) => write!(f, "{}", val),
+            SharedData::SharedUSize(val) => write!(f, "{}", val),
+            SharedData::SharedPathBuf(val) => write!(f, "{:?}", val),
+            SharedData::SharedFileData(val) => write!(f, "{:?}", val),
+            SharedData::SharedBool(val) => write!(f, "{}", val),
+            SharedData::SharedGame(val) => write!(f, "{:?}", val),
+            SharedData::SharedVec(val) => write!(f, "{:?}", val),
+        }
+    }
+}
+
 
 #[derive(Clone, Debug)]
 pub struct StepDescription {

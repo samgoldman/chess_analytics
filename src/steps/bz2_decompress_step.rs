@@ -22,10 +22,7 @@ impl<'a> Step for Bz2DecompressStep {
             unlocked_data.remove("file_path_bufs").unwrap()
         };
 
-        let paths = match bufs {
-            SharedData::SharedVec(vec) => vec,
-            _ => return Err("Bz2DecompressStep: Could not downcast input!".to_string()),
-        };
+        let paths = bufs.to_vec().unwrap();
 
         {
             let mut unlocked_data = data.lock().unwrap();
@@ -33,10 +30,7 @@ impl<'a> Step for Bz2DecompressStep {
         }
 
         paths.par_iter().for_each(|path| {
-            let path = match path {
-                SharedData::SharedPathBuf(buf) => buf,
-                _ => panic!("Bz2DecompressStep: Could not downcast input!"), // TODO don't panic
-            };
+            let path = path.to_path_buf().unwrap();
 
             let mut file = File::open(&path).expect("Could not open file");
             let mut file_data = Vec::new();
@@ -61,10 +55,7 @@ impl<'a> Step for Bz2DecompressStep {
                 let mut unlocked_data = data.lock().unwrap();
 
                 let raw_file_data = unlocked_data.get_mut("raw_file_data").unwrap();
-                let file_data_vec: &mut Vec<SharedData> = match raw_file_data {
-                    SharedData::SharedVec(vec) => vec,
-                    _ => panic!("Bz2DecompressStep: Could not downcast input!"), // TODO no panic
-                };
+                let file_data_vec: &mut Vec<SharedData> = raw_file_data.to_vec_mut().unwrap();
 
                 file_data_vec.push(SharedData::SharedFileData(file_data));
             }

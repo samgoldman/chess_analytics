@@ -14,7 +14,8 @@ macro_rules! timed_data_lock {
 macro_rules! load_step_config {
     ($name1:literal, $name2:literal, $configuration:ident) => {
         {
-            // Test
+            use clap::{App, load_yaml};
+
             let yml = load_yaml!($name2);
             let arg_app = App::from(yml);
 

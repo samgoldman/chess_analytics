@@ -10,35 +10,59 @@ use tui::{
     },
 };
 
-pub struct MonitorStep {
+pub struct UiMonitorStep {
     terminal: Terminal<RustboxBackend>,
+    raw_fields: Vec<(String, String)>,
+    length_fields: Vec<(String, String)>,
 }
 
-/// chess_analytics_build::register_step_builder "MonitorStep" MonitorStep
-impl MonitorStep {
-    pub fn try_new(_configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
+/// chess_analytics_build::register_step_builder "UiMonitorStep" UiMonitorStep
+impl UiMonitorStep {
+    pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
         let backend = RustboxBackend::new().expect("Could not create backend");
         let terminal = Terminal::new(backend).expect("Could not create terminal");
 
-        Ok(Box::new(MonitorStep {
+        let matches = load_step_config!("UiMonitorStep", "step_arg_configs/ui_monitor_step.yaml", configuration);
+
+        let raw = matches.values_of("raw").unwrap().map(|val| {
+            let mut split = val.split(",");
+            (split.next().unwrap().to_string(), split.next().unwrap().to_string())
+        }).collect();
+
+        let length = matches.values_of("length").unwrap().map(|val| {
+            let mut split = val.split(",");
+            (split.next().unwrap().to_string(), split.next().unwrap().to_string())
+        }).collect();
+
+        Ok(Box::new(UiMonitorStep {
             terminal,
+            raw_fields: raw,
+            length_fields: length,
         }))
     }
 }
 
-impl<'a> Step for MonitorStep {
+impl<'a> Step for UiMonitorStep {
     #[allow(clippy::needless_return)] // Allow for coverage
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         loop {
             let monitored_data = {
                 let unlocked_data = data.lock().unwrap();
-                vec![
-                    (format!("{}: {}", "Pending Games", unlocked_data.get("parsed_games").unwrap_or(&SharedData::SharedVec(vec![])).to_vec().unwrap().len())),
-                    (format!("{}: {}", "Pending Files", unlocked_data.get("raw_file_data").unwrap_or(&SharedData::SharedVec(vec![])).to_vec().unwrap().len())),
-                    (format!("{}: {}", "Game Count", unlocked_data.get("count_games").unwrap_or(&SharedData::SharedU64(0)).to_u64().unwrap())),
-                    (format!("{}: {:?}", "Done reading files", unlocked_data.get("done_reading_files").unwrap_or(&SharedData::SharedBool(false)).to_bool())),
-                    (format!("{}: {:?}", "Done parsing games", unlocked_data.get("done_parsing_games").unwrap_or(&SharedData::SharedBool(false)).to_bool())),
-                ]
+                
+                let mut raw = self.raw_fields.iter().map(|(title, field)| {
+                    let data = unlocked_data.get(field).unwrap_or(&SharedData::SharedBool(false));
+                    format!("{}: {}", title, data)
+                }).collect::<Vec<String>>();
+                
+                let mut length = self.length_fields.iter().map(|(title, field)| {
+                    let data = unlocked_data.get(field).unwrap_or(&SharedData::SharedVec(vec![])).to_vec().unwrap_or(vec![]).len();
+                    format!("{}: {}", title, data)
+                }).collect::<Vec<String>>();
+
+                
+                raw.append(&mut length);
+
+                raw
             };
 
             let list_items: Vec<ListItem> = monitored_data
@@ -72,7 +96,7 @@ impl<'a> Step for MonitorStep {
     }
 }
 
-impl std::fmt::Debug for MonitorStep {
+impl std::fmt::Debug for UiMonitorStep {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "MonitorStep TODO") // TODO
     }

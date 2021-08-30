@@ -13,11 +13,13 @@ pub struct CheckmateFilter {
 /// chess_analytics_build::register_step_builder "CheckmateFilter" CheckmateFilter
 impl CheckmateFilter {
     pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
+        let matches = load_step_config!("CheckmateFilter", "step_arg_configs/checkmate_filter.yaml", configuration);
+        
         Ok(Box::new(CheckmateFilter {
-            input_vec_name: configuration.get(0).unwrap().to_string(),
-            output_vec_name: configuration.get(1).unwrap().to_string(),
-            discard_vec_name: configuration.get(2).unwrap().to_string(),
-            flag_name: configuration.get(2).unwrap().to_string(),
+            input_vec_name: matches.value_of("input").unwrap().to_string(),
+            output_vec_name: matches.value_of("output").unwrap().to_string(),
+            discard_vec_name: matches.value_of("discard").unwrap().to_string(),
+            flag_name: matches.value_of("finish_flag").unwrap().to_string()
         }))
     }
 
