@@ -109,11 +109,11 @@ dependencies = [
  "predicates",
  "rayon",
  "regex",
- "rustbox",
  "serde",
  "serde_yaml",
  "strum",
  "strum_macros",
+ "termion",
  "tui",
 ]
 

@@ -33,9 +33,8 @@ impl<'a> Step for LabelledPrintStep {
         let locked_data = data.lock().unwrap();
         let value = locked_data.get(&self.field);
 
-        // TODO don't just use debug formatting
         match value {
-            Some(value) => println!("{}: {:?}", self.label, value),
+            Some(value) => println!("{}: {}", self.label, value),
             None => {} // TODO For now fail silently
         }
         Ok(())

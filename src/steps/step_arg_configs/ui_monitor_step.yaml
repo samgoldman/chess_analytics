@@ -1,0 +1,11 @@
+name: UiMonitorStep
+version: "1.0"
+args:
+  - raw:
+      long: raw
+      takes_value: true
+      multiple_values: true
+  - length:
+      long: length
+      takes_value: true
+      multiple_values: true

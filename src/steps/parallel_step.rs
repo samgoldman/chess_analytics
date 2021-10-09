@@ -35,16 +35,16 @@ impl<'a> Step for ParallelStep {
 
         for child in self.children.clone() {
             let data_clone = data.clone();
-            handles.push(thread::spawn(move || {
+            handles.push((child.step_type.clone(), thread::spawn(move || {
                 let mut step = child.to_step().expect("ok");
                 step.process(data_clone).expect("ok");
-            }));
+            })));
         }
 
-        for handle in handles {
+        for (step_type, handle) in handles {
             match handle.join() {
                 Ok(_) => (),
-                Err(err) => panic!("{:?}", err),
+                Err(err) => panic!("Step with type '{}' failed with error: {:?}", step_type, err),
             }
         }
 

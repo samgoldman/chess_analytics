@@ -1,4 +1,4 @@
-name: GlobFileStepp
+name: GlobFileStep
 version: "1.0"
 args:
   - glob:

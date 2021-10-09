@@ -1,4 +1,9 @@
-use tui::{backend::RustboxBackend, Terminal};
+use std::io::{Stdout, stdout, stdin};
+use tui::{backend::TermionBackend, Terminal};
+use termion::raw::{IntoRawMode, RawTerminal};
+use termion::event::{Key, Event};
+use termion::input::{TermRead};
+
 
 use crate::workflow_step::*;
 
@@ -11,7 +16,7 @@ use tui::{
 };
 
 pub struct UiMonitorStep {
-    terminal: Terminal<RustboxBackend>,
+    terminal: Terminal<TermionBackend<RawTerminal<Stdout>>>,
     raw_fields: Vec<(String, String)>,
     length_fields: Vec<(String, String)>,
 }
@@ -19,20 +24,32 @@ pub struct UiMonitorStep {
 /// chess_analytics_build::register_step_builder "UiMonitorStep" UiMonitorStep
 impl UiMonitorStep {
     pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
-        let backend = RustboxBackend::new().expect("Could not create backend");
+        let stdout = stdout().into_raw_mode().expect("Could not init stdout");
+
+        let backend = TermionBackend::new(stdout);
         let terminal = Terminal::new(backend).expect("Could not create terminal");
 
         let matches = load_step_config!("UiMonitorStep", "step_arg_configs/ui_monitor_step.yaml", configuration);
 
-        let raw = matches.values_of("raw").unwrap().map(|val| {
-            let mut split = val.split(",");
-            (split.next().unwrap().to_string(), split.next().unwrap().to_string())
-        }).collect();
+        let raw = match matches.values_of("raw") {
+            Some(values) => {
+                values.map(|val| {
+                    let mut split = val.split(",");
+                    (split.next().unwrap().to_string(), split.next().unwrap().to_string())
+                }).collect()
+            },
+            None => vec![]
+        };
 
-        let length = matches.values_of("length").unwrap().map(|val| {
-            let mut split = val.split(",");
-            (split.next().unwrap().to_string(), split.next().unwrap().to_string())
-        }).collect();
+        let length = match matches.values_of("length") {
+            Some(values) => {
+                values.map(|val| {
+                    let mut split = val.split(",");
+                    (split.next().unwrap().to_string(), split.next().unwrap().to_string())
+                }).collect()
+            },
+            None => vec![]
+        };
 
         Ok(Box::new(UiMonitorStep {
             terminal,
@@ -45,6 +62,7 @@ impl UiMonitorStep {
 impl<'a> Step for UiMonitorStep {
     #[allow(clippy::needless_return)] // Allow for coverage
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+        self.terminal.clear().unwrap();
         loop {
             let monitored_data = {
                 let unlocked_data = data.lock().unwrap();
@@ -79,16 +97,22 @@ impl<'a> Step for UiMonitorStep {
                 f.render_widget(list, f.size());
             }).expect("Could not draw");
 
-            if let Ok(rustbox::Event::KeyEvent(key)) =
-            self.terminal.backend().rustbox().peek_event(std::time::Duration::from_millis(250), false) {
-                match key {
-                    rustbox::keyboard::Key::Char(c) => {
-                        if c == 'q' {
-                            break;
-                        }
-                    }
+
+            let stdin = stdin();
+            let mut quit = false;
+            for c in stdin.events() {
+                let evt = c.unwrap();
+                match evt {
+                    Event::Key(Key::Char('q')) => {
+                        quit = true;
+                        break;
+                    },
                     _ => {}
                 }
+            }
+            
+            if quit {
+                break;
             }
         }
 
