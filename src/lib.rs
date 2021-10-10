@@ -10,7 +10,6 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::sync::{Arc, Mutex};
 
-mod arguments;
 #[macro_use]
 mod basic_types;
 mod board;

@@ -9,6 +9,7 @@ lcov.info
 *.sh
 *.tvs
 results/
+*.tar.gz
 *.log
 tarpaulin-report.html
 *.bin
