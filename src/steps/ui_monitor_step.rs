@@ -115,6 +115,7 @@ impl<'a> Step for UiMonitorStep {
             }
             
             if quit {
+                self.terminal.clear().unwrap();
                 break;
             }
         }
