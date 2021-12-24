@@ -97,8 +97,8 @@ macro_rules! filter_template {
                 if final_loop && quit {
                     break;
                 }
-            }        
-            
+            }
+
             {
                 let mut unlocked_data = data.lock().unwrap();
                 let d: bool = true;

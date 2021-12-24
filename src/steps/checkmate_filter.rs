@@ -8,7 +8,7 @@ pub struct CheckmateFilter {
     output_vec_name: String,
     discard_vec_name: String,
     input_flag: String,
-    output_flag: String
+    output_flag: String,
 }
 
 /// chess_analytics_build::register_step_builder "CheckmateFilter" CheckmateFilter
@@ -41,12 +41,14 @@ impl CheckmateFilter {
             output_vec_name,
             discard_vec_name,
             input_flag,
-            output_flag
+            output_flag,
         }))
     }
 
     pub fn filter(game: GameWrapper, _filter: &CheckmateFilter) -> bool {
-        game.termination == Termination::Normal && game.moves.len() > 0 && game.moves.last().unwrap().mates
+        game.termination == Termination::Normal
+            && game.moves.len() > 0
+            && game.moves.last().unwrap().mates
     }
 }
 

@@ -57,7 +57,10 @@ impl<'a> Step for RawByteCounterStep {
                 _ => panic!("RawByteCounterStep: Could not downcast input!"), // TODO no panic
             };
 
-            let file_data = match file_data_vec.pop().unwrap_or_else(|| SharedData::Vec(vec![])) {
+            let file_data = match file_data_vec
+                .pop()
+                .unwrap_or_else(|| SharedData::Vec(vec![]))
+            {
                 SharedData::FileData(data) => data,
                 _ => panic!(), // TODO
             };

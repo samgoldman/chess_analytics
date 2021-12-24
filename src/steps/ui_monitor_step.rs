@@ -84,9 +84,7 @@ impl<'a> Step for UiMonitorStep {
                     .raw_fields
                     .iter()
                     .map(|(title, field)| {
-                        let data = unlocked_data
-                            .get(field)
-                            .unwrap_or(&SharedData::Bool(false));
+                        let data = unlocked_data.get(field).unwrap_or(&SharedData::Bool(false));
                         format!("{}: {}", title, data)
                     })
                     .collect::<Vec<String>>();

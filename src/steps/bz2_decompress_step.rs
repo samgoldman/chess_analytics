@@ -8,7 +8,7 @@ use std::io::Read;
 #[derive(Debug)]
 pub struct Bz2DecompressStep {
     max_queue_size: u64,
-    full_queue_delay_ms: u64
+    full_queue_delay_ms: u64,
 }
 
 /// chess_analytics_build::register_step_builder "Bz2DecompressStep" Bz2DecompressStep
@@ -24,7 +24,7 @@ impl Bz2DecompressStep {
         let full_queue_delay_ms = params.get("full_queue_delay_ms").unwrap().as_u64().unwrap();
         Ok(Box::new(Bz2DecompressStep {
             max_queue_size,
-            full_queue_delay_ms
+            full_queue_delay_ms,
         }))
     }
 }
@@ -68,7 +68,14 @@ impl<'a> Step for Bz2DecompressStep {
             loop {
                 {
                     let unlocked_data = data.lock().unwrap();
-                    if (unlocked_data.get("raw_file_data").unwrap().to_vec().unwrap().len() as u64) < self.max_queue_size {
+                    if (unlocked_data
+                        .get("raw_file_data")
+                        .unwrap()
+                        .to_vec()
+                        .unwrap()
+                        .len() as u64)
+                        < self.max_queue_size
+                    {
                         break;
                     }
                 }
