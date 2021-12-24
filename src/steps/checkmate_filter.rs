@@ -47,7 +47,7 @@ impl CheckmateFilter {
 
     pub fn filter(game: GameWrapper, _filter: &CheckmateFilter) -> bool {
         game.termination == Termination::Normal
-            && game.moves.len() > 0
+            && !game.moves.is_empty()
             && game.moves.last().unwrap().mates
     }
 }
