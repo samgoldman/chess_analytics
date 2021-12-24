@@ -10,7 +10,7 @@ pub struct Bz2DecompressStep {}
 
 /// chess_analytics_build::register_step_builder "Bz2DecompressStep" Bz2DecompressStep
 impl Bz2DecompressStep {
-    pub fn try_new(_configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
+    pub fn try_new(_configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         Ok(Box::new(Bz2DecompressStep {}))
     }
 }

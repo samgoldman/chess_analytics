@@ -8,11 +8,19 @@ pub struct RawByteCounterStep {
 
 /// chess_analytics_build::register_step_builder "RawByteCounterStep" RawByteCounterStep
 impl RawByteCounterStep {
-    pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
+    pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
+        let params = match configuration {
+            Some(value) => value,
+            None => return Err("RawByteCounterStep: no parameters provided".to_string())
+        };
+
+        // TODO: better error handling
+        let child = params.get("child").unwrap().as_str().unwrap().to_string();
+
         Ok(Box::new(RawByteCounterStep {
-            // TODO better error handling
-            child: get_step_description(configuration.get(0).unwrap().clone()).to_step()?,
+            child: get_step_description(child).to_step()?
         }))
+   
     }
 }
 

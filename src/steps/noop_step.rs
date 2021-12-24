@@ -6,7 +6,7 @@ pub struct NoopStep {
 
 /// chess_analytics_build::register_step_builder "NoopStep" NoopStep
 impl NoopStep {
-    pub fn try_new(_configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
+    pub fn try_new(_configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         Ok(Box::new(NoopStep {
         }))
     }

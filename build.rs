@@ -68,7 +68,7 @@ use std::collections::HashMap;
 use itertools::izip;
 
 {}
-pub fn get_step_by_name_and_params(name: String, params: Vec<String>) -> Result<BoxedStep, String> {{
+pub fn get_step_by_name_and_params(name: String, params: std::option::Option<serde_yaml::Value>) -> Result<BoxedStep, String> {{
     let names = vec![
 {}    ];
 

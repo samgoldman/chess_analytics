@@ -69,45 +69,6 @@ filter!(moves_count_filter, "moveCount", params, {
     })
 });
 
-// Requires three parameters:
-// 1. min or max
-// 2. White, Black, both
-// 3. threshold
-filter!(player_elo_filter, "playerElo", params, {
-    use crate::general_utils::get_comparator;
-    let comparison = get_comparator::<u16>(&params[0]);
-
-    let which_player = params[1].to_string();
-    let threshold_elo = params[2].parse::<u16>().unwrap();
-    Box::new(move |game| -> bool {
-        let check_white;
-        let check_black;
-
-        // This falls back to black = true, white = false
-        // TODO: panic in the event player is not one of the three expected values
-        if which_player == "Both" {
-            check_white = true;
-            check_black = true;
-        } else if which_player == "White" {
-            check_white = true;
-            check_black = false;
-        } else {
-            check_white = false;
-            check_black = true;
-        }
-
-        if check_white && comparison(game.white_rating, threshold_elo) != threshold_elo {
-            return false;
-        }
-
-        if check_black && comparison(game.black_rating, threshold_elo) != threshold_elo {
-            return false;
-        }
-
-        true
-    })
-});
-
 // Requires any parameters: the
 filter!(site_matches_any_filter, "siteMatchesAny", params, {
     Box::new(move |game| -> bool {

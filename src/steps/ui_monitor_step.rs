@@ -1,9 +1,13 @@
 use std::io::{Stdout, stdout, stdin};
 use tui::{backend::TermionBackend, Terminal};
 use termion::raw::{IntoRawMode, RawTerminal};
-use termion::event::{Key, Event};
 use termion::input::{TermRead};
 
+use crossterm::{
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
 
 use crate::workflow_step::*;
 
@@ -23,29 +27,30 @@ pub struct UiMonitorStep {
 
 /// chess_analytics_build::register_step_builder "UiMonitorStep" UiMonitorStep
 impl UiMonitorStep {
-    pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
+    pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let stdout = stdout().into_raw_mode().expect("Could not init stdout");
 
         let backend = TermionBackend::new(stdout);
         let terminal = Terminal::new(backend).expect("Could not create terminal");
 
-        let matches = load_step_config!("UiMonitorStep", "step_arg_configs/ui_monitor_step.yaml", configuration);
+        let params = match configuration {
+            Some(value) => value,
+            None => return Err("UiMonitorStep: no parameters provided".to_string())
+        };
 
-        let raw = match matches.values_of("raw") {
+        let raw = match params.get("raw").unwrap().as_sequence() {
             Some(values) => {
-                values.map(|val| {
-                    let mut split = val.split(",");
-                    (split.next().unwrap().to_string(), split.next().unwrap().to_string())
+                values.iter().map(|val| {
+                    (val.get("display_name").unwrap().as_str().unwrap().to_string(), val.get("field").unwrap().as_str().unwrap().to_string())
                 }).collect()
             },
             None => vec![]
         };
 
-        let length = match matches.values_of("length") {
+        let length = match params.get("length").unwrap().as_sequence() {
             Some(values) => {
-                values.map(|val| {
-                    let mut split = val.split(",");
-                    (split.next().unwrap().to_string(), split.next().unwrap().to_string())
+                values.iter().map(|val| {
+                    (val.get("display_name").unwrap().as_str().unwrap().to_string(), val.get("field").unwrap().as_str().unwrap().to_string())
                 }).collect()
             },
             None => vec![]
@@ -66,7 +71,6 @@ impl<'a> Step for UiMonitorStep {
         loop {
             let monitored_data = {
                 let unlocked_data = data.lock().unwrap();
-                
                 let mut raw = self.raw_fields.iter().map(|(title, field)| {
                     let data = unlocked_data.get(field).unwrap_or(&SharedData::SharedBool(false));
                     format!("{}: {}", title, data)
@@ -98,16 +102,15 @@ impl<'a> Step for UiMonitorStep {
             }).expect("Could not draw");
 
 
-            let stdin = stdin();
             let mut quit = false;
-            for c in stdin.events() {
-                let evt = c.unwrap();
-                match evt {
-                    Event::Key(Key::Char('q')) => {
-                        quit = true;
-                        break;
-                    },
-                    _ => {}
+            if event::poll(std::time::Duration::from_millis(30)).unwrap_or(false) {
+                if let Event::Key(key) = event::read().unwrap() {
+                    match key.code {
+                        KeyCode::Char('q') => {
+                            quit = true;
+                        }
+                        _ => {}
+                    }
                 }
             }
             

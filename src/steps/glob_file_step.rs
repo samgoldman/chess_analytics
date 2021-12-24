@@ -11,14 +11,15 @@ pub struct GlobFileStep {
 
 /// chess_analytics_build::register_step_builder "GlobFileStep" GlobFileStep
 impl GlobFileStep {
-    pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
-        let matches = load_step_config!("GlobFileStep", "step_arg_configs/glob_file_step.yaml", configuration);
+    pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
+        let params = match configuration {
+            Some(value) => value,
+            None => return Err("GlobFileStep: no parameters provided".to_string())
+        };
 
-        // "glob" is required by args, so safe to unwrap
-        let glob_string = matches.value_of("glob").unwrap().to_string();
+        let glob_string = params.get("glob").unwrap().as_str().unwrap().to_string();
 
-        // "child" is required by args, so safe to unwrap
-        let child_string = matches.value_of("child").unwrap().to_string();
+        let child_string = params.get("child").unwrap().as_str().unwrap().to_string();
 
         let step = GlobFileStep {
             glob_string,

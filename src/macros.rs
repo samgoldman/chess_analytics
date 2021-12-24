@@ -11,25 +11,6 @@ macro_rules! timed_data_lock {
     };
 }
 
-macro_rules! load_step_config {
-    ($name1:literal, $name2:literal, $configuration:ident) => {
-        {
-            use clap::{App, load_yaml};
-
-            let yml = load_yaml!($name2);
-            let arg_app = App::from(yml);
-
-            let mut configuration = $configuration.clone();
-            configuration.insert(0, $name1.to_string());
-
-            match arg_app.try_get_matches_from(configuration) {
-                Ok(matches) => matches,
-                Err(err) => return Err(format!("{}: bad configuration: {}", $name2, err)),
-            }
-        }
-    };
-}
-
 macro_rules! filter_template {
     ($logic:expr) => {
         fn process(&mut self, data: StepGeneric) -> Result<(), String> {

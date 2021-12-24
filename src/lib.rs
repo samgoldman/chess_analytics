@@ -31,7 +31,6 @@ extern crate lazy_static;
 use steps_manager::*;
 use workflow_step::*;
 
-// TODO: global: investigate no-panic
 // TODO: global: Ok/Err
 // TODO: global: currently count 20 calls to 'panic!()'
 
@@ -91,20 +90,8 @@ where
         };
 
         let params = match step_data.get("params") {
-            Some(params) => match params {
-                serde_yaml::Value::Sequence(param_seq) => param_seq
-                    .iter()
-                    .map(|entry| match entry {
-                        serde_yaml::Value::String(entry_str) => entry_str.to_string(),
-                        _ => panic!("params has non-string entry"),
-                    })
-                    .collect::<Vec<String>>(),
-                serde_yaml::Value::String(param_string) => {
-                    param_string.split(" ").map(|s| s.to_string()).collect()
-                },
-                _ => return Err(format!("Params for step {:?} is not a sequence", step_name)),
-            },
-            None => vec![],
+            Some(p) => Some(p.clone()),
+            None => None
         };
 
         let step = StepDescription {

@@ -9,10 +9,8 @@ pub struct ParseBinGame {
 
 /// chess_analytics_build::register_step_builder "ParseBinGame" ParseBinGame
 impl ParseBinGame {
-    pub fn try_new(_configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
+    pub fn try_new(_configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         Ok(Box::new(ParseBinGame {
-            // TODO better error handling
-            // child: get_step_description(configuration.get(0).unwrap().clone()).to_step()?,
         }))
     }
 }

@@ -9,7 +9,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 pub type BoxedStep = Box<dyn Step>;
-pub type StepFactory = Box<dyn Fn(Vec<String>) -> Result<BoxedStep, String>>;
+pub type StepFactory = Box<dyn Fn(Option<serde_yaml::Value>) -> Result<BoxedStep, String>>;
 pub type StepGeneric = Arc<Mutex<HashMap<String, SharedData>>>;
 
 #[derive(Clone, Debug)]
@@ -106,14 +106,14 @@ impl std::fmt::Display for SharedData {
 #[derive(Clone, Debug)]
 pub struct StepDescription {
     pub step_type: String,
-    pub parameters: Vec<String>,
+    pub parameters: std::option::Option<serde_yaml::Value>
 }
 
 impl StepDescription {
     pub fn to_step(&self) -> Result<BoxedStep, String> {
         get_step_by_name_and_params(
             self.step_type.to_string(),
-            self.parameters.iter().map(|s| s.to_string()).collect(),
+            self.parameters.clone()
         )
     }
 }

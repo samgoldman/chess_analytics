@@ -9,11 +9,19 @@ pub struct ParallelStep {
 
 /// chess_analytics_build::register_step_builder "ParallelStep" ParallelStep
 impl ParallelStep {
-    pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
+    pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
+        let params = match configuration {
+            Some(value) => value,
+            None => return Err("ParallelStep: no parameters provided".to_string())
+        };
+
+        // TODO: better error handling
+        let children = params.get("children").unwrap().as_sequence().unwrap();
+
         Ok(Box::new(ParallelStep {
-            children: configuration
+            children: children
                 .iter()
-                .map(|config_str| get_step_description(config_str.to_string()))
+                .map(|config_str| get_step_description(config_str.as_str().unwrap().to_string()))
                 .collect(),
         }))
     }

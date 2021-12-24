@@ -12,14 +12,23 @@ pub struct CheckmateFilter {
 
 /// chess_analytics_build::register_step_builder "CheckmateFilter" CheckmateFilter
 impl CheckmateFilter {
-    pub fn try_new(configuration: Vec<String>) -> Result<Box<dyn Step>, String> {
-        let matches = load_step_config!("CheckmateFilter", "step_arg_configs/checkmate_filter.yaml", configuration);
-        
+    pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
+        let params = match configuration {
+            Some(value) => value,
+            None => return Err("CheckmateFilter: no parameters provided".to_string())
+        };
+
+        // TODO: better error handling
+        let input_vec_name = params.get("input").unwrap().as_str().unwrap().to_string();
+        let output_vec_name = params.get("output").unwrap().as_str().unwrap().to_string();
+        let discard_vec_name = params.get("discard").unwrap().as_str().unwrap().to_string();
+        let flag_name = params.get("finish_flag").unwrap().as_str().unwrap().to_string();
+   
         Ok(Box::new(CheckmateFilter {
-            input_vec_name: matches.value_of("input").unwrap().to_string(),
-            output_vec_name: matches.value_of("output").unwrap().to_string(),
-            discard_vec_name: matches.value_of("discard").unwrap().to_string(),
-            flag_name: matches.value_of("finish_flag").unwrap().to_string()
+            input_vec_name,
+            output_vec_name,
+            discard_vec_name,
+            flag_name: flag_name
         }))
     }
 

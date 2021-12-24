@@ -1,18 +1,32 @@
 steps:
   init:
-    type: "UiMonitorStep"
-    # params: "--glob /data/data_scratch/lichess_data/rust_conversions_v3/2013-01/*.bin --child parallel_step"
+    type: "GlobFileStep"
+    params: 
+      glob: /data/data_scratch/lichess_data/rust_conversions_v3/2013-01/*.bin
+      child: parallel_step
   parallel_step:
     type: ParallelStep
     params:
-      - "load_files"
-      - "parse_games"
-      - "monitor"
+      children:
+        - "load_files"
+        - "parse_games"
+        - "monitor"
   load_files:
     type: Bz2DecompressStep
   parse_games:
     type: ParseBinGame
   monitor:
     type: UiMonitorStep
+    params: 
+      raw:
+        - display_name: Done Reading Files
+          field: done_reading_files
+        - display_name: Done Parsing Games
+          field: done_parsing_games
+      length:
+        - display_name: Raw File Data
+          field: raw_file_data
+        - display_name: Parsed Games
+          field: parsed_games
   noop:
     type: NoopStep
