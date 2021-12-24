@@ -1,22 +1,15 @@
-use std::io::{Stdout, stdout, stdin};
-use tui::{backend::TermionBackend, Terminal};
+use std::io::{stdout, Stdout};
 use termion::raw::{IntoRawMode, RawTerminal};
-use termion::input::{TermRead};
+use tui::{backend::TermionBackend, Terminal};
 
-use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
-    execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-};
+use crossterm::event::{self, Event, KeyCode};
 
 use crate::workflow_step::*;
 
 use tui::{
     style::{Modifier, Style},
     text::{Span, Spans},
-    widgets::{
-        Block, Borders, List, ListItem,
-    },
+    widgets::{Block, Borders, List, ListItem},
 };
 
 pub struct UiMonitorStep {
@@ -35,25 +28,41 @@ impl UiMonitorStep {
 
         let params = match configuration {
             Some(value) => value,
-            None => return Err("UiMonitorStep: no parameters provided".to_string())
+            None => return Err("UiMonitorStep: no parameters provided".to_string()),
         };
 
         let raw = match params.get("raw").unwrap().as_sequence() {
-            Some(values) => {
-                values.iter().map(|val| {
-                    (val.get("display_name").unwrap().as_str().unwrap().to_string(), val.get("field").unwrap().as_str().unwrap().to_string())
-                }).collect()
-            },
-            None => vec![]
+            Some(values) => values
+                .iter()
+                .map(|val| {
+                    (
+                        val.get("display_name")
+                            .unwrap()
+                            .as_str()
+                            .unwrap()
+                            .to_string(),
+                        val.get("field").unwrap().as_str().unwrap().to_string(),
+                    )
+                })
+                .collect(),
+            None => vec![],
         };
 
         let length = match params.get("length").unwrap().as_sequence() {
-            Some(values) => {
-                values.iter().map(|val| {
-                    (val.get("display_name").unwrap().as_str().unwrap().to_string(), val.get("field").unwrap().as_str().unwrap().to_string())
-                }).collect()
-            },
-            None => vec![]
+            Some(values) => values
+                .iter()
+                .map(|val| {
+                    (
+                        val.get("display_name")
+                            .unwrap()
+                            .as_str()
+                            .unwrap()
+                            .to_string(),
+                        val.get("field").unwrap().as_str().unwrap().to_string(),
+                    )
+                })
+                .collect(),
+            None => vec![],
         };
 
         Ok(Box::new(UiMonitorStep {
@@ -71,17 +80,31 @@ impl<'a> Step for UiMonitorStep {
         loop {
             let monitored_data = {
                 let unlocked_data = data.lock().unwrap();
-                let mut raw = self.raw_fields.iter().map(|(title, field)| {
-                    let data = unlocked_data.get(field).unwrap_or(&SharedData::SharedBool(false));
-                    format!("{}: {}", title, data)
-                }).collect::<Vec<String>>();
-                
-                let mut length = self.length_fields.iter().map(|(title, field)| {
-                    let data = unlocked_data.get(field).unwrap_or(&SharedData::SharedVec(vec![])).to_vec().unwrap_or(vec![]).len();
-                    format!("{}: {}", title, data)
-                }).collect::<Vec<String>>();
+                let mut raw = self
+                    .raw_fields
+                    .iter()
+                    .map(|(title, field)| {
+                        let data = unlocked_data
+                            .get(field)
+                            .unwrap_or(&SharedData::SharedBool(false));
+                        format!("{}: {}", title, data)
+                    })
+                    .collect::<Vec<String>>();
 
-                
+                let mut length = self
+                    .length_fields
+                    .iter()
+                    .map(|(title, field)| {
+                        let data = unlocked_data
+                            .get(field)
+                            .unwrap_or(&SharedData::SharedVec(vec![]))
+                            .to_vec()
+                            .unwrap_or(vec![])
+                            .len();
+                        format!("{}: {}", title, data)
+                    })
+                    .collect::<Vec<String>>();
+
                 raw.append(&mut length);
 
                 raw
@@ -97,10 +120,11 @@ impl<'a> Step for UiMonitorStep {
                 .highlight_style(Style::default().add_modifier(Modifier::BOLD))
                 .highlight_symbol("> ");
 
-            self.terminal.draw(|f| {
-                f.render_widget(list, f.size());
-            }).expect("Could not draw");
-
+            self.terminal
+                .draw(|f| {
+                    f.render_widget(list, f.size());
+                })
+                .expect("Could not draw");
 
             let mut quit = false;
             if event::poll(std::time::Duration::from_millis(30)).unwrap_or(false) {
@@ -113,7 +137,7 @@ impl<'a> Step for UiMonitorStep {
                     }
                 }
             }
-            
+
             if quit {
                 self.terminal.clear().unwrap();
                 break;

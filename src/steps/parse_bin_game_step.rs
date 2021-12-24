@@ -10,8 +10,7 @@ pub struct ParseBinGame {
 /// chess_analytics_build::register_step_builder "ParseBinGame" ParseBinGame
 impl ParseBinGame {
     pub fn try_new(_configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
-        Ok(Box::new(ParseBinGame {
-        }))
+        Ok(Box::new(ParseBinGame {}))
     }
 }
 

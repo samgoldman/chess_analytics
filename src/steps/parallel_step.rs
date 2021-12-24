@@ -12,7 +12,7 @@ impl ParallelStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
             Some(value) => value,
-            None => return Err("ParallelStep: no parameters provided".to_string())
+            None => return Err("ParallelStep: no parameters provided".to_string()),
         };
 
         // TODO: better error handling
@@ -43,16 +43,22 @@ impl<'a> Step for ParallelStep {
 
         for child in self.children.clone() {
             let data_clone = data.clone();
-            handles.push((child.step_type.clone(), thread::spawn(move || {
-                let mut step = child.to_step().expect("ok");
-                step.process(data_clone).expect("ok");
-            })));
+            handles.push((
+                child.step_type.clone(),
+                thread::spawn(move || {
+                    let mut step = child.to_step().expect("ok");
+                    step.process(data_clone).expect("ok");
+                }),
+            ));
         }
 
         for (step_type, handle) in handles {
             match handle.join() {
                 Ok(_) => (),
-                Err(err) => panic!("Step with type '{}' failed with error: {:?}", step_type, err),
+                Err(err) => panic!(
+                    "Step with type '{}' failed with error: {:?}",
+                    step_type, err
+                ),
             }
         }
 

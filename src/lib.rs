@@ -91,7 +91,7 @@ where
 
         let params = match step_data.get("params") {
             Some(p) => Some(p.clone()),
-            None => None
+            None => None,
         };
 
         let step = StepDescription {

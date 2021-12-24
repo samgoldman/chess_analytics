@@ -10,16 +10,21 @@ impl ClearVectorStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
             Some(value) => value,
-            None => return Err("ClearVectorStep: no parameters provided".to_string())
+            None => return Err("ClearVectorStep: no parameters provided".to_string()),
         };
 
         // TODO: better error handling
         let vec_name = params.get("input").unwrap().as_str().unwrap().to_string();
-        let flag_name = params.get("finish_flag").unwrap().as_str().unwrap().to_string();
-   
+        let flag_name = params
+            .get("finish_flag")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .to_string();
+
         Ok(Box::new(ClearVectorStep {
             vec_name,
-            flag_name
+            flag_name,
         }))
     }
 }

@@ -11,16 +11,15 @@ impl RawByteCounterStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
             Some(value) => value,
-            None => return Err("RawByteCounterStep: no parameters provided".to_string())
+            None => return Err("RawByteCounterStep: no parameters provided".to_string()),
         };
 
         // TODO: better error handling
         let child = params.get("child").unwrap().as_str().unwrap().to_string();
 
         Ok(Box::new(RawByteCounterStep {
-            child: get_step_description(child).to_step()?
+            child: get_step_description(child).to_step()?,
         }))
-   
     }
 }
 
@@ -63,7 +62,11 @@ impl<'a> Step for RawByteCounterStep {
                 _ => panic!(), // TODO
             };
 
-            let byte_counter = unlocked_data.get_mut("byte_counter").unwrap().to_u64_mut().unwrap();
+            let byte_counter = unlocked_data
+                .get_mut("byte_counter")
+                .unwrap()
+                .to_u64_mut()
+                .unwrap();
             *byte_counter += file_data.len() as u64;
         }
 

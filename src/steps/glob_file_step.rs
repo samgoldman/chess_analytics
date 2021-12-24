@@ -14,7 +14,7 @@ impl GlobFileStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
             Some(value) => value,
-            None => return Err("GlobFileStep: no parameters provided".to_string())
+            None => return Err("GlobFileStep: no parameters provided".to_string()),
         };
 
         let glob_string = params.get("glob").unwrap().as_str().unwrap().to_string();

@@ -1,5 +1,5 @@
-use crate::workflow_step::*;
 use crate::game_wrapper::GameWrapper;
+use crate::workflow_step::*;
 
 #[derive(Debug)]
 pub struct PlayerEloFilter {
@@ -18,14 +18,19 @@ impl PlayerEloFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
             Some(value) => value,
-            None => return Err("PlayerEloFilter: no parameters provided".to_string())
+            None => return Err("PlayerEloFilter: no parameters provided".to_string()),
         };
 
         // TODO: better error handling
         let input_vec_name = params.get("input").unwrap().as_str().unwrap().to_string();
         let output_vec_name = params.get("output").unwrap().as_str().unwrap().to_string();
         let discard_vec_name = params.get("discard").unwrap().as_str().unwrap().to_string();
-        let flag_name = params.get("finish_flag").unwrap().as_str().unwrap().to_string();
+        let flag_name = params
+            .get("finish_flag")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .to_string();
         let filter_white = params.get("white").unwrap().as_bool().unwrap();
         let filter_black = params.get("black").unwrap().as_bool().unwrap();
         let min_elo = match params.get("min_elo") {
@@ -42,7 +47,7 @@ impl PlayerEloFilter {
             },
             None => None,
         };
-   
+
         Ok(Box::new(PlayerEloFilter {
             input_vec_name,
             output_vec_name,
@@ -51,7 +56,7 @@ impl PlayerEloFilter {
             min_elo,
             max_elo,
             filter_white,
-            filter_black
+            filter_black,
         }))
     }
 
@@ -65,7 +70,7 @@ impl PlayerEloFilter {
                 } else {
                     true
                 }
-            },
+            }
             _ => true, // No min
         };
 
@@ -78,7 +83,7 @@ impl PlayerEloFilter {
                 } else {
                     true
                 }
-            },
+            }
             _ => true, // No max
         };
 
