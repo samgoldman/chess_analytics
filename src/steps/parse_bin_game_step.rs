@@ -19,7 +19,7 @@ impl<'a> Step for ParseBinGame {
         {
             let mut unlocked_data = data.lock().unwrap();
             let vec: Vec<SharedData> = vec![];
-            unlocked_data.insert("parsed_games".to_string(), SharedData::SharedVec(vec));
+            unlocked_data.insert("parsed_games".to_string(), SharedData::Vec(vec));
         }
         loop {
             let done_reading_files = {
@@ -44,7 +44,7 @@ impl<'a> Step for ParseBinGame {
                     vec![]
                 } else {
                     let file_data = match file_data_vec.pop().unwrap() {
-                        SharedData::SharedFileData(data) => data,
+                        SharedData::FileData(data) => data,
                         _ => panic!(), // TODO
                     };
 
@@ -55,7 +55,7 @@ impl<'a> Step for ParseBinGame {
             if !file_data.is_empty() {
                 let mut games = GameWrapper::from_game_list_data(file_data)
                     .iter()
-                    .map(|g| SharedData::SharedGame(g.clone()))
+                    .map(|g| SharedData::Game(g.clone()))
                     .collect::<Vec<SharedData>>();
 
                 {
@@ -76,7 +76,7 @@ impl<'a> Step for ParseBinGame {
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: bool = true;
-            unlocked_data.insert("done_parsing_games".to_string(), SharedData::SharedBool(d));
+            unlocked_data.insert("done_parsing_games".to_string(), SharedData::Bool(d));
         }
 
         Ok(()) //self.child.process(data)

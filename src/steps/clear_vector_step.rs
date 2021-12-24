@@ -44,7 +44,7 @@ impl<'a> Step for ClearVectorStep {
 
             let flag = unlocked_data
                 .get(&self.flag_name)
-                .unwrap_or(&SharedData::SharedBool(false));
+                .unwrap_or(&SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 

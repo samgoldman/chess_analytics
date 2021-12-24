@@ -43,12 +43,12 @@ impl Step for GlobFileStep {
 
         let files: Vec<SharedData> = file_glob
             .map(Result::unwrap)
-            .map(|path| SharedData::SharedPathBuf(path))
+            .map(SharedData::PathBuf)
             .collect();
 
         {
             let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert("file_path_bufs".to_string(), SharedData::SharedVec(files));
+            unlocked_data.insert("file_path_bufs".to_string(), SharedData::Vec(files));
         }
 
         self.child.process(data)

@@ -7,9 +7,7 @@ pub enum Player {
 
 impl Player {
     pub fn get_opposing_player(&self) -> Self {
-        if Player::NA == *self {
-            panic!("Player::NA has no opposing player");
-        }
+        assert!(Player::NA != *self, "Player::NA has no opposing player");
 
         if Player::White == *self {
             Player::Black

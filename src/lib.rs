@@ -89,10 +89,7 @@ where
             None => return Err(format!("Step {:?} does not have a type field", step_name)),
         };
 
-        let params = match step_data.get("params") {
-            Some(p) => Some(p.clone()),
-            None => None,
-        };
+        let params = step_data.get("params").cloned();
 
         let step = StepDescription {
             step_type: step_type.to_string(),

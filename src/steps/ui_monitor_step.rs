@@ -86,7 +86,7 @@ impl<'a> Step for UiMonitorStep {
                     .map(|(title, field)| {
                         let data = unlocked_data
                             .get(field)
-                            .unwrap_or(&SharedData::SharedBool(false));
+                            .unwrap_or(&SharedData::Bool(false));
                         format!("{}: {}", title, data)
                     })
                     .collect::<Vec<String>>();
@@ -97,9 +97,9 @@ impl<'a> Step for UiMonitorStep {
                     .map(|(title, field)| {
                         let data = unlocked_data
                             .get(field)
-                            .unwrap_or(&SharedData::SharedVec(vec![]))
+                            .unwrap_or(&SharedData::Vec(vec![]))
                             .to_vec()
-                            .unwrap_or(vec![])
+                            .unwrap_or_default()
                             .len();
                         format!("{}: {}", title, data)
                     })
@@ -129,11 +129,8 @@ impl<'a> Step for UiMonitorStep {
             let mut quit = false;
             if event::poll(std::time::Duration::from_millis(30)).unwrap_or(false) {
                 if let Event::Key(key) = event::read().unwrap() {
-                    match key.code {
-                        KeyCode::Char('q') => {
-                            quit = true;
-                        }
-                        _ => {}
+                    if let KeyCode::Char('q') = key.code {
+                        quit = true;
                     }
                 }
             }

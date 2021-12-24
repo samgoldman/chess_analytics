@@ -14,8 +14,8 @@ macro_rules! filter_template {
         fn process(&mut self, data: StepGeneric) -> Result<(), String> {
             {
                 let mut unlocked_data = data.lock().unwrap();
-                unlocked_data.insert(self.output_vec_name.clone(), SharedData::SharedVec(vec![]));
-                unlocked_data.insert(self.discard_vec_name.clone(), SharedData::SharedVec(vec![]));
+                unlocked_data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
+                unlocked_data.insert(self.discard_vec_name.clone(), SharedData::Vec(vec![]));
             }
 
             loop {
@@ -39,7 +39,7 @@ macro_rules! filter_template {
 
                 for shared_game in games {
                     let game = match shared_game.clone() {
-                        SharedData::SharedGame(game) => game,
+                        SharedData::Game(game) => game,
                         _ => return Err("Vector isn't of games!".to_string()),
                     };
 
@@ -78,7 +78,7 @@ macro_rules! filter_template {
 
                 let flag = unlocked_data
                     .get(&self.flag_name)
-                    .unwrap_or(&SharedData::SharedBool(false));
+                    .unwrap_or(&SharedData::Bool(false));
 
                 let flag = flag.to_bool().unwrap();
 

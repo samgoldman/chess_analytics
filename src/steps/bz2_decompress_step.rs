@@ -26,7 +26,7 @@ impl<'a> Step for Bz2DecompressStep {
 
         {
             let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert("raw_file_data".to_string(), SharedData::SharedVec(vec![]));
+            unlocked_data.insert("raw_file_data".to_string(), SharedData::Vec(vec![]));
         }
 
         paths.par_iter().for_each(|path| {
@@ -57,14 +57,14 @@ impl<'a> Step for Bz2DecompressStep {
                 let raw_file_data = unlocked_data.get_mut("raw_file_data").unwrap();
                 let file_data_vec: &mut Vec<SharedData> = raw_file_data.to_vec_mut().unwrap();
 
-                file_data_vec.push(SharedData::SharedFileData(file_data));
+                file_data_vec.push(SharedData::FileData(file_data));
             }
         });
 
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: bool = true;
-            unlocked_data.insert("done_reading_files".to_string(), SharedData::SharedBool(d));
+            unlocked_data.insert("done_reading_files".to_string(), SharedData::Bool(d));
         }
 
         Ok(())

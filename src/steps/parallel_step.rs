@@ -34,9 +34,9 @@ impl<'a> Step for ParallelStep {
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: bool = false;
-            unlocked_data.insert("done_reading_files".to_string(), SharedData::SharedBool(d));
+            unlocked_data.insert("done_reading_files".to_string(), SharedData::Bool(d));
             let f: bool = false;
-            unlocked_data.insert("done_parsing_games".to_string(), SharedData::SharedBool(f));
+            unlocked_data.insert("done_parsing_games".to_string(), SharedData::Bool(f));
         }
 
         let mut handles = vec![];

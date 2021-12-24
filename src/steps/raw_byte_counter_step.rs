@@ -29,7 +29,7 @@ impl<'a> Step for RawByteCounterStep {
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: u64 = 0;
-            unlocked_data.insert("byte_counter".to_string(), SharedData::SharedU64(d));
+            unlocked_data.insert("byte_counter".to_string(), SharedData::U64(d));
         }
 
         loop {
@@ -38,7 +38,7 @@ impl<'a> Step for RawByteCounterStep {
                 let flag = unlocked_data.get("done_reading_files").unwrap();
 
                 match flag {
-                    SharedData::SharedBool(downcast) => !downcast,
+                    SharedData::Bool(downcast) => !downcast,
                     _ => return Err("RawByteCounterStep: Could not downcast input!".to_string()),
                 }
             };
@@ -53,12 +53,12 @@ impl<'a> Step for RawByteCounterStep {
                 None => continue,
             };
             let file_data_vec = match raw_file_data {
-                SharedData::SharedVec(downcast) => downcast,
+                SharedData::Vec(downcast) => downcast,
                 _ => panic!("RawByteCounterStep: Could not downcast input!"), // TODO no panic
             };
 
-            let file_data = match file_data_vec.pop().unwrap_or(SharedData::SharedVec(vec![])) {
-                SharedData::SharedFileData(data) => data,
+            let file_data = match file_data_vec.pop().unwrap_or_else(|| SharedData::Vec(vec![])) {
+                SharedData::FileData(data) => data,
                 _ => panic!(), // TODO
             };
 

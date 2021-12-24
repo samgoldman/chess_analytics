@@ -14,75 +14,75 @@ pub type StepGeneric = Arc<Mutex<HashMap<String, SharedData>>>;
 
 #[derive(Clone, Debug)]
 pub enum SharedData {
-    SharedU64(u64),
-    SharedUSize(usize),
-    SharedPathBuf(PathBuf),
-    SharedFileData(Vec<u8>),
-    SharedBool(bool),
-    SharedGame(GameWrapper),
-    SharedVec(Vec<SharedData>),
+    U64(u64),
+    USize(usize),
+    PathBuf(PathBuf),
+    FileData(Vec<u8>),
+    Bool(bool),
+    Game(GameWrapper),
+    Vec(Vec<SharedData>),
 }
 
 impl SharedData {
     pub fn to_u64(&self) -> Option<u64> {
         match self {
-            SharedData::SharedU64(val) => Some(*val),
+            SharedData::U64(val) => Some(*val),
             _ => None,
         }
     }
 
     pub fn to_u64_mut(&mut self) -> Option<&mut u64> {
         match self {
-            SharedData::SharedU64(val) => Some(val),
+            SharedData::U64(val) => Some(val),
             _ => None,
         }
     }
 
     pub fn to_usize_mut(&mut self) -> Option<&mut usize> {
         match self {
-            SharedData::SharedUSize(val) => Some(val),
+            SharedData::USize(val) => Some(val),
             _ => None,
         }
     }
 
     pub fn to_bool(&self) -> Option<bool> {
         match self {
-            SharedData::SharedBool(val) => Some(*val),
+            SharedData::Bool(val) => Some(*val),
             _ => None,
         }
     }
 
     pub fn to_bool_mut(&mut self) -> Option<&mut bool> {
         match self {
-            SharedData::SharedBool(val) => Some(val),
+            SharedData::Bool(val) => Some(val),
             _ => None,
         }
     }
 
     pub fn to_game_mut(&mut self) -> Option<&mut GameWrapper> {
         match self {
-            SharedData::SharedGame(val) => Some(val),
+            SharedData::Game(val) => Some(val),
             _ => None,
         }
     }
 
     pub fn to_vec(&self) -> Option<Vec<SharedData>> {
         match self {
-            SharedData::SharedVec(v) => Some(v.to_vec()),
+            SharedData::Vec(v) => Some(v.to_vec()),
             _ => None,
         }
     }
 
     pub fn to_vec_mut(&mut self) -> Option<&mut Vec<SharedData>> {
         match self {
-            SharedData::SharedVec(v) => Some(v),
+            SharedData::Vec(v) => Some(v),
             _ => None,
         }
     }
 
     pub fn to_path_buf(&self) -> Option<PathBuf> {
         match self {
-            SharedData::SharedPathBuf(v) => Some(v.clone()),
+            SharedData::PathBuf(v) => Some(v.clone()),
             _ => None,
         }
     }
@@ -91,13 +91,13 @@ impl SharedData {
 impl std::fmt::Display for SharedData {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            SharedData::SharedU64(val) => write!(f, "{}", val),
-            SharedData::SharedUSize(val) => write!(f, "{}", val),
-            SharedData::SharedPathBuf(val) => write!(f, "{:?}", val),
-            SharedData::SharedFileData(val) => write!(f, "{:?}", val),
-            SharedData::SharedBool(val) => write!(f, "{}", val),
-            SharedData::SharedGame(val) => write!(f, "{:?}", val),
-            SharedData::SharedVec(val) => write!(f, "{:?}", val),
+            SharedData::U64(val) => write!(f, "{}", val),
+            SharedData::USize(val) => write!(f, "{}", val),
+            SharedData::PathBuf(val) => write!(f, "{:?}", val),
+            SharedData::FileData(val) => write!(f, "{:?}", val),
+            SharedData::Bool(val) => write!(f, "{}", val),
+            SharedData::Game(val) => write!(f, "{:?}", val),
+            SharedData::Vec(val) => write!(f, "{:?}", val),
         }
     }
 }

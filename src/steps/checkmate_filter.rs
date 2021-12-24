@@ -33,7 +33,7 @@ impl CheckmateFilter {
             input_vec_name,
             output_vec_name,
             discard_vec_name,
-            flag_name: flag_name,
+            flag_name,
         }))
     }
 

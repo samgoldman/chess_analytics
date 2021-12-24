@@ -36,14 +36,14 @@ impl PlayerEloFilter {
         let min_elo = match params.get("min_elo") {
             Some(val) => match val.as_u64() {
                 Some(val) => Some(val as u16),
-                None => return Err(format!("Could not parse min_elo")),
+                None => return Err("Could not parse min_elo".to_string()),
             },
             None => None,
         };
         let max_elo = match params.get("max_elo") {
             Some(val) => match val.as_u64() {
                 Some(val) => Some(val as u16),
-                None => return Err(format!("Could not parse max_elo")),
+                None => return Err("Could not parse max_elo".to_string()),
             },
             None => None,
         };
@@ -63,26 +63,18 @@ impl PlayerEloFilter {
     pub fn filter(game: GameWrapper, filter: &PlayerEloFilter) -> bool {
         let min_res = match filter.min_elo {
             Some(value) => {
-                if filter.filter_white && game.white_rating < value {
-                    false
-                } else if filter.filter_black && game.black_rating < value {
-                    false
-                } else {
-                    true
-                }
+                let white_violation = filter.filter_white && game.white_rating < value;
+                let black_violation = filter.filter_black && game.black_rating < value;
+                !black_violation && !white_violation
             }
             _ => true, // No min
         };
 
         let max_res = match filter.max_elo {
             Some(value) => {
-                if filter.filter_white && game.white_rating > value {
-                    false
-                } else if filter.filter_black && game.black_rating > value {
-                    false
-                } else {
-                    true
-                }
+                let white_violation = filter.filter_white && game.white_rating > value;
+                let black_violation = filter.filter_black && game.black_rating > value;
+                !black_violation && !white_violation
             }
             _ => true, // No max
         };
