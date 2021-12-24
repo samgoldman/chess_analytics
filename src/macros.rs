@@ -15,10 +15,18 @@ macro_rules! filter_template {
             {
                 let mut unlocked_data = data.lock().unwrap();
                 unlocked_data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
-                unlocked_data.insert(self.discard_vec_name.clone(), SharedData::Vec(vec![]));
+                if self.discard_vec_name != "null" {
+                    unlocked_data.insert(self.discard_vec_name.clone(), SharedData::Vec(vec![]));
+                }
             }
 
+            let mut quit = false;
+            let mut final_loop = false;
             loop {
+                if quit {
+                    final_loop = true;
+                }
+
                 let games = {
                     let mut unlocked_data = data.lock().unwrap();
 
@@ -62,7 +70,7 @@ macro_rules! filter_template {
                     vec_to_append.append(&mut output_games);
                 }
 
-                {
+                if &self.discard_vec_name != "null" {
                     let mut unlocked_data = data.lock().unwrap();
 
                     let data = match unlocked_data.get_mut(&self.discard_vec_name) {
@@ -77,14 +85,24 @@ macro_rules! filter_template {
                 let unlocked_data = data.lock().unwrap();
 
                 let flag = unlocked_data
-                    .get(&self.flag_name)
+                    .get(&self.input_flag)
                     .unwrap_or(&SharedData::Bool(false));
 
                 let flag = flag.to_bool().unwrap();
 
                 if flag {
+                    quit = true;
+                }
+
+                if final_loop && quit {
                     break;
                 }
+            }        
+            
+            {
+                let mut unlocked_data = data.lock().unwrap();
+                let d: bool = true;
+                unlocked_data.insert(self.output_flag.clone(), SharedData::Bool(d));
             }
 
             Ok(())

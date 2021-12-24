@@ -6,12 +6,26 @@ use std::fs::File;
 use std::io::Read;
 
 #[derive(Debug)]
-pub struct Bz2DecompressStep {}
+pub struct Bz2DecompressStep {
+    max_queue_size: u64,
+    full_queue_delay_ms: u64
+}
 
 /// chess_analytics_build::register_step_builder "Bz2DecompressStep" Bz2DecompressStep
 impl Bz2DecompressStep {
-    pub fn try_new(_configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
-        Ok(Box::new(Bz2DecompressStep {}))
+    pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
+        let params = match configuration {
+            Some(value) => value,
+            None => return Err("Bz2DecompressStep: no parameters provided".to_string()),
+        };
+
+        // TODO: better error handling
+        let max_queue_size = params.get("max_queue_size").unwrap().as_u64().unwrap();
+        let full_queue_delay_ms = params.get("full_queue_delay_ms").unwrap().as_u64().unwrap();
+        Ok(Box::new(Bz2DecompressStep {
+            max_queue_size,
+            full_queue_delay_ms
+        }))
     }
 }
 
@@ -49,6 +63,16 @@ impl<'a> Step for Bz2DecompressStep {
             } else {
                 file.read_to_end(&mut file_data)
                     .expect("Could not read file");
+            }
+
+            loop {
+                {
+                    let unlocked_data = data.lock().unwrap();
+                    if (unlocked_data.get("raw_file_data").unwrap().to_vec().unwrap().len() as u64) < self.max_queue_size {
+                        break;
+                    }
+                }
+                std::thread::sleep(std::time::Duration::from_millis(self.full_queue_delay_ms));
             }
 
             {

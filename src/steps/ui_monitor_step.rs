@@ -139,6 +139,7 @@ impl<'a> Step for UiMonitorStep {
                 self.terminal.clear().unwrap();
                 break;
             }
+            std::thread::sleep(std::time::Duration::from_millis(332));
         }
 
         Ok(())

@@ -72,12 +72,9 @@ impl<'a> Step for ParseBinGame {
             }
         }
 
-        std::thread::sleep(std::time::Duration::from_secs(1));
-        {
-            let mut unlocked_data = data.lock().unwrap();
-            let d: bool = true;
-            unlocked_data.insert("done_parsing_games".to_string(), SharedData::Bool(d));
-        }
+        let mut unlocked_data = data.lock().unwrap();
+        let d: bool = true;
+        unlocked_data.insert("done_parsing_games".to_string(), SharedData::Bool(d));
 
         Ok(()) //self.child.process(data)
     }
