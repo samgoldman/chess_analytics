@@ -2,7 +2,7 @@ steps:
   init:
     type: "GlobFileStep"
     params: 
-      glob: /data/data_scratch/lichess_data/rust_conversions_v3/*/*.bin
+      glob: /data/data_scratch/lichess_data/rust_conversions_v3/2013*/*.bin
       child: parallel_step
   parallel_step:
     type: ParallelStep
@@ -12,7 +12,9 @@ steps:
         - "parse_games"
         - "monitor"
         - "filter_mate"
-        - "filter_player_elo"
+        # - "filter_player_elo"
+        - "filter_eval_available"
+        - "filter_min_moves"
   load_files:
     type: Bz2DecompressStep
     params:
@@ -32,6 +34,8 @@ steps:
           field: filter_1_done
         - display_name: Done Filter 2
           field: filter_2_done
+        - display_name: Done Filter 3
+          field: filter_3_done
       length:
         - display_name: Raw File Data
           field: raw_file_data
@@ -41,14 +45,33 @@ steps:
           field: filtered_games_1
         - display_name: Filtered Games 2
           field: filtered_games_2
+        - display_name: Filtered Games 3
+          field: filtered_games_3
   filter_mate:
     type: CheckmateFilter
+    params:
+      input: filtered_games_2
+      output: filtered_games_3
+      discard: "null"
+      input_flag: filter_2_done
+      output_flag: filter_3_done
+  filter_eval_available:
+    type: EvalAvailableFilter
+    params:
+      input: filtered_games_1
+      output: filtered_games_2
+      discard: "null"
+      input_flag: filter_1_done
+      output_flag: filter_2_done
+  filter_min_moves:
+    type: MinMovesFilter
     params:
       input: parsed_games
       output: filtered_games_1
       discard: "null"
       input_flag: done_parsing_games
       output_flag: filter_1_done
+      min_moves: 20
   filter_player_elo:
     type: PlayerEloFilter
     params:
