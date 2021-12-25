@@ -46,6 +46,15 @@ impl Path {
 }
 
 #[cfg(test)]
+mod test_path_misc {
+    use super::*;
+
+    fn test_empty() {
+        assert_eq!(Path::empty(), Path(vec![]));
+    }
+}
+
+#[cfg(test)]
 mod test_generate_path {
     use super::*;
     use crate::basic_types::file::File;
