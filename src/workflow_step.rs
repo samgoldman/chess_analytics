@@ -20,7 +20,10 @@ pub enum SharedData {
     FileData(Vec<u8>),
     Bool(bool),
     Game(GameWrapper),
+    BinnedValue((Box<SharedData>, Vec<SharedData>)),
+    String(String),
     Vec(Vec<SharedData>),
+    Map(HashMap<String, SharedData>),
 }
 
 impl SharedData {
@@ -80,6 +83,48 @@ impl SharedData {
         }
     }
 
+    pub fn to_binned_value(&self) -> Option<&(Box<SharedData>, Vec<SharedData>)> {
+        match self {
+            SharedData::BinnedValue(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn to_binned_value_mut(&mut self) -> Option<&mut (Box<SharedData>, Vec<SharedData>)> {
+        match self {
+            SharedData::BinnedValue(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn to_string(&self) -> Option<&String> {
+        match self {
+            SharedData::String(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn to_string_mut(&mut self) -> Option<&mut String> {
+        match self {
+            SharedData::String(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn to_map(&self) -> Option<&HashMap<String, SharedData>> {
+        match self {
+            SharedData::Map(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn to_map_mut(&mut self) -> Option<&mut HashMap<String, SharedData>> {
+        match self {
+            SharedData::Map(v) => Some(v),
+            _ => None,
+        }
+    }
+
     pub fn to_path_buf(&self) -> Option<PathBuf> {
         match self {
             SharedData::PathBuf(v) => Some(v.clone()),
@@ -97,7 +142,16 @@ impl std::fmt::Display for SharedData {
             SharedData::FileData(val) => write!(f, "{:?}", val),
             SharedData::Bool(val) => write!(f, "{}", val),
             SharedData::Game(val) => write!(f, "{:?}", val),
+            SharedData::BinnedValue(val) => write!(f, "{:?}", val),
+            SharedData::String(val) => write!(f, "{}", val),
             SharedData::Vec(val) => write!(f, "{:?}", val),
+            SharedData::Map(val) => {
+                write!(f, "Map: \n").expect("Write fail");
+                for (k, v) in val.iter() {
+                    write!(f, "\t{:?}: {:?}\r\n", k, v).expect("Write fail");
+                }
+                Ok(())
+            }
         }
     }
 }

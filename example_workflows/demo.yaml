@@ -2,7 +2,7 @@ steps:
   init:
     type: "GlobFileStep"
     params: 
-      glob: /data/data_scratch/lichess_data/rust_conversions_v3/2013*/*.bin
+      glob: /data/data_scratch/lichess_data/rust_conversions_v3/2013-01/*.bin
       child: parallel_step
   parallel_step:
     type: ParallelStep
@@ -12,9 +12,12 @@ steps:
         - "parse_games"
         - "monitor"
         - "filter_mate"
-        # - "filter_player_elo"
         - "filter_eval_available"
         - "filter_min_moves"
+        - "init_bins"
+        - "bin_time_control"
+        - "map_count"
+        - "reduce_sum"
   load_files:
     type: Bz2DecompressStep
     params:
@@ -36,6 +39,8 @@ steps:
           field: filter_2_done
         - display_name: Done Filter 3
           field: filter_3_done
+        - display_name: Reduction Map
+          field: reduced
       length:
         - display_name: Raw File Data
           field: raw_file_data
@@ -72,15 +77,44 @@ steps:
       input_flag: done_parsing_games
       output_flag: filter_1_done
       min_moves: 20
-  filter_player_elo:
-    type: PlayerEloFilter
+  init_bins:
+    type: InitBinStep
     params:
-      input: filtered_games_1
-      output: filtered_games_2
-      discard: "null"
-      input_flag: filter_1_done
-      output_flag: filter_2_done
-      max_elo: 1500
-      min_elo: 1600
-      white: true
-      black: true
+      input: filtered_games_3
+      output: unbinned_games
+      input_flag: filter_3_done
+      output_flag: init_bins_done
+  bin_time_control:
+    type: TimeControlBin
+    params:
+      input: unbinned_games
+      output: time_control_binned
+      input_flag: init_bins_done
+      output_flag: time_control_bin_done
+  map_count:
+    type: CountMap
+    params:
+      input: time_control_binned
+      output: mapped_count
+      input_flag: time_control_bin_done
+      output_flag: mapping_done
+  reduce_sum:
+    type: SumReduce
+    params:
+      input: mapped_count
+      output: reduced
+      input_flag: mapping_done
+      output_flag: reduction_done
+
+  # filter_player_elo:
+  #   type: PlayerEloFilter
+  #   params:
+  #     input: filtered_games_1
+  #     output: filtered_games_2
+  #     discard: "null"
+  #     input_flag: filter_1_done
+  #     output_flag: filter_2_done
+  #     max_elo: 1500
+  #     min_elo: 1600
+  #     white: true
+  #     black: true
