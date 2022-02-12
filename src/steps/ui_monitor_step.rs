@@ -16,6 +16,9 @@ pub struct UiMonitorStep {
     terminal: Terminal<TermionBackend<RawTerminal<Stdout>>>,
     raw_fields: Vec<(String, String)>,
     length_fields: Vec<(String, String)>,
+    finish_flag_name: String,
+    start_time: std::time::Instant,
+    elapsed: std::time::Duration,
 }
 
 /// chess_analytics_build::register_step_builder "UiMonitorStep" UiMonitorStep
@@ -30,6 +33,8 @@ impl UiMonitorStep {
             Some(value) => value,
             None => return Err("UiMonitorStep: no parameters provided".to_string()),
         };
+
+        let finish_flag_name = params.get("finish_flag").unwrap().as_str().unwrap().to_string();
 
         let raw = match params.get("raw").unwrap().as_sequence() {
             Some(values) => values
@@ -69,6 +74,9 @@ impl UiMonitorStep {
             terminal,
             raw_fields: raw,
             length_fields: length,
+            finish_flag_name,
+            elapsed: std::time::Duration::from_millis(0),
+            start_time: std::time::Instant::now(),
         }))
     }
 }
@@ -76,8 +84,11 @@ impl UiMonitorStep {
 impl<'a> Step for UiMonitorStep {
     #[allow(clippy::needless_return)] // Allow for coverage
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+        self.start_time = std::time::Instant::now();
         self.terminal.clear().unwrap();
         loop {
+            let mut done = false;
+
             let monitored_data = {
                 let unlocked_data = data.lock().unwrap();
                 let mut raw = self
@@ -104,6 +115,17 @@ impl<'a> Step for UiMonitorStep {
                     .collect::<Vec<String>>();
 
                 raw.append(&mut length);
+
+                if unlocked_data.contains_key(&self.finish_flag_name) && unlocked_data.get(&self.finish_flag_name).unwrap().to_bool().unwrap() {
+                    done = true;
+                }
+
+                if !done {
+                    self.elapsed = self.start_time.elapsed();
+                }
+    
+                let mut t = vec![format!("Duration: {:?}", self.elapsed)];
+                raw.append(&mut t);
 
                 raw
             };

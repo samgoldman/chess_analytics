@@ -1,0 +1,62 @@
+steps:
+  init:
+    type: "GlobFileStep"
+    params: 
+      glob: /data/data_scratch/lichess_data/rust_conversions_v3/2022-01/*.bin*
+      child: parallel_step
+  parallel_step:
+    type: ParallelStep
+    params:
+      children:
+        - "load_files"
+        - "parse_games"
+        - "monitor"
+        - "init_bins"
+        - "map_count"
+        - "reduce_sum"
+  load_files:
+    type: Bz2DecompressStep
+    params:
+      max_queue_size: 10
+      full_queue_delay_ms: 332
+  parse_games:
+    type: ParseBinGame
+  monitor:
+    type: UiMonitorStep
+    params: 
+      finish_flag: reduction_done
+      raw:
+        - display_name: Done Reading Files
+          field: done_reading_files
+        - display_name: Done Parsing Games
+          field: done_parsing_games
+        - display_name: Reduction Map
+          field: reduced
+        - display_name: Total File Count
+          field: total_file_count
+      length:
+        - display_name: Raw File Data
+          field: raw_file_data
+        - display_name: Parsed Games
+          field: parsed_games
+  init_bins:
+    type: InitBinStep
+    params:
+      input: parsed_games
+      output: unbinned_games
+      input_flag: done_parsing_games
+      output_flag: init_bins_done
+  map_count:
+    type: CountMap
+    params:
+      input: unbinned_games
+      output: mapped_count
+      input_flag: init_bins_done
+      output_flag: mapping_done
+  reduce_sum:
+    type: SumReduce
+    params:
+      input: mapped_count
+      output: reduced
+      input_flag: mapping_done
+      output_flag: reduction_done

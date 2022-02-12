@@ -2,7 +2,7 @@ steps:
   init:
     type: "GlobFileStep"
     params: 
-      glob: /data/data_scratch/lichess_data/rust_conversions_v3/2013-01/*.bin
+      glob: /data/data_scratch/lichess_data/rust_conversions_v3/2013-01/*.bin*
       child: parallel_step
   parallel_step:
     type: ParallelStep
@@ -28,6 +28,7 @@ steps:
   monitor:
     type: UiMonitorStep
     params: 
+      finish_flag: reduction_done
       raw:
         - display_name: Done Reading Files
           field: done_reading_files
@@ -41,6 +42,8 @@ steps:
           field: filter_3_done
         - display_name: Reduction Map
           field: reduced
+        - display_name: Total File Count
+          field: total_file_count
       length:
         - display_name: Raw File Data
           field: raw_file_data
