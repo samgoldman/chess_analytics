@@ -25,7 +25,9 @@ impl<'a> Step for ParseBinGame {
             let done_reading_files = {
                 let unlocked_data = data.lock().unwrap();
 
-                if !unlocked_data.contains_key("done_reading_files") { continue; }
+                if !unlocked_data.contains_key("done_reading_files") {
+                    continue;
+                }
 
                 let flag = unlocked_data.get("done_reading_files").unwrap();
 
@@ -37,8 +39,10 @@ impl<'a> Step for ParseBinGame {
             let file_data = {
                 let mut unlocked_data = data.lock().unwrap();
 
-                if !unlocked_data.contains_key("raw_file_data") { continue; }
-                
+                if !unlocked_data.contains_key("raw_file_data") {
+                    continue;
+                }
+
                 let raw_file_data = match unlocked_data.get_mut("raw_file_data") {
                     Some(data) => data,
                     None => continue,

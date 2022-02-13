@@ -34,7 +34,12 @@ impl UiMonitorStep {
             None => return Err("UiMonitorStep: no parameters provided".to_string()),
         };
 
-        let finish_flag_name = params.get("finish_flag").unwrap().as_str().unwrap().to_string();
+        let finish_flag_name = params
+            .get("finish_flag")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .to_string();
 
         let raw = match params.get("raw").unwrap().as_sequence() {
             Some(values) => values
@@ -116,14 +121,20 @@ impl<'a> Step for UiMonitorStep {
 
                 raw.append(&mut length);
 
-                if unlocked_data.contains_key(&self.finish_flag_name) && unlocked_data.get(&self.finish_flag_name).unwrap().to_bool().unwrap() {
+                if unlocked_data.contains_key(&self.finish_flag_name)
+                    && unlocked_data
+                        .get(&self.finish_flag_name)
+                        .unwrap()
+                        .to_bool()
+                        .unwrap()
+                {
                     done = true;
                 }
 
                 if !done {
                     self.elapsed = self.start_time.elapsed();
                 }
-    
+
                 let mut t = vec![format!("Duration: {:?}", self.elapsed)];
                 raw.append(&mut t);
 

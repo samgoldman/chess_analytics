@@ -3,6 +3,7 @@ steps:
     type: "GlobFileStep"
     params: 
       glob: /data/data_scratch/lichess_data/converted_v4/2013-01/*.bin*
+      # glob: /data/data_scratch/lichess_data/*.bin*
       child: parallel_step
   parallel_step:
     type: ParallelStep
@@ -16,8 +17,8 @@ steps:
         - "filter_min_moves"
         - "init_bins"
         - "bin_time_control"
-        - "map_count"
-        - "reduce_sum"
+        - "map_perfect_checkmate"
+        - "reduce_avg"
   load_files:
     type: Bz2DecompressStep
     params:
@@ -94,30 +95,17 @@ steps:
       output: time_control_binned
       input_flag: init_bins_done
       output_flag: time_control_bin_done
-  map_count:
-    type: CountMap
+  map_perfect_checkmate:
+    type: PerfectCheckmateMap
     params:
       input: time_control_binned
       output: mapped_count
       input_flag: time_control_bin_done
       output_flag: mapping_done
-  reduce_sum:
-    type: SumReduce
+  reduce_avg:
+    type: AvgReduce
     params:
       input: mapped_count
       output: reduced
       input_flag: mapping_done
       output_flag: reduction_done
-
-  # filter_player_elo:
-  #   type: PlayerEloFilter
-  #   params:
-  #     input: filtered_games_1
-  #     output: filtered_games_2
-  #     discard: "null"
-  #     input_flag: filter_1_done
-  #     output_flag: filter_2_done
-  #     max_elo: 1500
-  #     min_elo: 1600
-  #     white: true
-  #     black: true

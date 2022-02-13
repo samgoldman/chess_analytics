@@ -48,7 +48,10 @@ impl Step for GlobFileStep {
 
         {
             let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert("total_file_count".to_string(), SharedData::USize(files.clone().len()));
+            unlocked_data.insert(
+                "total_file_count".to_string(),
+                SharedData::USize(files.clone().len()),
+            );
             unlocked_data.insert("file_path_bufs".to_string(), SharedData::Vec(files));
         }
 

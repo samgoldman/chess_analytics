@@ -15,6 +15,7 @@ pub type StepGeneric = Arc<Mutex<HashMap<String, SharedData>>>;
 #[derive(Clone, Debug)]
 pub enum SharedData {
     U64(u64),
+    F64(f64),
     USize(usize),
     PathBuf(PathBuf),
     FileData(Vec<u8>),
@@ -137,6 +138,7 @@ impl std::fmt::Display for SharedData {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             SharedData::U64(val) => write!(f, "{}", val),
+            SharedData::F64(val) => write!(f, "{}", val),
             SharedData::USize(val) => write!(f, "{}", val),
             SharedData::PathBuf(val) => write!(f, "{:?}", val),
             SharedData::FileData(val) => write!(f, "{:?}", val),

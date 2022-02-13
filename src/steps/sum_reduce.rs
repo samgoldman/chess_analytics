@@ -47,7 +47,10 @@ impl<'a> Step for SumReduce {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert(self.output_map_name.clone(), SharedData::Map(HashMap::new()));
+            unlocked_data.insert(
+                self.output_map_name.clone(),
+                SharedData::Map(HashMap::new()),
+            );
         }
 
         let mut quit = false;
@@ -87,13 +90,14 @@ impl<'a> Step for SumReduce {
                 };
 
                 let bin_labels = binned_game.1;
-                let bin_str_labels: Vec<String> = bin_labels.iter().map(|b| format!("{}", b)).collect();
+                let bin_str_labels: Vec<String> =
+                    bin_labels.iter().map(|b| format!("{}", b)).collect();
                 let combined_label = bin_str_labels.join(".");
 
                 if !new_data.contains_key(&combined_label) {
                     new_data.insert(combined_label.clone(), 0);
                 }
-                
+
                 *(new_data.get_mut(&combined_label).unwrap()) += value;
             }
 
@@ -109,7 +113,8 @@ impl<'a> Step for SumReduce {
                     if !map.contains_key(&key.to_string()) {
                         map.insert(key.to_string(), SharedData::U64(0));
                     }
-                    *(map.get_mut(&key.to_string()).unwrap().to_u64_mut().unwrap()) += new_data.get(&key.to_string()).unwrap();
+                    *(map.get_mut(&key.to_string()).unwrap().to_u64_mut().unwrap()) +=
+                        new_data.get(&key.to_string()).unwrap();
                 }
             }
 
@@ -138,5 +143,4 @@ impl<'a> Step for SumReduce {
 
         Ok(())
     }
-
 }

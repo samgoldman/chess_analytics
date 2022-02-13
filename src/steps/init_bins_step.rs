@@ -58,7 +58,9 @@ impl<'a> Step for InitBinStep {
             let games = {
                 let mut unlocked_data = data.lock().unwrap();
 
-                if !unlocked_data.contains_key(&self.input_vec_name) { continue; }
+                if !unlocked_data.contains_key(&self.input_vec_name) {
+                    continue;
+                }
 
                 let data = match unlocked_data.get_mut(&self.input_vec_name) {
                     Some(data) => data,

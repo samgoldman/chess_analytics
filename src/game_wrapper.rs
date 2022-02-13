@@ -60,6 +60,8 @@ impl GameWrapper {
         );
         let clock = clock_components.map(hours_min_sec_to_duration).collect();
 
+        // println!("{}: {:?}", game.eval_available(), game.eval_mate_in());
+
         GameWrapper {
             year: game.year(),
             month: game.month(),
