@@ -3,19 +3,19 @@ use crate::workflow_step::*;
 use std::collections::HashMap;
 
 #[derive(Debug)]
-pub struct AvgReduce {
+pub struct MaxReduce {
     input_vec_name: String,
     output_map_name: String,
     input_flag: String,
     output_flag: String,
 }
 
-/// chess_analytics_build::register_step_builder "AvgReduce" AvgReduce
-impl AvgReduce {
+/// chess_analytics_build::register_step_builder "MaxReduce" MaxReduce
+impl MaxReduce {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
             Some(value) => value,
-            None => return Err("AvgReduce: no parameters provided".to_string()),
+            None => return Err("MaxReduce: no parameters provided".to_string()),
         };
 
         // TODO: better error handling
@@ -34,7 +34,7 @@ impl AvgReduce {
             .unwrap()
             .to_string();
 
-        Ok(Box::new(AvgReduce {
+        Ok(Box::new(MaxReduce {
             input_vec_name,
             output_map_name,
             input_flag,
@@ -43,7 +43,7 @@ impl AvgReduce {
     }
 }
 
-impl<'a> Step for AvgReduce {
+impl<'a> Step for MaxReduce {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();
@@ -75,7 +75,7 @@ impl<'a> Step for AvgReduce {
                 ret
             };
 
-            let mut new_data: HashMap<String, Vec<u64>> = HashMap::new();
+            let mut new_data: HashMap<String, SharedData> = HashMap::new();
 
             for shared_binned_game in binned_games {
                 let binned_game = match shared_binned_game.clone() {
@@ -83,11 +83,7 @@ impl<'a> Step for AvgReduce {
                     _ => return Err("Vector isn't of binned values!".to_string()),
                 };
 
-                let value = match *binned_game.0 {
-                    SharedData::U64(v) => v,
-                    SharedData::USize(v) => v as u64,
-                    _ => return Err("Value isn't an integer!".to_string()),
-                };
+                let value = *binned_game.0;
 
                 let bin_labels = binned_game.1;
                 let bin_str_labels: Vec<String> =
@@ -95,11 +91,12 @@ impl<'a> Step for AvgReduce {
                 let combined_label = bin_str_labels.join(".");
 
                 if !new_data.contains_key(&combined_label) {
-                    new_data.insert(combined_label.clone(), vec![0, 0]);
+                    new_data.insert(combined_label.clone(), value.clone());
                 }
 
-                new_data.get_mut(&combined_label).unwrap()[0] += value;
-                new_data.get_mut(&combined_label).unwrap()[1] += 1;
+                let original_value = new_data.get_mut(&combined_label).unwrap();
+
+                *(original_value) = original_value.max(value);
             }
 
             {
@@ -112,21 +109,12 @@ impl<'a> Step for AvgReduce {
 
                 for key in new_data.keys() {
                     if !map.contains_key(&key.to_string()) {
-                        map.insert(
-                            key.to_string(),
-                            SharedData::Vec(vec![SharedData::U64(0), SharedData::U64(0), SharedData::F64(0.0)]),
-                        );
+                        map.insert(key.to_string(), SharedData::U64(0));
                     }
 
-                    let shared_vec: &mut Vec<SharedData> =
-                        map.get_mut(&key.to_string()).unwrap().to_vec_mut().unwrap();
-
-                    *(shared_vec[0].to_u64_mut().unwrap()) +=
-                        new_data.get(&key.to_string()).unwrap()[0];
-                    *(shared_vec[1].to_u64_mut().unwrap()) +=
-                        new_data.get(&key.to_string()).unwrap()[1];
-                    shared_vec[2] =
-                        SharedData::F64(*(shared_vec[0].to_u64_mut().unwrap()) as f64 / *(shared_vec[1].to_u64_mut().unwrap()) as f64)
+                    let original = map.get_mut(&key.to_string()).unwrap();
+                    let new = &*(new_data.get(&key.to_string()).unwrap());
+                    *original = original.max(new.clone());
                 }
             }
 
@@ -149,26 +137,8 @@ impl<'a> Step for AvgReduce {
 
         {
             let mut unlocked_data = data.lock().unwrap();
-
             let d: bool = true;
             unlocked_data.insert(self.output_flag.clone(), SharedData::Bool(d));
-
-            let data = match unlocked_data.get_mut(&self.output_map_name) {
-                Some(data) => data,
-                None => panic!("AvgReduce: data not found for some reason!"),
-            };
-            let map = data.to_map_mut().unwrap();
-
-            for key in map.clone().keys() {
-                let shared_vec: Vec<SharedData> =
-                    map.get(&key.to_string()).unwrap().to_vec().unwrap();
-
-                let total = shared_vec[0].to_u64().unwrap() as f64;
-                let count = shared_vec[1].to_u64().unwrap() as f64;
-
-                let avg = total / count;
-                map.insert(key.clone(), SharedData::F64(avg));
-            }
         }
 
         Ok(())

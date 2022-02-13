@@ -55,6 +55,10 @@ impl PerfectCheckmateMap {
         let direction = if game.result == GameResult::White { 1 } else { -1 };
         let mut x = true;
         for eval in reversed {
+            if eval == 0 {
+                break;
+            }
+
             if !x {
                 last_eval = eval;
                 x = true;

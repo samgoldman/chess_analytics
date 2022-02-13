@@ -1,9 +1,10 @@
+# NOTE: for eval use 2017 and newer
+
 steps:
   init:
     type: "GlobFileStep"
     params: 
-      glob: /data/data_scratch/lichess_data/converted_v4/2013-01/*.bin*
-      # glob: /data/data_scratch/lichess_data/*.bin*
+      glob: /data/data_scratch/lichess_data/converted_v4/2017-0[1-6]/*.bin*
       child: parallel_step
   parallel_step:
     type: ParallelStep
@@ -15,10 +16,13 @@ steps:
         - "filter_mate"
         - "filter_eval_available"
         - "filter_min_moves"
+        - "filter_player_elo"
         - "init_bins"
         - "bin_time_control"
+        - "bin_game_elo"
         - "map_perfect_checkmate"
         - "reduce_avg"
+        # - "reduce_max"
   load_files:
     type: Bz2DecompressStep
     params:
@@ -30,6 +34,7 @@ steps:
     type: UiMonitorStep
     params: 
       finish_flag: reduction_done
+      final_results: reduced
       raw:
         - display_name: Done Reading Files
           field: done_reading_files
@@ -41,8 +46,6 @@ steps:
           field: filter_2_done
         - display_name: Done Filter 3
           field: filter_3_done
-        - display_name: Reduction Map
-          field: reduced
         - display_name: Total File Count
           field: total_file_count
       length:
@@ -56,22 +59,6 @@ steps:
           field: filtered_games_2
         - display_name: Filtered Games 3
           field: filtered_games_3
-  filter_mate:
-    type: CheckmateFilter
-    params:
-      input: filtered_games_2
-      output: filtered_games_3
-      discard: "null"
-      input_flag: filter_2_done
-      output_flag: filter_3_done
-  filter_eval_available:
-    type: EvalAvailableFilter
-    params:
-      input: filtered_games_1
-      output: filtered_games_2
-      discard: "null"
-      input_flag: filter_1_done
-      output_flag: filter_2_done
   filter_min_moves:
     type: MinMovesFilter
     params:
@@ -81,12 +68,40 @@ steps:
       input_flag: done_parsing_games
       output_flag: filter_1_done
       min_moves: 20
+  filter_eval_available:
+    type: EvalAvailableFilter
+    params:
+      input: filtered_games_1
+      output: filtered_games_2
+      discard: "null"
+      input_flag: filter_1_done
+      output_flag: filter_2_done
+  filter_mate:
+    type: CheckmateFilter
+    params:
+      input: filtered_games_2
+      output: filtered_games_3
+      discard: "null"
+      input_flag: filter_2_done
+      output_flag: filter_3_done
+  filter_player_elo:
+    type: PlayerEloFilter
+    params:
+      input: filtered_games_3
+      output: filtered_games_4
+      discard: "null"
+      input_flag: filter_3_done
+      output_flag: filter_4_done
+      min_elo: 600
+      max_elo: 3000
+      white: true
+      black: true
   init_bins:
     type: InitBinStep
     params:
-      input: filtered_games_3
+      input: filtered_games_4
       output: unbinned_games
-      input_flag: filter_3_done
+      input_flag: filter_4_done
       output_flag: init_bins_done
   bin_time_control:
     type: TimeControlBin
@@ -95,15 +110,30 @@ steps:
       output: time_control_binned
       input_flag: init_bins_done
       output_flag: time_control_bin_done
+  bin_game_elo:
+    type: GameEloBin
+    params:
+      input: time_control_binned
+      output: game_elo_binned
+      input_flag: time_control_bin_done
+      output_flag: game_elo_bin_done
+      bucket_size: 250
   map_perfect_checkmate:
     type: PerfectCheckmateMap
     params:
-      input: time_control_binned
+      input: game_elo_binned
       output: mapped_count
-      input_flag: time_control_bin_done
+      input_flag: game_elo_bin_done
       output_flag: mapping_done
   reduce_avg:
     type: AvgReduce
+    params:
+      input: mapped_count
+      output: reduced
+      input_flag: mapping_done
+      output_flag: reduction_done
+  reduce_max:
+    type: MaxReduce
     params:
       input: mapped_count
       output: reduced

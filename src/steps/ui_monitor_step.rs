@@ -17,6 +17,7 @@ pub struct UiMonitorStep {
     raw_fields: Vec<(String, String)>,
     length_fields: Vec<(String, String)>,
     finish_flag_name: String,
+    final_results_field_name: String,
     start_time: std::time::Instant,
     elapsed: std::time::Duration,
 }
@@ -36,6 +37,12 @@ impl UiMonitorStep {
 
         let finish_flag_name = params
             .get("finish_flag")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .to_string();
+
+        let final_results = params.get("final_results")
             .unwrap()
             .as_str()
             .unwrap()
@@ -82,6 +89,7 @@ impl UiMonitorStep {
             finish_flag_name,
             elapsed: std::time::Duration::from_millis(0),
             start_time: std::time::Instant::now(),
+            final_results_field_name: final_results,
         }))
     }
 }
@@ -135,8 +143,15 @@ impl<'a> Step for UiMonitorStep {
                     self.elapsed = self.start_time.elapsed();
                 }
 
-                let mut t = vec![format!("Duration: {:?}", self.elapsed)];
-                raw.append(&mut t);
+                raw.push(format!("Duration: {:?}", self.elapsed));
+
+                let final_results_map = unlocked_data.get(&self.final_results_field_name).unwrap().to_map().unwrap();
+
+                for (k, v) in final_results_map.iter() {
+                    raw.push(format!("{:?}: {}\t", k, v));
+                }
+
+                raw.sort();
 
                 raw
             };
