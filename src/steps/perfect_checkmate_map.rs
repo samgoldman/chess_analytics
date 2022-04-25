@@ -52,7 +52,11 @@ impl PerfectCheckmateMap {
 
         let mut count = 0;
         let mut last_eval = 0;
-        let direction = if game.result == GameResult::White { 1 } else { -1 };
+        let direction = if game.result == GameResult::White {
+            1
+        } else {
+            -1
+        };
         let mut x = true;
         for eval in reversed {
             if eval == 0 {
@@ -67,7 +71,7 @@ impl PerfectCheckmateMap {
 
             x = false;
             let diff = eval - last_eval;
-            let diff_unit = if diff == 0 { 0 } else {diff / diff.abs() };
+            let diff_unit = if diff == 0 { 0 } else { diff / diff.abs() };
             if direction == diff_unit {
                 count += 1;
                 last_eval = eval;

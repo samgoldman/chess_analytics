@@ -135,25 +135,19 @@ impl SharedData {
 
     pub fn max(&self, rhs: SharedData) -> SharedData {
         match self {
-            SharedData::U64(s) => {
-                match rhs {
-                    SharedData::U64(r) => SharedData::U64(u64::max(*s, r)),
-                    _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs)
-                }
-            }
-            SharedData::F64(s) => {
-                match rhs {
-                    SharedData::F64(r) => SharedData::F64(f64::max(*s, r)),
-                    _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs)
-                }
-            }
-            SharedData::USize(s) => {
-                match rhs {
-                    SharedData::USize(r) => SharedData::USize(usize::max(*s, r)),
-                    _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs)
-                }
-            }
-            _ => panic!("Max is not valid for {:?}", self)
+            SharedData::U64(s) => match rhs {
+                SharedData::U64(r) => SharedData::U64(u64::max(*s, r)),
+                _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs),
+            },
+            SharedData::F64(s) => match rhs {
+                SharedData::F64(r) => SharedData::F64(f64::max(*s, r)),
+                _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs),
+            },
+            SharedData::USize(s) => match rhs {
+                SharedData::USize(r) => SharedData::USize(usize::max(*s, r)),
+                _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs),
+            },
+            _ => panic!("Max is not valid for {:?}", self),
         }
     }
 }

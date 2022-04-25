@@ -114,7 +114,11 @@ impl<'a> Step for AvgReduce {
                     if !map.contains_key(&key.to_string()) {
                         map.insert(
                             key.to_string(),
-                            SharedData::Vec(vec![SharedData::U64(0), SharedData::U64(0), SharedData::F64(0.0)]),
+                            SharedData::Vec(vec![
+                                SharedData::U64(0),
+                                SharedData::U64(0),
+                                SharedData::F64(0.0),
+                            ]),
                         );
                     }
 
@@ -125,8 +129,10 @@ impl<'a> Step for AvgReduce {
                         new_data.get(&key.to_string()).unwrap()[0];
                     *(shared_vec[1].to_u64_mut().unwrap()) +=
                         new_data.get(&key.to_string()).unwrap()[1];
-                    shared_vec[2] =
-                        SharedData::F64(*(shared_vec[0].to_u64_mut().unwrap()) as f64 / *(shared_vec[1].to_u64_mut().unwrap()) as f64)
+                    shared_vec[2] = SharedData::F64(
+                        *(shared_vec[0].to_u64_mut().unwrap()) as f64
+                            / *(shared_vec[1].to_u64_mut().unwrap()) as f64,
+                    )
                 }
             }
 

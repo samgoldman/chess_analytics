@@ -42,7 +42,8 @@ impl UiMonitorStep {
             .unwrap()
             .to_string();
 
-        let final_results = params.get("final_results")
+        let final_results = params
+            .get("final_results")
             .unwrap()
             .as_str()
             .unwrap()
@@ -145,7 +146,11 @@ impl<'a> Step for UiMonitorStep {
 
                 raw.push(format!("Duration: {:?}", self.elapsed));
 
-                let final_results_map = unlocked_data.get(&self.final_results_field_name).unwrap().to_map().unwrap();
+                let final_results_map = unlocked_data
+                    .get(&self.final_results_field_name)
+                    .unwrap()
+                    .to_map()
+                    .unwrap();
 
                 for (k, v) in final_results_map.iter() {
                     raw.push(format!("{:?}: {}\t", k, v));
