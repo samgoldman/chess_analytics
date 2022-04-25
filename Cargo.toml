@@ -29,7 +29,7 @@ strum_macros = "0.21"
 mockall = "0.10.2"
 tui = { version = "0.16.0", features = ["rustbox"] }
 termion = "1.5.6"
-crossterm = "0.22"
+crossterm = "0.23"
 
 [dev-dependencies]
 predicates = "1"
