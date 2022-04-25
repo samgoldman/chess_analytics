@@ -108,12 +108,12 @@ impl<'a> Step for MaxReduce {
                 let map = data.to_map_mut().unwrap();
 
                 for key in new_data.keys() {
-                    if !map.contains_key(&key.to_string()) {
+                    if !map.contains_key(key) {
                         map.insert(key.to_string(), SharedData::U64(0));
                     }
 
-                    let original = map.get_mut(&key.to_string()).unwrap();
-                    let new = &*(new_data.get(&key.to_string()).unwrap());
+                    let original = map.get_mut(key).unwrap();
+                    let new = &*(new_data.get(key).unwrap());
                     *original = original.max(new.clone());
                 }
             }

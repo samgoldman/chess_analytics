@@ -24,7 +24,7 @@ fn generate_chess_flatbuff() -> Result<(), std::io::Error> {
 }
 
 fn generate_steps_module() -> Result<(), std::io::Error> {
-    let mut module = fs::File::create("src/steps.rs".to_string())?;
+    let mut module = fs::File::create("src/steps.rs")?;
 
     let mut mod_declarations = String::default();
     let mut use_declarations = String::default();

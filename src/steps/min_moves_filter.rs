@@ -53,5 +53,5 @@ impl MinMovesFilter {
 }
 
 impl<'a> Step for MinMovesFilter {
-    filter_template!(&MinMovesFilter::filter);
+    filter_template!(MinMovesFilter::filter);
 }

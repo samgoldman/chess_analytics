@@ -50,5 +50,5 @@ impl EvalAvailableFilter {
 }
 
 impl<'a> Step for EvalAvailableFilter {
-    filter_template!(&EvalAvailableFilter::filter);
+    filter_template!(EvalAvailableFilter::filter);
 }

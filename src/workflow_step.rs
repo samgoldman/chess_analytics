@@ -166,7 +166,7 @@ impl std::fmt::Display for SharedData {
             SharedData::String(val) => write!(f, "{}", val),
             SharedData::Vec(val) => write!(f, "{:?}", val),
             SharedData::Map(val) => {
-                write!(f, "Map: \n").expect("Write fail");
+                writeln!(f, "Map: ").expect("Write fail");
                 for (k, v) in val.iter() {
                     write!(f, "\t{:?}: {}\t", k, v).expect("Write fail");
                 }

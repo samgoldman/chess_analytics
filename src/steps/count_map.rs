@@ -47,5 +47,5 @@ impl CountMap {
 }
 
 impl<'a> Step for CountMap {
-    map_template!(&CountMap::map);
+    map_template!(CountMap::map);
 }

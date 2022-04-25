@@ -53,5 +53,5 @@ impl CheckmateFilter {
 }
 
 impl<'a> Step for CheckmateFilter {
-    filter_template!(&CheckmateFilter::filter);
+    filter_template!(CheckmateFilter::filter);
 }

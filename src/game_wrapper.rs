@@ -54,9 +54,9 @@ impl GameWrapper {
 
     fn new(game: Game) -> GameWrapper {
         let clock_components = izip!(
-            game.clock_hours().unwrap_or(&[]).to_vec(),
-            game.clock_minutes().unwrap_or(&[]).to_vec(),
-            game.clock_seconds().unwrap_or(&[]).to_vec()
+            game.clock_hours().unwrap_or(&[]),
+            game.clock_minutes().unwrap_or(&[]),
+            game.clock_seconds().unwrap_or(&[])
         );
         let clock = clock_components.map(hours_min_sec_to_duration).collect();
 

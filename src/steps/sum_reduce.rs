@@ -110,11 +110,11 @@ impl<'a> Step for SumReduce {
                 let map = data.to_map_mut().unwrap();
 
                 for key in new_data.keys() {
-                    if !map.contains_key(&key.to_string()) {
+                    if !map.contains_key(key) {
                         map.insert(key.to_string(), SharedData::U64(0));
                     }
-                    *(map.get_mut(&key.to_string()).unwrap().to_u64_mut().unwrap()) +=
-                        new_data.get(&key.to_string()).unwrap();
+                    *(map.get_mut(key).unwrap().to_u64_mut().unwrap()) +=
+                        new_data.get(key).unwrap();
                 }
             }
 

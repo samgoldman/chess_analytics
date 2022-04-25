@@ -92,5 +92,5 @@ impl PlayerEloFilter {
 }
 
 impl<'a> Step for PlayerEloFilter {
-    filter_template!(&PlayerEloFilter::filter);
+    filter_template!(PlayerEloFilter::filter);
 }
