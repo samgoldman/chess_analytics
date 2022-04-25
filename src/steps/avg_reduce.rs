@@ -125,10 +125,8 @@ impl<'a> Step for AvgReduce {
                     let shared_vec: &mut Vec<SharedData> =
                         map.get_mut(key).unwrap().to_vec_mut().unwrap();
 
-                    *(shared_vec[0].to_u64_mut().unwrap()) +=
-                        new_data.get(key).unwrap()[0];
-                    *(shared_vec[1].to_u64_mut().unwrap()) +=
-                        new_data.get(key).unwrap()[1];
+                    *(shared_vec[0].to_u64_mut().unwrap()) += new_data.get(key).unwrap()[0];
+                    *(shared_vec[1].to_u64_mut().unwrap()) += new_data.get(key).unwrap()[1];
                     shared_vec[2] = SharedData::F64(
                         *(shared_vec[0].to_u64_mut().unwrap()) as f64
                             / *(shared_vec[1].to_u64_mut().unwrap()) as f64,
@@ -166,8 +164,7 @@ impl<'a> Step for AvgReduce {
             let map = data.to_map_mut().unwrap();
 
             for key in map.clone().keys() {
-                let shared_vec: Vec<SharedData> =
-                    map.get(key).unwrap().to_vec().unwrap();
+                let shared_vec: Vec<SharedData> = map.get(key).unwrap().to_vec().unwrap();
 
                 let total = shared_vec[0].to_u64().unwrap() as f64;
                 let count = shared_vec[1].to_u64().unwrap() as f64;
