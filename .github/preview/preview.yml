@@ -1,0 +1,35 @@
+on: [push, pull_request]
+
+name: Rust Package Preview
+
+jobs:
+  find_outdated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - run: chmod u+x ./scripts/install-flatbuffers.sh
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      - run: ./scripts/install-flatbuffers.sh
+      - run: cargo install --locked cargo-outdated
+      - run: cargo install cargo-edit
+      - run: cargo outdated -R --format json | tee outdated.json
+      - run: echo "::set-output name=matrix::$(python -c "import json; f = open('outdated.json'); o = json.load(f); print(o['dependencies']); f.close()")"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+  test_outdates:
+    needs: find_outdated
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.provide_packages_json.outputs.matrix) }}
+    steps:
+      run: echo ${{ package }}
+      run: echo ${{ package.name }}
+      run: echo ${{ package.latest }}
