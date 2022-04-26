@@ -1,6 +1,9 @@
 on:
   schedule:
     - cron:  '0 6 * * *'
+  push:
+    branches:
+      - main
 
 name: Rust Package Preview
 
@@ -24,12 +27,12 @@ jobs:
       - run: cargo outdated -R --format json | tee outdated.json
       - id: parse_outdated
         run: python scripts/outdated_to_matrix.py | tee tmp.log
-      - run: echo ${{ steps.parse_outdated.outputs.matrix }}
       - uses: Swatinem/rust-cache@v1
     outputs:
       matrix: ${{ steps.parse_outdated.outputs.matrix }}
   test_outdated:
     needs: find_outdated
+    if: ${{ needs.find_outdated.outputs.matrix != '[]' && needs.find_outdated.outputs.matrix != '' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
