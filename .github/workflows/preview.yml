@@ -20,12 +20,13 @@ jobs:
       - run: ./scripts/install-flatbuffers.sh
       - run: cargo install --locked cargo-outdated
       - run: cargo outdated -R --format json | tee outdated.json
-      - run: | #python scripts/outdated_to_matrix.py
+      - id: parse_outdated
+        run: | #python scripts/outdated_to_matrix.py
           echo '::set-output name=matrix::[{"name": "test", "version": "4.2"}]'
       - uses: Swatinem/rust-cache@v1
     outputs:
-      matrix: ${{ steps.find_outdated.outputs.matrix }}
-  test_outdates:
+      matrix: ${{ steps.parse_outdated.outputs.matrix }}
+  test_outdated:
     needs: find_outdated
     runs-on: ubuntu-latest
     strategy:
