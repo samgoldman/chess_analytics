@@ -30,6 +30,6 @@ jobs:
       matrix:
         package: ${{ fromJson(needs.provide_packages_json.outputs.matrix) }}
     steps:
-      run: echo ${{ package }}
-      run: echo ${{ package.name }}
-      run: echo ${{ package.latest }}
+      - run: echo ${{ package }}
+      - run: echo ${{ package.name }}
+      - run: echo ${{ package.latest }}
