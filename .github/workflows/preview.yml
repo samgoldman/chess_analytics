@@ -22,7 +22,8 @@ jobs:
       - run: cargo outdated -R --format json | tee outdated.json
       - run: ls scripts/
       - id: parse_outdated
-        run: python scripts/outdated_to_matrix.py
+        run: python scripts/outdated_to_matrix.py | tee tmp.log
+      - run: cat tmp.log
       - uses: Swatinem/rust-cache@v1
     outputs:
       matrix: ${{ steps.parse_outdated.outputs.matrix }}
