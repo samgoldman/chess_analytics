@@ -50,6 +50,8 @@ jobs:
       - run: cargo install cargo-edit
       - id: update
         run: ./scripts/update_outdated.sh ${{ matrix.package.name }} ${{ matrix.package.latest }}
+      - run: cargo check
+        continue_on_error: true
       - run: rm -rf flatbuffers
       - uses: peter-evans/create-pull-request@v4
         if: steps.update.updated == 0
