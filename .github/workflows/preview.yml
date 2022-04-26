@@ -1,4 +1,6 @@
-on: [push]
+on:
+  schedule:
+    - cron:  '0 6 * * *'
 
 name: Rust Package Preview
 
@@ -48,6 +50,7 @@ jobs:
       - run: cargo install cargo-edit
       - id: update
         run: ./scripts/update_outdated.sh ${{ matrix.package.name }} ${{ matrix.package.latest }}
+      - run: rm -rf flatbuffers
       - uses: peter-evans/create-pull-request@v4
         if: steps.update.updated == 0
         with:
