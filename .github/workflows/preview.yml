@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v3
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -18,9 +19,9 @@ jobs:
       - uses: seanmiddleditch/gha-setup-ninja@master
       - run: ./scripts/install-flatbuffers.sh
       - run: cargo install --locked cargo-outdated
-      - run: cargo install cargo-edit
       - run: cargo outdated -R --format json | tee outdated.json
       - run: echo "::set-output name=matrix::$(python scripts/outdated_to_matrix.py)"
+      - uses: Swatinem/rust-cache@v1
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
   test_outdates:
