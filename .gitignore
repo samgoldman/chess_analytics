@@ -6,7 +6,6 @@ lcov.info
 /cov
 /.vscode
 *.swp
-*.sh
 *.tvs
 results/
 *.tar.gz
