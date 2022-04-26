@@ -1,4 +1,4 @@
-on: [push, pull_request]
+on: [push]
 
 name: Rust Package Preview
 
@@ -20,7 +20,7 @@ jobs:
       - run: cargo install --locked cargo-outdated
       - run: cargo install cargo-edit
       - run: cargo outdated -R --format json | tee outdated.json
-      - run: echo "::set-output name=matrix::$(python -c "import json; f = open('outdated.json'); o = json.load(f); print(o['dependencies']); f.close()")"
+      - run: echo "::set-output name=matrix::$(python scripts/outdated_to_matrix.py)"
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
   test_outdates:
