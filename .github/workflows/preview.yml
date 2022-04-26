@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: ${{ fromJson(needs.provide_packages_json.outputs.matrix) }}
+        package: ${{ fromJson(needs.find_outdated.outputs.matrix) }}
     steps:
       - run: echo ${{ matrix.package }}
       - run: echo ${{ matrix.package.name }}
