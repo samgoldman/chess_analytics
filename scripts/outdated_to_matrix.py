@@ -2,5 +2,5 @@ import json
 
 f = open('outdated.json')
 o = json.load(f)
-print(o['dependencies'])
+print(f"::set-output name=matrix::{o['dependencies']}")
 f.close()
