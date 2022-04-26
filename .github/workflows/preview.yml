@@ -23,6 +23,7 @@ jobs:
       - run: ls -hal
       - id: parse_outdated
         run: python scripts/outdated_to_matrix.py | tee tmp.log
+      - run: ls -hal
       - run: cat tmp.log
       - uses: Swatinem/rust-cache@v1
     outputs:
