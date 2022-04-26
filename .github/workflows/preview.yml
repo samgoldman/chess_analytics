@@ -1,0 +1,59 @@
+on:
+  schedule:
+    - cron:  '0 6 * * *'
+
+name: Rust Package Preview
+
+jobs:
+  find_outdated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - run: chmod u+x ./scripts/install-flatbuffers.sh
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      - run: ./scripts/install-flatbuffers.sh
+      - run: cargo install --locked cargo-outdated
+      - run: cargo outdated -R --format json | tee outdated.json
+      - id: parse_outdated
+        run: python scripts/outdated_to_matrix.py | tee tmp.log
+      - run: echo ${{ steps.parse_outdated.outputs.matrix }}
+      - uses: Swatinem/rust-cache@v1
+    outputs:
+      matrix: ${{ steps.parse_outdated.outputs.matrix }}
+  test_outdated:
+    needs: find_outdated
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.find_outdated.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+      - run: chmod u+x ./scripts/*
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      - run: ./scripts/install-flatbuffers.sh
+      - run: cargo install cargo-edit
+      - id: update
+        run: ./scripts/update_outdated.sh ${{ matrix.package.name }} ${{ matrix.package.latest }}
+      - run: rm -rf flatbuffers
+      - uses: peter-evans/create-pull-request@v4
+        if: steps.update.updated == 0
+        with:
+          commit-message: Update ${{ matrix.package.name }} to v${{ matrix.package.latest }}
+          branch: preview-rs-${{ matrix.package.name }}-${{ matrix.package.latest }}
+          title: Update ${{ matrix.package.name }} to v${{ matrix.package.latest }}

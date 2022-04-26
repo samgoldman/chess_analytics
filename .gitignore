@@ -6,13 +6,13 @@ lcov.info
 /cov
 /.vscode
 *.swp
-*.sh
 *.tvs
 results/
 *.tar.gz
 *.log
 tarpaulin-report.html
 *.bin
+ninja-build/
 
 # Auto-generated files
 src/steps.rs
