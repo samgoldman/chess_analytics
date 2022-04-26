@@ -42,12 +42,12 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
-      - run: chmod u+x ./scripts/install-flatbuffers.sh
+      - run: chmod u+x ./scripts/*
       - uses: seanmiddleditch/gha-setup-ninja@master
       - run: ./scripts/install-flatbuffers.sh
       - run: cargo install cargo-edit
       - id: update
-        run: update_outdated.sh ${{ matrix.package.name }} ${{ matrix.package.latest }}
+        run: ./scripts/update_outdated.sh ${{ matrix.package.name }} ${{ matrix.package.latest }}
       - uses: peter-evans/create-pull-request@v4
         if: steps.update.updated == 0
         with:
