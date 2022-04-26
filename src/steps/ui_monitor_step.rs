@@ -1,6 +1,6 @@
 use std::io::{stdout, Stdout};
 use termion::raw::{IntoRawMode, RawTerminal};
-use tui::{backend::TermionBackend, Terminal};
+use tui::{backend::CrosstermBackend, Terminal};
 
 use crossterm::event::{self, Event, KeyCode};
 
@@ -13,7 +13,7 @@ use tui::{
 };
 
 pub struct UiMonitorStep {
-    terminal: Terminal<TermionBackend<RawTerminal<Stdout>>>,
+    terminal: Terminal<CrosstermBackend<RawTerminal<Stdout>>>,
     raw_fields: Vec<(String, String)>,
     length_fields: Vec<(String, String)>,
     finish_flag_name: String,
@@ -27,7 +27,7 @@ impl UiMonitorStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let stdout = stdout().into_raw_mode().expect("Could not init stdout");
 
-        let backend = TermionBackend::new(stdout);
+        let backend = CrosstermBackend::new(stdout);
         let terminal = Terminal::new(backend).expect("Could not create terminal");
 
         let params = match configuration {
