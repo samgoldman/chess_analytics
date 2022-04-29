@@ -69,7 +69,7 @@ mod test_filter_fn {
             output_vec_name: "".to_string(),
             discard_vec_name: "".to_string(),
             input_flag: "".to_string(),
-            output_flag: "".to_string()
+            output_flag: "".to_string(),
         };
 
         assert_eq!(true, EvalAvailableFilter::filter(g, &f));
@@ -84,7 +84,7 @@ mod test_filter_fn {
             output_vec_name: "".to_string(),
             discard_vec_name: "".to_string(),
             input_flag: "".to_string(),
-            output_flag: "".to_string()
+            output_flag: "".to_string(),
         };
 
         assert_eq!(false, EvalAvailableFilter::filter(g, &f));
