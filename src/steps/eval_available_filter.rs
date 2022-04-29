@@ -52,3 +52,41 @@ impl EvalAvailableFilter {
 impl<'a> Step for EvalAvailableFilter {
     filter_template!(EvalAvailableFilter::filter);
 }
+
+#[cfg(test)]
+mod test_filter_fn {
+    use crate::game_wrapper::GameWrapper;
+
+    use super::EvalAvailableFilter;
+
+    #[test]
+    fn test_true() {
+        let mut g = GameWrapper::default();
+        g.eval_available = true;
+
+        let f = EvalAvailableFilter {
+            input_vec_name: "".to_string(),
+            output_vec_name: "".to_string(),
+            discard_vec_name: "".to_string(),
+            input_flag: "".to_string(),
+            output_flag: "".to_string()
+        };
+
+        assert_eq!(true, EvalAvailableFilter::filter(g, &f));
+    }
+    #[test]
+    fn test_false() {
+        let mut g = GameWrapper::default();
+        g.eval_available = false;
+
+        let f = EvalAvailableFilter {
+            input_vec_name: "".to_string(),
+            output_vec_name: "".to_string(),
+            discard_vec_name: "".to_string(),
+            input_flag: "".to_string(),
+            output_flag: "".to_string()
+        };
+
+        assert_eq!(false, EvalAvailableFilter::filter(g, &f));
+    }
+}
