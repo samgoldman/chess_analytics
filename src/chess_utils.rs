@@ -83,6 +83,7 @@ pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
 }
 
 // Game elo is the average of the two player's ratings
+#[inline]
 pub fn get_game_elo(game: &GameWrapper) -> u32 {
     (game.white_rating + game.black_rating) as u32 / 2
 }
@@ -439,31 +440,5 @@ mod test_has_opening {
         test_match_2: (vec![*MOVE_3, *MOVE_2, *MOVE_3, *MOVE_4], vec![*MOVE_3, *MOVE_2, *MOVE_3, *MOVE_4], true),
         test_no_match_1: (vec![*MOVE_1, *MOVE_2, *MOVE_3, *MOVE_4], vec![*MOVE_1, *MOVE_4], false),
         test_no_match_2: (vec![*MOVE_1, *MOVE_2, *MOVE_3, *MOVE_4], vec![*MOVE_2, *MOVE_2, *MOVE_3], false),
-    }
-}
-
-#[cfg(test)]
-mod test_get_game_elo_new {
-    use crate::game_wrapper::GameWrapper;
-
-    use super::get_game_elo;
-
-    #[test]
-    fn test_get_game_elo_nominal() {
-        let mut g = GameWrapper::default();
-        g.black_rating = 1000;
-        g.white_rating = 1000;
-
-        assert_eq!(1000, get_game_elo(&g));
-
-        g.black_rating = 2000;
-        g.white_rating = 1000;
-
-        assert_eq!(1500, get_game_elo(&g));
-
-        g.black_rating = 2000;
-        g.white_rating = 3000;
-
-        assert_eq!(2500, get_game_elo(&g));
     }
 }
