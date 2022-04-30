@@ -57,3 +57,45 @@ impl GameEloBin {
 impl<'a> Step for GameEloBin {
     bin_template!(GameEloBin::bin);
 }
+
+#[cfg(test)]
+mod test_game_elo_bin {
+    use crate::game_wrapper::GameWrapper;
+
+    use super::*;
+
+    #[test]
+    fn test_game_elo_bin_1() {
+        let mut game = GameWrapper::default();
+
+        let bin = GameEloBin {
+            input_vec_name: "".to_string(),
+            output_vec_name: "".to_string(),
+            input_flag: "".to_string(),
+            output_flag: "".to_string(),
+            bucket_size: 100,
+        };
+
+        game.white_rating = 200;
+        game.black_rating = 300;
+        assert_eq!(GameEloBin::bin(game, &bin).to_string().unwrap_or(&"".to_string()), "0200");
+    }
+
+
+    #[test]
+    fn test_game_elo_bin_2() {
+        let mut game = GameWrapper::default();
+
+        let bin = GameEloBin {
+            input_vec_name: "".to_string(),
+            output_vec_name: "".to_string(),
+            input_flag: "".to_string(),
+            output_flag: "".to_string(),
+            bucket_size: 600,
+        };
+
+        game.white_rating = 2450;
+        game.black_rating = 2950;
+        assert_eq!(GameEloBin::bin(game, &bin).to_string().unwrap_or(&"".to_string()), "2400");
+    }
+}
