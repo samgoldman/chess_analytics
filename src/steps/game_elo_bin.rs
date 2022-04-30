@@ -78,9 +78,13 @@ mod test_game_elo_bin {
 
         game.white_rating = 200;
         game.black_rating = 300;
-        assert_eq!(GameEloBin::bin(game, &bin).to_string().unwrap_or(&"".to_string()), "0200");
+        assert_eq!(
+            GameEloBin::bin(game, &bin)
+                .to_string()
+                .unwrap_or(&"".to_string()),
+            "0200"
+        );
     }
-
 
     #[test]
     fn test_game_elo_bin_2() {
@@ -96,6 +100,11 @@ mod test_game_elo_bin {
 
         game.white_rating = 2450;
         game.black_rating = 2950;
-        assert_eq!(GameEloBin::bin(game, &bin).to_string().unwrap_or(&"".to_string()), "2400");
+        assert_eq!(
+            GameEloBin::bin(game, &bin)
+                .to_string()
+                .unwrap_or(&"".to_string()),
+            "2400"
+        );
     }
 }
