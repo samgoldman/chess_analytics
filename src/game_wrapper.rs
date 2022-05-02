@@ -5,9 +5,10 @@ use crate::chess::chess::Game;
 use crate::chess::chess::GameList;
 use crate::general_utils::hours_min_sec_to_duration;
 use itertools::izip;
+use serde::Serialize;
 use std::time::Duration;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct GameWrapper {
     pub year: u16,
     pub month: u8,

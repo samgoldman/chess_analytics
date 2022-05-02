@@ -1,4 +1,6 @@
-#[derive(PartialEq, Clone, Debug, Copy, Eq)]
+use serde::Serialize;
+
+#[derive(PartialEq, Clone, Debug, Copy, Eq, Serialize)]
 pub enum Player {
     White,
     Black,

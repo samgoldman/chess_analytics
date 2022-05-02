@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::basic_types::cell::Cell;
 use crate::basic_types::file::File;
 use crate::basic_types::rank::Rank;
@@ -12,7 +14,7 @@ macro_rules! partial_cell {
     };
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub struct PartialCell {
     pub file: Option<File>,
     pub rank: Option<Rank>,

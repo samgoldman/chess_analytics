@@ -1,8 +1,9 @@
 use crate::basic_types::*;
 use itertools::Itertools;
+use serde::Serialize;
 use std::collections::HashMap;
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Serialize)]
 pub struct Board {
     board: HashMap<Cell, PlayerPiece>,
     to_move: Player,

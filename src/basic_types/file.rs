@@ -1,8 +1,9 @@
+use serde::Serialize;
 use std::cmp::Ordering;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-#[derive(PartialEq, Clone, Debug, Copy, Eq, EnumIter, Hash)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq, EnumIter, Hash, Serialize)]
 pub enum File {
     _A = 1,
     _B = 2,

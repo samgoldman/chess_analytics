@@ -1,5 +1,6 @@
 use crate::basic_types::Piece;
 use crate::basic_types::Player;
+use serde::Serialize;
 
 #[cfg(test)]
 use std::convert::TryInto;
@@ -27,7 +28,7 @@ macro_rules! black {
     };
 }
 
-#[derive(PartialEq, Clone, Debug, Copy, Eq)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq, Serialize)]
 pub struct PlayerPiece {
     pub piece: Piece,
     pub player: Player,

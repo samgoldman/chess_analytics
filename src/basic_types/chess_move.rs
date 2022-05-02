@@ -1,7 +1,8 @@
 use crate::basic_types::*;
 use crate::chess_utils::*;
+use serde::Serialize;
 
-#[derive(PartialEq, Clone, Debug, Copy)]
+#[derive(PartialEq, Clone, Debug, Copy, Serialize)]
 pub struct Move {
     pub from: PartialCell,
     pub to: Cell,

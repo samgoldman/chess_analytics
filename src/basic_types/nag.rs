@@ -1,4 +1,6 @@
-#[derive(PartialEq, Clone, Debug, Copy)]
+use serde::Serialize;
+
+#[derive(PartialEq, Clone, Debug, Copy, Serialize)]
 pub enum NAG {
     None = 0,
     Questionable = 1,
