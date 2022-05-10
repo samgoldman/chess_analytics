@@ -53,6 +53,12 @@ mod test_path_misc {
     fn test_empty() {
         assert_eq!(Path::empty(), Path(vec![]));
     }
+
+    #[test]
+    fn test_debug_fmt() {
+        let p = Path::empty();
+        assert_eq!(format!("{:?}", p), "Path([])");
+    }
 }
 
 #[cfg(test)]

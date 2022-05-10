@@ -12,7 +12,7 @@ macro_rules! partial_cell {
     };
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PartialCell {
     pub file: Option<File>,
     pub rank: Option<Rank>,
@@ -38,5 +38,19 @@ impl PartialCell {
     pub fn possible_files(&self) -> Vec<File> {
         self.file
             .map_or(File::all_files(), |some_file| vec![some_file])
+    }
+}
+
+#[cfg(test)]
+mod test_default_impls {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let a = PartialCell {
+            file: Some(File::_A),
+            rank: Some(Rank::_5),
+        };
+        assert_eq!(a, a.clone());
     }
 }
