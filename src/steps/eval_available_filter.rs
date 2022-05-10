@@ -54,6 +54,21 @@ impl<'a> Step for EvalAvailableFilter {
 }
 
 #[cfg(test)]
+mod test_try_new {
+    use super::EvalAvailableFilter;
+
+    #[test]
+    fn test_no_params() {
+        let result = EvalAvailableFilter::try_new(None);
+        assert!(result.is_err());
+        assert_eq!(
+            result.err().unwrap_or("".to_string()),
+            "EvalAvailableFilter: no parameters provided".to_string()
+        );
+    }
+}
+
+#[cfg(test)]
 mod test_filter_fn {
     use crate::game_wrapper::GameWrapper;
 
