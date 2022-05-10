@@ -29,7 +29,7 @@ impl Board {
                     let piece = self.board.get(&cell).unwrap();
 
                     if blanks > 0 {
-                        fen += &blanks.to_string();
+                        fen = format!("{}{}", fen, blanks);
                         blanks = 0;
                     }
 
@@ -47,7 +47,7 @@ impl Board {
             }
 
             if blanks > 0 {
-                fen += &blanks.to_string();
+                fen = format!("{}{}", fen, blanks);
             }
 
             if *rank != Rank::_1 {
@@ -76,7 +76,8 @@ impl Board {
 
     pub fn is_in_check(&self, player: Player) -> bool {
         let king_loc = self.find_king_loc(player);
-        let opposing_pieces = self.find_player_piece_locs(player.get_opposing_player());
+        let opposing_player = player.get_opposing_player();
+        let opposing_pieces = self.find_player_piece_locs(opposing_player);
 
         opposing_pieces
             .iter()
