@@ -49,6 +49,7 @@ impl Path {
 mod test_path_misc {
     use super::*;
 
+    #[test]
     fn test_empty() {
         assert_eq!(Path::empty(), Path(vec![]));
     }

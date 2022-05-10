@@ -24,7 +24,6 @@ impl RawByteCounterStep {
 }
 
 impl<'a> Step for RawByteCounterStep {
-    #[allow(clippy::needless_return)] // Allow for coverage
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();

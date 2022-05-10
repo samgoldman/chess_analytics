@@ -31,7 +31,6 @@ impl GlobFileStep {
 }
 
 impl Step for GlobFileStep {
-    #[allow(clippy::needless_return)] // Allow for coverage
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         let glob_result = glob(&self.glob_string);
 

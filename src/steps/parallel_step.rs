@@ -28,7 +28,6 @@ impl ParallelStep {
 }
 
 impl<'a> Step for ParallelStep {
-    #[allow(clippy::needless_return)] // Allow for coverage
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         // TODO make own step
         {

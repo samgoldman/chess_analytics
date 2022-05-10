@@ -114,7 +114,6 @@ impl GameWrapper {
         }
     }
 
-    #[allow(clippy::needless_return)] // Allow for coverage
     pub fn build_boards(&self) -> Vec<Board> {
         self.moves
             .iter()
@@ -123,7 +122,7 @@ impl GameWrapper {
                 new_board.move_piece(*curr_move);
                 boards.push(new_board);
 
-                return boards;
+                boards
             })
     }
 }
@@ -191,7 +190,6 @@ mod test_build_boards {
 }
 
 #[cfg(test)]
-// Note: doing as UT not int due to coverage
 mod test_game_wrapper_from_games {
     use super::*;
 

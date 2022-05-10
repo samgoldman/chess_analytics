@@ -3,3 +3,5 @@ coverage:
 
 ignore:
   - "flatbuffers/"
+  - "build.rs"
+  - "src/steps.rs"
