@@ -50,7 +50,7 @@ mod test_termination_from_u8 {
 
 #[cfg(test)]
 mod test_default_impls {
-    use super::Termination;
+    use super::*;
 
     #[test]
     fn test_clone() {

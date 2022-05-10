@@ -69,3 +69,14 @@ mod test_display {
         assert_eq!(GameResult::Star.to_string(), "?".to_string());
     }
 }
+
+#[cfg(test)]
+mod test_default_impls {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let x = GameResult::White;
+        assert_eq!(x.clone(), x);
+    }
+}
