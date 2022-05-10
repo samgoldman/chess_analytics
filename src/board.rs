@@ -13,7 +13,11 @@ impl Board {
     pub fn to_fen(&self) -> String {
         let mut fen = String::default();
 
-        for rank in Rank::all_ranks().iter().rev() {
+        let all_ranks = Rank::all_ranks();
+        let all_ranks_iter = all_ranks.iter();
+        let all_ranks_rev_iter = all_ranks_iter.rev();
+
+        for rank in all_ranks_rev_iter {
             let mut blanks = 0;
 
             for file in File::all_files() {
