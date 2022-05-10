@@ -1134,3 +1134,16 @@ mod test_move_piece {
         }, "r2Q1bkr/p5pp/5p2/1p1Q4/8/2p2Q2/P1P1PPPP/RNB1KBNR b"),
     }
 }
+
+#[cfg(test)]
+mod test_debug_fmt {
+    use super::*;
+
+    #[test]
+    fn test_empty() {
+        assert_eq!(
+            format!("{:?}", Board::empty()),
+            "Board { board: {}, to_move: NA }".to_string()
+        );
+    }
+}
