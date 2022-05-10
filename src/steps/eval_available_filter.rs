@@ -1,7 +1,7 @@
 use crate::game_wrapper::GameWrapper;
 use crate::workflow_step::*;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct EvalAvailableFilter {
     input_vec_name: String,
     output_vec_name: String,
@@ -55,6 +55,8 @@ impl<'a> Step for EvalAvailableFilter {
 
 #[cfg(test)]
 mod test_try_new {
+    use serde_yaml::{Mapping, Value};
+
     use super::EvalAvailableFilter;
 
     #[test]
@@ -65,6 +67,35 @@ mod test_try_new {
             result.err().unwrap_or("".to_string()),
             "EvalAvailableFilter: no parameters provided".to_string()
         );
+    }
+
+    #[test]
+    fn test_nominal() {
+        let mut params = Mapping::new();
+        params.insert(
+            Value::String("input".to_string()),
+            Value::String("A".to_string()),
+        );
+        params.insert(
+            Value::String("output".to_string()),
+            Value::String("B".to_string()),
+        );
+        params.insert(
+            Value::String("discard".to_string()),
+            Value::String("C".to_string()),
+        );
+        params.insert(
+            Value::String("input_flag".to_string()),
+            Value::String("D".to_string()),
+        );
+        params.insert(
+            Value::String("output_flag".to_string()),
+            Value::String("E".to_string()),
+        );
+
+        let result = EvalAvailableFilter::try_new(Some(Value::Mapping(params)));
+        assert!(result.is_ok());
+        // Eventually figure out how to test actual values
     }
 }
 
