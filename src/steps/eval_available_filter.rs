@@ -1,56 +1,29 @@
 use crate::game_wrapper::GameWrapper;
+use crate::generic_steps::{FilterFn, GenericFilter};
 use crate::workflow_step::*;
 
 #[derive(Debug, PartialEq)]
 pub struct EvalAvailableFilter {
-    input_vec_name: String,
-    output_vec_name: String,
-    discard_vec_name: String,
-    input_flag: String,
-    output_flag: String,
+    generic_filter: GenericFilter,
 }
 
 /// chess_analytics_build::register_step_builder "EvalAvailableFilter" EvalAvailableFilter
 impl EvalAvailableFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
-        let params = match configuration {
-            Some(value) => value,
-            None => return Err("EvalAvailableFilter: no parameters provided".to_string()),
-        };
-
-        // TODO: better error handling
-        let input_vec_name = params.get("input").unwrap().as_str().unwrap().to_string();
-        let output_vec_name = params.get("output").unwrap().as_str().unwrap().to_string();
-        let discard_vec_name = params.get("discard").unwrap().as_str().unwrap().to_string();
-        let input_flag = params
-            .get("input_flag")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_string();
-        let output_flag = params
-            .get("output_flag")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_string();
-
         Ok(Box::new(EvalAvailableFilter {
-            input_vec_name,
-            output_vec_name,
-            discard_vec_name,
-            input_flag,
-            output_flag,
+            generic_filter: *GenericFilter::try_new(configuration)?,
         }))
     }
 
-    pub fn filter(game: GameWrapper, _filter: &EvalAvailableFilter) -> bool {
-        game.eval_available
+    pub fn create_filter(&self) -> &FilterFn {
+        &(|game: &GameWrapper| game.eval_available)
     }
 }
 
 impl<'a> Step for EvalAvailableFilter {
-    filter_template!(EvalAvailableFilter::filter);
+    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+        self.generic_filter.process(data, self.create_filter())
+    }
 }
 
 #[cfg(test)]
@@ -65,7 +38,7 @@ mod test_try_new {
         assert!(result.is_err());
         assert_eq!(
             result.err().unwrap_or("".to_string()),
-            "EvalAvailableFilter: no parameters provided".to_string()
+            "GenericFilter: no parameters provided".to_string()
         );
     }
 
@@ -101,7 +74,7 @@ mod test_try_new {
 
 #[cfg(test)]
 mod test_filter_fn {
-    use crate::game_wrapper::GameWrapper;
+    use crate::{game_wrapper::GameWrapper, generic_steps::GenericFilter};
 
     use super::EvalAvailableFilter;
 
@@ -111,14 +84,10 @@ mod test_filter_fn {
         g.eval_available = true;
 
         let f = EvalAvailableFilter {
-            input_vec_name: "".to_string(),
-            output_vec_name: "".to_string(),
-            discard_vec_name: "".to_string(),
-            input_flag: "".to_string(),
-            output_flag: "".to_string(),
+            generic_filter: GenericFilter::default(),
         };
 
-        assert_eq!(true, EvalAvailableFilter::filter(g, &f));
+        assert_eq!(true, f.create_filter()(&g));
     }
     #[test]
     fn test_false() {
@@ -126,13 +95,9 @@ mod test_filter_fn {
         g.eval_available = false;
 
         let f = EvalAvailableFilter {
-            input_vec_name: "".to_string(),
-            output_vec_name: "".to_string(),
-            discard_vec_name: "".to_string(),
-            input_flag: "".to_string(),
-            output_flag: "".to_string(),
+            generic_filter: GenericFilter::default(),
         };
 
-        assert_eq!(false, EvalAvailableFilter::filter(g, &f));
+        assert_eq!(false, f.create_filter()(&g));
     }
 }
