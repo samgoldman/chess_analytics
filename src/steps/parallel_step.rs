@@ -6,8 +6,8 @@ use super::noop_step::NoopStep;
 
 #[derive(Debug)]
 pub struct ParallelStep {
-    children: Vec<StepDescription>,
-    post: StepDescription,
+    children_names: Vec<String>,
+    post_name: String,
 }
 
 /// chess_analytics_build::register_step_builder "ParallelStep" ParallelStep
@@ -22,11 +22,11 @@ impl ParallelStep {
         let children = params.get("children").unwrap().as_sequence().unwrap();
 
         Ok(Box::new(ParallelStep {
-            children: children
+            children_names: children
                 .iter()
-                .map(|config_str| get_step_description(config_str.as_str().unwrap().to_string()))
+                .map(|config_str| config_str.as_str().unwrap().to_string())
                 .collect(),
-            post: get_step_description(params.get("post").unwrap().as_str().unwrap().to_string()),
+            post_name: params.get("post").unwrap().as_str().unwrap().to_string(),
         }))
     }
 }
@@ -44,8 +44,9 @@ impl<'a> Step for ParallelStep {
 
         let mut handles = vec![];
 
-        for child in self.children.clone() {
+        for child_name in self.children_names.clone() {
             let data_clone = data.clone();
+            let child = get_step_description(child_name, data.clone());
             handles.push((
                 child.step_type.clone(),
                 thread::spawn(move || {
@@ -65,10 +66,10 @@ impl<'a> Step for ParallelStep {
             }
         }
 
-        self.post
+        let mut post = get_step_description(self.post_name.clone(), data.clone())
             .to_step()
-            .unwrap_or_else(|_| Box::new(NoopStep {}))
-            .process(data)?;
+            .unwrap_or_else(|_| Box::new(NoopStep {}));
+        post.process(data)?;
 
         Ok(())
     }

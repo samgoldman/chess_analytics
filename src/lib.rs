@@ -75,6 +75,8 @@ where
         None => return Err("Steps is not a map".to_string()),
     };
 
+    let data = Arc::new(Mutex::new(HashMap::new()));
+
     for (step_name, step_data) in steps_map.iter() {
         let step_name = step_name.as_str().unwrap().to_string();
         let step_type = match step_data.get("type") {
@@ -96,13 +98,11 @@ where
             step_type: step_type.to_string(),
             parameters: params,
         };
-        add_step_description(step_name, step);
+        add_step_description(step_name, step, data.clone());
     }
 
-    let init_desc = get_step_description("init".to_string());
+    let init_desc = get_step_description("init".to_string(), data.clone());
     let mut init = init_desc.to_step()?;
-
-    let data = Arc::new(Mutex::new(HashMap::new()));
     init.process(data)?;
 
     Ok(())

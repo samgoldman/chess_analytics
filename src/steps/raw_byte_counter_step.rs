@@ -3,7 +3,7 @@ use crate::workflow_step::*;
 
 #[derive(Debug)]
 pub struct RawByteCounterStep {
-    child: Box<dyn Step>,
+    child_name: String,
 }
 
 /// chess_analytics_build::register_step_builder "RawByteCounterStep" RawByteCounterStep
@@ -17,9 +17,7 @@ impl RawByteCounterStep {
         // TODO: better error handling
         let child = params.get("child").unwrap().as_str().unwrap().to_string();
 
-        Ok(Box::new(RawByteCounterStep {
-            child: get_step_description(child).to_step()?,
-        }))
+        Ok(Box::new(RawByteCounterStep { child_name: child }))
     }
 }
 
@@ -72,6 +70,7 @@ impl<'a> Step for RawByteCounterStep {
             *byte_counter += file_data.len() as u64;
         }
 
-        self.child.process(data)
+        let mut child = get_step_description(self.child_name.clone(), data.clone()).to_step()?;
+        child.process(data)
     }
 }
