@@ -2,9 +2,12 @@ use crate::steps_manager::get_step_description;
 use crate::workflow_step::*;
 use std::thread;
 
+use super::noop_step::NoopStep;
+
 #[derive(Debug)]
 pub struct ParallelStep {
     children: Vec<StepDescription>,
+    post: StepDescription,
 }
 
 /// chess_analytics_build::register_step_builder "ParallelStep" ParallelStep
@@ -23,6 +26,7 @@ impl ParallelStep {
                 .iter()
                 .map(|config_str| get_step_description(config_str.as_str().unwrap().to_string()))
                 .collect(),
+            post: get_step_description(params.get("post").unwrap().as_str().unwrap().to_string()),
         }))
     }
 }
@@ -60,6 +64,11 @@ impl<'a> Step for ParallelStep {
                 ),
             }
         }
+
+        self.post
+            .to_step()
+            .unwrap_or_else(|_| Box::new(NoopStep {}))
+            .process(data)?;
 
         Ok(())
     }
