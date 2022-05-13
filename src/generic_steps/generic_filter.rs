@@ -35,7 +35,12 @@ impl GenericFilter {
         // TODO: better error handling
         let input_vec_name = params.get("input").unwrap().as_str().unwrap().to_string();
         let output_vec_name = params.get("output").unwrap().as_str().unwrap().to_string();
-        let discard_vec_name = params.get("discard").unwrap().as_str().unwrap().to_string();
+        let discard_vec_name = params
+            .get("discard")
+            .unwrap_or(&serde_yaml::Value::String("null".to_string()))
+            .as_str()
+            .unwrap()
+            .to_string();
         let input_flag = params
             .get("input_flag")
             .unwrap()

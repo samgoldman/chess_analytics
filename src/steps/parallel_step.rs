@@ -26,7 +26,12 @@ impl ParallelStep {
                 .iter()
                 .map(|config_str| config_str.as_str().unwrap().to_string())
                 .collect(),
-            post_name: params.get("post").unwrap().as_str().unwrap().to_string(),
+            post_name: params
+                .get("post")
+                .unwrap_or(&serde_yaml::Value::String("noop".to_string()))
+                .as_str()
+                .unwrap()
+                .to_string(),
         }))
     }
 }

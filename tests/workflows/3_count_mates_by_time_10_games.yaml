@@ -1,0 +1,84 @@
+steps:
+  init:
+    type: "GlobFileStep"
+    params: 
+      glob: tests/data/test_set_1.bin.bz2
+      child: parallel_step
+  parallel_step:
+    type: ParallelStep
+    params:
+      children:
+        - "load_files"
+        - "parse_games"
+        - "map_count"
+        - "reduce_sum"
+        - "init_bins"
+        - "bin_tc"
+        - "checkmate_filter"
+      post: "save_results"
+  monitor:
+    type: UiMonitorStep
+    params: 
+      finish_flag: reduction_done
+      raw:
+        - display_name: Done Reading Files
+          field: done_reading_files
+        - display_name: Done Parsing Games
+          field: done_parsing_games
+        - display_name: Reduction Map
+          field: reduced
+        - display_name: Total File Count
+          field: total_file_count
+      length:
+        - display_name: Raw File Data
+          field: raw_file_data
+        - display_name: Parsed Games
+          field: parsed_games
+  load_files:
+    type: Bz2DecompressStep
+    params:
+      max_queue_size: 10
+      full_queue_delay_ms: 332
+  parse_games:
+    type: ParseBinGame
+  checkmate_filter:
+    type: CheckmateFilter
+    params:
+      input: parsed_games
+      output: filtered_games
+      input_flag: done_parsing_games
+      output_flag: done_filtering_games
+  init_bins:
+    type: InitBinStep
+    params:
+      input: filtered_games
+      output: unbinned_games
+      input_flag: done_filtering_games
+      output_flag: init_bins_done
+  bin_tc:
+    type: TimeControlBin
+    params:
+      input: unbinned_games
+      output: binned_games
+      input_flag: init_bins_done
+      output_flag: binning_done
+  map_count:
+    type: CountMap
+    params:
+      input: binned_games
+      output: mapped_count
+      input_flag: binning_done
+      output_flag: mapping_done
+  reduce_sum:
+    type: SumReduce
+    params:
+      input: mapped_count
+      output: game_count
+      input_flag: mapping_done
+      output_flag: reduction_done
+  save_results:
+    type: SaveDataStep
+    params:
+      file: tests/output/int_3/tmp.txt
+      fields:
+        - game_count
