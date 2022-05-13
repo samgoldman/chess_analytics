@@ -15,3 +15,27 @@ impl<'a> Step for NoopStep {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod test_noop_step {
+    use std::{
+        collections::HashMap,
+        sync::{Arc, Mutex},
+    };
+
+    use super::*;
+
+    #[test]
+    fn test_try_new() {
+        assert_eq!(
+            format!("{:?}", NoopStep::try_new(None).unwrap()),
+            "NoopStep"
+        );
+    }
+
+    #[test]
+    fn test_process() {
+        let mut step = NoopStep {};
+        assert_eq!(Ok(()), step.process(Arc::new(Mutex::new(HashMap::new()))));
+    }
+}

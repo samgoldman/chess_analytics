@@ -14,24 +14,6 @@ steps:
         - "reduce_sum"
         - "init_bins"
       post: "save_results"
-  monitor:
-    type: UiMonitorStep
-    params: 
-      finish_flag: reduction_done
-      raw:
-        - display_name: Done Reading Files
-          field: done_reading_files
-        - display_name: Done Parsing Games
-          field: done_parsing_games
-        - display_name: Reduction Map
-          field: reduced
-        - display_name: Total File Count
-          field: total_file_count
-      length:
-        - display_name: Raw File Data
-          field: raw_file_data
-        - display_name: Parsed Games
-          field: parsed_games
   load_files:
     type: Bz2DecompressStep
     params:
