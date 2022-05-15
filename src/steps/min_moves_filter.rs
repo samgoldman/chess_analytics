@@ -32,7 +32,7 @@ impl MinMovesFilter {
     }
 }
 
-impl<'a> Step for MinMovesFilter {
+impl Step for MinMovesFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         self.generic_filter.process(data, &*self.create_filter())
     }

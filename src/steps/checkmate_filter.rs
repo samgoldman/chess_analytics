@@ -25,7 +25,7 @@ impl CheckmateFilter {
     }
 }
 
-impl<'a> Step for CheckmateFilter {
+impl Step for CheckmateFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         self.generic_filter.process(data, self.create_filter())
     }

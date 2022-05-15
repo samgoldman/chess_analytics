@@ -20,7 +20,7 @@ impl EvalAvailableFilter {
     }
 }
 
-impl<'a> Step for EvalAvailableFilter {
+impl Step for EvalAvailableFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         self.generic_filter.process(data, self.create_filter())
     }

@@ -54,7 +54,7 @@ impl GameEloBin {
     }
 }
 
-impl<'a> Step for GameEloBin {
+impl Step for GameEloBin {
     bin_template!(GameEloBin::bin);
 }
 

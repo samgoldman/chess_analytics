@@ -41,7 +41,7 @@ impl InitBinStep {
     }
 }
 
-impl<'a> Step for InitBinStep {
+impl Step for InitBinStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();

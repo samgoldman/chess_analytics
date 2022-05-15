@@ -10,7 +10,7 @@ impl NoopStep {
     }
 }
 
-impl<'a> Step for NoopStep {
+impl Step for NoopStep {
     fn process(&mut self, _data: StepGeneric) -> Result<(), String> {
         Ok(())
     }

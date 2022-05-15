@@ -36,7 +36,7 @@ impl ParallelStep {
     }
 }
 
-impl<'a> Step for ParallelStep {
+impl Step for ParallelStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         // TODO make own step
         {

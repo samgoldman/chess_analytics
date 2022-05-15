@@ -12,7 +12,7 @@ impl ParseBinGame {
     }
 }
 
-impl<'a> Step for ParseBinGame {
+impl Step for ParseBinGame {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();

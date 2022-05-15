@@ -28,7 +28,7 @@ impl SaveDataStep {
     }
 }
 
-impl<'a> Step for SaveDataStep {
+impl Step for SaveDataStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         let unlocked_data = data.lock().unwrap();
         // TODO: better error handling

@@ -43,7 +43,7 @@ impl MaxReduce {
     }
 }
 
-impl<'a> Step for MaxReduce {
+impl Step for MaxReduce {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();

@@ -392,7 +392,7 @@ impl Board {
                     for (rank, fen_rank) in ranks.iter().enumerate() {
                         let mut file = 1;
                         for c in fen_rank.chars() {
-                            if c.is_digit(10) {
+                            if c.is_ascii_digit() {
                                 file += c.to_digit(10).unwrap();
                             } else {
                                 let piece = PlayerPiece {
