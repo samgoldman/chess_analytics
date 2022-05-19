@@ -49,3 +49,19 @@ mod test_termination_from_u8 {
         test_from_u8_125: (125, None),
     }
 }
+
+#[cfg(test)]
+mod test_default_impls {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let x = Termination::Normal;
+        assert_eq!(x.clone(), x);
+    }
+
+    #[test]
+    fn test_debug() {
+        assert_eq!(format!("{:?}", Termination::Normal), "Normal");
+    }
+}

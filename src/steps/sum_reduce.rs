@@ -43,7 +43,7 @@ impl SumReduce {
     }
 }
 
-impl<'a> Step for SumReduce {
+impl Step for SumReduce {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();

@@ -69,3 +69,19 @@ mod test_from_base_and_increment {
         test_900_14: (900, 14, TimeControl::Rapid),
     }
 }
+
+#[cfg(test)]
+mod test_default_impls {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let x = TimeControl::Blitz;
+        assert_eq!(x.clone(), x);
+    }
+
+    #[test]
+    fn test_debug() {
+        assert_eq!(format!("{:?}", TimeControl::Blitz), "Blitz");
+    }
+}

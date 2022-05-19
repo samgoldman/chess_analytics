@@ -46,3 +46,14 @@ mod test_from_metadata {
         test_from_metadata_7: (0x0000, NAG::None),
     }
 }
+
+#[cfg(test)]
+mod test_default_impls {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let x = NAG::Questionable;
+        assert_eq!(x.clone(), x);
+    }
+}

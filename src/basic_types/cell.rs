@@ -46,3 +46,14 @@ impl PartialOrd for Cell {
         Some(self.cmp(other))
     }
 }
+
+#[cfg(test)]
+mod test_default_impls {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let x = cell!(File::_A, Rank::_1);
+        assert_eq!(x.clone(), x);
+    }
+}

@@ -170,3 +170,14 @@ mod test_piece_from_fen {
         test_from_fen_invalid_5: "1234", "Unrecognized piece: 1234",
     }
 }
+
+#[cfg(test)]
+mod test_default_impls {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let x = Piece::Pawn;
+        assert_eq!(x.clone(), x);
+    }
+}

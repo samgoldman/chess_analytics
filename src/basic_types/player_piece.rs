@@ -147,3 +147,17 @@ mod test_build_pawn_row {
         test_black_pawn_row: Player::Black,
     }
 }
+
+#[cfg(test)]
+mod test_misc {
+    use super::*;
+
+    #[test]
+    fn test_debug_fmt() {
+        let p = black!(Piece::Knight);
+        assert_eq!(
+            format!("{:?}", p),
+            "PlayerPiece { piece: Knight, player: Black }"
+        );
+    }
+}

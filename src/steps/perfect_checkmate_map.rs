@@ -84,6 +84,6 @@ impl PerfectCheckmateMap {
     }
 }
 
-impl<'a> Step for PerfectCheckmateMap {
+impl Step for PerfectCheckmateMap {
     map_template!(PerfectCheckmateMap::map);
 }

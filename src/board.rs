@@ -14,7 +14,11 @@ impl Board {
     pub fn to_fen(&self) -> String {
         let mut fen = String::default();
 
-        for rank in Rank::all_ranks().iter().rev() {
+        let all_ranks = Rank::all_ranks();
+        let all_ranks_iter = all_ranks.iter();
+        let all_ranks_rev_iter = all_ranks_iter.rev();
+
+        for rank in all_ranks_rev_iter {
             let mut blanks = 0;
 
             for file in File::all_files() {
@@ -26,7 +30,7 @@ impl Board {
                     let piece = self.board.get(&cell).unwrap();
 
                     if blanks > 0 {
-                        fen += &blanks.to_string();
+                        fen = format!("{}{}", fen, blanks);
                         blanks = 0;
                     }
 
@@ -44,7 +48,7 @@ impl Board {
             }
 
             if blanks > 0 {
-                fen += &blanks.to_string();
+                fen = format!("{}{}", fen, blanks);
             }
 
             if *rank != Rank::_1 {
@@ -73,7 +77,8 @@ impl Board {
 
     pub fn is_in_check(&self, player: Player) -> bool {
         let king_loc = self.find_king_loc(player);
-        let opposing_pieces = self.find_player_piece_locs(player.get_opposing_player());
+        let opposing_player = player.get_opposing_player();
+        let opposing_pieces = self.find_player_piece_locs(opposing_player);
 
         opposing_pieces
             .iter()
@@ -388,7 +393,7 @@ impl Board {
                     for (rank, fen_rank) in ranks.iter().enumerate() {
                         let mut file = 1;
                         for c in fen_rank.chars() {
-                            if c.is_digit(10) {
+                            if c.is_ascii_digit() {
                                 file += c.to_digit(10).unwrap();
                             } else {
                                 let piece = PlayerPiece {
@@ -1128,5 +1133,18 @@ mod test_move_piece {
             nag: NAG::None,
             promoted_to: Some(Piece::Queen),
         }, "r2Q1bkr/p5pp/5p2/1p1Q4/8/2p2Q2/P1P1PPPP/RNB1KBNR b"),
+    }
+}
+
+#[cfg(test)]
+mod test_debug_fmt {
+    use super::*;
+
+    #[test]
+    fn test_empty() {
+        assert_eq!(
+            format!("{:?}", Board::empty()),
+            "Board { board: {}, to_move: NA }".to_string()
+        );
     }
 }

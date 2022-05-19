@@ -220,3 +220,14 @@ mod test_shift {
         test_9: (File::_C, -1, File::_B),
     }
 }
+
+#[cfg(test)]
+mod test_default_impls {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let x = File::_A;
+        assert_eq!(x.clone(), x);
+    }
+}

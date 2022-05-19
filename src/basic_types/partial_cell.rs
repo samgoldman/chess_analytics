@@ -42,3 +42,17 @@ impl PartialCell {
             .map_or(File::all_files(), |some_file| vec![some_file])
     }
 }
+
+#[cfg(test)]
+mod test_default_impls {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let a = PartialCell {
+            file: Some(File::_A),
+            rank: Some(Rank::_5),
+        };
+        assert_eq!(a, a.clone());
+    }
+}

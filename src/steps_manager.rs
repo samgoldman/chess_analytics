@@ -1,15 +1,38 @@
-use crate::workflow_step::StepDescription;
+use crate::workflow_step::{SharedData, StepDescription, StepGeneric};
 use std::collections::HashMap;
-use std::sync::Mutex;
 
-lazy_static! {
-    static ref BUILT_STEPS: Mutex<HashMap<String, StepDescription>> = Mutex::new(HashMap::new());
+// TODO use result
+pub fn add_step_description(name: String, step: StepDescription, data: StepGeneric) {
+    let mut unlocked_data = data.lock().unwrap();
+
+    if !unlocked_data.contains_key("step_descriptions") {
+        unlocked_data.insert(
+            "step_descriptions".to_string(),
+            SharedData::Map(HashMap::new()),
+        );
+    }
+
+    unlocked_data
+        .get_mut("step_descriptions")
+        .unwrap()
+        .to_map_mut()
+        .unwrap()
+        .insert(name, SharedData::StepDescription(step));
 }
 
-pub fn add_step_description(name: String, step: StepDescription) {
-    BUILT_STEPS.lock().unwrap().insert(name, step);
-}
-
-pub fn get_step_description(name: String) -> StepDescription {
-    BUILT_STEPS.lock().unwrap().get(&name).unwrap().clone()
+// TODO use Result
+pub fn get_step_description(name: String, data: StepGeneric) -> StepDescription {
+    let unlocked_data = data.lock().unwrap();
+    let descs = unlocked_data
+        .get("step_descriptions")
+        .unwrap()
+        .to_map()
+        .unwrap();
+    let desc = descs
+        .get(&name)
+        .unwrap()
+        .to_step_description()
+        .unwrap()
+        .clone();
+    desc
 }

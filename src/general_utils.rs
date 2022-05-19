@@ -188,3 +188,19 @@ mod test_hours_min_sec_to_duration {
         );
     }
 }
+
+#[cfg(test)]
+mod test_get_comparator {
+    use super::*;
+
+    #[test]
+    fn test_u32() {
+        let x = get_comparator::<u32>("max");
+        assert_eq!(5, x(1, 5));
+        assert_eq!(99, x(99, 5));
+
+        let x = get_comparator::<u32>("min");
+        assert_eq!(1, x(1, 5));
+        assert_eq!(5, x(99, 5));
+    }
+}

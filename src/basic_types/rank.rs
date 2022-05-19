@@ -235,3 +235,14 @@ mod test_shift {
         test_9: (Rank::_3, -1, Rank::_2),
     }
 }
+
+#[cfg(test)]
+mod test_default_impls {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let x = Rank::_1;
+        assert_eq!(x.clone(), x);
+    }
+}

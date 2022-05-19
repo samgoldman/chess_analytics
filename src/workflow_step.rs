@@ -24,6 +24,7 @@ pub enum SharedData {
     BinnedValue((Box<SharedData>, Vec<SharedData>)),
     String(String),
     Vec(Vec<SharedData>),
+    StepDescription(StepDescription),
     Map(HashMap<String, SharedData>),
 }
 
@@ -105,6 +106,13 @@ impl SharedData {
         }
     }
 
+    pub fn to_step_description(&self) -> Option<&StepDescription> {
+        match self {
+            SharedData::StepDescription(v) => Some(v),
+            _ => None,
+        }
+    }
+
     pub fn to_string_mut(&mut self) -> Option<&mut String> {
         match self {
             SharedData::String(v) => Some(v),
@@ -165,6 +173,7 @@ impl std::fmt::Display for SharedData {
             SharedData::BinnedValue(val) => write!(f, "{:?}", val),
             SharedData::String(val) => write!(f, "{}", val),
             SharedData::Vec(val) => write!(f, "{:?}", val),
+            SharedData::StepDescription(val) => write!(f, "{:?}", val),
             SharedData::Map(val) => {
                 writeln!(f, "Map: ").expect("Write fail");
                 for (k, v) in val.iter() {

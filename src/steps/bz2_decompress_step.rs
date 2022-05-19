@@ -29,7 +29,7 @@ impl Bz2DecompressStep {
     }
 }
 
-impl<'a> Step for Bz2DecompressStep {
+impl Step for Bz2DecompressStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         let bufs = {
             let mut unlocked_data = data.lock().unwrap();

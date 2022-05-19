@@ -54,8 +54,85 @@ impl GameEloBin {
     }
 }
 
-impl<'a> Step for GameEloBin {
+impl Step for GameEloBin {
     bin_template!(GameEloBin::bin);
+}
+
+#[cfg(test)]
+mod test_try_new {
+    use serde_yaml::{Mapping, Value};
+
+    use super::*;
+
+    #[test]
+    fn test_no_params() {
+        let result = GameEloBin::try_new(None);
+        assert!(result.is_err());
+        assert_eq!(
+            result.err().unwrap_or("".to_string()),
+            "GameEloBin: no parameters provided".to_string()
+        );
+    }
+
+    #[test]
+    fn test_nominal() {
+        let mut params = Mapping::new();
+        params.insert(
+            Value::String("input".to_string()),
+            Value::String("A".to_string()),
+        );
+        params.insert(
+            Value::String("output".to_string()),
+            Value::String("B".to_string()),
+        );
+        params.insert(
+            Value::String("input_flag".to_string()),
+            Value::String("D".to_string()),
+        );
+        params.insert(
+            Value::String("output_flag".to_string()),
+            Value::String("E".to_string()),
+        );
+        params.insert(
+            Value::String("bucket_size".to_string()),
+            Value::Number(serde_yaml::Number::from(42)),
+        );
+
+        let result = GameEloBin::try_new(Some(Value::Mapping(params.clone())));
+        assert!(result.is_ok());
+        assert_eq!(
+            format!("{:?}", result.unwrap()),
+            r#"GameEloBin { input_vec_name: "A", output_vec_name: "B", input_flag: "D", output_flag: "E", bucket_size: 42 }"#
+        );
+
+        params.insert(
+            Value::String("input".to_string()),
+            Value::String("ABCD".to_string()),
+        );
+        params.insert(
+            Value::String("output".to_string()),
+            Value::String("EFGH".to_string()),
+        );
+        params.insert(
+            Value::String("input_flag".to_string()),
+            Value::String("IJKL".to_string()),
+        );
+        params.insert(
+            Value::String("output_flag".to_string()),
+            Value::String("MNOP".to_string()),
+        );
+        params.insert(
+            Value::String("bucket_size".to_string()),
+            Value::Number(serde_yaml::Number::from(142)),
+        );
+
+        let result = GameEloBin::try_new(Some(Value::Mapping(params)));
+        assert!(result.is_ok());
+        assert_eq!(
+            format!("{:?}", result.unwrap()),
+            r#"GameEloBin { input_vec_name: "ABCD", output_vec_name: "EFGH", input_flag: "IJKL", output_flag: "MNOP", bucket_size: 142 }"#
+        );
+    }
 }
 
 #[cfg(test)]

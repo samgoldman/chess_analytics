@@ -94,6 +94,7 @@ dependencies = [
  "lazy_static",
  "mktemp",
  "mockall",
+ "mockall_double",
  "predicates",
  "rayon",
  "regex",
@@ -371,9 +372,9 @@ dependencies = [
 
 [[package]]
 name = "mockall"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d4d70639a72f972725db16350db56da68266ca368b2a1fe26724a903ad3d6b8"
+checksum = "5641e476bbaf592a3939a7485fa079f427b4db21407d5ebfd5bba4e07a1f6f4c"
 dependencies = [
  "cfg-if",
  "downcast",
@@ -386,9 +387,21 @@ dependencies = [
 
 [[package]]
 name = "mockall_derive"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "79ef208208a0dea3f72221e26e904cdc6db2e481d9ade89081ddd494f1dbaa6b"
+checksum = "262d56735932ee0240d515656e5a7667af3af2a5b0af4da558c4cff2b2aeb0c7"
+dependencies = [
+ "cfg-if",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "mockall_double"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7dffc15b97456ecc84d2bde8c1df79145e154f45225828c4361f676e1b82acd6"
 dependencies = [
  "cfg-if",
  "proc-macro2",
@@ -515,9 +528,9 @@ dependencies = [
 
 [[package]]
 name = "rayon"
-version = "1.5.2"
+version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd249e82c21598a9a426a4e00dd7adc1d640b22445ec8545feef801d1a74c221"
+checksum = "bd99e5772ead8baa5215278c9b15bf92087709e9c1b2d1f97cdb5a183c933a7d"
 dependencies = [
  "autocfg",
  "crossbeam-deque",
@@ -612,9 +625,9 @@ dependencies = [
 
 [[package]]
 name = "serde_yaml"
-version = "0.8.23"
+version = "0.8.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4a521f2940385c165a24ee286aa8599633d162077a54bdcae2a6fd5a7bfa7a0"
+checksum = "707d15895415db6628332b737c838b88c598522e4dc70647e59b72312924aebc"
 dependencies = [
  "indexmap",
  "ryu",
