@@ -3,9 +3,7 @@ use crate::game_wrapper::*;
 use crate::workflow_step::*;
 
 #[derive(Debug)]
-pub struct ParseBinGame {
-    // child: Box<dyn Step>,
-}
+pub struct ParseBinGame {}
 
 /// chess_analytics_build::register_step_builder "ParseBinGame" ParseBinGame
 impl ParseBinGame {
@@ -14,7 +12,7 @@ impl ParseBinGame {
     }
 }
 
-impl<'a> Step for ParseBinGame {
+impl Step for ParseBinGame {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();
@@ -86,6 +84,6 @@ impl<'a> Step for ParseBinGame {
         let d: bool = true;
         unlocked_data.insert("done_parsing_games".to_string(), SharedData::Bool(d));
 
-        Ok(()) //self.child.process(data)
+        Ok(())
     }
 }

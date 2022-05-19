@@ -1,2 +1,7 @@
 coverage:
   range: "0...100"
+
+ignore:
+  - "flatbuffers/"
+  - "build.rs"
+  - "src/steps.rs"

@@ -83,6 +83,7 @@ pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
 }
 
 // Game elo is the average of the two player's ratings
+#[inline]
 pub fn get_game_elo(game: &GameWrapper) -> u32 {
     (game.white_rating + game.black_rating) as u32 / 2
 }

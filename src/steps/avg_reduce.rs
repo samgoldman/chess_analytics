@@ -43,7 +43,7 @@ impl AvgReduce {
     }
 }
 
-impl<'a> Step for AvgReduce {
+impl Step for AvgReduce {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();

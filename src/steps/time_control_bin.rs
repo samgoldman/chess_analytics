@@ -46,6 +46,6 @@ impl TimeControlBin {
     }
 }
 
-impl<'a> Step for TimeControlBin {
+impl Step for TimeControlBin {
     bin_template!(TimeControlBin::bin);
 }

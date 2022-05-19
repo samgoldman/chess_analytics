@@ -119,3 +119,44 @@ mod test_convert {
         );
     }
 }
+
+#[cfg(test)]
+mod test_default_impls {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let x = Move {
+            from: PartialCell {
+                file: Some(File::_B),
+                rank: Some(Rank::_2),
+            },
+            to: cell!(File::_A, Rank::_1),
+            piece_moved: Piece::Bishop,
+            captures: false,
+            checks: true,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None,
+        };
+        assert_eq!(x.clone(), x);
+    }
+
+    #[test]
+    fn test_debug() {
+        let x = Move {
+            from: PartialCell {
+                file: Some(File::_B),
+                rank: Some(Rank::_2),
+            },
+            to: cell!(File::_A, Rank::_1),
+            piece_moved: Piece::Bishop,
+            captures: false,
+            checks: true,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: None,
+        };
+        assert_eq!(format!("{:?}", x), "Move { from: PartialCell { file: Some(_B), rank: Some(_2) }, to: Cell { file: _A, rank: _1 }, piece_moved: Bishop, captures: false, checks: true, mates: false, nag: None, promoted_to: None }");
+    }
+}

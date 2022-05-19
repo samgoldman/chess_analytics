@@ -95,8 +95,7 @@ impl UiMonitorStep {
     }
 }
 
-impl<'a> Step for UiMonitorStep {
-    #[allow(clippy::needless_return)] // Allow for coverage
+impl Step for UiMonitorStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         self.start_time = std::time::Instant::now();
         self.terminal.clear().unwrap();

@@ -1,13 +1,10 @@
 use crate::game_wrapper::GameWrapper;
+use crate::generic_steps::{FilterFn, GenericFilter};
 use crate::workflow_step::*;
 
 #[derive(Debug)]
 pub struct PlayerEloFilter {
-    input_vec_name: String,
-    output_vec_name: String,
-    discard_vec_name: String,
-    input_flag: String,
-    output_flag: String,
+    generic_filter: GenericFilter,
     min_elo: Option<u16>,
     max_elo: Option<u16>,
     filter_white: bool,
@@ -17,27 +14,12 @@ pub struct PlayerEloFilter {
 /// chess_analytics_build::register_step_builder "PlayerEloFilter" PlayerEloFilter
 impl PlayerEloFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
-        let params = match configuration {
+        let params = match configuration.clone() {
             Some(value) => value,
             None => return Err("PlayerEloFilter: no parameters provided".to_string()),
         };
 
         // TODO: better error handling
-        let input_vec_name = params.get("input").unwrap().as_str().unwrap().to_string();
-        let output_vec_name = params.get("output").unwrap().as_str().unwrap().to_string();
-        let discard_vec_name = params.get("discard").unwrap().as_str().unwrap().to_string();
-        let input_flag = params
-            .get("input_flag")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_string();
-        let output_flag = params
-            .get("output_flag")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_string();
         let filter_white = params.get("white").unwrap().as_bool().unwrap();
         let filter_black = params.get("black").unwrap().as_bool().unwrap();
         let min_elo = match params.get("min_elo") {
@@ -56,11 +38,7 @@ impl PlayerEloFilter {
         };
 
         Ok(Box::new(PlayerEloFilter {
-            input_vec_name,
-            output_vec_name,
-            discard_vec_name,
-            input_flag,
-            output_flag,
+            generic_filter: *GenericFilter::try_new(configuration)?,
             min_elo,
             max_elo,
             filter_white,
@@ -68,29 +46,40 @@ impl PlayerEloFilter {
         }))
     }
 
-    pub fn filter(game: GameWrapper, filter: &PlayerEloFilter) -> bool {
-        let min_res = match filter.min_elo {
-            Some(value) => {
-                let white_violation = filter.filter_white && game.white_rating < value;
-                let black_violation = filter.filter_black && game.black_rating < value;
-                !black_violation && !white_violation
-            }
-            _ => true, // No min
+    pub fn create_filter(&self) -> Box<FilterFn> {
+        let filter_white = self.filter_white;
+        let filter_black = self.filter_black;
+        let min_elo = self.min_elo;
+        let max_elo = self.max_elo;
+
+        let filter = move |game: &GameWrapper| {
+            let min_res = match min_elo {
+                Some(value) => {
+                    let white_violation = filter_white && game.white_rating < value;
+                    let black_violation = filter_black && game.black_rating < value;
+                    !black_violation && !white_violation
+                }
+                _ => true, // No min
+            };
+
+            let max_res = match max_elo {
+                Some(value) => {
+                    let white_violation = filter_white && game.white_rating > value;
+                    let black_violation = filter_black && game.black_rating > value;
+                    !black_violation && !white_violation
+                }
+                _ => true, // No max
+            };
+
+            max_res && min_res
         };
 
-        let max_res = match filter.max_elo {
-            Some(value) => {
-                let white_violation = filter.filter_white && game.white_rating > value;
-                let black_violation = filter.filter_black && game.black_rating > value;
-                !black_violation && !white_violation
-            }
-            _ => true, // No max
-        };
-
-        max_res && min_res
+        Box::new(filter)
     }
 }
 
-impl<'a> Step for PlayerEloFilter {
-    filter_template!(PlayerEloFilter::filter);
+impl Step for PlayerEloFilter {
+    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+        self.generic_filter.process(data, &*self.create_filter())
+    }
 }

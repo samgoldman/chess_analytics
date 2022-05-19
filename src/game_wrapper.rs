@@ -60,8 +60,6 @@ impl GameWrapper {
         );
         let clock = clock_components.map(hours_min_sec_to_duration).collect();
 
-        // println!("{}: {:?}", game.eval_available(), game.eval_mate_in());
-
         GameWrapper {
             year: game.year(),
             month: game.month(),
@@ -114,7 +112,6 @@ impl GameWrapper {
         }
     }
 
-    #[allow(clippy::needless_return)] // Allow for coverage
     pub fn build_boards(&self) -> Vec<Board> {
         self.moves
             .iter()
@@ -123,7 +120,7 @@ impl GameWrapper {
                 new_board.move_piece(*curr_move);
                 boards.push(new_board);
 
-                return boards;
+                boards
             })
     }
 }
@@ -191,31 +188,6 @@ mod test_build_boards {
 }
 
 #[cfg(test)]
-// Note: doing as UT not int due to coverage
-mod test_game_wrapper_from_games {
-    use super::*;
-
-    use bzip2::read::BzDecoder;
-    use std::fs::File;
-    use std::io::prelude::*;
-
-    #[test]
-    fn test_from_10() {
-        let file = File::open("tests/data/10_games_000000.bin.bz2").unwrap();
-        let mut data = Vec::new();
-
-        // Assume uncompressed unless extension is "bz2"
-        let mut decompressor = BzDecoder::new(file);
-        decompressor.read_to_end(&mut data).unwrap();
-
-        let games = GameWrapper::from_game_list_data(data);
-
-        assert_eq!(games.len(), 10);
-        // TODO more assertions for correctness
-    }
-}
-
-#[cfg(test)]
 mod test_clock_available {
     use super::*;
     use std::time::Duration;
@@ -257,5 +229,18 @@ mod test_move_timep {
         test_1: (vec![120, 120], 0, 0),
         test_2: (vec![60, 60, 54, 52], 2, 6),
         test_3: (vec![3600, 3600, 3500, 3550, 3425, 3475], 5, 75),
+    }
+}
+
+#[cfg(test)]
+mod test_debug_impl {
+    use super::*;
+
+    #[test]
+    fn test_default() {
+        assert_eq!(
+            format!("{:?}", GameWrapper::default()),
+            r#"GameWrapper { year: 0, month: 0, day: 0, site: "", white: "", black: "", white_rating: 0, black_rating: 0, time_control_main: 0, time_control_increment: 0, time_control: UltraBullet, eco_category: '-', eco_subcategory: 0, moves: [], clock: [], eval_available: false, eval_mate_in: [], eval_advantage: [], result: Draw, termination: Normal, white_diff: 0, black_diff: 0, boards: [] }"#
+        );
     }
 }

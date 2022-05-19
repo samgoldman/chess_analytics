@@ -1,0 +1,50 @@
+steps:
+  init:
+    type: "GlobFileStep"
+    params: 
+      glob: tests/data/simple_count_eval_and_clock_1_game.bin.bz2
+      child: parallel_step
+  parallel_step:
+    type: ParallelStep
+    params:
+      children:
+        - "load_files"
+        - "parse_games"
+        - "map_count"
+        - "reduce_sum"
+        - "init_bins"
+      post: "save_results"
+  load_files:
+    type: Bz2DecompressStep
+    params:
+      max_queue_size: 10
+      full_queue_delay_ms: 332
+  parse_games:
+    type: ParseBinGame
+  init_bins:
+    type: InitBinStep
+    params:
+      input: parsed_games
+      output: unbinned_games
+      input_flag: done_parsing_games
+      output_flag: init_bins_done
+  map_count:
+    type: CountMap
+    params:
+      input: unbinned_games
+      output: mapped_count
+      input_flag: init_bins_done
+      output_flag: mapping_done
+  reduce_sum:
+    type: SumReduce
+    params:
+      input: mapped_count
+      output: game_count
+      input_flag: mapping_done
+      output_flag: reduction_done
+  save_results:
+    type: SaveDataStep
+    params:
+      file: tests/output/int_2/tmp.txt
+      fields:
+        - game_count

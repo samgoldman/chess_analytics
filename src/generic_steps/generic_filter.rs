@@ -1,24 +1,46 @@
-use crate::workflow_step::*;
+use crate::{
+    game_wrapper::GameWrapper,
+    workflow_step::{SharedData, StepGeneric},
+};
 
-#[derive(Debug)]
-pub struct InitBinStep {
+pub type FilterFn = dyn Fn(&GameWrapper) -> bool;
+
+#[derive(Debug, PartialEq)]
+pub struct GenericFilter {
     input_vec_name: String,
     output_vec_name: String,
+    discard_vec_name: String,
     input_flag: String,
     output_flag: String,
 }
 
-/// chess_analytics_build::register_step_builder "InitBinStep" InitBinStep
-impl InitBinStep {
-    pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
+impl GenericFilter {
+    #[cfg(test)]
+    pub fn default() -> GenericFilter {
+        GenericFilter {
+            input_vec_name: "input_vec".to_string(),
+            output_vec_name: "output_vec".to_string(),
+            discard_vec_name: "discard_vec".to_string(),
+            input_flag: "input_flag".to_string(),
+            output_flag: "output_flag".to_string(),
+        }
+    }
+
+    pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<Self>, String> {
         let params = match configuration {
             Some(value) => value,
-            None => return Err("InitBinStep: no parameters provided".to_string()),
+            None => return Err("GenericFilter: no parameters provided".to_string()),
         };
 
         // TODO: better error handling
         let input_vec_name = params.get("input").unwrap().as_str().unwrap().to_string();
         let output_vec_name = params.get("output").unwrap().as_str().unwrap().to_string();
+        let discard_vec_name = params
+            .get("discard")
+            .unwrap_or(&serde_yaml::Value::String("null".to_string()))
+            .as_str()
+            .unwrap()
+            .to_string();
         let input_flag = params
             .get("input_flag")
             .unwrap()
@@ -32,20 +54,22 @@ impl InitBinStep {
             .unwrap()
             .to_string();
 
-        Ok(Box::new(InitBinStep {
+        Ok(Box::new(GenericFilter {
             input_vec_name,
             output_vec_name,
+            discard_vec_name,
             input_flag,
             output_flag,
         }))
     }
-}
 
-impl Step for InitBinStep {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+    pub fn process(&self, data: StepGeneric, logic: &FilterFn) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();
             unlocked_data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
+            if self.discard_vec_name != "null" {
+                unlocked_data.insert(self.discard_vec_name.clone(), SharedData::Vec(vec![]));
+            }
         }
 
         let mut quit = false;
@@ -57,10 +81,6 @@ impl Step for InitBinStep {
 
             let games = {
                 let mut unlocked_data = data.lock().unwrap();
-
-                if !unlocked_data.contains_key(&self.input_vec_name) {
-                    continue;
-                }
 
                 let data = match unlocked_data.get_mut(&self.input_vec_name) {
                     Some(data) => data,
@@ -74,7 +94,8 @@ impl Step for InitBinStep {
                 ret
             };
 
-            let mut output_games = vec![];
+            let mut output_games: Vec<SharedData> = vec![];
+            let mut discard_games: Vec<SharedData> = vec![];
 
             for shared_game in games {
                 let game = match shared_game.clone() {
@@ -82,10 +103,11 @@ impl Step for InitBinStep {
                     _ => return Err("Vector isn't of games!".to_string()),
                 };
 
-                output_games.push(SharedData::BinnedValue((
-                    Box::new(SharedData::Game(game)),
-                    vec![],
-                )));
+                if logic(&game) {
+                    output_games.push(shared_game);
+                } else {
+                    discard_games.push(shared_game);
+                }
             }
 
             {
@@ -98,6 +120,18 @@ impl Step for InitBinStep {
                 let vec_to_append = data.to_vec_mut().unwrap();
 
                 vec_to_append.append(&mut output_games);
+            }
+
+            if &self.discard_vec_name != "null" {
+                let mut unlocked_data = data.lock().unwrap();
+
+                let data = match unlocked_data.get_mut(&self.discard_vec_name) {
+                    Some(data) => data,
+                    None => continue,
+                };
+                let vec_to_append = data.to_vec_mut().unwrap();
+
+                vec_to_append.append(&mut discard_games);
             }
 
             let unlocked_data = data.lock().unwrap();

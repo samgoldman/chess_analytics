@@ -30,14 +30,6 @@ bin!(day_bin, "day", _params, {
     Box::new(move |game| format!("{:02}", game.day))
 });
 
-// Params: 1. bucket size
-bin!(game_elo_bin, "gameElo", params, {
-    use crate::chess_utils::get_game_elo;
-
-    let bucket_size: u32 = params[0].parse::<u32>().unwrap();
-    Box::new(move |game| format!("{:04}", (get_game_elo(game) / bucket_size) * bucket_size))
-});
-
 bin!(eco_category_bin, "ecoCategory", _params, {
     Box::new(move |game| format!("{}", game.eco_category))
 });
@@ -261,21 +253,6 @@ mod test_simple_bins {
 
         game.result = GameResult::Star;
         assert_eq!(bin_fn(&game), "?");
-    }
-
-    #[test]
-    fn test_game_elo_bin() {
-        let mut game = GameWrapper::default();
-
-        let bin_fn = game_elo_bin::factory(vec!["100".to_string()]);
-        game.white_rating = 200;
-        game.black_rating = 300;
-        assert_eq!(bin_fn(&game), "0200");
-
-        let bin_fn = game_elo_bin::factory(vec!["600".to_string()]);
-        game.white_rating = 2450;
-        game.black_rating = 2950;
-        assert_eq!(bin_fn(&game), "2400");
     }
 
     #[test]

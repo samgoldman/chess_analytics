@@ -6,7 +6,7 @@ use glob::glob;
 #[derive(Debug)]
 pub struct GlobFileStep {
     glob_string: String,
-    child: Box<dyn Step>,
+    child_name: String,
 }
 
 /// chess_analytics_build::register_step_builder "GlobFileStep" GlobFileStep
@@ -23,7 +23,7 @@ impl GlobFileStep {
 
         let step = GlobFileStep {
             glob_string,
-            child: get_step_description(child_string).to_step()?,
+            child_name: child_string,
         };
 
         Ok(Box::new(step))
@@ -31,7 +31,6 @@ impl GlobFileStep {
 }
 
 impl Step for GlobFileStep {
-    #[allow(clippy::needless_return)] // Allow for coverage
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         let glob_result = glob(&self.glob_string);
 
@@ -55,6 +54,7 @@ impl Step for GlobFileStep {
             unlocked_data.insert("file_path_bufs".to_string(), SharedData::Vec(files));
         }
 
-        self.child.process(data)
+        let mut child = get_step_description(self.child_name.clone(), data.clone()).to_step()?;
+        child.process(data)
     }
 }
