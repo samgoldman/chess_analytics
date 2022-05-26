@@ -63,14 +63,14 @@ impl Step for MaxReduce {
             let binned_games = {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get_mut(&self.input_vec_name) {
+                let data = match unlocked_data.get(&self.input_vec_name) {
                     Some(data) => data,
                     None => continue,
                 };
-                let vec_to_filter = data.to_vec_mut().unwrap();
+                let vec_to_filter = data.to_vec().unwrap();
 
                 let ret = vec_to_filter.clone();
-                vec_to_filter.clear();
+                unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 ret
             };
@@ -101,11 +101,11 @@ impl Step for MaxReduce {
 
             {
                 let mut unlocked_data = data.lock().unwrap();
-                let data = match unlocked_data.get_mut(&self.output_map_name) {
+                let data = match unlocked_data.get(&self.output_map_name) {
                     Some(data) => data,
                     None => continue,
                 };
-                let map = data.to_map_mut().unwrap();
+                let mut map = data.to_map().unwrap();
 
                 for key in new_data.keys() {
                     if !map.contains_key(key) {
@@ -116,13 +116,15 @@ impl Step for MaxReduce {
                     let new = &*(new_data.get(key).unwrap());
                     *original = original.max(new.clone());
                 }
+
+                unlocked_data.insert(self.output_map_name.clone(), SharedData::Map(map));
             }
 
             let unlocked_data = data.lock().unwrap();
 
             let flag = unlocked_data
                 .get(&self.input_flag)
-                .unwrap_or(&SharedData::Bool(false));
+                .unwrap_or(SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 

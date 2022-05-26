@@ -82,14 +82,15 @@ impl GenericFilter {
             let games = {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get_mut(&self.input_vec_name) {
+                let data = match unlocked_data.get(&self.input_vec_name) {
                     Some(data) => data,
                     None => continue,
                 };
-                let vec_to_filter = data.to_vec_mut().unwrap();
+                let vec_to_filter = data.to_vec().unwrap();
 
                 let ret = vec_to_filter.clone();
-                vec_to_filter.clear();
+
+                unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 ret
             };
@@ -113,32 +114,37 @@ impl GenericFilter {
             {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get_mut(&self.output_vec_name) {
+                let data = match unlocked_data.get(&self.output_vec_name) {
                     Some(data) => data,
                     None => continue,
                 };
-                let vec_to_append = data.to_vec_mut().unwrap();
+                let mut vec_to_append = data.to_vec().unwrap();
 
                 vec_to_append.append(&mut output_games);
+                unlocked_data.insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
             }
 
             if &self.discard_vec_name != "null" {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get_mut(&self.discard_vec_name) {
+                let data = match unlocked_data.get(&self.discard_vec_name) {
                     Some(data) => data,
                     None => continue,
                 };
-                let vec_to_append = data.to_vec_mut().unwrap();
+                let mut vec_to_append = data.to_vec().unwrap();
 
                 vec_to_append.append(&mut discard_games);
+                unlocked_data.insert(
+                    self.discard_vec_name.clone(),
+                    SharedData::Vec(vec_to_append),
+                );
             }
 
             let unlocked_data = data.lock().unwrap();
 
             let flag = unlocked_data
                 .get(&self.input_flag)
-                .unwrap_or(&SharedData::Bool(false));
+                .unwrap_or(SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 
@@ -158,5 +164,39 @@ impl GenericFilter {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test_process {
+    // use crate::workflow_step::MockStepGenericCore;
+
+    use super::*;
+
+    use mockall::automock;
+    pub struct FilterStep {}
+    #[automock]
+    impl FilterStep {
+        pub fn filter(_game: &GameWrapper) -> bool {
+            false
+        }
+    }
+
+    #[test]
+    fn test_nominal_1() {
+        // let ctx =  MockFilterStep::filter_context();
+        // let mut data = MockStepGenericCore::new();
+
+        // let default_game = GameWrapper::default();
+        // let mut game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
+
+        // faux::when!(data.insert("output_vec".to_string(), SharedData::Vec(vec![]))).then_return(None);
+        // faux::when!(data.insert("discard_vec".to_string(), SharedData::Vec(vec![]))).then_return(None);
+        // unsafe {faux::when!(data.get_mut("input_vec")).then_unchecked(|_| {
+
+        //     Some(&mut game_data)
+        // }); }
+
+        // ctx.expect().times(0);
     }
 }

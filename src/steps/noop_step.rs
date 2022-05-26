@@ -36,6 +36,11 @@ mod test_noop_step {
     #[test]
     fn test_process() {
         let mut step = NoopStep {};
-        assert_eq!(Ok(()), step.process(Arc::new(Mutex::new(HashMap::new()))));
+        assert_eq!(
+            Ok(()),
+            step.process(Arc::new(Mutex::new(StepGenericCoreImpl {
+                map: HashMap::new()
+            })))
+        );
     }
 }
