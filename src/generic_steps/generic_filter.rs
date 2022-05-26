@@ -169,9 +169,28 @@ impl GenericFilter {
 
 #[cfg(test)]
 mod test_process {
-    // use crate::workflow_step::MockStepGenericCore;
+    use crate::workflow_step::MockStepGenericCore;
+    use std::sync::{Arc, Mutex, MutexGuard};
 
     use super::*;
+    use mockall::predicate::*;
+
+    // Guard static mock
+    lazy_static! {
+        static ref MTX: Mutex<()> = Mutex::new(());
+    }
+
+    // When a test panics, it will poison the Mutex. Since we don't actually
+    // care about the state of the data we ignore that it is poisoned and grab
+    // the lock regardless.  If you just do `let _m = &MTX.lock().unwrap()`, one
+    // test panicking will cause all other tests that try and acquire a lock on
+    // that Mutex to also panic.
+    fn get_lock(m: &'static Mutex<()>) -> MutexGuard<'static, ()> {
+        match m.lock() {
+            Ok(guard) => guard,
+            Err(poisoned) => poisoned.into_inner(),
+        }
+    }
 
     use mockall::automock;
     pub struct FilterStep {}
@@ -184,19 +203,147 @@ mod test_process {
 
     #[test]
     fn test_nominal_1() {
-        // let ctx =  MockFilterStep::filter_context();
-        // let mut data = MockStepGenericCore::new();
+        let _m = get_lock(&MTX);
 
-        // let default_game = GameWrapper::default();
-        // let mut game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
+        let ctx = MockFilterStep::filter_context();
+        let mut data = MockStepGenericCore::new();
 
-        // faux::when!(data.insert("output_vec".to_string(), SharedData::Vec(vec![]))).then_return(None);
-        // faux::when!(data.insert("discard_vec".to_string(), SharedData::Vec(vec![]))).then_return(None);
-        // unsafe {faux::when!(data.get_mut("input_vec")).then_unchecked(|_| {
+        let default_game = GameWrapper::default();
+        let game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
 
-        //     Some(&mut game_data)
-        // }); }
+        // Set up output vectors
+        data.expect_insert()
+            .with(eq("output_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .times(1)
+            .return_const(None);
 
-        // ctx.expect().times(0);
+        data.expect_insert()
+            .with(eq("discard_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .times(1)
+            .return_const(None);
+
+        // Get input data - two different loops
+        data.expect_get()
+            .with(eq("input_vec"))
+            .times(2)
+            .return_const(Some(game_data.clone()));
+
+        data.expect_insert()
+            .with(eq("input_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .times(2)
+            .return_const(None);
+
+        // Both games will be rejected, so no output
+        data.expect_get()
+            .with(eq("output_vec"))
+            .times(2)
+            .return_const(Some(SharedData::Vec(vec![])));
+
+        data.expect_insert()
+            .with(eq("output_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .times(2)
+            .return_const(None);
+
+        // Both games will be rejected, so two discards
+        data.expect_get()
+            .with(eq("discard_vec"))
+            .times(2)
+            .return_const(Some(SharedData::Vec(vec![])));
+
+        data.expect_insert()
+            .with(eq("discard_vec".to_string()), eq(game_data.clone()))
+            .times(2)
+            .return_const(None);
+
+        // End after one loop
+        data.expect_get()
+            .with(eq("input_flag"))
+            .times(2)
+            .return_const(Some(SharedData::Bool(true)));
+
+        // Set end condition
+        data.expect_insert()
+            .with(eq("output_flag".to_string()), eq(SharedData::Bool(true)))
+            .times(1)
+            .return_const(None);
+
+        ctx.expect().times(2).return_const(false);
+
+        let generic_filter = GenericFilter::default();
+        let res = generic_filter.process(Arc::new(Mutex::new(data)), &MockFilterStep::filter);
+        assert!(res.is_ok());
+    }
+
+    #[test]
+    fn test_nominal_2() {
+        let _m = get_lock(&MTX);
+
+        let ctx = MockFilterStep::filter_context();
+        let mut data = MockStepGenericCore::new();
+
+        let default_game = GameWrapper::default();
+        let game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
+
+        // Set up output vectors
+        data.expect_insert()
+            .with(eq("output_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .times(1)
+            .return_const(None);
+
+        data.expect_insert()
+            .with(eq("discard_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .times(1)
+            .return_const(None);
+
+        // Get input data - two different loops
+        data.expect_get()
+            .with(eq("input_vec"))
+            .times(2)
+            .return_const(Some(game_data.clone()));
+
+        data.expect_insert()
+            .with(eq("input_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .times(2)
+            .return_const(None);
+
+        // Both games will be rejected, so output both
+        data.expect_get()
+            .with(eq("output_vec"))
+            .times(2)
+            .return_const(Some(SharedData::Vec(vec![])));
+
+        data.expect_insert()
+            .with(eq("output_vec".to_string()), eq(game_data.clone()))
+            .times(2)
+            .return_const(None);
+
+        // Both games will be rejected, so no discard
+        data.expect_get()
+            .with(eq("discard_vec"))
+            .times(2)
+            .return_const(Some(SharedData::Vec(vec![])));
+
+        data.expect_insert()
+            .with(eq("discard_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .times(2)
+            .return_const(None);
+
+        // End after one loop
+        data.expect_get()
+            .with(eq("input_flag"))
+            .times(2)
+            .return_const(Some(SharedData::Bool(true)));
+
+        // Set end condition
+        data.expect_insert()
+            .with(eq("output_flag".to_string()), eq(SharedData::Bool(true)))
+            .times(1)
+            .return_const(None);
+
+        ctx.expect().times(2).return_const(true);
+
+        let generic_filter = GenericFilter::default();
+        let res = generic_filter.process(Arc::new(Mutex::new(data)), &MockFilterStep::filter);
+        assert!(res.is_ok());
     }
 }
