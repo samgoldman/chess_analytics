@@ -10,9 +10,39 @@ use std::sync::Mutex;
 
 pub type BoxedStep = Box<dyn Step>;
 pub type StepFactory = Box<dyn Fn(Option<serde_yaml::Value>) -> Result<BoxedStep, String>>;
-pub type StepGeneric = Arc<Mutex<HashMap<String, SharedData>>>;
+pub type StepGeneric = Arc<Mutex<dyn StepGenericCore>>;
 
-#[derive(Clone, Debug)]
+#[automock]
+pub trait StepGenericCore: Send {
+    fn insert(&mut self, k: String, v: SharedData) -> Option<SharedData>;
+    fn contains_key(&self, k: &str) -> bool;
+    fn get(&self, k: &str) -> Option<SharedData>;
+    fn remove(&mut self, k: &str) -> Option<SharedData>;
+}
+
+pub struct StepGenericCoreImpl {
+    pub map: HashMap<String, SharedData>,
+}
+
+impl StepGenericCore for StepGenericCoreImpl {
+    fn contains_key(&self, k: &str) -> bool {
+        self.map.contains_key(k)
+    }
+
+    fn get(&self, k: &str) -> Option<SharedData> {
+        self.map.get(k).map(|v| (*v).clone())
+    }
+
+    fn insert(&mut self, k: String, v: SharedData) -> Option<SharedData> {
+        self.map.insert(k, v)
+    }
+
+    fn remove(&mut self, k: &str) -> Option<SharedData> {
+        self.map.remove(k)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum SharedData {
     U64(u64),
     F64(f64),
@@ -36,16 +66,9 @@ impl SharedData {
         }
     }
 
-    pub fn to_u64_mut(&mut self) -> Option<&mut u64> {
+    pub fn to_usize(&self) -> Option<usize> {
         match self {
-            SharedData::U64(val) => Some(val),
-            _ => None,
-        }
-    }
-
-    pub fn to_usize_mut(&mut self) -> Option<&mut usize> {
-        match self {
-            SharedData::USize(val) => Some(val),
+            SharedData::USize(val) => Some(*val),
             _ => None,
         }
     }
@@ -57,20 +80,6 @@ impl SharedData {
         }
     }
 
-    pub fn to_bool_mut(&mut self) -> Option<&mut bool> {
-        match self {
-            SharedData::Bool(val) => Some(val),
-            _ => None,
-        }
-    }
-
-    pub fn to_game_mut(&mut self) -> Option<&mut GameWrapper> {
-        match self {
-            SharedData::Game(val) => Some(val),
-            _ => None,
-        }
-    }
-
     pub fn to_vec(&self) -> Option<Vec<SharedData>> {
         match self {
             SharedData::Vec(v) => Some(v.to_vec()),
@@ -78,21 +87,7 @@ impl SharedData {
         }
     }
 
-    pub fn to_vec_mut(&mut self) -> Option<&mut Vec<SharedData>> {
-        match self {
-            SharedData::Vec(v) => Some(v),
-            _ => None,
-        }
-    }
-
     pub fn to_binned_value(&self) -> Option<&(Box<SharedData>, Vec<SharedData>)> {
-        match self {
-            SharedData::BinnedValue(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    pub fn to_binned_value_mut(&mut self) -> Option<&mut (Box<SharedData>, Vec<SharedData>)> {
         match self {
             SharedData::BinnedValue(v) => Some(v),
             _ => None,
@@ -113,23 +108,9 @@ impl SharedData {
         }
     }
 
-    pub fn to_string_mut(&mut self) -> Option<&mut String> {
+    pub fn to_map(&self) -> Option<HashMap<String, SharedData>> {
         match self {
-            SharedData::String(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    pub fn to_map(&self) -> Option<&HashMap<String, SharedData>> {
-        match self {
-            SharedData::Map(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    pub fn to_map_mut(&mut self) -> Option<&mut HashMap<String, SharedData>> {
-        match self {
-            SharedData::Map(v) => Some(v),
+            SharedData::Map(v) => Some((*v).clone()),
             _ => None,
         }
     }
@@ -185,7 +166,7 @@ impl std::fmt::Display for SharedData {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct StepDescription {
     pub step_type: String,
     pub parameters: std::option::Option<serde_yaml::Value>,

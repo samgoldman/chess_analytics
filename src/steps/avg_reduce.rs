@@ -63,14 +63,14 @@ impl Step for AvgReduce {
             let binned_games = {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get_mut(&self.input_vec_name) {
+                let data = match unlocked_data.get(&self.input_vec_name) {
                     Some(data) => data,
                     None => continue,
                 };
-                let vec_to_filter = data.to_vec_mut().unwrap();
+                let vec_to_filter = data.to_vec().unwrap();
 
                 let ret = vec_to_filter.clone();
-                vec_to_filter.clear();
+                unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 ret
             };
@@ -104,11 +104,11 @@ impl Step for AvgReduce {
 
             {
                 let mut unlocked_data = data.lock().unwrap();
-                let data = match unlocked_data.get_mut(&self.output_map_name) {
+                let data = match unlocked_data.get(&self.output_map_name) {
                     Some(data) => data,
                     None => continue,
                 };
-                let map = data.to_map_mut().unwrap();
+                let mut map = data.to_map().unwrap();
 
                 for key in new_data.keys() {
                     if !map.contains_key(key) {
@@ -122,23 +122,32 @@ impl Step for AvgReduce {
                         );
                     }
 
-                    let shared_vec: &mut Vec<SharedData> =
-                        map.get_mut(key).unwrap().to_vec_mut().unwrap();
+                    let shared_vec: Vec<SharedData> = map.get_mut(key).unwrap().to_vec().unwrap();
 
-                    *(shared_vec[0].to_u64_mut().unwrap()) += new_data.get(key).unwrap()[0];
-                    *(shared_vec[1].to_u64_mut().unwrap()) += new_data.get(key).unwrap()[1];
-                    shared_vec[2] = SharedData::F64(
-                        *(shared_vec[0].to_u64_mut().unwrap()) as f64
-                            / *(shared_vec[1].to_u64_mut().unwrap()) as f64,
-                    )
+                    let original_total = shared_vec[0].to_u64().unwrap();
+                    let new_total = new_data.get(key).unwrap()[0] + original_total;
+
+                    let original_count = shared_vec[1].to_u64().unwrap();
+                    let new_count = new_data.get(key).unwrap()[1] + original_count;
+
+                    let average = new_total as f64 / new_count as f64;
+                    map.insert(
+                        key.to_string(),
+                        SharedData::Vec(vec![
+                            SharedData::U64(new_total),
+                            SharedData::U64(new_count),
+                            SharedData::F64(average),
+                        ]),
+                    );
                 }
+                unlocked_data.insert(self.output_map_name.clone(), SharedData::Map(map));
             }
 
             let unlocked_data = data.lock().unwrap();
 
             let flag = unlocked_data
                 .get(&self.input_flag)
-                .unwrap_or(&SharedData::Bool(false));
+                .unwrap_or(SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 
@@ -157,11 +166,11 @@ impl Step for AvgReduce {
             let d: bool = true;
             unlocked_data.insert(self.output_flag.clone(), SharedData::Bool(d));
 
-            let data = match unlocked_data.get_mut(&self.output_map_name) {
+            let data = match unlocked_data.get(&self.output_map_name) {
                 Some(data) => data,
                 None => panic!("AvgReduce: data not found for some reason!"),
             };
-            let map = data.to_map_mut().unwrap();
+            let mut map = data.to_map().unwrap();
 
             for key in map.clone().keys() {
                 let shared_vec: Vec<SharedData> = map.get(key).unwrap().to_vec().unwrap();
@@ -172,6 +181,7 @@ impl Step for AvgReduce {
                 let avg = total / count;
                 map.insert(key.clone(), SharedData::F64(avg));
             }
+            unlocked_data.insert(self.output_map_name.clone(), SharedData::Map(map));
         }
 
         Ok(())

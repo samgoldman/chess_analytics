@@ -27,14 +27,14 @@ macro_rules! bin_template {
                 let binned_games = {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get_mut(&self.input_vec_name) {
+                    let data = match unlocked_data.get(&self.input_vec_name) {
                         Some(data) => data,
                         None => continue,
                     };
-                    let vec_to_filter = data.to_vec_mut().unwrap();
+                    let vec_to_filter = data.to_vec().unwrap();
 
                     let ret = vec_to_filter.clone();
-                    vec_to_filter.clear();
+                    unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                     ret
                 };
@@ -65,20 +65,22 @@ macro_rules! bin_template {
                 {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get_mut(&self.output_vec_name) {
+                    let data = match unlocked_data.get(&self.output_vec_name) {
                         Some(data) => data,
                         None => continue,
                     };
-                    let vec_to_append = data.to_vec_mut().unwrap();
+                    let mut vec_to_append = data.to_vec().unwrap();
 
                     vec_to_append.append(&mut new_binned_games);
+                    unlocked_data
+                        .insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
                 }
 
                 let unlocked_data = data.lock().unwrap();
 
                 let flag = unlocked_data
                     .get(&self.input_flag)
-                    .unwrap_or(&SharedData::Bool(false));
+                    .unwrap_or(SharedData::Bool(false));
 
                 let flag = flag.to_bool().unwrap();
 
@@ -120,14 +122,14 @@ macro_rules! map_template {
                 let binned_games = {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get_mut(&self.input_vec_name) {
+                    let data = match unlocked_data.get(&self.input_vec_name) {
                         Some(data) => data,
                         None => continue,
                     };
-                    let vec_to_filter = data.to_vec_mut().unwrap();
+                    let vec_to_filter = data.to_vec().unwrap();
 
                     let ret = vec_to_filter.clone();
-                    vec_to_filter.clear();
+                    unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                     ret
                 };
@@ -142,7 +144,7 @@ macro_rules! map_template {
 
                     let game = match *binned_game.0 {
                         SharedData::Game(game) => game,
-                        _ => return Err("Binned value isn't a game!".to_string()),
+                        o => return Err(format!("Binned value isn't a game! ({:?})", o)),
                     };
 
                     let bin_labels = binned_game.1;
@@ -157,20 +159,22 @@ macro_rules! map_template {
                 {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get_mut(&self.output_vec_name) {
+                    let data = match unlocked_data.get(&self.output_vec_name) {
                         Some(data) => data,
                         None => continue,
                     };
-                    let vec_to_append = data.to_vec_mut().unwrap();
+                    let mut vec_to_append = data.to_vec().unwrap();
 
                     vec_to_append.append(&mut new_binned_games);
+                    unlocked_data
+                        .insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
                 }
 
                 let unlocked_data = data.lock().unwrap();
 
                 let flag = unlocked_data
                     .get(&self.input_flag)
-                    .unwrap_or(&SharedData::Bool(false));
+                    .unwrap_or(SharedData::Bool(false));
 
                 let flag = flag.to_bool().unwrap();
 

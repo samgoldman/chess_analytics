@@ -12,12 +12,14 @@ pub fn add_step_description(name: String, step: StepDescription, data: StepGener
         );
     }
 
-    unlocked_data
-        .get_mut("step_descriptions")
+    let mut step_vec = unlocked_data
+        .get("step_descriptions")
         .unwrap()
-        .to_map_mut()
-        .unwrap()
-        .insert(name, SharedData::StepDescription(step));
+        .to_map()
+        .unwrap();
+    step_vec.insert(name, SharedData::StepDescription(step));
+
+    unlocked_data.insert("step_descriptions".to_string(), SharedData::Map(step_vec));
 }
 
 // TODO use Result
