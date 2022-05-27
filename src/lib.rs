@@ -75,7 +75,9 @@ where
         None => return Err("Steps is not a map".to_string()),
     };
 
-    let data = Arc::new(Mutex::new(HashMap::new()));
+    let data = Arc::new(Mutex::new(StepGenericCoreImpl {
+        map: HashMap::new(),
+    }));
 
     for (step_name, step_data) in steps_map.iter() {
         let step_name = step_name.as_str().unwrap().to_string();

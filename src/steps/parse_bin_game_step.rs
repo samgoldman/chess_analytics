@@ -41,14 +41,14 @@ impl Step for ParseBinGame {
                     continue;
                 }
 
-                let raw_file_data = match unlocked_data.get_mut("raw_file_data") {
+                let raw_file_data = match unlocked_data.get("raw_file_data") {
                     Some(data) => data,
                     None => continue,
                 };
-                let file_data_vec = raw_file_data.to_vec_mut().unwrap();
+                let mut file_data_vec = raw_file_data.to_vec().unwrap();
 
                 remaining_files = file_data_vec.len();
-                if remaining_files == 0 {
+                let ret = if remaining_files == 0 {
                     vec![]
                 } else {
                     let file_data = match file_data_vec.pop().unwrap() {
@@ -57,7 +57,10 @@ impl Step for ParseBinGame {
                     };
 
                     file_data.clone()
-                }
+                };
+                unlocked_data.insert("raw_file_data".to_string(), SharedData::Vec(file_data_vec));
+
+                ret
             };
 
             if !file_data.is_empty() {
@@ -68,10 +71,11 @@ impl Step for ParseBinGame {
 
                 {
                     let mut unlocked_data = data.lock().unwrap();
-                    let game_list = unlocked_data.get_mut("parsed_games").unwrap();
-                    let game_list: &mut Vec<SharedData> = game_list.to_vec_mut().unwrap();
+                    let game_list = unlocked_data.get("parsed_games").unwrap();
+                    let mut game_list: Vec<SharedData> = game_list.to_vec().unwrap();
 
                     game_list.append(&mut games);
+                    unlocked_data.insert("parsed_games".to_string(), SharedData::Vec(game_list));
                 }
             }
 

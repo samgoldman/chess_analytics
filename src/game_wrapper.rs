@@ -8,7 +8,7 @@ use itertools::izip;
 use serde::Serialize;
 use std::time::Duration;
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct GameWrapper {
     pub year: u16,
     pub month: u8,

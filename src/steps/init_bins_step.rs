@@ -62,14 +62,14 @@ impl Step for InitBinStep {
                     continue;
                 }
 
-                let data = match unlocked_data.get_mut(&self.input_vec_name) {
+                let data = match unlocked_data.get(&self.input_vec_name) {
                     Some(data) => data,
                     None => continue,
                 };
-                let vec_to_filter = data.to_vec_mut().unwrap();
+                let vec_to_filter = data.to_vec().unwrap();
 
                 let ret = vec_to_filter.clone();
-                vec_to_filter.clear();
+                unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 ret
             };
@@ -91,20 +91,21 @@ impl Step for InitBinStep {
             {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get_mut(&self.output_vec_name) {
+                let data = match unlocked_data.get(&self.output_vec_name) {
                     Some(data) => data,
                     None => continue,
                 };
-                let vec_to_append = data.to_vec_mut().unwrap();
+                let mut vec_to_append = data.to_vec().unwrap();
 
                 vec_to_append.append(&mut output_games);
+                unlocked_data.insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
             }
 
             let unlocked_data = data.lock().unwrap();
 
             let flag = unlocked_data
                 .get(&self.input_flag)
-                .unwrap_or(&SharedData::Bool(false));
+                .unwrap_or(SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 

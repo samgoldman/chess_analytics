@@ -63,14 +63,14 @@ impl Step for SumReduce {
             let binned_games = {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get_mut(&self.input_vec_name) {
+                let data = match unlocked_data.get(&self.input_vec_name) {
                     Some(data) => data,
                     None => continue,
                 };
-                let vec_to_filter = data.to_vec_mut().unwrap();
+                let vec_to_filter = data.to_vec().unwrap();
 
                 let ret = vec_to_filter.clone();
-                vec_to_filter.clear();
+                unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 ret
             };
@@ -103,26 +103,28 @@ impl Step for SumReduce {
 
             {
                 let mut unlocked_data = data.lock().unwrap();
-                let data = match unlocked_data.get_mut(&self.output_map_name) {
+                let data = match unlocked_data.get(&self.output_map_name) {
                     Some(data) => data,
                     None => continue,
                 };
-                let map = data.to_map_mut().unwrap();
+                let mut map = data.to_map().unwrap();
 
                 for key in new_data.keys() {
                     if !map.contains_key(key) {
                         map.insert(key.to_string(), SharedData::U64(0));
                     }
-                    *(map.get_mut(key).unwrap().to_u64_mut().unwrap()) +=
-                        new_data.get(key).unwrap();
+                    let original_count = map.get(key).unwrap().to_u64().unwrap();
+                    let new_count = new_data.get(key).unwrap() + original_count;
+                    map.insert(key.to_string(), SharedData::U64(new_count));
                 }
+                unlocked_data.insert(self.output_map_name.clone(), SharedData::Map(map));
             }
 
             let unlocked_data = data.lock().unwrap();
 
             let flag = unlocked_data
                 .get(&self.input_flag)
-                .unwrap_or(&SharedData::Bool(false));
+                .unwrap_or(SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 

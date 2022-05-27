@@ -85,10 +85,12 @@ impl Step for Bz2DecompressStep {
             {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let raw_file_data = unlocked_data.get_mut("raw_file_data").unwrap();
-                let file_data_vec: &mut Vec<SharedData> = raw_file_data.to_vec_mut().unwrap();
+                let raw_file_data = unlocked_data.get("raw_file_data").unwrap();
+                let mut file_data_vec: Vec<SharedData> = raw_file_data.to_vec().unwrap();
 
                 file_data_vec.push(SharedData::FileData(file_data));
+
+                unlocked_data.insert("raw_file_data".to_string(), SharedData::Vec(file_data_vec));
             }
         });
 
