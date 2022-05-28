@@ -55,7 +55,7 @@ impl GenericFilter {
         }))
     }
 
-    pub fn process(&self, data: StepGeneric, logic: &FilterFn) -> Result<(), String> {
+    pub fn process(&self, data: &StepGeneric, logic: &FilterFn) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();
             unlocked_data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
@@ -178,7 +178,7 @@ mod test_process {
     use std::sync::{Arc, Mutex, MutexGuard};
 
     use super::*;
-    use mockall::predicate::*;
+    use mockall::predicate::eq;
 
     // Guard static mock
     lazy_static! {
@@ -277,7 +277,8 @@ mod test_process {
         ctx.expect().times(2).return_const(false);
 
         let generic_filter = GenericFilter::default();
-        let res = generic_filter.process(Arc::new(Mutex::new(data)), &MockFilterStep::filter);
+        let data_param: StepGeneric = Arc::new(Mutex::new(data));
+        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
         assert!(res.is_ok());
     }
 
@@ -350,7 +351,8 @@ mod test_process {
         ctx.expect().times(2).return_const(true);
 
         let generic_filter = GenericFilter::default();
-        let res = generic_filter.process(Arc::new(Mutex::new(data)), &MockFilterStep::filter);
+        let data_param: StepGeneric = Arc::new(Mutex::new(data));
+        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
         assert!(res.is_ok());
     }
 
@@ -408,7 +410,8 @@ mod test_process {
 
         let mut generic_filter = GenericFilter::default();
         generic_filter.discard_vec_name = "null".to_string();
-        let res = generic_filter.process(Arc::new(Mutex::new(data)), &MockFilterStep::filter);
+        let data_param: StepGeneric = Arc::new(Mutex::new(data));
+        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
         assert!(res.is_ok());
     }
 
@@ -449,7 +452,8 @@ mod test_process {
 
         let mut generic_filter = GenericFilter::default();
         generic_filter.discard_vec_name = "null".to_string();
-        let res = generic_filter.process(Arc::new(Mutex::new(data)), &MockFilterStep::filter);
+        let data_param: StepGeneric = Arc::new(Mutex::new(data));
+        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
         assert!(res.is_err());
     }
 
@@ -505,7 +509,8 @@ mod test_process {
         ctx.expect().times(1).return_const(false);
 
         let generic_filter = GenericFilter::default();
-        let res = generic_filter.process(Arc::new(Mutex::new(data)), &MockFilterStep::filter);
+        let data_param: StepGeneric = Arc::new(Mutex::new(data));
+        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
         assert!(res.is_err());
     }
 
@@ -541,7 +546,8 @@ mod test_process {
         ctx.expect().times(0);
 
         let generic_filter = GenericFilter::default();
-        let res = generic_filter.process(Arc::new(Mutex::new(data)), &MockFilterStep::filter);
+        let data_param: StepGeneric = Arc::new(Mutex::new(data));
+        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
         assert!(res.is_err());
     }
 }

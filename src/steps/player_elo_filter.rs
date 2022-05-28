@@ -79,6 +79,6 @@ impl PlayerEloFilter {
 
 impl Step for PlayerEloFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-        self.generic_filter.process(data, &*self.create_filter())
+        self.generic_filter.process(&data, &*self.create_filter())
     }
 }

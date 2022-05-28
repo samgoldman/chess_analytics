@@ -22,8 +22,8 @@ impl Cell {
     #[cfg(test)]
     pub fn from_indices((rank, file): (usize, usize)) -> Self {
         cell!(
-            File::from_int((file + 1) as u32),
-            Rank::from_int((rank + 1) as u32)
+            File::from_uint((file + 1) as u32),
+            Rank::from_uint((rank + 1) as u32)
         )
     }
 }

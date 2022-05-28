@@ -40,7 +40,7 @@ impl CountMap {
         }))
     }
 
-    pub fn map(_game: GameWrapper, _filter: &CountMap) -> SharedData {
+    pub fn map(_game: &GameWrapper, _filter: &CountMap) -> SharedData {
         SharedData::U64(1)
     }
 }

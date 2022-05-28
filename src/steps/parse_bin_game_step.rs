@@ -1,13 +1,13 @@
 // use crate::steps_manager::get_step_description;
 use crate::game_wrapper::GameWrapper;
-use crate::workflow_step::{SharedData, Step, StepGeneric};
+use crate::workflow_step::{BoxedStep, SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct ParseBinGame {}
 
 impl ParseBinGame {
-    pub fn try_new(_configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
-        Ok(Box::new(ParseBinGame {}))
+    pub fn boxed_new() -> BoxedStep {
+        Box::new(ParseBinGame {})
     }
 }
 
@@ -63,7 +63,7 @@ impl Step for ParseBinGame {
             };
 
             if !file_data.is_empty() {
-                let mut games = GameWrapper::from_game_list_data(file_data)
+                let mut games = GameWrapper::from_game_list_data(&file_data)
                     .iter()
                     .map(|g| SharedData::Game(g.clone()))
                     .collect::<Vec<SharedData>>();

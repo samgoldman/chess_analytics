@@ -16,14 +16,14 @@ impl EvalAvailableFilter {
         }))
     }
 
-    pub fn create_filter(&self) -> &FilterFn {
+    pub fn create_filter() -> &'static FilterFn {
         &(|game: &GameWrapper| game.eval_available)
     }
 }
 
 impl Step for EvalAvailableFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-        self.generic_filter.process(data, self.create_filter())
+        self.generic_filter.process(&data, Self::create_filter())
     }
 }
 
@@ -119,7 +119,7 @@ mod test_try_new {
 
 #[cfg(test)]
 mod test_filter_fn {
-    use crate::{game_wrapper::GameWrapper, generic_steps::MockGenericFilter};
+    use crate::game_wrapper::GameWrapper;
 
     use super::EvalAvailableFilter;
 
@@ -128,21 +128,13 @@ mod test_filter_fn {
         let mut g = GameWrapper::default();
         g.eval_available = true;
 
-        let f = EvalAvailableFilter {
-            generic_filter: MockGenericFilter::default(),
-        };
-
-        assert_eq!(true, f.create_filter()(&g));
+        assert_eq!(true, EvalAvailableFilter::create_filter()(&g));
     }
     #[test]
     fn test_false() {
         let mut g = GameWrapper::default();
         g.eval_available = false;
 
-        let f = EvalAvailableFilter {
-            generic_filter: MockGenericFilter::default(),
-        };
-
-        assert_eq!(false, f.create_filter()(&g));
+        assert_eq!(false, EvalAvailableFilter::create_filter()(&g));
     }
 }

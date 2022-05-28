@@ -18,10 +18,7 @@ mod sum_reduce;
 mod time_control_bin;
 mod ui_monitor_step;
 
-use crate::workflow_step::{BoxedStep, StepFactory};
-
-use itertools::izip;
-use std::collections::HashMap;
+use crate::workflow_step::BoxedStep;
 
 use avg_reduce::AvgReduce;
 use bz2_decompress_step::Bz2DecompressStep;
@@ -47,56 +44,26 @@ pub fn get_step_by_name_and_params(
     name: &str,
     params: std::option::Option<serde_yaml::Value>,
 ) -> Result<BoxedStep, String> {
-    let names = vec![
-        "Bz2DecompressStep".to_string(),
-        "InitBinStep".to_string(),
-        "GameEloBin".to_string(),
-        "TimeControlBin".to_string(),
-        "AvgReduce".to_string(),
-        "SumReduce".to_string(),
-        "CountMap".to_string(),
-        "MinMovesFilter".to_string(),
-        "MaxReduce".to_string(),
-        "SaveDataStep".to_string(),
-        "ParallelStep".to_string(),
-        "NoopStep".to_string(),
-        "UiMonitorStep".to_string(),
-        "PlayerEloFilter".to_string(),
-        "PerfectCheckmateMap".to_string(),
-        "CheckmateFilter".to_string(),
-        "EvalAvailableFilter".to_string(),
-        "ParseBinGame".to_string(),
-        "GlobFileStep".to_string(),
-    ];
-
-    let funcs: Vec<StepFactory> = vec![
-        Box::new(Bz2DecompressStep::try_new),
-        Box::new(InitBinStep::try_new),
-        Box::new(GameEloBin::try_new),
-        Box::new(TimeControlBin::try_new),
-        Box::new(AvgReduce::try_new),
-        Box::new(SumReduce::try_new),
-        Box::new(CountMap::try_new),
-        Box::new(MinMovesFilter::try_new),
-        Box::new(MaxReduce::try_new),
-        Box::new(SaveDataStep::try_new),
-        Box::new(ParallelStep::try_new),
-        Box::new(NoopStep::try_new),
-        Box::new(UiMonitorStep::try_new),
-        Box::new(PlayerEloFilter::try_new),
-        Box::new(PerfectCheckmateMap::try_new),
-        Box::new(CheckmateFilter::try_new),
-        Box::new(EvalAvailableFilter::try_new),
-        Box::new(ParseBinGame::try_new),
-        Box::new(GlobFileStep::try_new),
-    ];
-
-    let builders = izip!(names, funcs).collect::<HashMap<_, _>>();
-
-    let result = builders.get(name);
-
-    match result {
-        Some(step) => (step)(params),
-        None => Err(format!("Step with name '{}' not found", name)),
+    match name {
+        "Bz2DecompressStep" => Bz2DecompressStep::try_new(params),
+        "InitBinStep" => InitBinStep::try_new(params),
+        "GameEloBin" => GameEloBin::try_new(params),
+        "TimeControlBin" => TimeControlBin::try_new(params),
+        "AvgReduce" => AvgReduce::try_new(params),
+        "SumReduce" => SumReduce::try_new(params),
+        "CountMap" => CountMap::try_new(params),
+        "MinMovesFilter" => MinMovesFilter::try_new(params),
+        "MaxReduce" => MaxReduce::try_new(params),
+        "SaveDataStep" => SaveDataStep::try_new(params),
+        "ParallelStep" => ParallelStep::try_new(params),
+        "NoopStep" => Ok(NoopStep::boxed_new()),
+        "UiMonitorStep" => UiMonitorStep::try_new(params),
+        "PlayerEloFilter" => PlayerEloFilter::try_new(params),
+        "PerfectCheckmateMap" => PerfectCheckmateMap::try_new(params),
+        "CheckmateFilter" => CheckmateFilter::try_new(params),
+        "EvalAvailableFilter" => EvalAvailableFilter::try_new(params),
+        "ParseBinGame" => Ok(ParseBinGame::boxed_new()),
+        "GlobFileStep" => GlobFileStep::try_new(params),
+        _ => Err(format!("Step with name '{}' not found", name)),
     }
 }

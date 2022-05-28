@@ -6,10 +6,10 @@ pub enum Player {
 }
 
 impl Player {
-    pub fn get_opposing_player(&self) -> Self {
-        assert!(Player::NA != *self, "Player::NA has no opposing player");
+    pub fn get_opposing_player(self) -> Self {
+        assert!(Player::NA != self, "Player::NA has no opposing player");
 
-        if Player::White == *self {
+        if Player::White == self {
             Player::Black
         } else {
             Player::White

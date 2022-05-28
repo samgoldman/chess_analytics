@@ -15,7 +15,7 @@ impl CheckmateFilter {
         }))
     }
 
-    pub fn create_filter(&self) -> &FilterFn {
+    pub fn create_filter() -> &'static FilterFn {
         &|game: &GameWrapper| {
             game.termination == Termination::Normal
                 && !game.moves.is_empty()
@@ -26,6 +26,7 @@ impl CheckmateFilter {
 
 impl Step for CheckmateFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-        self.generic_filter.process(data, self.create_filter())
+        self.generic_filter
+            .process(&data, CheckmateFilter::create_filter())
     }
 }

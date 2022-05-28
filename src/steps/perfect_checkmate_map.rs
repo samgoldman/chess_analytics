@@ -41,11 +41,11 @@ impl PerfectCheckmateMap {
         }))
     }
 
-    pub fn map(game: GameWrapper, _filter: &PerfectCheckmateMap) -> SharedData {
-        if !game.eval_available {
-            panic!("PerfectCheckmateMap received game that did not have evaluation available!");
-        }
-
+    pub fn map(game: &GameWrapper, _filter: &PerfectCheckmateMap) -> SharedData {
+        assert!(
+            game.eval_available,
+            "PerfectCheckmateMap received game that did not have evaluation available!"
+        );
         let mut reversed = game.eval_mate_in.clone();
         reversed.reverse();
 

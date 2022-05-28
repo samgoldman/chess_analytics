@@ -8,7 +8,6 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 pub type BoxedStep = Box<dyn Step>;
-pub type StepFactory = Box<dyn Fn(Option<serde_yaml::Value>) -> Result<BoxedStep, String>>;
 pub type StepGeneric = Arc<Mutex<dyn StepGenericCore>>;
 
 #[automock]

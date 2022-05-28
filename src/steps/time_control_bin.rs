@@ -40,7 +40,7 @@ impl TimeControlBin {
         }))
     }
 
-    pub fn bin(game: GameWrapper, _filter: &TimeControlBin) -> SharedData {
+    pub fn bin(game: &GameWrapper, _filter: &TimeControlBin) -> SharedData {
         SharedData::String(format!("{:?}", game.time_control))
     }
 }

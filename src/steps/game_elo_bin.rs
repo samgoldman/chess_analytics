@@ -45,10 +45,10 @@ impl GameEloBin {
         }))
     }
 
-    pub fn bin(game: GameWrapper, bin: &GameEloBin) -> SharedData {
+    pub fn bin(game: &GameWrapper, bin: &GameEloBin) -> SharedData {
         SharedData::String(format!(
             "{:04}",
-            (get_game_elo(&game) as u64 / bin.bucket_size) * bin.bucket_size
+            (u64::from(get_game_elo(game)) / bin.bucket_size) * bin.bucket_size
         ))
     }
 }
@@ -155,7 +155,7 @@ mod test_game_elo_bin {
         game.white_rating = 200;
         game.black_rating = 300;
         assert_eq!(
-            GameEloBin::bin(game, &bin)
+            GameEloBin::bin(&game, &bin)
                 .to_string()
                 .unwrap_or(&"".to_string()),
             "0200"
@@ -177,7 +177,7 @@ mod test_game_elo_bin {
         game.white_rating = 2450;
         game.black_rating = 2950;
         assert_eq!(
-            GameEloBin::bin(game, &bin)
+            GameEloBin::bin(&game, &bin)
                 .to_string()
                 .unwrap_or(&"".to_string()),
             "2400"
