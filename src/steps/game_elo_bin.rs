@@ -11,7 +11,6 @@ pub struct GameEloBin {
     bucket_size: u32,
 }
 
-/// chess_analytics_build::register_step_builder "GameEloBin" GameEloBin
 impl GameEloBin {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {

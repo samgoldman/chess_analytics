@@ -11,7 +11,6 @@ pub struct PlayerEloFilter {
     filter_black: bool,
 }
 
-/// chess_analytics_build::register_step_builder "PlayerEloFilter" PlayerEloFilter
 impl PlayerEloFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration.clone() {

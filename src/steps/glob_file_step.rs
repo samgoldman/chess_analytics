@@ -9,7 +9,6 @@ pub struct GlobFileStep {
     child_name: String,
 }
 
-/// chess_analytics_build::register_step_builder "GlobFileStep" GlobFileStep
 impl GlobFileStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {

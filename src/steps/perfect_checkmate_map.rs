@@ -10,7 +10,6 @@ pub struct PerfectCheckmateMap {
     output_flag: String,
 }
 
-/// chess_analytics_build::register_step_builder "PerfectCheckmateMap" PerfectCheckmateMap
 impl PerfectCheckmateMap {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {

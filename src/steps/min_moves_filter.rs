@@ -8,7 +8,6 @@ pub struct MinMovesFilter {
     min_moves: usize,
 }
 
-/// chess_analytics_build::register_step_builder "MinMovesFilter" MinMovesFilter
 impl MinMovesFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration.clone() {

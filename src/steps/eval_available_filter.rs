@@ -9,7 +9,6 @@ pub struct EvalAvailableFilter {
     generic_filter: GenericFilter,
 }
 
-/// chess_analytics_build::register_step_builder "EvalAvailableFilter" EvalAvailableFilter
 impl EvalAvailableFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         Ok(Box::new(EvalAvailableFilter {
