@@ -2,6 +2,8 @@ use crate::{
     game_wrapper::GameWrapper,
     workflow_step::{SharedData, StepGeneric},
 };
+#[cfg(test)]
+use mockall::automock;
 
 pub type FilterFn = dyn Fn(&GameWrapper) -> bool;
 
@@ -14,18 +16,8 @@ pub struct GenericFilter {
     output_flag: String,
 }
 
+#[cfg_attr(test, automock)]
 impl GenericFilter {
-    #[cfg(test)]
-    pub fn default() -> GenericFilter {
-        GenericFilter {
-            input_vec_name: "input_vec".to_string(),
-            output_vec_name: "output_vec".to_string(),
-            discard_vec_name: "discard_vec".to_string(),
-            input_flag: "input_flag".to_string(),
-            output_flag: "output_flag".to_string(),
-        }
-    }
-
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<Self>, String> {
         let params = match configuration {
             Some(value) => value,
@@ -164,6 +156,19 @@ impl GenericFilter {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+impl Default for GenericFilter {
+    fn default() -> Self {
+        GenericFilter {
+            input_vec_name: "input_vec".to_string(),
+            output_vec_name: "output_vec".to_string(),
+            discard_vec_name: "discard_vec".to_string(),
+            input_flag: "input_flag".to_string(),
+            output_flag: "output_flag".to_string(),
+        }
     }
 }
 

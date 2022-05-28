@@ -3,7 +3,7 @@ use crate::game_wrapper::GameWrapper;
 use crate::generic_steps::{FilterFn, GenericFilter};
 use crate::workflow_step::*;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct CheckmateFilter {
     generic_filter: GenericFilter,
 }
