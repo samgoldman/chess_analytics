@@ -1,6 +1,6 @@
 use crate::game_wrapper::GameWrapper;
 use crate::generic_steps::{FilterFn, GenericFilter};
-use crate::workflow_step::*;
+use crate::workflow_step::{Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct MinMovesFilter {

@@ -18,10 +18,10 @@ pub fn get_comparator<T: Ord>(comparator: &str) -> fn(T, T) -> T {
 
 // Reduce value to -1, 0, or 1, if it is negative, zero, or positive respectively
 pub fn get_unit_value(val: i32) -> i32 {
-    if val != 0 {
-        val / val.abs()
-    } else {
+    if val == 0 {
         0
+    } else {
+        val / val.abs()
     }
 }
 
@@ -59,7 +59,7 @@ pub fn dedup_and_sort(vector: Vec<Vec<(usize, String)>>) -> Vec<Vec<(usize, Stri
 }
 
 pub fn hours_min_sec_to_duration((hours, minutes, seconds): (&u8, &u8, &u8)) -> Duration {
-    Duration::from_secs((*hours as u64) * 3600 + (*minutes as u64) * 60 + (*seconds as u64))
+    Duration::from_secs(u64::from(*hours) * 3600 + u64::from(*minutes) * 60 + u64::from(*seconds))
 }
 
 #[cfg(test)]

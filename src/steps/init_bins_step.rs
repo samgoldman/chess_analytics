@@ -1,4 +1,4 @@
-use crate::workflow_step::*;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct InitBinStep {

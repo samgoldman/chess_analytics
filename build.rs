@@ -11,7 +11,7 @@ fn generate_chess_flatbuff() -> Result<(), std::io::Error> {
     })
     .expect("flatc");
 
-    let data = "// Force clippy and checks to ignore this file\n#![allow(clippy::all)]\n#![allow(unknown_lints)]\n#![allow(unused_imports)]\n#![allow(clippy::cognitive_complexity)]\n\n";
+    let data = "// Force clippy and checks to ignore this file\n#![allow(clippy::all)]\n#![allow(unknown_lints)]\n#![allow(unused_imports)]\n#![allow(clippy::cognitive_complexity)]\n#![allow(clippy::pedantic)]\n\n";
 
     let file_path = Path::new("target/flatbuffers/chess_generated.rs");
     prepend_file(data.as_bytes(), &file_path)?;

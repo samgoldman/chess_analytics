@@ -2,7 +2,7 @@ use crate::game_wrapper::GameWrapper;
 use crate::generic_steps::FilterFn;
 #[mockall_double::double]
 use crate::generic_steps::GenericFilter;
-use crate::workflow_step::*;
+use crate::workflow_step::{Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct EvalAvailableFilter {
@@ -36,7 +36,7 @@ mod test_process {
     use super::*;
 
     use crate::generic_steps::MockGenericFilter;
-    use crate::MockStepGenericCore;
+    use crate::workflow_step::MockStepGenericCore;
 
     #[test]
     fn test_process() {

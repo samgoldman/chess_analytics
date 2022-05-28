@@ -1,7 +1,6 @@
 use crate::game_wrapper::GameWrapper;
 use crate::steps::get_step_by_name_and_params;
-use mockall::predicate::*;
-use mockall::*;
+use mockall::automock;
 use std::collections::HashMap;
 use std::fmt;
 use std::path::PathBuf;
@@ -82,7 +81,7 @@ impl SharedData {
 
     pub fn to_vec(&self) -> Option<Vec<SharedData>> {
         match self {
-            SharedData::Vec(v) => Some(v.to_vec()),
+            SharedData::Vec(v) => Some(v.clone()),
             _ => None,
         }
     }
@@ -122,18 +121,18 @@ impl SharedData {
         }
     }
 
-    pub fn max(&self, rhs: SharedData) -> SharedData {
+    pub fn max(&self, rhs: &SharedData) -> SharedData {
         match self {
             SharedData::U64(s) => match rhs {
-                SharedData::U64(r) => SharedData::U64(u64::max(*s, r)),
+                SharedData::U64(r) => SharedData::U64(u64::max(*s, *r)),
                 _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs),
             },
             SharedData::F64(s) => match rhs {
-                SharedData::F64(r) => SharedData::F64(f64::max(*s, r)),
+                SharedData::F64(r) => SharedData::F64(f64::max(*s, *r)),
                 _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs),
             },
             SharedData::USize(s) => match rhs {
-                SharedData::USize(r) => SharedData::USize(usize::max(*s, r)),
+                SharedData::USize(r) => SharedData::USize(usize::max(*s, *r)),
                 _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs),
             },
             _ => panic!("Max is not valid for {:?}", self),
@@ -174,7 +173,7 @@ pub struct StepDescription {
 
 impl StepDescription {
     pub fn to_step(&self) -> Result<BoxedStep, String> {
-        get_step_by_name_and_params(self.step_type.to_string(), self.parameters.clone())
+        get_step_by_name_and_params(&self.step_type, self.parameters.clone())
     }
 }
 

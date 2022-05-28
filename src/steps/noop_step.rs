@@ -1,4 +1,4 @@
-use crate::workflow_step::*;
+use crate::workflow_step::{Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct NoopStep {}
@@ -21,6 +21,8 @@ mod test_noop_step {
         collections::HashMap,
         sync::{Arc, Mutex},
     };
+
+    use crate::workflow_step::StepGenericCoreImpl;
 
     use super::*;
 

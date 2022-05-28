@@ -1,5 +1,5 @@
 use crate::steps_manager::get_step_description;
-use crate::workflow_step::*;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 use glob::glob;
 
@@ -53,7 +53,7 @@ impl Step for GlobFileStep {
             unlocked_data.insert("file_path_bufs".to_string(), SharedData::Vec(files));
         }
 
-        let mut child = get_step_description(self.child_name.clone(), data.clone()).to_step()?;
+        let mut child = get_step_description(&self.child_name, &data).to_step()?;
         child.process(data)
     }
 }

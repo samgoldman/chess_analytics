@@ -18,7 +18,7 @@ mod sum_reduce;
 mod time_control_bin;
 mod ui_monitor_step;
 
-use crate::workflow_step::*;
+use crate::workflow_step::{BoxedStep, StepFactory};
 
 use itertools::izip;
 use std::collections::HashMap;
@@ -44,7 +44,7 @@ use time_control_bin::TimeControlBin;
 use ui_monitor_step::UiMonitorStep;
 
 pub fn get_step_by_name_and_params(
-    name: String,
+    name: &str,
     params: std::option::Option<serde_yaml::Value>,
 ) -> Result<BoxedStep, String> {
     let names = vec![
@@ -93,7 +93,7 @@ pub fn get_step_by_name_and_params(
 
     let builders = izip!(names, funcs).collect::<HashMap<_, _>>();
 
-    let result = builders.get(&name);
+    let result = builders.get(name);
 
     match result {
         Some(step) => (step)(params),

@@ -30,12 +30,21 @@ mod workflow_step;
 #[macro_use]
 extern crate lazy_static;
 
-use steps_manager::*;
-use workflow_step::*;
+use steps_manager::{add_step_description, get_step_description};
+use workflow_step::{StepDescription, StepGeneric, StepGenericCoreImpl};
 
 // TODO: global: Ok/Err
 // TODO: global: currently count 20 calls to 'panic!()'
 
+///
+/// # Errors
+///
+/// Returns an error if unable to run with the provided arguments
+///
+/// # Panics
+///
+/// Currently some failures panic. TODO: eliminate as many panics as possible
+///
 pub fn run<T>(mut args: T) -> Result<(), String>
 where
     T: Iterator<Item = String>,
@@ -76,7 +85,7 @@ where
         None => return Err("Steps is not a map".to_string()),
     };
 
-    let data = Arc::new(Mutex::new(StepGenericCoreImpl {
+    let data: StepGeneric = Arc::new(Mutex::new(StepGenericCoreImpl {
         map: HashMap::new(),
     }));
 
@@ -101,10 +110,10 @@ where
             step_type: step_type.to_string(),
             parameters: params,
         };
-        add_step_description(step_name, step, data.clone());
+        add_step_description(step_name, step, &data);
     }
 
-    let init_desc = get_step_description("init".to_string(), data.clone());
+    let init_desc = get_step_description("init", &data);
     let mut init = init_desc.to_step()?;
     init.process(data)?;
 

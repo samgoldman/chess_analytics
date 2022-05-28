@@ -1,6 +1,6 @@
 use crate::basic_types::GameResult;
 use crate::game_wrapper::GameWrapper;
-use crate::workflow_step::*;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct PerfectCheckmateMap {

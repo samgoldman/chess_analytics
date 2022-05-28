@@ -1,6 +1,6 @@
 use crate::chess_utils::get_game_elo;
 use crate::game_wrapper::GameWrapper;
-use crate::workflow_step::*;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct GameEloBin {
@@ -8,7 +8,7 @@ pub struct GameEloBin {
     output_vec_name: String,
     input_flag: String,
     output_flag: String,
-    bucket_size: u32,
+    bucket_size: u64,
 }
 
 impl GameEloBin {
@@ -34,7 +34,7 @@ impl GameEloBin {
             .unwrap()
             .to_string();
 
-        let bucket_size = params.get("bucket_size").unwrap().as_u64().unwrap() as u32;
+        let bucket_size = params.get("bucket_size").unwrap().as_u64().unwrap();
 
         Ok(Box::new(GameEloBin {
             input_vec_name,
@@ -48,7 +48,7 @@ impl GameEloBin {
     pub fn bin(game: GameWrapper, bin: &GameEloBin) -> SharedData {
         SharedData::String(format!(
             "{:04}",
-            (get_game_elo(&game) / bin.bucket_size) * bin.bucket_size
+            (get_game_elo(&game) as u64 / bin.bucket_size) * bin.bucket_size
         ))
     }
 }

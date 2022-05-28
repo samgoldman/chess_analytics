@@ -10,7 +10,7 @@ fn simple_count_10_games() -> Result<(), Box<dyn std::error::Error>> {
         "tests/workflows/1_simple_count_10_games.yaml",
     ]
     .iter()
-    .map(|x| x.to_string()))?;
+    .map(|x| (*x).to_string()))?;
 
     let contents = fs::read_to_string("tests/output/int_1/tmp.txt")
     .expect("Something went wrong reading the file");
@@ -31,7 +31,7 @@ fn simple_count_eval_and_clock_1_game() -> Result<(), Box<dyn std::error::Error>
         "tests/workflows/2_simple_count_eval_and_clock_1_game.yaml",
     ]
     .iter()
-    .map(|x| x.to_string()))?;
+    .map(|x| (*x).to_string()))?;
 
     let contents = fs::read_to_string("tests/output/int_2/tmp.txt")
     .expect("Something went wrong reading the file");
@@ -52,7 +52,7 @@ fn count_mates_by_time_10_games() -> Result<(), Box<dyn std::error::Error>> {
         "tests/workflows/3_count_mates_by_time_10_games.yaml",
     ]
     .iter()
-    .map(|x| x.to_string()))?;
+    .map(|x| (*x).to_string()))?;
 
     let contents = fs::read_to_string("tests/output/int_3/tmp.txt").expect("Something went wrong reading the file");
 
@@ -77,7 +77,7 @@ fn player_elo_tc_bin_1() -> Result<(), Box<dyn std::error::Error>> {
         "tests/workflows/4_player_elo_tc_bin_1.yaml",
     ]
     .iter()
-    .map(|x| x.to_string()))?;
+    .map(|x| (*x).to_string()))?;
 
     let contents = fs::read_to_string("tests/output/int_4/tmp.txt").expect("Something went wrong reading the file");
 

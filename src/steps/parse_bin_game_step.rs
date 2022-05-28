@@ -1,6 +1,6 @@
 // use crate::steps_manager::get_step_description;
-use crate::game_wrapper::*;
-use crate::workflow_step::*;
+use crate::game_wrapper::GameWrapper;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct ParseBinGame {}
