@@ -3,6 +3,7 @@
 #![deny(clippy::cognitive_complexity)]
 // TODO: remove
 #![allow(dead_code)]
+#![feature(no_coverage)]
 
 use serde::Deserialize;
 use serde_yaml::Value;
