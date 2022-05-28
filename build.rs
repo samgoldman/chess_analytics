@@ -1,7 +1,7 @@
 use flatc_rust::run;
 
 use mktemp::Temp;
-use std::{fs, fs::File, io, io::prelude::*, io::BufReader, io::Write, path::Path};
+use std::{fs, fs::File, io, io::Write, path::Path};
 
 fn generate_chess_flatbuff() -> Result<(), std::io::Error> {
     run(flatc_rust::Args {
@@ -19,80 +19,11 @@ fn generate_chess_flatbuff() -> Result<(), std::io::Error> {
     Ok(())
 }
 
-fn generate_steps_module() -> Result<(), std::io::Error> {
-    let mut module = fs::File::create("src/steps.rs")?;
-
-    let mut mod_declarations = String::default();
-    let mut use_declarations = String::default();
-    let mut names = String::default();
-    let mut funcs = String::default();
-
-    let paths = fs::read_dir("src/steps")?;
-
-    for path in paths {
-        let path = path?.path();
-
-        if path.is_dir() {
-            continue;
-        }
-        let file = fs::File::open(path.clone())?;
-        let reader = BufReader::new(file);
-
-        for line in reader.lines() {
-            let line = line?;
-            if (&line).starts_with("/// chess_analytics_build::register_step_builder ") {
-                let split: Vec<&str> = (&line).split(' ').collect();
-                let name = split[2];
-                let struct_name = split[3];
-                let step_mod_name = path.file_stem().unwrap().to_str().unwrap();
-                mod_declarations += format!("mod {};\n", step_mod_name).as_ref();
-                use_declarations += format!("use {}::{};\n", step_mod_name, struct_name).as_ref();
-                names += format!("        {}.to_string(),\n", name).as_ref();
-                funcs += format!("        Box::new({}::try_new),\n", struct_name).as_ref();
-                println!("cargo:rerun-if-changed=./src/steps/{}.rs", step_mod_name);
-            }
-        }
-    }
-
-    writeln!(
-        module,
-        "// THIS FILE AUTO-GENERATED --- DO NOT MODIFY
-{}
-use crate::workflow_step::*;
-
-use std::collections::HashMap;
-use itertools::izip;
-
-{}
-pub fn get_step_by_name_and_params(name: String, params: std::option::Option<serde_yaml::Value>) -> Result<BoxedStep, String> {{
-    let names = vec![
-{}    ];
-
-    let funcs: Vec<StepFactory> = vec![
-{}    ];
-
-    let builders = izip!(names, funcs).collect::<HashMap<_, _>>();
-
-    let result = builders.get(&name);
-
-    match result {{
-        Some(step) => (step)(params),
-        None => Err(format!(\"Step with name '{{}}' not found\", name)),
-    }}
-}}",
-        mod_declarations, use_declarations, names, funcs
-    )?;
-
-    Ok(())
-}
-
 fn main() -> io::Result<()> {
     println!("cargo:rerun-if-changed=./build.rs");
     println!("cargo:rerun-if-changed=./Cargo.lock");
 
     generate_chess_flatbuff()?;
-
-    generate_steps_module()?;
 
     Ok(())
 }

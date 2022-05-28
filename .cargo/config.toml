@@ -1,4 +1,4 @@
 [alias]
-full_llvm_cov = "llvm-cov --ignore-filename-regex 'chess_generated.rs|target|steps.rs|build.rs'"
-ut_llvm_cov = "llvm-cov --ignore-filename-regex 'chess_generated.rs|target|steps.rs|build.rs' --lib"
-open_llvm_cov = "llvm-cov --ignore-filename-regex 'chess_generated.rs|target|steps.rs|build.rs' --lib --no-run --open"
+full_llvm_cov = "llvm-cov --ignore-filename-regex 'chess_generated.rs|target|build.rs'"
+ut_llvm_cov = "llvm-cov --ignore-filename-regex 'chess_generated.rs|target|build.rs' --lib"
+open_llvm_cov = "llvm-cov --ignore-filename-regex 'chess_generated.rs|target|build.rs' --lib --no-run --open"
