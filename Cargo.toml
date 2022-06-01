@@ -34,6 +34,7 @@ crossterm = "0.23"
 
 [dev-dependencies]
 predicates = "2.1.1"
+mutagen = {git = "https://github.com/llogiq/mutagen"}
 
 [build-dependencies]
 flatc-rust = "0.2.0"
@@ -41,3 +42,6 @@ mktemp = "0.4.0"
 
 [profile.dev]
 opt-level = 3
+
+[features]
+with_mutagen = []

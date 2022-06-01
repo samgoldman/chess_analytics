@@ -10,6 +10,7 @@ pub struct Board {
 
 // TODO investigate no-panic
 impl Board {
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn to_fen(&self) -> String {
         let mut fen = String::default();
 
@@ -62,18 +63,22 @@ impl Board {
         }
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn toggle_to_move(&mut self) {
         self.to_move = self.to_move.get_opposing_player();
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn is_cell_empty(&self, cell: Cell) -> bool {
         !self.board.contains_key(&cell)
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn is_path_clear(&self, path: &Path) -> bool {
         path.iter().all(|cell| self.is_cell_empty(*cell))
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn is_in_check(&self, player: Player) -> bool {
         let king_loc = self.find_king_loc(player);
         let opposing_player = player.get_opposing_player();
@@ -85,6 +90,7 @@ impl Board {
     }
 
     // TODO convert to Ok/Err
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn does_piece_check_loc(&self, attacker_cell: Cell, target_cell: Cell) -> bool {
         // let  = attacker_location;
         // TODO use fns
@@ -128,6 +134,7 @@ impl Board {
         }
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn find_player_piece_locs(&self, player: Player) -> Vec<Cell> {
         self.board
             .keys()
@@ -144,6 +151,7 @@ impl Board {
     }
 
     // TODO convert to Ok/Err
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn find_king_loc(&self, player: Player) -> Cell {
         for cell in self.board.keys() {
             let piece = self.board.get(cell).unwrap();
@@ -157,6 +165,7 @@ impl Board {
     }
 
     // TODO convert to Ok/Err
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn execute_move(&mut self, piece: Piece, from_cell: Cell, to_cell: Cell) {
         // TODO use fns
         let diff_file = to_cell.file as i32 - from_cell.file as i32;
@@ -192,6 +201,7 @@ impl Board {
     }
 
     // TODO convert to Ok/Err
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn find_origin(&self, piece: Piece, dest: Cell, from: PartialCell) -> Cell {
         let possible_origins = self.find_possible_origins(piece, dest, from);
 
@@ -238,6 +248,7 @@ impl Board {
     }
 
     // Return a list locations that contain the matching piece and that piece could move to the destination __if__ it was an otherwise empty board
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn find_possible_origins(
         &self,
         piece: Piece,
@@ -327,6 +338,7 @@ impl Board {
     }
 
     // TODO convert to Ok/Err
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn move_piece(&mut self, move_description: Move) {
         let piece_moved = move_description.piece_moved;
 
@@ -351,14 +363,17 @@ impl Board {
         self.toggle_to_move();
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn set_piece(&mut self, cell: Cell, piece: PlayerPiece) {
         self.board.insert(cell, piece);
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn clear(&mut self, cell: Cell) {
         self.board.remove(&cell);
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn empty() -> Self {
         Board {
             board: HashMap::default(),
@@ -367,6 +382,7 @@ impl Board {
     }
 
     #[allow(dead_code)]
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn from_fen(fen: &str) -> Result<Self, &str> {
         if fen.is_empty() {
             Err("Cannot parse empty FEN")

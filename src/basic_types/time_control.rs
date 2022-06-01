@@ -19,6 +19,7 @@ impl TimeControl {
     // Convert initial time + increment time to one of the time control categories
     // as defined here: https://lichess.org/faq#time-controls
     // Games with 0 for both values are assumed to be correspondence
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn from_base_and_increment(base_time: u16, increment: u16) -> Self {
         let estimated_duration =
             u32::from(base_time) + EXPECTED_NUMBER_OF_MOVES * u32::from(increment);

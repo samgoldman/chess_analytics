@@ -24,6 +24,7 @@ impl MinMovesFilter {
         }))
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn create_filter(&self) -> Box<FilterFn> {
         let min = self.min_moves;
         let filter = move |game: &GameWrapper| game.moves.len() as u64 >= min;
@@ -32,6 +33,7 @@ impl MinMovesFilter {
 }
 
 impl Step for MinMovesFilter {
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         self.generic_filter.process(&data, &*self.create_filter())
     }
