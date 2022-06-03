@@ -4,13 +4,13 @@ use tui::{backend::CrosstermBackend, Terminal};
 
 use crossterm::event::{self, Event, KeyCode};
 
-use crate::workflow_step::*;
-
 use tui::{
     style::{Modifier, Style},
     text::{Span, Spans},
     widgets::{Block, Borders, List, ListItem},
 };
+
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 pub struct UiMonitorStep {
     terminal: Terminal<CrosstermBackend<RawTerminal<Stdout>>>,
@@ -22,7 +22,6 @@ pub struct UiMonitorStep {
     elapsed: std::time::Duration,
 }
 
-/// chess_analytics_build::register_step_builder "UiMonitorStep" UiMonitorStep
 impl UiMonitorStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let stdout = stdout().into_raw_mode().expect("Could not init stdout");
@@ -151,7 +150,7 @@ impl Step for UiMonitorStep {
                     .to_map()
                     .unwrap();
 
-                for (k, v) in final_results_map.iter() {
+                for (k, v) in &final_results_map {
                     raw.push(format!("{:?}: {}\t", k, v));
                 }
 

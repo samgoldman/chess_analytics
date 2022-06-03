@@ -10,7 +10,7 @@ pub enum NAG {
 
 impl NAG {
     pub fn from_metadata(metadata: u16) -> Self {
-        match metadata & 0b000111000000 {
+        match metadata & 0b0001_1100_0000 {
             0x0180 => NAG::Questionable,
             0x0080 => NAG::Mistake,
             0x0100 => NAG::Blunder,

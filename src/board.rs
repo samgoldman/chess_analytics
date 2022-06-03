@@ -1,4 +1,4 @@
-use crate::basic_types::*;
+use crate::basic_types::{Cell, File, Move, PartialCell, Path, Piece, Player, PlayerPiece, Rank};
 use itertools::Itertools;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -24,9 +24,7 @@ impl Board {
             for file in File::all_files() {
                 let cell = cell!(file, *rank);
 
-                if !self.board.contains_key(&cell) {
-                    blanks += 1;
-                } else {
+                if self.board.contains_key(&cell) {
                     let piece = self.board.get(&cell).unwrap();
 
                     if blanks > 0 {
@@ -44,6 +42,8 @@ impl Board {
                     };
 
                     fen += letter;
+                } else {
+                    blanks += 1;
                 }
             }
 
@@ -67,12 +67,12 @@ impl Board {
         self.to_move = self.to_move.get_opposing_player();
     }
 
-    pub fn is_cell_empty(&self, cell: &Cell) -> bool {
-        !self.board.contains_key(cell)
+    pub fn is_cell_empty(&self, cell: Cell) -> bool {
+        !self.board.contains_key(&cell)
     }
 
-    pub fn is_path_clear(&self, path: Path) -> bool {
-        path.iter().all(|cell| self.is_cell_empty(cell))
+    pub fn is_path_clear(&self, path: &Path) -> bool {
+        path.iter().all(|cell| self.is_cell_empty(*cell))
     }
 
     pub fn is_in_check(&self, player: Player) -> bool {
@@ -117,10 +117,10 @@ impl Board {
                         file_diff.abs() == 1 && rank_diff == -1
                     }
                 }
-                Piece::Bishop => is_diagonal && !is_orthogonal && self.is_path_clear(path),
+                Piece::Bishop => is_diagonal && !is_orthogonal && self.is_path_clear(&path),
                 Piece::Knight => rank_diff.abs() + file_diff.abs() == 3 && !is_orthogonal,
-                Piece::Rook => !is_diagonal && is_orthogonal && self.is_path_clear(path),
-                Piece::Queen => (is_diagonal || is_orthogonal) && self.is_path_clear(path),
+                Piece::Rook => !is_diagonal && is_orthogonal && self.is_path_clear(&path),
+                Piece::Queen => (is_diagonal || is_orthogonal) && self.is_path_clear(&path),
                 Piece::King => false,
             }
         } else {
@@ -164,7 +164,7 @@ impl Board {
 
         // Special cases
         if piece == Piece::Pawn {
-            if diff_file != 0 && self.is_cell_empty(&to_cell) {
+            if diff_file != 0 && self.is_cell_empty(to_cell) {
                 // En passant
                 self.clear(Cell {
                     file: to_cell.file,
@@ -199,11 +199,11 @@ impl Board {
         let filtered_origins = possible_origins
             .iter()
             .filter(|possible_origin| {
-                if piece != Piece::Knight {
-                    let path = Path::generate_path(**possible_origin, dest);
-                    self.is_path_clear(path)
-                } else {
+                if piece == Piece::Knight {
                     true
+                } else {
+                    let path = Path::generate_path(**possible_origin, dest);
+                    self.is_path_clear(&path)
                 }
             })
             .filter(|possible_origin| {
@@ -216,10 +216,10 @@ impl Board {
                 if piece == Piece::Pawn {
                     let diff_file = dest.file as i32 - possible_origin.file as i32;
 
-                    if !self.is_cell_empty(&dest) {
-                        diff_file != 0 // If capturing, must be diagonal
-                    } else {
+                    if self.is_cell_empty(dest) {
                         diff_file == 0 // If not capturing, must not be diagonal
+                    } else {
+                        diff_file != 0 // If capturing, must be diagonal
                     }
                 } else {
                     true
@@ -346,7 +346,7 @@ impl Board {
                     piece: move_description.promoted_to.unwrap(),
                     player: self.to_move,
                 },
-            )
+            );
         }
 
         self.toggle_to_move();
@@ -374,14 +374,10 @@ impl Board {
         } else {
             let fields: Vec<&str> = fen.split(' ').collect();
 
-            if fields.len() != 6 {
-                Err("Incorrect number of fields")
-            } else {
+            if fields.len() == 6 {
                 let ranks: Vec<&str> = fields.get(0).unwrap().split('/').collect();
 
-                if ranks.len() != 8 {
-                    Err("Starting position has wrong number of rows")
-                } else {
+                if ranks.len() == 8 {
                     let mut board = Board::empty();
 
                     if fields.get(1).unwrap() == &"b" {
@@ -405,8 +401,8 @@ impl Board {
                                     },
                                 };
 
-                                let piece_file = File::from_int(file);
-                                let piece_rank = Rank::from_int(8 - rank as u32);
+                                let piece_file = File::from_uint(file);
+                                let piece_rank = Rank::from_usize(8 - rank);
 
                                 board.set_piece(cell!(piece_file, piece_rank), piece);
                                 file += 1;
@@ -415,7 +411,11 @@ impl Board {
                     }
 
                     Ok(board)
+                } else {
+                    Err("Starting position has wrong number of rows")
                 }
+            } else {
+                Err("Incorrect number of fields")
             }
         }
     }
@@ -459,7 +459,7 @@ impl Default for Board {
                 (cell!(File::_H, Rank::_8), black!(Piece::Rook)),
             ]
             .iter()
-            .cloned()
+            .copied()
             .collect(),
 
             to_move: Player::White,
@@ -653,7 +653,7 @@ mod test_is_cell_empty {
             #[test]
             fn $name() {
                 let (board, input, expected) = $value;
-                assert_eq!(expected, Board::from_fen(board).unwrap().is_cell_empty(&input));
+                assert_eq!(expected, Board::from_fen(board).unwrap().is_cell_empty(input));
             }
         )*
         }
@@ -703,7 +703,7 @@ mod test_is_path_clear {
             #[test]
             fn $name() {
                 let (board, input, expected) = $value;
-                assert_eq!(expected, Board::from_fen(board).unwrap().is_path_clear(Path::from_vec(input.iter().map(|indices| {
+                assert_eq!(expected, Board::from_fen(board).unwrap().is_path_clear(&Path::from_vec(input.iter().map(|indices| {
                     Cell::from_indices(*indices)
                 }).collect())));
             }
@@ -1085,6 +1085,7 @@ mod test_find_origin {
 #[cfg(test)]
 mod test_move_piece {
     use super::*;
+    use crate::basic_types::NAG;
 
     macro_rules! tests {
         ($($name:ident: $value:expr,)*) => {

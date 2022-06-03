@@ -1,6 +1,6 @@
 use crate::chess_utils::get_game_elo;
 use crate::game_wrapper::GameWrapper;
-use crate::workflow_step::*;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct GameEloBin {
@@ -8,10 +8,9 @@ pub struct GameEloBin {
     output_vec_name: String,
     input_flag: String,
     output_flag: String,
-    bucket_size: u32,
+    bucket_size: u64,
 }
 
-/// chess_analytics_build::register_step_builder "GameEloBin" GameEloBin
 impl GameEloBin {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -35,7 +34,7 @@ impl GameEloBin {
             .unwrap()
             .to_string();
 
-        let bucket_size = params.get("bucket_size").unwrap().as_u64().unwrap() as u32;
+        let bucket_size = params.get("bucket_size").unwrap().as_u64().unwrap();
 
         Ok(Box::new(GameEloBin {
             input_vec_name,
@@ -46,10 +45,10 @@ impl GameEloBin {
         }))
     }
 
-    pub fn bin(game: GameWrapper, bin: &GameEloBin) -> SharedData {
+    pub fn bin(game: &GameWrapper, bin: &GameEloBin) -> SharedData {
         SharedData::String(format!(
             "{:04}",
-            (get_game_elo(&game) / bin.bucket_size) * bin.bucket_size
+            (u64::from(get_game_elo(game)) / bin.bucket_size) * bin.bucket_size
         ))
     }
 }
@@ -156,7 +155,7 @@ mod test_game_elo_bin {
         game.white_rating = 200;
         game.black_rating = 300;
         assert_eq!(
-            GameEloBin::bin(game, &bin)
+            GameEloBin::bin(&game, &bin)
                 .to_string()
                 .unwrap_or(&"".to_string()),
             "0200"
@@ -178,7 +177,7 @@ mod test_game_elo_bin {
         game.white_rating = 2450;
         game.black_rating = 2950;
         assert_eq!(
-            GameEloBin::bin(game, &bin)
+            GameEloBin::bin(&game, &bin)
                 .to_string()
                 .unwrap_or(&"".to_string()),
             "2400"

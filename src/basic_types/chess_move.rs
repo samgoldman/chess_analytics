@@ -1,5 +1,5 @@
-use crate::basic_types::*;
-use crate::chess_utils::*;
+use crate::basic_types::{Cell, File, PartialCell, Piece, Rank, NAG};
+use crate::chess_utils::{extract_coordinate, extract_piece};
 use serde::Serialize;
 
 #[derive(PartialEq, Clone, Debug, Copy, Serialize)]
@@ -70,9 +70,9 @@ impl Move {
         // Bits 6-8: nag
         // Bits 9-11: promotion
         let piece_moved = extract_piece(metadata);
-        let captures = metadata & 0b001000 != 0;
-        let checks = metadata & 0b010000 != 0;
-        let mates = metadata & 0b100000 != 0;
+        let captures = metadata & 0b00_1000 != 0;
+        let checks = metadata & 0b01_0000 != 0;
+        let mates = metadata & 0b10_0000 != 0;
         let nag = NAG::from_metadata(metadata);
         let promoted_to = extract_piece(metadata >> 9);
 

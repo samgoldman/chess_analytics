@@ -1,14 +1,13 @@
 use crate::basic_types::Termination;
 use crate::game_wrapper::GameWrapper;
 use crate::generic_steps::{FilterFn, GenericFilter};
-use crate::workflow_step::*;
+use crate::workflow_step::{Step, StepGeneric};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct CheckmateFilter {
     generic_filter: GenericFilter,
 }
 
-/// chess_analytics_build::register_step_builder "CheckmateFilter" CheckmateFilter
 impl CheckmateFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         Ok(Box::new(CheckmateFilter {
@@ -16,7 +15,7 @@ impl CheckmateFilter {
         }))
     }
 
-    pub fn create_filter(&self) -> &FilterFn {
+    pub fn create_filter() -> &'static FilterFn {
         &|game: &GameWrapper| {
             game.termination == Termination::Normal
                 && !game.moves.is_empty()
@@ -27,6 +26,7 @@ impl CheckmateFilter {
 
 impl Step for CheckmateFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-        self.generic_filter.process(data, self.create_filter())
+        self.generic_filter
+            .process(&data, CheckmateFilter::create_filter())
     }
 }

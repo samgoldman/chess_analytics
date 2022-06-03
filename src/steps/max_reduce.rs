@@ -1,4 +1,4 @@
-use crate::workflow_step::*;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 use std::collections::HashMap;
 
@@ -10,7 +10,6 @@ pub struct MaxReduce {
     output_flag: String,
 }
 
-/// chess_analytics_build::register_step_builder "MaxReduce" MaxReduce
 impl MaxReduce {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -96,7 +95,7 @@ impl Step for MaxReduce {
 
                 let original_value = new_data.get_mut(&combined_label).unwrap();
 
-                *(original_value) = original_value.max(value);
+                *(original_value) = original_value.max(&value);
             }
 
             {
@@ -114,7 +113,7 @@ impl Step for MaxReduce {
 
                     let original = map.get_mut(key).unwrap();
                     let new = &*(new_data.get(key).unwrap());
-                    *original = original.max(new.clone());
+                    *original = original.max(new);
                 }
 
                 unlocked_data.insert(self.output_map_name.clone(), SharedData::Map(map));

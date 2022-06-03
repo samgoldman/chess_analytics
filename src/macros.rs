@@ -54,7 +54,7 @@ macro_rules! bin_template {
 
                     let mut bin_labels = binned_game.1;
 
-                    let bin_label = $logic(game.clone(), self);
+                    let bin_label = $logic(&game, self);
                     bin_labels.push(bin_label);
                     new_binned_games.push(SharedData::BinnedValue((
                         Box::new(SharedData::Game(game)),
@@ -149,7 +149,7 @@ macro_rules! map_template {
 
                     let bin_labels = binned_game.1;
 
-                    let mapped_value = $logic(game, self);
+                    let mapped_value = $logic(&game, self);
                     new_binned_games.push(SharedData::BinnedValue((
                         Box::new(mapped_value),
                         bin_labels,

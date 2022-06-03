@@ -1,4 +1,4 @@
-use crate::basic_types::*;
+use crate::basic_types::{GameResult, Move, Termination, TimeControl};
 use crate::board::Board;
 use crate::chess::chess::root_as_game_list;
 use crate::chess::chess::Game;
@@ -36,8 +36,8 @@ pub struct GameWrapper {
 }
 
 impl GameWrapper {
-    pub fn from_game_list_data(data: Vec<u8>) -> Vec<GameWrapper> {
-        let game_list = root_as_game_list(&data).unwrap();
+    pub fn from_game_list_data(data: &[u8]) -> Vec<GameWrapper> {
+        let game_list = root_as_game_list(data).unwrap();
         GameWrapper::from_game_list(game_list)
     }
 
@@ -49,7 +49,7 @@ impl GameWrapper {
     fn get_time_control_category(game: Game) -> TimeControl {
         TimeControl::from_base_and_increment(
             game.time_control_main(),
-            game.time_control_increment() as u16,
+            u16::from(game.time_control_increment()),
         )
     }
 
@@ -104,15 +104,6 @@ impl GameWrapper {
         !self.clock.is_empty()
     }
 
-    pub fn move_time(&self, move_num: usize) -> u32 {
-        if move_num == 0 || move_num == 1 || move_num == self.clock.len() {
-            0
-        } else {
-            (self.clock[(move_num - 2)] - self.clock[move_num]).as_secs() as u32
-                + self.time_control_increment as u32
-        }
-    }
-
     pub fn build_boards(&self) -> Vec<Board> {
         self.moves
             .iter()
@@ -160,6 +151,7 @@ impl Default for GameWrapper {
 #[cfg(test)]
 mod test_build_boards {
     use super::*;
+    use crate::basic_types::{File, Piece, Rank};
 
     macro_rules! tests {
         ($($name:ident: $value:expr,)*) => {
@@ -203,33 +195,6 @@ mod test_clock_available {
         game.clock.push(Duration::from_secs(42));
 
         assert_eq!(game.clock_available(), true);
-    }
-}
-
-#[cfg(test)]
-mod test_move_timep {
-    use super::*;
-    use std::time::Duration;
-
-    macro_rules! tests {
-        ($($name:ident: $value:expr,)*) => {
-        $(
-            #[test]
-            fn $name() {
-                let (times, move_num, expected) = $value;
-                let mut test_game = GameWrapper::default();
-                test_game.clock = times.iter().map(|&x| Duration::from_secs(x)).collect();
-
-                assert_eq!(test_game.move_time(move_num), expected);
-            }
-        )*
-        }
-    }
-
-    tests! {
-        test_1: (vec![120, 120], 0, 0),
-        test_2: (vec![60, 60, 54, 52], 2, 6),
-        test_3: (vec![3600, 3600, 3500, 3550, 3425, 3475], 5, 75),
     }
 }
 

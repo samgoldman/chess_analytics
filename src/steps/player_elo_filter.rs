@@ -1,17 +1,16 @@
 use crate::game_wrapper::GameWrapper;
 use crate::generic_steps::{FilterFn, GenericFilter};
-use crate::workflow_step::*;
+use crate::workflow_step::{Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct PlayerEloFilter {
     generic_filter: GenericFilter,
-    min_elo: Option<u16>,
-    max_elo: Option<u16>,
+    min_elo: Option<u64>,
+    max_elo: Option<u64>,
     filter_white: bool,
     filter_black: bool,
 }
 
-/// chess_analytics_build::register_step_builder "PlayerEloFilter" PlayerEloFilter
 impl PlayerEloFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration.clone() {
@@ -24,14 +23,14 @@ impl PlayerEloFilter {
         let filter_black = params.get("black").unwrap().as_bool().unwrap();
         let min_elo = match params.get("min_elo") {
             Some(val) => match val.as_u64() {
-                Some(val) => Some(val as u16),
+                Some(val) => Some(val),
                 None => return Err("Could not parse min_elo".to_string()),
             },
             None => None,
         };
         let max_elo = match params.get("max_elo") {
             Some(val) => match val.as_u64() {
-                Some(val) => Some(val as u16),
+                Some(val) => Some(val),
                 None => return Err("Could not parse max_elo".to_string()),
             },
             None => None,
@@ -55,8 +54,8 @@ impl PlayerEloFilter {
         let filter = move |game: &GameWrapper| {
             let min_res = match min_elo {
                 Some(value) => {
-                    let white_violation = filter_white && game.white_rating < value;
-                    let black_violation = filter_black && game.black_rating < value;
+                    let white_violation = filter_white && u64::from(game.white_rating) < value;
+                    let black_violation = filter_black && u64::from(game.black_rating) < value;
                     !black_violation && !white_violation
                 }
                 _ => true, // No min
@@ -64,8 +63,8 @@ impl PlayerEloFilter {
 
             let max_res = match max_elo {
                 Some(value) => {
-                    let white_violation = filter_white && game.white_rating > value;
-                    let black_violation = filter_black && game.black_rating > value;
+                    let white_violation = filter_white && u64::from(game.white_rating) > value;
+                    let black_violation = filter_black && u64::from(game.black_rating) > value;
                     !black_violation && !white_violation
                 }
                 _ => true, // No max
@@ -80,6 +79,6 @@ impl PlayerEloFilter {
 
 impl Step for PlayerEloFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-        self.generic_filter.process(data, &*self.create_filter())
+        self.generic_filter.process(&data, &*self.create_filter())
     }
 }

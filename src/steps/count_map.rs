@@ -1,5 +1,5 @@
 use crate::game_wrapper::GameWrapper;
-use crate::workflow_step::*;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct CountMap {
@@ -9,7 +9,6 @@ pub struct CountMap {
     output_flag: String,
 }
 
-/// chess_analytics_build::register_step_builder "CountMap" CountMap
 impl CountMap {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -41,7 +40,7 @@ impl CountMap {
         }))
     }
 
-    pub fn map(_game: GameWrapper, _filter: &CountMap) -> SharedData {
+    pub fn map(_game: &GameWrapper, _filter: &CountMap) -> SharedData {
         SharedData::U64(1)
     }
 }

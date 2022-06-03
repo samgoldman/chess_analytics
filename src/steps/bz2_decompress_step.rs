@@ -1,7 +1,7 @@
-use crate::workflow_step::*;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 use bzip2::read::BzDecoder;
-use rayon::prelude::*;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::fs::File;
 use std::io::Read;
 
@@ -11,7 +11,6 @@ pub struct Bz2DecompressStep {
     full_queue_delay_ms: u64,
 }
 
-/// chess_analytics_build::register_step_builder "Bz2DecompressStep" Bz2DecompressStep
 impl Bz2DecompressStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {

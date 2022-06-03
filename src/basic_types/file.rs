@@ -31,7 +31,7 @@ impl File {
         }
     }
 
-    pub fn from_int(val: u32) -> Self {
+    pub fn from_uint(val: u32) -> Self {
         match val {
             1 => File::_A,
             2 => File::_B,
@@ -45,8 +45,36 @@ impl File {
         }
     }
 
-    pub fn shift(&self, shift: i32) -> Self {
-        File::from_int((*self as i32 + shift) as u32)
+    pub fn from_usize(val: usize) -> Self {
+        match val {
+            1 => File::_A,
+            2 => File::_B,
+            3 => File::_C,
+            4 => File::_D,
+            5 => File::_E,
+            6 => File::_F,
+            7 => File::_G,
+            8 => File::_H,
+            u => panic!("Unrecognized file: {}", u),
+        }
+    }
+
+    pub fn from_int(val: i32) -> Self {
+        match val {
+            1 => File::_A,
+            2 => File::_B,
+            3 => File::_C,
+            4 => File::_D,
+            5 => File::_E,
+            6 => File::_F,
+            7 => File::_G,
+            8 => File::_H,
+            u => panic!("Unrecognized file: {}", u),
+        }
+    }
+
+    pub fn shift(self, shift: i32) -> Self {
+        File::from_int(self as i32 + shift)
     }
 
     pub fn all_files() -> Vec<File> {
@@ -158,7 +186,101 @@ mod test_file_from_int {
         test_from_pgn_invalid_1: 0, "Unrecognized file: 0",
         test_from_pgn_invalid_2: 9, "Unrecognized file: 9",
         test_from_pgn_invalid_3: 54656, "Unrecognized file: 54656",
+        test_from_pgn_invalid_4: i32::MAX, "Unrecognized file: 2147483647",
+    }
+}
+
+#[cfg(test)]
+mod test_file_from_uint {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, File::from_uint(input));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_from_pgn_a: (1, File::_A),
+        test_from_pgn_b: (2, File::_B),
+        test_from_pgn_c: (3, File::_C),
+        test_from_pgn_d: (4, File::_D),
+        test_from_pgn_e: (5, File::_E),
+        test_from_pgn_f: (6, File::_F),
+        test_from_pgn_g: (7, File::_G),
+        test_from_pgn_h: (8, File::_H),
+    }
+
+    macro_rules! panic_tests {
+        ($($name:ident: $input:expr, $panic_str:expr,)*) => {
+        $(
+            #[test]
+            #[should_panic(expected = $panic_str)]
+            fn $name() {
+                File::from_uint($input);
+            }
+        )*
+        }
+    }
+
+    panic_tests! {
+        test_from_pgn_invalid_1: 0, "Unrecognized file: 0",
+        test_from_pgn_invalid_2: 9, "Unrecognized file: 9",
+        test_from_pgn_invalid_3: 54656, "Unrecognized file: 54656",
         test_from_pgn_invalid_4: u32::MAX, "Unrecognized file: 4294967295",
+    }
+}
+
+#[cfg(test)]
+mod test_file_from_usize {
+    use super::*;
+
+    macro_rules! tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                assert_eq!(expected, File::from_usize(input));
+            }
+        )*
+        }
+    }
+
+    tests! {
+        test_from_pgn_a: (1, File::_A),
+        test_from_pgn_b: (2, File::_B),
+        test_from_pgn_c: (3, File::_C),
+        test_from_pgn_d: (4, File::_D),
+        test_from_pgn_e: (5, File::_E),
+        test_from_pgn_f: (6, File::_F),
+        test_from_pgn_g: (7, File::_G),
+        test_from_pgn_h: (8, File::_H),
+    }
+
+    macro_rules! panic_tests {
+        ($($name:ident: $input:expr, $panic_str:expr,)*) => {
+        $(
+            #[test]
+            #[should_panic(expected = $panic_str)]
+            fn $name() {
+                File::from_usize($input);
+            }
+        )*
+        }
+    }
+
+    panic_tests! {
+        test_from_pgn_invalid_1: 0, "Unrecognized file: 0",
+        test_from_pgn_invalid_2: 9, "Unrecognized file: 9",
+        test_from_pgn_invalid_3: 54656, "Unrecognized file: 54656",
+        test_from_pgn_invalid_4: usize::MAX, "Unrecognized file: 18446744073709551615",
     }
 }
 

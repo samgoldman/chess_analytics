@@ -1,5 +1,5 @@
 use crate::game_wrapper::GameWrapper;
-use crate::workflow_step::*;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct TimeControlBin {
@@ -9,7 +9,6 @@ pub struct TimeControlBin {
     output_flag: String,
 }
 
-/// chess_analytics_build::register_step_builder "TimeControlBin" TimeControlBin
 impl TimeControlBin {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -41,7 +40,7 @@ impl TimeControlBin {
         }))
     }
 
-    pub fn bin(game: GameWrapper, _filter: &TimeControlBin) -> SharedData {
+    pub fn bin(game: &GameWrapper, _filter: &TimeControlBin) -> SharedData {
         SharedData::String(format!("{:?}", game.time_control))
     }
 }

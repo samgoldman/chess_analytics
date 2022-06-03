@@ -1,5 +1,5 @@
 use crate::steps_manager::get_step_description;
-use crate::workflow_step::*;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 use std::thread;
 
 use super::noop_step::NoopStep;
@@ -10,7 +10,6 @@ pub struct ParallelStep {
     post_name: String,
 }
 
-/// chess_analytics_build::register_step_builder "ParallelStep" ParallelStep
 impl ParallelStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -51,7 +50,7 @@ impl Step for ParallelStep {
 
         for child_name in self.children_names.clone() {
             let data_clone = data.clone();
-            let child = get_step_description(child_name, data.clone());
+            let child = get_step_description(&child_name, &data);
             handles.push((
                 child.step_type.clone(),
                 thread::spawn(move || {
@@ -71,7 +70,7 @@ impl Step for ParallelStep {
             }
         }
 
-        let mut post = get_step_description(self.post_name.clone(), data.clone())
+        let mut post = get_step_description(&self.post_name, &data)
             .to_step()
             .unwrap_or_else(|_| Box::new(NoopStep {}));
         post.process(data)?;

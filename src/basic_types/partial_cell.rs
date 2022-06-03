@@ -32,12 +32,12 @@ impl PartialCell {
         self.file.is_some() && self.rank.is_some()
     }
 
-    pub fn possible_ranks(&self) -> Vec<Rank> {
+    pub fn possible_ranks(self) -> Vec<Rank> {
         self.rank
             .map_or(Rank::all_ranks(), |some_rank| vec![some_rank])
     }
 
-    pub fn possible_files(&self) -> Vec<File> {
+    pub fn possible_files(self) -> Vec<File> {
         self.file
             .map_or(File::all_files(), |some_file| vec![some_file])
     }
