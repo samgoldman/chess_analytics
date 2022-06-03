@@ -1,12 +1,11 @@
-use crate::workflow_step::*;
+use crate::workflow_step::{BoxedStep, Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct NoopStep {}
 
-/// chess_analytics_build::register_step_builder "NoopStep" NoopStep
 impl NoopStep {
-    pub fn try_new(_configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
-        Ok(Box::new(NoopStep {}))
+    pub fn boxed_new() -> BoxedStep {
+        Box::new(NoopStep {})
     }
 }
 
@@ -23,14 +22,13 @@ mod test_noop_step {
         sync::{Arc, Mutex},
     };
 
+    use crate::workflow_step::StepGenericCoreImpl;
+
     use super::*;
 
     #[test]
     fn test_try_new() {
-        assert_eq!(
-            format!("{:?}", NoopStep::try_new(None).unwrap()),
-            "NoopStep"
-        );
+        assert_eq!(format!("{:?}", NoopStep::boxed_new()), "NoopStep");
     }
 
     #[test]

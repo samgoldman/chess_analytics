@@ -2,7 +2,7 @@ use crate::workflow_step::{SharedData, StepDescription, StepGeneric};
 use std::collections::HashMap;
 
 // TODO use result
-pub fn add_step_description(name: String, step: StepDescription, data: StepGeneric) {
+pub fn add_step_description(name: String, step: StepDescription, data: &StepGeneric) {
     let mut unlocked_data = data.lock().unwrap();
 
     if !unlocked_data.contains_key("step_descriptions") {
@@ -23,7 +23,7 @@ pub fn add_step_description(name: String, step: StepDescription, data: StepGener
 }
 
 // TODO use Result
-pub fn get_step_description(name: String, data: StepGeneric) -> StepDescription {
+pub fn get_step_description(name: &str, data: &StepGeneric) -> StepDescription {
     let unlocked_data = data.lock().unwrap();
     let descs = unlocked_data
         .get("step_descriptions")
@@ -31,7 +31,7 @@ pub fn get_step_description(name: String, data: StepGeneric) -> StepDescription 
         .to_map()
         .unwrap();
     let desc = descs
-        .get(&name)
+        .get(name)
         .unwrap()
         .to_step_description()
         .unwrap()

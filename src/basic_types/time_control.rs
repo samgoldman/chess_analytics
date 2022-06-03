@@ -20,7 +20,8 @@ impl TimeControl {
     // as defined here: https://lichess.org/faq#time-controls
     // Games with 0 for both values are assumed to be correspondence
     pub fn from_base_and_increment(base_time: u16, increment: u16) -> Self {
-        let estimated_duration = base_time as u32 + EXPECTED_NUMBER_OF_MOVES * increment as u32;
+        let estimated_duration =
+            u32::from(base_time) + EXPECTED_NUMBER_OF_MOVES * u32::from(increment);
 
         // Games with 0 for both values are assumed to be correspondence
         if estimated_duration == 0 {

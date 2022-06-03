@@ -1,5 +1,4 @@
 ignore = [
     "src/../target/flatbuffers/chess_generated.rs",
-    "src/steps.rs",
     "tests/integration_tests.rs"
 ]

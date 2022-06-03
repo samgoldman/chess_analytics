@@ -14,5 +14,4 @@ tarpaulin-report.html
 *.bin
 ninja-build/
 
-# Auto-generated files
-src/steps.rs
+*.json

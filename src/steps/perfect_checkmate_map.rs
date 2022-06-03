@@ -1,6 +1,6 @@
 use crate::basic_types::GameResult;
 use crate::game_wrapper::GameWrapper;
-use crate::workflow_step::*;
+use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
 pub struct PerfectCheckmateMap {
@@ -10,7 +10,6 @@ pub struct PerfectCheckmateMap {
     output_flag: String,
 }
 
-/// chess_analytics_build::register_step_builder "PerfectCheckmateMap" PerfectCheckmateMap
 impl PerfectCheckmateMap {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -42,11 +41,11 @@ impl PerfectCheckmateMap {
         }))
     }
 
-    pub fn map(game: GameWrapper, _filter: &PerfectCheckmateMap) -> SharedData {
-        if !game.eval_available {
-            panic!("PerfectCheckmateMap received game that did not have evaluation available!");
-        }
-
+    pub fn map(game: &GameWrapper, _filter: &PerfectCheckmateMap) -> SharedData {
+        assert!(
+            game.eval_available,
+            "PerfectCheckmateMap received game that did not have evaluation available!"
+        );
         let mut reversed = game.eval_mate_in.clone();
         reversed.reverse();
 
