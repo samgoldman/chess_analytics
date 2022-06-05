@@ -1,8 +1,9 @@
 use crate::basic_types::{Cell, File, PartialCell, Piece, Rank, NAG};
 use crate::chess_utils::{extract_coordinate, extract_piece};
-use serde::Serialize;
+use bincode::{Decode, Encode};
+use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Clone, Debug, Copy, Serialize)]
+#[derive(PartialEq, Clone, Debug, Copy, Serialize, Deserialize, Encode, Decode)]
 pub struct Move {
     pub from: PartialCell,
     pub to: Cell,

@@ -1,6 +1,7 @@
 use crate::basic_types::Piece;
 use crate::basic_types::Player;
-use serde::Serialize;
+use bincode::{Decode, Encode};
+use serde::{Deserialize, Serialize};
 
 #[cfg(test)]
 use std::convert::TryInto;
@@ -28,7 +29,7 @@ macro_rules! black {
     };
 }
 
-#[derive(PartialEq, Clone, Debug, Copy, Eq, Serialize)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq, Serialize, Deserialize, Encode, Decode)]
 pub struct PlayerPiece {
     pub piece: Piece,
     pub player: Player,

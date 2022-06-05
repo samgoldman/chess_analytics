@@ -1,6 +1,7 @@
 use crate::basic_types::file::File;
 use crate::basic_types::rank::Rank;
-use serde::Serialize;
+use bincode::{Decode, Encode};
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
 #[macro_export]
@@ -13,7 +14,7 @@ macro_rules! cell {
     };
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Encode, Decode)]
 pub struct Cell {
     pub file: File,
     pub rank: Rank,

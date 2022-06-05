@@ -1,6 +1,7 @@
-use serde::Serialize;
+use bincode::{Decode, Encode};
+use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Clone, Debug, Copy, Eq, Serialize)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq, Serialize, Deserialize, Encode, Decode)]
 pub enum Piece {
     Pawn = 1,
     Knight = 2,

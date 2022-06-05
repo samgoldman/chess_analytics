@@ -1,6 +1,7 @@
-use serde::Serialize;
+use bincode::{Decode, Encode};
+use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Clone, Debug, Copy, Serialize)]
+#[derive(PartialEq, Clone, Debug, Copy, Serialize, Deserialize, Encode, Decode)]
 pub enum Termination {
     Normal = 0,
     TimeForfeit = 1,
