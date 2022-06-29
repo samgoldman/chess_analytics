@@ -20,6 +20,7 @@ pub struct Cell {
 
 impl Cell {
     #[cfg(test)]
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn from_indices((rank, file): (usize, usize)) -> Self {
         cell!(
             File::from_uint((file + 1) as u32),
@@ -29,6 +30,7 @@ impl Cell {
 }
 
 impl Ord for Cell {
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     fn cmp(&self, other: &Self) -> Ordering {
         let rank_ord = self.rank.cmp(&other.rank);
 
@@ -41,6 +43,7 @@ impl Ord for Cell {
 }
 
 impl PartialOrd for Cell {
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }

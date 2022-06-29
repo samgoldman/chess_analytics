@@ -2,6 +2,7 @@ use crate::basic_types::{File, Move, Piece, Rank};
 use crate::game_wrapper::GameWrapper;
 use regex::Regex;
 
+#[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 fn int_to_file(int: u16) -> Option<File> {
     match int & 0x0f {
         0x0 => None,
@@ -17,6 +18,7 @@ fn int_to_file(int: u16) -> Option<File> {
     }
 }
 
+#[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 fn int_to_rank(int: u16) -> Option<Rank> {
     match (int >> 4) & 0x0f {
         0x0 => None,
@@ -33,6 +35,7 @@ fn int_to_rank(int: u16) -> Option<Rank> {
 }
 
 // Look at the first three bits to get the piece
+#[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 pub fn extract_piece(raw_metadata: u16) -> Option<Piece> {
     match raw_metadata & 0b0111 {
         0 => None,
@@ -46,12 +49,14 @@ pub fn extract_piece(raw_metadata: u16) -> Option<Piece> {
     }
 }
 
+#[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 pub fn extract_coordinate(raw_coord: u16) -> (Option<File>, Option<Rank>) {
     let file = int_to_file(raw_coord);
     let rank = int_to_rank(raw_coord);
     (file, rank)
 }
 
+#[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
     let moves = game.moves.clone();
@@ -84,12 +89,14 @@ pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
 
 // Game elo is the average of the two player's ratings
 #[inline]
+#[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 pub fn get_game_elo(game: &GameWrapper) -> u32 {
     (u32::from(game.white_rating) + u32::from(game.black_rating)) / 2
 }
 
 // For now this only parses the piece being moved, and the to/from coordinates
 // TODO: support castling
+#[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 pub fn parse_movetext(movetext: &str) -> Vec<Move> {
     lazy_static! {
         static ref RE_MOVE: Regex = Regex::new(

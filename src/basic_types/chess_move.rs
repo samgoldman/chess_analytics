@@ -16,6 +16,7 @@ pub struct Move {
 }
 
 impl Move {
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn new_to_from(
         from_file: Option<File>,
         from_rank: Option<Rank>,
@@ -56,6 +57,7 @@ impl Move {
     }
 
     // Extract move data and create a move object from it
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn convert_from_binary_move_data((data, metadata): (u16, u16)) -> Move {
         // Move coordinates are simple: 4 bits per rank/file
         let (from_file, from_rank) = extract_coordinate(data);

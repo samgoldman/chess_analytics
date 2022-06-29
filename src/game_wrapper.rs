@@ -35,16 +35,19 @@ pub struct GameWrapper {
 }
 
 impl GameWrapper {
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn from_game_list_data(data: &[u8]) -> Vec<GameWrapper> {
         let game_list = root_as_game_list(data).unwrap();
         GameWrapper::from_game_list(game_list)
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     fn from_game_list(game_list: GameList) -> Vec<GameWrapper> {
         let games = game_list.games().unwrap();
         games.iter().map(GameWrapper::new).collect()
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     fn get_time_control_category(game: Game) -> TimeControl {
         TimeControl::from_base_and_increment(
             game.time_control_main(),
@@ -52,6 +55,7 @@ impl GameWrapper {
         )
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     fn new(game: Game) -> GameWrapper {
         let clock_components = izip!(
             game.clock_hours().unwrap_or(&[]),
@@ -99,10 +103,12 @@ impl GameWrapper {
         }
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn clock_available(&self) -> bool {
         !self.clock.is_empty()
     }
 
+    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn build_boards(&self) -> Vec<Board> {
         self.moves
             .iter()

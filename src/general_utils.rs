@@ -7,6 +7,7 @@ use std::time::Duration;
 ///
 /// * `comparator` - "min" or "max", the function you want
 ///
+#[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 pub fn get_comparator<T: Ord>(comparator: &str) -> fn(T, T) -> T {
     if comparator == "max" {
         T::max
@@ -16,6 +17,7 @@ pub fn get_comparator<T: Ord>(comparator: &str) -> fn(T, T) -> T {
 }
 
 // Reduce value to -1, 0, or 1, if it is negative, zero, or positive respectively
+#[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 pub fn get_unit_value(val: i32) -> i32 {
     if val == 0 {
         0
@@ -24,10 +26,12 @@ pub fn get_unit_value(val: i32) -> i32 {
     }
 }
 
+#[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 pub fn dedup_and_sort(vector: Vec<Vec<(usize, String)>>) -> Vec<Vec<(usize, String)>> {
     vector.into_iter().unique().sorted().collect()
 }
 
+#[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 pub fn hours_min_sec_to_duration((hours, minutes, seconds): (&u8, &u8, &u8)) -> Duration {
     Duration::from_secs(u64::from(*hours) * 3600 + u64::from(*minutes) * 60 + u64::from(*seconds))
 }
