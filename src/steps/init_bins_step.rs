@@ -99,10 +99,7 @@ impl Step for InitBinStep {
                 let mut vec_to_append = data.to_vec().unwrap();
 
                 vec_to_append.append(&mut output_games);
-                unlocked_data.insert(
-                    &self.output_vec_name,
-                    SharedData::Vec(vec_to_append),
-                );
+                unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
             }
 
             let unlocked_data = data.lock().unwrap();

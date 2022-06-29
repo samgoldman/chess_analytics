@@ -74,10 +74,7 @@ macro_rules! bin_template {
                     let mut vec_to_append = data.to_vec().unwrap();
 
                     vec_to_append.append(&mut new_binned_games);
-                    unlocked_data.insert(
-                        &self.output_vec_name,
-                        SharedData::Vec(vec_to_append),
-                    );
+                    unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
                 }
 
                 let unlocked_data = data.lock().unwrap();
@@ -172,10 +169,7 @@ macro_rules! map_template {
                     let mut vec_to_append = data.to_vec().unwrap();
 
                     vec_to_append.append(&mut new_binned_games);
-                    unlocked_data.insert(
-                        &self.output_vec_name,
-                        SharedData::Vec(vec_to_append),
-                    );
+                    unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
                 }
 
                 let unlocked_data = data.lock().unwrap();

@@ -46,10 +46,7 @@ impl Step for AvgReduce {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert(
-                &self.output_map_name,
-                SharedData::Map(HashMap::new()),
-            );
+            unlocked_data.insert(&self.output_map_name, SharedData::Map(HashMap::new()));
         }
 
         let mut quit = false;
