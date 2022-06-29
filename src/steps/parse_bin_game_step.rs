@@ -40,7 +40,8 @@ impl Step for ParseBinGame {
                     continue;
                 }
 
-                let raw_file_data = match unlocked_data.get("raw_file_data") {
+                let potential_data = unlocked_data.get("raw_file_data");
+                let raw_file_data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };

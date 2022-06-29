@@ -164,7 +164,7 @@ impl std::fmt::Display for SharedData {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct StepDescription {
     pub step_type: String,
     pub parameters: std::option::Option<serde_yaml::Value>,

@@ -61,7 +61,8 @@ impl Step for InitBinStep {
                     continue;
                 }
 
-                let data = match unlocked_data.get(&self.input_vec_name) {
+                let potential_data = unlocked_data.get(&self.input_vec_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };
@@ -90,7 +91,8 @@ impl Step for InitBinStep {
             {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get(&self.output_vec_name) {
+                let potential_data = unlocked_data.get(&self.output_vec_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };

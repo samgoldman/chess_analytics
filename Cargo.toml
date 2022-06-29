@@ -24,8 +24,6 @@ rayon = "1.5.3"
 serde = { version = "1.0.137", features = ["derive"] }
 serde_yaml = "0.8.24"
 itertools = "0.10.0"
-strum_macros = "0.24.2"
-strum = "0.24.1"
 mockall = "0.11.1"
 mockall_double = "0.3.0"
 tui = "0.18.0"

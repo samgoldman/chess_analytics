@@ -6,14 +6,14 @@ use std::{fs, fs::File, io, io::Write, path::Path};
 fn generate_chess_flatbuff() -> Result<(), std::io::Error> {
     run(flatc_rust::Args {
         inputs: &[Path::new("chess_flat_buffer/chess.fbs")],
-        out_dir: Path::new("target/flatbuffers/"),
+        out_dir: Path::new("src/"),
         ..Default::default()
     })
     .expect("flatc");
 
     let data = "// Force clippy and checks to ignore this file\n#![allow(clippy::all)]\n#![allow(unknown_lints)]\n#![allow(unused_imports)]\n#![allow(clippy::cognitive_complexity)]\n#![allow(clippy::pedantic)]\n\n";
 
-    let file_path = Path::new("target/flatbuffers/chess_generated.rs");
+    let file_path = Path::new("src/chess_generated.rs");
     prepend_file(data.as_bytes(), &file_path)?;
 
     Ok(())

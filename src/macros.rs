@@ -27,7 +27,8 @@ macro_rules! bin_template {
                 let binned_games = {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get(&self.input_vec_name) {
+                    let potential_data = unlocked_data.get(&self.input_vec_name);
+                    let data = match potential_data {
                         Some(data) => data,
                         None => continue,
                     };
@@ -65,7 +66,8 @@ macro_rules! bin_template {
                 {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get(&self.output_vec_name) {
+                    let potential_data = unlocked_data.get(&self.output_vec_name);
+                    let data = match potential_data {
                         Some(data) => data,
                         None => continue,
                     };
@@ -122,7 +124,8 @@ macro_rules! map_template {
                 let binned_games = {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get(&self.input_vec_name) {
+                    let potential_data = unlocked_data.get(&self.input_vec_name);
+                    let data = match potential_data {
                         Some(data) => data,
                         None => continue,
                     };
@@ -159,7 +162,8 @@ macro_rules! map_template {
                 {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get(&self.output_vec_name) {
+                    let potential_data = unlocked_data.get(&self.output_vec_name);
+                    let data = match potential_data {
                         Some(data) => data,
                         None => continue,
                     };

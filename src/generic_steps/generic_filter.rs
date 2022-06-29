@@ -7,7 +7,7 @@ use mockall::automock;
 
 pub type FilterFn = dyn Fn(&GameWrapper) -> bool;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct GenericFilter {
     input_vec_name: String,
     output_vec_name: String,
@@ -74,7 +74,8 @@ impl GenericFilter {
             let games = {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get(&self.input_vec_name) {
+                let potential_data = unlocked_data.get(&self.input_vec_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };
@@ -106,7 +107,8 @@ impl GenericFilter {
             {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get(&self.output_vec_name) {
+                let potential_data = unlocked_data.get(&self.output_vec_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => return Err("GenericFilter: no output vector".to_string()),
                 };
@@ -119,7 +121,8 @@ impl GenericFilter {
             if &self.discard_vec_name != "null" {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get(&self.discard_vec_name) {
+                let potential_data = unlocked_data.get(&self.discard_vec_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => return Err("GenericFilter: no discard vector".to_string()),
                 };
@@ -258,7 +261,7 @@ mod test_process {
             .return_const(Some(SharedData::Vec(vec![])));
 
         data.expect_insert()
-            .with(eq("discard_vec".to_string()), eq(game_data.clone()))
+            .with(eq("discard_vec".to_string()), eq(game_data))
             .times(2)
             .return_const(None);
 
@@ -321,7 +324,7 @@ mod test_process {
             .return_const(Some(SharedData::Vec(vec![])));
 
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(game_data.clone()))
+            .with(eq("output_vec".to_string()), eq(game_data))
             .times(2)
             .return_const(None);
 
@@ -390,7 +393,7 @@ mod test_process {
             .return_const(Some(SharedData::Vec(vec![])));
 
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(game_data.clone()))
+            .with(eq("output_vec".to_string()), eq(game_data))
             .times(2)
             .return_const(None);
 
@@ -435,7 +438,7 @@ mod test_process {
         data.expect_get()
             .with(eq("input_vec"))
             .times(1)
-            .return_const(Some(game_data.clone()));
+            .return_const(Some(game_data));
 
         data.expect_insert()
             .with(eq("input_vec".to_string()), eq(SharedData::Vec(vec![])))
@@ -482,7 +485,7 @@ mod test_process {
         data.expect_get()
             .with(eq("input_vec"))
             .times(1)
-            .return_const(Some(game_data.clone()));
+            .return_const(Some(game_data));
 
         data.expect_insert()
             .with(eq("input_vec".to_string()), eq(SharedData::Vec(vec![])))

@@ -1,8 +1,6 @@
 use std::cmp::Ordering;
-use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
 
-#[derive(PartialEq, Clone, Debug, Copy, Eq, EnumIter, Hash)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq, Hash)]
 pub enum File {
     _A = 1,
     _B = 2,
@@ -77,7 +75,16 @@ impl File {
     }
 
     pub fn all_files() -> Vec<File> {
-        File::iter().collect()
+        vec![
+            Self::_A,
+            Self::_B,
+            Self::_C,
+            Self::_D,
+            Self::_E,
+            Self::_F,
+            Self::_G,
+            Self::_H,
+        ]
     }
 }
 

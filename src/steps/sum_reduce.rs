@@ -62,7 +62,8 @@ impl Step for SumReduce {
             let binned_games = {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get(&self.input_vec_name) {
+                let potential_data = unlocked_data.get(&self.input_vec_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };
@@ -102,7 +103,9 @@ impl Step for SumReduce {
 
             {
                 let mut unlocked_data = data.lock().unwrap();
-                let data = match unlocked_data.get(&self.output_map_name) {
+
+                let potential_data = unlocked_data.get(&self.output_map_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };
