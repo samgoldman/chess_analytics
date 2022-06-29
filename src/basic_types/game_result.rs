@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(PartialEq, Clone, Debug, Copy, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy, Serialize, Deserialize)]
 pub enum GameResult {
     White = 0,
     Black = 1,

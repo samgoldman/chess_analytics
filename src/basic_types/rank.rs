@@ -1,11 +1,9 @@
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
-use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
 
 // use std::ops;
 
-#[derive(PartialEq, Clone, Debug, Copy, Eq, EnumIter, Hash, Serialize, Deserialize)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq, Hash, Serialize, Deserialize)]
 pub enum Rank {
     _1 = 1,
     _2 = 2,
@@ -80,12 +78,17 @@ impl Rank {
     }
 
     pub fn all_ranks() -> Vec<Rank> {
-        Rank::iter().collect()
+        vec![
+            Self::_1,
+            Self::_2,
+            Self::_3,
+            Self::_4,
+            Self::_5,
+            Self::_6,
+            Self::_7,
+            Self::_8,
+        ]
     }
-
-    // pub fn as_integer(&self) -> u8 {
-    //     *self as u8
-    // }
 }
 
 impl Ord for Rank {

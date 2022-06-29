@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Clone, Debug, Copy, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy, Serialize, Deserialize)]
 pub enum Termination {
     Normal = 0,
     TimeForfeit = 1,

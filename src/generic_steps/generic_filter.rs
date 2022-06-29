@@ -7,7 +7,7 @@ use mockall::automock;
 
 pub type FilterFn = dyn Fn(&GameWrapper) -> bool;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct GenericFilter {
     input_vec_name: String,
     output_vec_name: String,
@@ -58,9 +58,9 @@ impl GenericFilter {
     pub fn process(&self, data: &StepGeneric, logic: &FilterFn) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
+            unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
             if self.discard_vec_name != "null" {
-                unlocked_data.insert(self.discard_vec_name.clone(), SharedData::Vec(vec![]));
+                unlocked_data.insert(&self.discard_vec_name, SharedData::Vec(vec![]));
             }
         }
 
@@ -74,7 +74,8 @@ impl GenericFilter {
             let games = {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get(&self.input_vec_name) {
+                let potential_data = unlocked_data.get(&self.input_vec_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };
@@ -82,7 +83,7 @@ impl GenericFilter {
 
                 let ret = vec_to_filter.clone();
 
-                unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
+                unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
                 ret
             };
@@ -106,30 +107,29 @@ impl GenericFilter {
             {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get(&self.output_vec_name) {
+                let potential_data = unlocked_data.get(&self.output_vec_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => return Err("GenericFilter: no output vector".to_string()),
                 };
                 let mut vec_to_append = data.to_vec().unwrap();
 
                 vec_to_append.append(&mut output_games);
-                unlocked_data.insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
+                unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
             }
 
             if &self.discard_vec_name != "null" {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get(&self.discard_vec_name) {
+                let potential_data = unlocked_data.get(&self.discard_vec_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => return Err("GenericFilter: no discard vector".to_string()),
                 };
                 let mut vec_to_append = data.to_vec().unwrap();
 
                 vec_to_append.append(&mut discard_games);
-                unlocked_data.insert(
-                    self.discard_vec_name.clone(),
-                    SharedData::Vec(vec_to_append),
-                );
+                unlocked_data.insert(&self.discard_vec_name, SharedData::Vec(vec_to_append));
             }
 
             let unlocked_data = data.lock().unwrap();
@@ -152,7 +152,7 @@ impl GenericFilter {
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: bool = true;
-            unlocked_data.insert(self.output_flag.clone(), SharedData::Bool(d));
+            unlocked_data.insert(&self.output_flag, SharedData::Bool(d));
         }
 
         Ok(())
@@ -220,12 +220,12 @@ mod test_process {
 
         // Set up output vectors
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("output_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
         data.expect_insert()
-            .with(eq("discard_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("discard_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
@@ -236,7 +236,7 @@ mod test_process {
             .return_const(Some(game_data.clone()));
 
         data.expect_insert()
-            .with(eq("input_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("input_vec"), eq(SharedData::Vec(vec![])))
             .times(2)
             .return_const(None);
 
@@ -247,7 +247,7 @@ mod test_process {
             .return_const(Some(SharedData::Vec(vec![])));
 
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("output_vec"), eq(SharedData::Vec(vec![])))
             .times(2)
             .return_const(None);
 
@@ -258,7 +258,7 @@ mod test_process {
             .return_const(Some(SharedData::Vec(vec![])));
 
         data.expect_insert()
-            .with(eq("discard_vec".to_string()), eq(game_data.clone()))
+            .with(eq("discard_vec"), eq(game_data))
             .times(2)
             .return_const(None);
 
@@ -270,7 +270,7 @@ mod test_process {
 
         // Set end condition
         data.expect_insert()
-            .with(eq("output_flag".to_string()), eq(SharedData::Bool(true)))
+            .with(eq("output_flag"), eq(SharedData::Bool(true)))
             .times(1)
             .return_const(None);
 
@@ -294,12 +294,12 @@ mod test_process {
 
         // Set up output vectors
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("output_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
         data.expect_insert()
-            .with(eq("discard_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("discard_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
@@ -310,7 +310,7 @@ mod test_process {
             .return_const(Some(game_data.clone()));
 
         data.expect_insert()
-            .with(eq("input_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("input_vec"), eq(SharedData::Vec(vec![])))
             .times(2)
             .return_const(None);
 
@@ -321,7 +321,7 @@ mod test_process {
             .return_const(Some(SharedData::Vec(vec![])));
 
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(game_data.clone()))
+            .with(eq("output_vec"), eq(game_data))
             .times(2)
             .return_const(None);
 
@@ -332,7 +332,7 @@ mod test_process {
             .return_const(Some(SharedData::Vec(vec![])));
 
         data.expect_insert()
-            .with(eq("discard_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("discard_vec"), eq(SharedData::Vec(vec![])))
             .times(2)
             .return_const(None);
 
@@ -344,7 +344,7 @@ mod test_process {
 
         // Set end condition
         data.expect_insert()
-            .with(eq("output_flag".to_string()), eq(SharedData::Bool(true)))
+            .with(eq("output_flag"), eq(SharedData::Bool(true)))
             .times(1)
             .return_const(None);
 
@@ -368,7 +368,7 @@ mod test_process {
 
         // Set up output vectors
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("output_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
@@ -379,7 +379,7 @@ mod test_process {
             .return_const(Some(game_data.clone()));
 
         data.expect_insert()
-            .with(eq("input_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("input_vec"), eq(SharedData::Vec(vec![])))
             .times(2)
             .return_const(None);
 
@@ -390,7 +390,7 @@ mod test_process {
             .return_const(Some(SharedData::Vec(vec![])));
 
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(game_data.clone()))
+            .with(eq("output_vec"), eq(game_data))
             .times(2)
             .return_const(None);
 
@@ -402,7 +402,7 @@ mod test_process {
 
         // Set end condition
         data.expect_insert()
-            .with(eq("output_flag".to_string()), eq(SharedData::Bool(true)))
+            .with(eq("output_flag"), eq(SharedData::Bool(true)))
             .times(1)
             .return_const(None);
 
@@ -427,7 +427,7 @@ mod test_process {
 
         // Set up output vectors
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("output_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
@@ -435,10 +435,10 @@ mod test_process {
         data.expect_get()
             .with(eq("input_vec"))
             .times(1)
-            .return_const(Some(game_data.clone()));
+            .return_const(Some(game_data));
 
         data.expect_insert()
-            .with(eq("input_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("input_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
@@ -469,12 +469,12 @@ mod test_process {
 
         // Set up output vectors
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("output_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
         data.expect_insert()
-            .with(eq("discard_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("discard_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
@@ -482,10 +482,10 @@ mod test_process {
         data.expect_get()
             .with(eq("input_vec"))
             .times(1)
-            .return_const(Some(game_data.clone()));
+            .return_const(Some(game_data));
 
         data.expect_insert()
-            .with(eq("input_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("input_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
@@ -496,7 +496,7 @@ mod test_process {
             .return_const(Some(SharedData::Vec(vec![])));
 
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("output_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
@@ -523,12 +523,12 @@ mod test_process {
 
         // Set up output vectors
         data.expect_insert()
-            .with(eq("output_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("output_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
         data.expect_insert()
-            .with(eq("discard_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("discard_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 
@@ -539,7 +539,7 @@ mod test_process {
             .return_const(Some(SharedData::Vec(vec![SharedData::Bool(false)])));
 
         data.expect_insert()
-            .with(eq("input_vec".to_string()), eq(SharedData::Vec(vec![])))
+            .with(eq("input_vec"), eq(SharedData::Vec(vec![])))
             .times(1)
             .return_const(None);
 

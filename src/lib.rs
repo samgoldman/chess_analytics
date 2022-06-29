@@ -14,9 +14,7 @@ use std::sync::{Arc, Mutex};
 #[macro_use]
 mod basic_types;
 mod board;
-#[allow(non_snake_case)]
-#[path = "../target/flatbuffers/chess_generated.rs"]
-mod chess;
+mod chess_generated;
 mod chess_utils;
 mod game_wrapper;
 mod general_utils;

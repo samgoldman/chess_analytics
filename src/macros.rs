@@ -14,7 +14,7 @@ macro_rules! bin_template {
         fn process(&mut self, data: StepGeneric) -> Result<(), String> {
             {
                 let mut unlocked_data = data.lock().unwrap();
-                unlocked_data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
+                unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
             }
 
             let mut quit = false;
@@ -27,14 +27,15 @@ macro_rules! bin_template {
                 let binned_games = {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get(&self.input_vec_name) {
+                    let potential_data = unlocked_data.get(&self.input_vec_name);
+                    let data = match potential_data {
                         Some(data) => data,
                         None => continue,
                     };
                     let vec_to_filter = data.to_vec().unwrap();
 
                     let ret = vec_to_filter.clone();
-                    unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
+                    unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
                     ret
                 };
@@ -65,15 +66,15 @@ macro_rules! bin_template {
                 {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get(&self.output_vec_name) {
+                    let potential_data = unlocked_data.get(&self.output_vec_name);
+                    let data = match potential_data {
                         Some(data) => data,
                         None => continue,
                     };
                     let mut vec_to_append = data.to_vec().unwrap();
 
                     vec_to_append.append(&mut new_binned_games);
-                    unlocked_data
-                        .insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
+                    unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
                 }
 
                 let unlocked_data = data.lock().unwrap();
@@ -96,7 +97,7 @@ macro_rules! bin_template {
             {
                 let mut unlocked_data = data.lock().unwrap();
                 let d: bool = true;
-                unlocked_data.insert(self.output_flag.clone(), SharedData::Bool(d));
+                unlocked_data.insert(&self.output_flag, SharedData::Bool(d));
             }
 
             Ok(())
@@ -109,7 +110,7 @@ macro_rules! map_template {
         fn process(&mut self, data: StepGeneric) -> Result<(), String> {
             {
                 let mut unlocked_data = data.lock().unwrap();
-                unlocked_data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
+                unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
             }
 
             let mut quit = false;
@@ -122,14 +123,15 @@ macro_rules! map_template {
                 let binned_games = {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get(&self.input_vec_name) {
+                    let potential_data = unlocked_data.get(&self.input_vec_name);
+                    let data = match potential_data {
                         Some(data) => data,
                         None => continue,
                     };
                     let vec_to_filter = data.to_vec().unwrap();
 
                     let ret = vec_to_filter.clone();
-                    unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
+                    unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
                     ret
                 };
@@ -159,15 +161,15 @@ macro_rules! map_template {
                 {
                     let mut unlocked_data = data.lock().unwrap();
 
-                    let data = match unlocked_data.get(&self.output_vec_name) {
+                    let potential_data = unlocked_data.get(&self.output_vec_name);
+                    let data = match potential_data {
                         Some(data) => data,
                         None => continue,
                     };
                     let mut vec_to_append = data.to_vec().unwrap();
 
                     vec_to_append.append(&mut new_binned_games);
-                    unlocked_data
-                        .insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
+                    unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
                 }
 
                 let unlocked_data = data.lock().unwrap();
@@ -190,7 +192,7 @@ macro_rules! map_template {
             {
                 let mut unlocked_data = data.lock().unwrap();
                 let d: bool = true;
-                unlocked_data.insert(self.output_flag.clone(), SharedData::Bool(d));
+                unlocked_data.insert(&self.output_flag, SharedData::Bool(d));
             }
 
             Ok(())

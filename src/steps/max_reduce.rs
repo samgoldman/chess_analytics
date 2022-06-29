@@ -46,10 +46,7 @@ impl Step for MaxReduce {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert(
-                self.output_map_name.clone(),
-                SharedData::Map(HashMap::new()),
-            );
+            unlocked_data.insert(&self.output_map_name, SharedData::Map(HashMap::new()));
         }
 
         let mut quit = false;
@@ -62,14 +59,15 @@ impl Step for MaxReduce {
             let binned_games = {
                 let mut unlocked_data = data.lock().unwrap();
 
-                let data = match unlocked_data.get(&self.input_vec_name) {
+                let potential_data = unlocked_data.get(&self.input_vec_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };
                 let vec_to_filter = data.to_vec().unwrap();
 
                 let ret = vec_to_filter.clone();
-                unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
+                unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
                 ret
             };
@@ -100,7 +98,9 @@ impl Step for MaxReduce {
 
             {
                 let mut unlocked_data = data.lock().unwrap();
-                let data = match unlocked_data.get(&self.output_map_name) {
+
+                let potential_data = unlocked_data.get(&self.output_map_name);
+                let data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };
@@ -112,11 +112,11 @@ impl Step for MaxReduce {
                     }
 
                     let original = map.get_mut(key).unwrap();
-                    let new = &*(new_data.get(key).unwrap());
+                    let new = new_data.get(key).unwrap();
                     *original = original.max(new);
                 }
 
-                unlocked_data.insert(self.output_map_name.clone(), SharedData::Map(map));
+                unlocked_data.insert(&self.output_map_name, SharedData::Map(map));
             }
 
             let unlocked_data = data.lock().unwrap();
@@ -139,7 +139,7 @@ impl Step for MaxReduce {
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: bool = true;
-            unlocked_data.insert(self.output_flag.clone(), SharedData::Bool(d));
+            unlocked_data.insert(&self.output_flag, SharedData::Bool(d));
         }
 
         Ok(())

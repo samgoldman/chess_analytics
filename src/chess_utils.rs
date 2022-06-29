@@ -54,7 +54,7 @@ pub fn extract_coordinate(raw_coord: u16) -> (Option<File>, Option<Rank>) {
 
 pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
-    let moves = game.moves.clone();
+    let moves = &game.moves;
 
     // Verify this game has enough moves for the given opening
     if moves.len() < opening.len() {
