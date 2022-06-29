@@ -13,7 +13,7 @@ fn simple_count_10_games() -> Result<(), Box<dyn std::error::Error>> {
     .map(|x| (*x).to_string()))?;
 
     let contents = fs::read_to_string("tests/output/int_1/tmp.txt")
-    .expect("Something went wrong reading the file");
+        .expect("Something went wrong reading the file");
 
     assert_eq!(contents, "game_count: Map({\"\": U64(10)})\n");
 
@@ -34,7 +34,7 @@ fn simple_count_eval_and_clock_1_game() -> Result<(), Box<dyn std::error::Error>
     .map(|x| (*x).to_string()))?;
 
     let contents = fs::read_to_string("tests/output/int_2/tmp.txt")
-    .expect("Something went wrong reading the file");
+        .expect("Something went wrong reading the file");
 
     assert_eq!(contents, "game_count: Map({\"\": U64(1)})\n");
 
@@ -54,7 +54,8 @@ fn count_mates_by_time_10_games() -> Result<(), Box<dyn std::error::Error>> {
     .iter()
     .map(|x| (*x).to_string()))?;
 
-    let contents = fs::read_to_string("tests/output/int_3/tmp.txt").expect("Something went wrong reading the file");
+    let contents = fs::read_to_string("tests/output/int_3/tmp.txt")
+        .expect("Something went wrong reading the file");
 
     // Either option is valid
     // TODO: ideally create a step that can print specific bins in a pre-determined order
@@ -79,7 +80,8 @@ fn player_elo_tc_bin_1() -> Result<(), Box<dyn std::error::Error>> {
     .iter()
     .map(|x| (*x).to_string()))?;
 
-    let contents = fs::read_to_string("tests/output/int_4/tmp.txt").expect("Something went wrong reading the file");
+    let contents = fs::read_to_string("tests/output/int_4/tmp.txt")
+        .expect("Something went wrong reading the file");
 
     // Either option is valid
     // TODO: ideally create a step that can print specific bins in a pre-determined order
@@ -93,4 +95,3 @@ fn player_elo_tc_bin_1() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-
