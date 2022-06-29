@@ -39,7 +39,7 @@ impl Step for Bz2DecompressStep {
 
         {
             let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert("raw_file_data".to_string(), SharedData::Vec(vec![]));
+            unlocked_data.insert("raw_file_data", SharedData::Vec(vec![]));
         }
 
         paths.par_iter().for_each(|path| {
@@ -89,14 +89,14 @@ impl Step for Bz2DecompressStep {
 
                 file_data_vec.push(SharedData::FileData(file_data));
 
-                unlocked_data.insert("raw_file_data".to_string(), SharedData::Vec(file_data_vec));
+                unlocked_data.insert("raw_file_data", SharedData::Vec(file_data_vec));
             }
         });
 
         {
             let mut unlocked_data = data.lock().unwrap();
             let d: bool = true;
-            unlocked_data.insert("done_reading_files".to_string(), SharedData::Bool(d));
+            unlocked_data.insert("done_reading_files", SharedData::Bool(d));
         }
 
         Ok(())

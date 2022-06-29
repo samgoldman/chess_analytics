@@ -47,7 +47,7 @@ impl Step for AvgReduce {
         {
             let mut unlocked_data = data.lock().unwrap();
             unlocked_data.insert(
-                self.output_map_name.clone(),
+                &self.output_map_name,
                 SharedData::Map(HashMap::new()),
             );
         }
@@ -70,7 +70,7 @@ impl Step for AvgReduce {
                 let vec_to_filter = data.to_vec().unwrap();
 
                 let ret = vec_to_filter.clone();
-                unlocked_data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
+                unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
                 ret
             };
@@ -142,7 +142,7 @@ impl Step for AvgReduce {
                         ]),
                     );
                 }
-                unlocked_data.insert(self.output_map_name.clone(), SharedData::Map(map));
+                unlocked_data.insert(&self.output_map_name, SharedData::Map(map));
             }
 
             let unlocked_data = data.lock().unwrap();
@@ -166,7 +166,7 @@ impl Step for AvgReduce {
             let mut unlocked_data = data.lock().unwrap();
 
             let d: bool = true;
-            unlocked_data.insert(self.output_flag.clone(), SharedData::Bool(d));
+            unlocked_data.insert(&self.output_flag, SharedData::Bool(d));
 
             let potential_data = unlocked_data.get(&self.output_map_name);
             let data = match potential_data {
@@ -184,7 +184,7 @@ impl Step for AvgReduce {
                 let avg = total / count;
                 map.insert(key.clone(), SharedData::F64(avg));
             }
-            unlocked_data.insert(self.output_map_name.clone(), SharedData::Map(map));
+            unlocked_data.insert(&self.output_map_name, SharedData::Map(map));
         }
 
         Ok(())

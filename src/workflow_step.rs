@@ -12,7 +12,7 @@ pub type StepGeneric = Arc<Mutex<dyn StepGenericCore>>;
 
 #[automock]
 pub trait StepGenericCore: Send {
-    fn insert(&mut self, k: String, v: SharedData) -> Option<SharedData>;
+    fn insert(&mut self, k: &str, v: SharedData) -> Option<SharedData>;
     fn contains_key(&self, k: &str) -> bool;
     fn get(&self, k: &str) -> Option<SharedData>;
     fn remove(&mut self, k: &str) -> Option<SharedData>;
@@ -31,8 +31,8 @@ impl StepGenericCore for StepGenericCoreImpl {
         self.map.get(k).map(|v| (*v).clone())
     }
 
-    fn insert(&mut self, k: String, v: SharedData) -> Option<SharedData> {
-        self.map.insert(k, v)
+    fn insert(&mut self, k: &str, v: SharedData) -> Option<SharedData> {
+        self.map.insert(k.to_string(), v)
     }
 
     fn remove(&mut self, k: &str) -> Option<SharedData> {
