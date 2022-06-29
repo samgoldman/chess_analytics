@@ -1,10 +1,9 @@
 use crate::basic_types::{Cell, File, Move, PartialCell, Path, Piece, Player, PlayerPiece, Rank};
-use bincode::{Decode, Encode};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(PartialEq, Clone, Debug, Serialize, Deserialize, Encode, Decode)]
+#[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
 pub struct Board {
     board: HashMap<Cell, PlayerPiece>,
     to_move: Player,

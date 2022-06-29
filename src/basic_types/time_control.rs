@@ -1,7 +1,6 @@
-use bincode::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Clone, Debug, Deserialize, Serialize, Encode, Decode)]
+#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
 pub enum TimeControl {
     UltraBullet,
     Bullet,

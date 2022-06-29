@@ -4,28 +4,25 @@ use crate::chess::chess::root_as_game_list;
 use crate::chess::chess::Game;
 use crate::chess::chess::GameList;
 use crate::general_utils::hours_min_sec_to_duration;
-use bincode::{config, Decode, Encode};
 use itertools::izip;
+use postcard::{from_bytes, to_allocvec};
+use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
-#[derive(Debug, Encode, Decode)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Games(Vec<GameWrapper>);
 
 impl Games {
     pub fn serialize(&self) -> Vec<u8> {
-        let config = config::standard(); //.with_variable_int_encoding();
-        bincode::encode_to_vec(self, config).unwrap()
+        to_allocvec(self).unwrap()
     }
 
     pub fn deserialize(bytes: Vec<u8>) -> Self {
-        let config = config::standard(); //.with_variable_int_encoding();
-        let (decoded, _len): (Games, usize) =
-            bincode::decode_from_slice(&bytes[..], config).unwrap();
-        decoded
+        from_bytes(&bytes).unwrap()
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Encode, Decode)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GameWrapper {
     pub year: u16,
     pub month: u8,
@@ -71,15 +68,11 @@ impl GameWrapper {
     }
 
     pub fn serialize(&self) -> Vec<u8> {
-        let config = config::standard();
-        bincode::encode_to_vec(self, config).unwrap()
+        to_allocvec(self).unwrap()
     }
 
     pub fn deserialize(bytes: Vec<u8>) -> Self {
-        let config = config::standard();
-        let (decoded, _len): (GameWrapper, usize) =
-            bincode::decode_from_slice(&bytes[..], config).unwrap();
-        decoded
+        from_bytes(&bytes).unwrap()
     }
 
     fn new(game: Game) -> GameWrapper {
@@ -239,49 +232,3 @@ mod test_debug_impl {
         );
     }
 }
-
-// #[cfg(test)]
-// mod test_serialize {
-//     use super::*;
-//     use std::fs::File;
-//     use std::io::Read;
-
-//     use std::io::Write;
-//     use std::time::Instant; // bring trait into scope
-
-//     #[test]
-//     fn test_serialize_1() {
-//         let mut file = File::open("tests/data/simple_count_10_games.bin").unwrap();
-//         let mut file_data = Vec::new();
-
-//         file.read_to_end(&mut file_data).unwrap();
-
-//         let now = Instant::now();
-//         let mut games_vec = GameWrapper::from_game_list_data(&file_data);
-//         let original_time = now.elapsed();
-
-//         for game in &mut games_vec {
-//             game.boards = game.build_boards();
-//         }
-
-//         let games = Games(games_vec);
-
-//         let encoded_games = games.serialize();
-
-//         let x = encoded_games.clone();
-//         let now2 = Instant::now();
-//         let _deserialized_games = Games::deserialize(x);
-//         let new_time = now2.elapsed();
-
-//         println!(
-//             "{} bytes (original: {} bytes)!",
-//             encoded_games.len(),
-//             file_data.len()
-//         );
-//         println!("{:?} (original: {:?})!", new_time, original_time);
-
-//         let mut file = File::create("tests/data/tmp.bin").unwrap();
-
-//         file.write_all(&encoded_games).unwrap();
-//     }
-// }

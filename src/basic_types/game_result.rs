@@ -1,8 +1,7 @@
-use bincode::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(PartialEq, Clone, Debug, Copy, Serialize, Deserialize, Encode, Decode)]
+#[derive(PartialEq, Clone, Debug, Copy, Serialize, Deserialize)]
 pub enum GameResult {
     White = 0,
     Black = 1,

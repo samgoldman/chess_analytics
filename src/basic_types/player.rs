@@ -1,7 +1,6 @@
-use bincode::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Clone, Debug, Copy, Eq, Serialize, Deserialize, Encode, Decode)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq, Serialize, Deserialize)]
 pub enum Player {
     White,
     Black,

@@ -1,4 +1,3 @@
-use bincode::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use strum::IntoEnumIterator;
@@ -6,9 +5,7 @@ use strum_macros::EnumIter;
 
 // use std::ops;
 
-#[derive(
-    PartialEq, Clone, Debug, Copy, Eq, EnumIter, Hash, Serialize, Deserialize, Encode, Decode,
-)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq, EnumIter, Hash, Serialize, Deserialize)]
 pub enum Rank {
     _1 = 1,
     _2 = 2,

@@ -1,4 +1,3 @@
-use bincode::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 
 use crate::basic_types::cell::Cell;
@@ -15,7 +14,7 @@ macro_rules! partial_cell {
     };
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Encode, Decode)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct PartialCell {
     pub file: Option<File>,
     pub rank: Option<Rank>,
