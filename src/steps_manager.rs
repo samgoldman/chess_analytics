@@ -7,10 +7,7 @@ pub fn add_step_description(name: String, step: StepDescription, data: &StepGene
     let mut unlocked_data = data.lock().unwrap();
 
     if !unlocked_data.contains_key("step_descriptions") {
-        unlocked_data.insert(
-            "step_descriptions".to_string(),
-            SharedData::Map(HashMap::new()),
-        );
+        unlocked_data.insert("step_descriptions", SharedData::Map(HashMap::new()));
     }
 
     let mut step_vec = unlocked_data
@@ -20,7 +17,7 @@ pub fn add_step_description(name: String, step: StepDescription, data: &StepGene
         .unwrap();
     step_vec.insert(name, SharedData::StepDescription(step));
 
-    unlocked_data.insert("step_descriptions".to_string(), SharedData::Map(step_vec));
+    unlocked_data.insert("step_descriptions", SharedData::Map(step_vec));
 }
 
 // TODO use Result

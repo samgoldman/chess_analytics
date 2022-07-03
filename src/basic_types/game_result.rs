@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(PartialEq, Clone, Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum GameResult {
     White = 0,
     Black = 1,

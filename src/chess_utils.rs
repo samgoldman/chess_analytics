@@ -59,7 +59,7 @@ pub fn extract_coordinate(raw_coord: u16) -> (Option<File>, Option<Rank>) {
 #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
 pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
-    let moves = game.moves.clone();
+    let moves = &game.moves;
 
     // Verify this game has enough moves for the given opening
     if moves.len() < opening.len() {
@@ -100,7 +100,7 @@ pub fn get_game_elo(game: &GameWrapper) -> u32 {
 pub fn parse_movetext(movetext: &str) -> Vec<Move> {
     lazy_static! {
         static ref RE_MOVE: Regex = Regex::new(
-            r#"([NBRQK]?)([a-h1-9]{0,4})(x?)([a-h1-9]{2})(=?)([NBRQK]?)([+#]?)([?!]{0,2})"#
+            r#"([NBRQK]?)([a-h1-9]{0,4})(x?)([a-h1-9]{2})(=?)([NBRQK]?)([+#]?)([?!]{0,2})|(O-O-O)|(O-O)"#
         )
         .unwrap();
         static ref RE_COORD: Regex = Regex::new(r#"^([a-h]?)([1-8]?)$"#).unwrap();
@@ -108,7 +108,18 @@ pub fn parse_movetext(movetext: &str) -> Vec<Move> {
 
     RE_MOVE
         .captures_iter(movetext)
-        .map(|cap| {
+        .enumerate()
+        .map(|(index, cap)| {
+            if &cap[0] == "O-O" {
+                let is_white = index % 2 == 0;
+                let rank = if is_white { Rank::_1 } else { Rank::_8 };
+                return Move::new_to_from(None, None, File::_G, rank, Piece::King);
+            }
+            if &cap[0] == "O-O-O" {
+                let is_white = index % 2 == 0;
+                let rank = if is_white { Rank::_1 } else { Rank::_8 };
+                return Move::new_to_from(None, None, File::_C, rank, Piece::King);
+            }
             let piece_str = &cap[1];
 
             // Disambiguation, AKA from - only present if needed
@@ -213,6 +224,33 @@ mod test_parse_movetext {
         vec![
             Move::new_to(File::_F, Rank::_5, Piece::King),
             Move::new_to_from(Some(File::_D), None, File::_D, Rank::_3, Piece::Queen)
+        ]
+    );
+    // Not testing correctness
+    test_movetext!(
+        white_kingside_castle,
+        "1. O-O",
+        vec![Move::new_to(File::_G, Rank::_1, Piece::King)]
+    );
+    test_movetext!(
+        black_kingside_castle,
+        "1. a3 O-O",
+        vec![
+            Move::new_to(File::_A, Rank::_3, Piece::Pawn),
+            Move::new_to(File::_G, Rank::_8, Piece::King)
+        ]
+    );
+    test_movetext!(
+        white_queenside_castle,
+        "1. O-O-O",
+        vec![Move::new_to(File::_C, Rank::_1, Piece::King)]
+    );
+    test_movetext!(
+        black_queenside_castle,
+        "1. a3 O-O-O",
+        vec![
+            Move::new_to(File::_A, Rank::_3, Piece::Pawn),
+            Move::new_to(File::_C, Rank::_8, Piece::King)
         ]
     );
 }

@@ -2,7 +2,7 @@ use crate::basic_types::{Cell, File, Move, PartialCell, Path, Piece, Player, Pla
 use itertools::Itertools;
 use std::collections::HashMap;
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Board {
     board: HashMap<Cell, PlayerPiece>,
     to_move: Player,
@@ -390,7 +390,7 @@ impl Board {
             let fields: Vec<&str> = fen.split(' ').collect();
 
             if fields.len() == 6 {
-                let ranks: Vec<&str> = fields.get(0).unwrap().split('/').collect();
+                let ranks: Vec<&str> = fields.first().unwrap().split('/').collect();
 
                 if ranks.len() == 8 {
                     let mut board = Board::empty();

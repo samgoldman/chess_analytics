@@ -1,4 +1,4 @@
-#[derive(PartialEq, Clone, Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum Termination {
     Normal = 0,
     TimeForfeit = 1,
