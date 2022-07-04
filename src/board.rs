@@ -383,9 +383,9 @@ impl Board {
 
     #[allow(dead_code)]
     #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
-    pub fn from_fen(fen: &str) -> Result<Self, &str> {
+    pub fn from_fen(fen: &str) -> Result<Self, String> {
         if fen.is_empty() {
-            Err("Cannot parse empty FEN")
+            Err("Cannot parse empty FEN".to_string())
         } else {
             let fields: Vec<&str> = fen.split(' ').collect();
 
@@ -427,10 +427,10 @@ impl Board {
 
                     Ok(board)
                 } else {
-                    Err("Starting position has wrong number of rows")
+                    Err("Starting position has wrong number of rows".to_string())
                 }
             } else {
-                Err("Incorrect number of fields")
+                Err("Incorrect number of fields".to_string())
             }
         }
     }
@@ -499,10 +499,10 @@ mod test_from_fen {
     }
 
     tests! {
-        test_empty_fen: ("", Err("Cannot parse empty FEN")),
+        test_empty_fen: ("", Err("Cannot parse empty FEN".to_string())),
         test_default_fen: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Ok(Board::default())),
-        test_only_board_portion: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", Err("Incorrect number of fields")),
-        test_not_enough_rows: ("rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Err("Starting position has wrong number of rows")),
+        test_only_board_portion: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", Err("Incorrect number of fields".to_string())),
+        test_not_enough_rows: ("rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Err("Starting position has wrong number of rows".to_string())),
         test_black_to_move: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", Ok(
             Board {
                 board: [
