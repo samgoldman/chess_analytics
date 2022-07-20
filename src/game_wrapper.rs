@@ -9,8 +9,8 @@ use postcard::{from_bytes, to_allocvec};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Games(Vec<GameWrapper>);
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct Games(pub Vec<GameWrapper>);
 
 impl Games {
     pub fn serialize(&self) -> Vec<u8> {
@@ -24,6 +24,7 @@ impl Games {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GameWrapper {
+    // Combine into date field
     pub year: u16,
     pub month: u8,
     pub day: u8,
@@ -35,11 +36,15 @@ pub struct GameWrapper {
     pub time_control_main: u16,
     pub time_control_increment: u8,
     pub time_control: TimeControl,
+
+    // Combine into ECO field
+    pub eval_available: bool,
     pub eco_category: char,
     pub eco_subcategory: u8,
     pub moves: Vec<Move>,
     pub clock: Vec<Duration>,
-    pub eval_available: bool,
+
+    // Combine into Eval enum - either MateIn(i16) or Advantage(i16)
     pub eval_mate_in: Vec<i16>,
     pub eval_advantage: Vec<f32>,
     pub result: GameResult,
@@ -131,11 +136,16 @@ impl GameWrapper {
             .iter()
             .fold(vec![Board::default()], |mut boards, curr_move| {
                 let mut new_board = boards.last().unwrap().clone();
+                // dbg!(boards.len(), curr_move, boards.last().unwrap().to_fen());
                 new_board.move_piece(*curr_move);
                 boards.push(new_board);
 
                 boards
             })
+    }
+
+    pub fn eval_available(&self) -> bool {
+        !self.eval_advantage.is_empty()
     }
 }
 
@@ -228,7 +238,78 @@ mod test_debug_impl {
     fn test_default() {
         assert_eq!(
             format!("{:?}", GameWrapper::default()),
-            r#"GameWrapper { year: 0, month: 0, day: 0, site: "", white: "", black: "", white_rating: 0, black_rating: 0, time_control_main: 0, time_control_increment: 0, time_control: UltraBullet, eco_category: '-', eco_subcategory: 0, moves: [], clock: [], eval_available: false, eval_mate_in: [], eval_advantage: [], result: Draw, termination: Normal, white_diff: 0, black_diff: 0, boards: [] }"#
+            r#"GameWrapper { year: 0, month: 0, day: 0, site: "", white: "", black: "", white_rating: 0, black_rating: 0, time_control_main: 0, time_control_increment: 0, time_control: UltraBullet, eval_available: false, eco_category: '-', eco_subcategory: 0, moves: [], clock: [], eval_mate_in: [], eval_advantage: [], result: Draw, termination: Normal, white_diff: 0, black_diff: 0, boards: [] }"#
+        );
+    }
+}
+
+#[cfg(test)]
+mod test_serialize {
+    use super::*;
+    use std::fs::File;
+    use std::io::Read;
+
+    use std::io::Write;
+    use std::time::Instant; // bring trait into scope
+
+    #[test]
+    fn test_serialize_1() {
+        let mut file = File::open("tests/data/2022-01_000000.bin").unwrap();
+        let mut file_data = Vec::new();
+
+        let now = Instant::now();
+        file.read_to_end(&mut file_data).unwrap();
+        let original_read_time = now.elapsed();
+
+        let now = Instant::now();
+        let games_vec = GameWrapper::from_game_list_data(&file_data);
+        let original_time = now.elapsed();
+
+        let now = Instant::now();
+        // for game in &mut games_vec {
+        //     // dbg!(&game.site);
+        //     game.boards = game.build_boards();
+        // }
+        println!("Board generation: {:?}", Instant::now() - now);
+
+        let games = Games(games_vec);
+
+        let encoded_games = games.serialize();
+
+        let x = encoded_games.clone();
+        let now2 = Instant::now();
+        let deserialized_games = Games::deserialize(x);
+        let new_time = now2.elapsed();
+
+        println!(
+            "{} bytes (original: {} bytes), {}!",
+            encoded_games.len(),
+            file_data.len(),
+            encoded_games.len() as f64 / file_data.len() as f64
+        );
+        println!(
+            "{:?} (original: {:?}), {}!",
+            new_time,
+            original_time,
+            new_time.as_micros() as f64 / original_time.as_micros() as f64
+        );
+
+        let mut file = File::create("tests/data/tmp2022.bin").unwrap();
+
+        file.write_all(&encoded_games).unwrap();
+        assert_eq!(deserialized_games, games);
+
+        let mut file = File::open("tests/data/tmp2022.bin").unwrap();
+        let mut file_data = Vec::new();
+
+        let now = Instant::now();
+        file.read_to_end(&mut file_data).unwrap();
+        let new_read_time = now.elapsed();
+        println!(
+            "{:?} (original: {:?}), {}!",
+            new_read_time,
+            original_read_time,
+            new_read_time.as_micros() as f64 / original_read_time.as_micros() as f64
         );
     }
 }

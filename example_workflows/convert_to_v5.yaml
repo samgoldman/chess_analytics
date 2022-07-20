@@ -1,0 +1,29 @@
+steps:
+  init:
+    type: "GlobFileStep"
+    params: 
+      glob: /data/data_scratch/lichess_data/converted_v4/2022-01/*.bin*
+      child: parallel_step
+  parallel_step:
+    type: ParallelStep
+    params:
+      children:
+        - "load_files"
+        - "parse_games"
+        - "export_games"
+  load_files:
+    type: Bz2DecompressStep
+    params:
+      max_queue_size: 10
+      full_queue_delay_ms: 332
+  parse_games:
+    type: ParseBinGame
+  export_games:
+    type: ExportGames
+    params:
+      input: parsed_games
+      input_flag: done_parsing_games
+      file_prefix: 2022-01
+      output_path: /data/data_scratch/lichess_data/converted_v5/2022-01
+  noop:
+    type: NoopStep

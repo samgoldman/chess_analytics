@@ -1,5 +1,6 @@
 use crate::basic_types::file::File;
 use crate::basic_types::rank::Rank;
+use packed_struct::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
@@ -17,6 +18,32 @@ macro_rules! cell {
 pub struct Cell {
     pub file: File,
     pub rank: Rank,
+}
+
+impl PackedStruct for Cell {
+    type ByteArray = [u8; 1];
+
+    fn pack(&self) -> packed_struct::PackingResult<Self::ByteArray> {
+        let mut n: u8 = 0;
+
+        n |= self.file as u8;
+        n |= (self.rank as u8) << 4;
+
+        Ok([n])
+    }
+
+    fn unpack(src: &Self::ByteArray) -> packed_struct::PackingResult<Self> {
+        assert!(src.len() == 1);
+
+        let file_raw = src[0] & 0x0F;
+        let rank_raw = (src[0] & 0xF0) >> 4;
+
+        let file = File::from_uint(file_raw as u32);
+
+        let rank = Rank::from_uint(rank_raw as u32);
+
+        Ok(Self { file, rank })
+    }
 }
 
 impl Cell {

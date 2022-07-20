@@ -3,6 +3,7 @@ mod bz2_decompress_step;
 mod checkmate_filter;
 mod count_map;
 mod eval_available_filter;
+mod export_games;
 mod game_elo_bin;
 mod glob_file_step;
 mod init_bins_step;
@@ -25,6 +26,7 @@ use bz2_decompress_step::Bz2DecompressStep;
 use checkmate_filter::CheckmateFilter;
 use count_map::CountMap;
 use eval_available_filter::EvalAvailableFilter;
+use export_games::ExportGames;
 use game_elo_bin::GameEloBin;
 use glob_file_step::GlobFileStep;
 use init_bins_step::InitBinStep;
@@ -64,6 +66,7 @@ pub fn get_step_by_name_and_params(
         "EvalAvailableFilter" => EvalAvailableFilter::try_new(params),
         "ParseBinGame" => Ok(ParseBinGame::boxed_new()),
         "GlobFileStep" => GlobFileStep::try_new(params),
+        "ExportGames" => ExportGames::try_new(params),
         _ => Err(format!("Step with name '{}' not found", name)),
     }
 }

@@ -17,7 +17,7 @@ impl EvalAvailableFilter {
     }
 
     pub fn create_filter() -> &'static FilterFn {
-        &(|game: &GameWrapper| game.eval_available)
+        &(|game: &GameWrapper| game.eval_available())
     }
 }
 
@@ -126,14 +126,14 @@ mod test_filter_fn {
     #[test]
     fn test_true() {
         let mut g = GameWrapper::default();
-        g.eval_available = true;
+        g.eval_advantage = vec![0.0];
 
         assert_eq!(true, EvalAvailableFilter::create_filter()(&g));
     }
     #[test]
     fn test_false() {
         let mut g = GameWrapper::default();
-        g.eval_available = false;
+        g.eval_advantage = vec![];
 
         assert_eq!(false, EvalAvailableFilter::create_filter()(&g));
     }
