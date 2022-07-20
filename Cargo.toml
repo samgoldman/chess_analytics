@@ -17,20 +17,20 @@ path = "src/main.rs"
 [dependencies]
 flatbuffers = "2.0.0"
 lazy_static = "1.4.0"
-regex = "1.5.6"
+regex = "1.6.0"
 glob = "0.3.0"
 bzip2 = "0.4.1"
 rayon = "1.5.3"
-serde = { version = "1.0.137", features = ["derive"] }
-serde_yaml = "0.8.24"
+serde = { version = "1.0.139", features = ["derive"] }
+serde_yaml = "0.8.25"
 itertools = "0.10.0"
 mockall = "0.11.1"
 mockall_double = "0.3.0"
 tui = "0.18.0"
 termion = "1.5.6"
-crossterm = "0.23"
 postcard = { version = "1.0.0", features = ["alloc"] }
 packed_struct = "0.10.0"
+crossterm = "0.24.0"
 
 [dev-dependencies]
 predicates = "2.1.1"

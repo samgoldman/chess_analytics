@@ -121,7 +121,7 @@ name = "chess_analytics"
 version = "0.1.0"
 dependencies = [
  "bzip2",
- "crossterm",
+ "crossterm 0.24.0",
  "flatbuffers",
  "flatc-rust",
  "glob",
@@ -221,6 +221,22 @@ name = "crossterm"
 version = "0.23.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2102ea4f781910f8a5b98dd061f4c2023f479ce7bb1236330099ceb5a93cf17"
+dependencies = [
+ "bitflags",
+ "crossterm_winapi",
+ "libc",
+ "mio",
+ "parking_lot",
+ "signal-hook",
+ "signal-hook-mio",
+ "winapi",
+]
+
+[[package]]
+name = "crossterm"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab9f7409c70a38a56216480fba371ee460207dd8926ccf5b4160591759559170"
 dependencies = [
  "bitflags",
  "crossterm_winapi",
@@ -817,9 +833,9 @@ dependencies = [
 
 [[package]]
 name = "serde_yaml"
-version = "0.8.26"
+version = "0.8.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "578a7433b776b56a35785ed5ce9a7e777ac0598aac5a6dd1b4b18a307c7fc71b"
+checksum = "1ec0091e1f5aa338283ce049bd9dfefd55e1f168ac233e85c1ffe0038fb48cbe"
 dependencies = [
  "indexmap",
  "ryu",
@@ -941,7 +957,7 @@ checksum = "96fe69244ec2af261bced1d9046a6fee6c8c2a6b0228e59e5ba39bc8ba4ed729"
 dependencies = [
  "bitflags",
  "cassowary",
- "crossterm",
+ "crossterm 0.23.2",
  "unicode-segmentation",
  "unicode-width",
 ]
