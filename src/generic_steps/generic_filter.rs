@@ -1,11 +1,11 @@
 use crate::{
-    game_wrapper::GameWrapper,
+    game::Game,
     workflow_step::{SharedData, StepGeneric},
 };
 #[cfg(test)]
 use mockall::automock;
 
-pub type FilterFn = dyn Fn(&GameWrapper) -> bool;
+pub type FilterFn = dyn Fn(&Game) -> bool;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct GenericFilter {
@@ -202,8 +202,7 @@ mod test_process {
     pub struct FilterStep {}
     #[automock]
     impl FilterStep {
-        #[cfg_attr(coverage_nightly, no_coverage)]
-        pub fn filter(_game: &GameWrapper) -> bool {
+        pub fn filter(_game: &Game) -> bool {
             false
         }
     }
@@ -215,7 +214,7 @@ mod test_process {
         let ctx = MockFilterStep::filter_context();
         let mut data = MockStepGenericCore::new();
 
-        let default_game = GameWrapper::default();
+        let default_game = Game::default();
         let game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
 
         // Set up output vectors
@@ -289,7 +288,7 @@ mod test_process {
         let ctx = MockFilterStep::filter_context();
         let mut data = MockStepGenericCore::new();
 
-        let default_game = GameWrapper::default();
+        let default_game = Game::default();
         let game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
 
         // Set up output vectors
@@ -363,7 +362,7 @@ mod test_process {
         let ctx = MockFilterStep::filter_context();
         let mut data = MockStepGenericCore::new();
 
-        let default_game = GameWrapper::default();
+        let default_game = Game::default();
         let game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
 
         // Set up output vectors
@@ -422,7 +421,7 @@ mod test_process {
         let ctx = MockFilterStep::filter_context();
         let mut data = MockStepGenericCore::new();
 
-        let default_game = GameWrapper::default();
+        let default_game = Game::default();
         let game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
 
         // Set up output vectors
@@ -464,7 +463,7 @@ mod test_process {
         let ctx = MockFilterStep::filter_context();
         let mut data = MockStepGenericCore::new();
 
-        let default_game = GameWrapper::default();
+        let default_game = Game::default();
         let game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
 
         // Set up output vectors

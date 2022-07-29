@@ -1,6 +1,9 @@
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
-#[derive(PartialEq, Clone, Debug, Copy, Eq, Hash)]
+// use std::ops;
+
+#[derive(PartialEq, Clone, Debug, Copy, Eq, Hash, Serialize, Deserialize)]
 pub enum Rank {
     _1 = 1,
     _2 = 2,

@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
-#[derive(PartialEq, Clone, Debug, Copy, Eq, Hash)]
+#[derive(PartialEq, Clone, Debug, Copy, Eq, Hash, Serialize, Deserialize)]
 pub enum File {
     _A = 1,
     _B = 2,

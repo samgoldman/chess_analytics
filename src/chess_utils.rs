@@ -1,5 +1,5 @@
-use crate::basic_types::{File, Move, Piece, Rank};
-use crate::game_wrapper::GameWrapper;
+use crate::basic_types::{File, Move, OptionalPiece, Piece, Rank};
+use crate::game::Game;
 use regex::Regex;
 
 #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
@@ -36,15 +36,15 @@ fn int_to_rank(int: u16) -> Option<Rank> {
 
 // Look at the first three bits to get the piece
 #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
-pub fn extract_piece(raw_metadata: u16) -> Option<Piece> {
+pub fn extract_piece(raw_metadata: u16) -> OptionalPiece {
     match raw_metadata & 0b0111 {
-        0 => None,
-        1 => Some(Piece::Pawn),
-        2 => Some(Piece::Knight),
-        3 => Some(Piece::Bishop),
-        4 => Some(Piece::Rook),
-        5 => Some(Piece::Queen),
-        6 => Some(Piece::King),
+        0 => OptionalPiece::new_none(),
+        1 => OptionalPiece::new_some(Piece::Pawn),
+        2 => OptionalPiece::new_some(Piece::Knight),
+        3 => OptionalPiece::new_some(Piece::Bishop),
+        4 => OptionalPiece::new_some(Piece::Rook),
+        5 => OptionalPiece::new_some(Piece::Queen),
+        6 => OptionalPiece::new_some(Piece::King),
         _ => panic!("Piece not recognized: 0x{:02x}", raw_metadata),
     }
 }
@@ -57,7 +57,7 @@ pub fn extract_coordinate(raw_coord: u16) -> (Option<File>, Option<Rank>) {
 }
 
 #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
-pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
+pub fn has_opening(game: &Game, opening: &[Move]) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
     let moves = &game.moves;
 
@@ -90,7 +90,7 @@ pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
 // Game elo is the average of the two player's ratings
 #[inline]
 #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
-pub fn get_game_elo(game: &GameWrapper) -> u32 {
+pub fn get_game_elo(game: &Game) -> u32 {
     (u32::from(game.white_rating) + u32::from(game.black_rating)) / 2
 }
 
@@ -390,13 +390,13 @@ mod test_extract_piece {
     }
 
     tests! {
-        test_0x00: (0x00, None),
-        test_0x1: (0x1, Some(Piece::Pawn)),
-        test_0x2: (0x2, Some(Piece::Knight)),
-        test_0x3: (0x3, Some(Piece::Bishop)),
-        test_0x4: (0x4, Some(Piece::Rook)),
-        test_0x5: (0x5, Some(Piece::Queen)),
-        test_0x6: (0x6, Some(Piece::King)),
+        test_0x00: (0x00, OptionalPiece::new_none()),
+        test_0x1: (0x1, OptionalPiece::new_some(Piece::Pawn)),
+        test_0x2: (0x2, OptionalPiece::new_some(Piece::Knight)),
+        test_0x3: (0x3, OptionalPiece::new_some(Piece::Bishop)),
+        test_0x4: (0x4, OptionalPiece::new_some(Piece::Rook)),
+        test_0x5: (0x5, OptionalPiece::new_some(Piece::Queen)),
+        test_0x6: (0x6, OptionalPiece::new_some(Piece::King)),
     }
 
     macro_rules! test_panics {
@@ -420,7 +420,7 @@ mod test_extract_piece {
 #[cfg(test)]
 mod test_get_game_elo {
     use super::*;
-    use crate::game_wrapper::GameWrapper;
+    use crate::game::Game;
 
     macro_rules! tests {
         ($($name:ident: $value:expr,)*) => {
@@ -428,7 +428,7 @@ mod test_get_game_elo {
             #[test]
             fn $name() {
                 let (white_rating, black_rating, expected) = $value;
-                let mut test_game = GameWrapper::default();
+                let mut test_game = Game::default();
                 test_game.white_rating = white_rating;
                 test_game.black_rating = black_rating;
 
@@ -455,7 +455,7 @@ mod test_has_opening {
             #[test]
             fn $name() {
                 let (board_moves, opening_moves, expected) = $value;
-                let mut test_game = GameWrapper::default();
+                let mut test_game = Game::default();
                 test_game.moves = board_moves;
 
                 assert_eq!(has_opening(&test_game, &opening_moves), expected);

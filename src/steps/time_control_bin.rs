@@ -1,4 +1,4 @@
-use crate::game_wrapper::GameWrapper;
+use crate::game::Game;
 use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
@@ -40,7 +40,7 @@ impl TimeControlBin {
         }))
     }
 
-    pub fn bin(game: &GameWrapper, _filter: &TimeControlBin) -> SharedData {
+    pub fn bin(game: &Game, _filter: &TimeControlBin) -> SharedData {
         SharedData::String(format!("{:?}", game.time_control))
     }
 }
