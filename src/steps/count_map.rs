@@ -1,4 +1,4 @@
-use crate::game_wrapper::GameWrapper;
+use crate::game::Game;
 use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
@@ -40,7 +40,7 @@ impl CountMap {
         }))
     }
 
-    pub fn map(_game: &GameWrapper, _filter: &CountMap) -> SharedData {
+    pub fn map(_game: &Game, _filter: &CountMap) -> SharedData {
         SharedData::U64(1)
     }
 }

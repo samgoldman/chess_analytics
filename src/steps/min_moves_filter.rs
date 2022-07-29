@@ -1,4 +1,4 @@
-use crate::game_wrapper::GameWrapper;
+use crate::game::Game;
 use crate::generic_steps::{FilterFn, GenericFilter};
 use crate::workflow_step::{Step, StepGeneric};
 
@@ -26,7 +26,7 @@ impl MinMovesFilter {
 
     pub fn create_filter(&self) -> Box<FilterFn> {
         let min = self.min_moves;
-        let filter = move |game: &GameWrapper| game.moves.len() as u64 >= min;
+        let filter = move |game: &Game| game.moves.len() as u64 >= min;
         Box::new(filter)
     }
 }

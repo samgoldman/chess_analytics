@@ -1,5 +1,5 @@
 // use crate::steps_manager::get_step_description;
-use crate::game_wrapper::GameWrapper;
+use crate::game::Games;
 use crate::workflow_step::{BoxedStep, SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
@@ -64,7 +64,8 @@ impl Step for ParseBinGame {
             };
 
             if !file_data.is_empty() {
-                let mut games = GameWrapper::from_game_list_data(&file_data)
+                let mut games = Games::deserialize(file_data)
+                    .0
                     .iter()
                     .map(|g| SharedData::Game(g.clone()))
                     .collect::<Vec<SharedData>>();

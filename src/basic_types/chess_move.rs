@@ -87,7 +87,6 @@ impl Move {
         }
     }
 
-    #[cfg(test)]
     pub fn new_to(to_file: File, to_rank: Rank, piece_moved: Piece) -> Self {
         Move {
             from: PartialCell {

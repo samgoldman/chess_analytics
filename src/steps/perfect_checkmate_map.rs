@@ -1,5 +1,5 @@
 use crate::basic_types::GameResult;
-use crate::game_wrapper::GameWrapper;
+use crate::game::Game;
 use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
@@ -41,7 +41,7 @@ impl PerfectCheckmateMap {
         }))
     }
 
-    pub fn map(game: &GameWrapper, _filter: &PerfectCheckmateMap) -> SharedData {
+    pub fn map(game: &Game, _filter: &PerfectCheckmateMap) -> SharedData {
         assert!(
             game.eval_available(),
             "PerfectCheckmateMap received game that did not have evaluation available!"

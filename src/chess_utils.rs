@@ -1,5 +1,5 @@
 use crate::basic_types::{File, Move, OptionalPiece, Piece, Rank};
-use crate::game_wrapper::GameWrapper;
+use crate::game::Game;
 use regex::Regex;
 
 fn int_to_file(int: u16) -> Option<File> {
@@ -52,7 +52,7 @@ pub fn extract_coordinate(raw_coord: u16) -> (Option<File>, Option<Rank>) {
     (file, rank)
 }
 
-pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
+pub fn has_opening(game: &Game, opening: &[Move]) -> bool {
     // Extract files - if none, game has no opening, so it doesn't have this opening
     let moves = &game.moves;
 
@@ -84,7 +84,7 @@ pub fn has_opening(game: &GameWrapper, opening: &[Move]) -> bool {
 
 // Game elo is the average of the two player's ratings
 #[inline]
-pub fn get_game_elo(game: &GameWrapper) -> u32 {
+pub fn get_game_elo(game: &Game) -> u32 {
     (u32::from(game.white_rating) + u32::from(game.black_rating)) / 2
 }
 
@@ -412,7 +412,7 @@ mod test_extract_piece {
 #[cfg(test)]
 mod test_get_game_elo {
     use super::*;
-    use crate::game_wrapper::GameWrapper;
+    use crate::game::Game;
 
     macro_rules! tests {
         ($($name:ident: $value:expr,)*) => {
@@ -420,7 +420,7 @@ mod test_get_game_elo {
             #[test]
             fn $name() {
                 let (white_rating, black_rating, expected) = $value;
-                let mut test_game = GameWrapper::default();
+                let mut test_game = Game::default();
                 test_game.white_rating = white_rating;
                 test_game.black_rating = black_rating;
 
@@ -447,7 +447,7 @@ mod test_has_opening {
             #[test]
             fn $name() {
                 let (board_moves, opening_moves, expected) = $value;
-                let mut test_game = GameWrapper::default();
+                let mut test_game = Game::default();
                 test_game.moves = board_moves;
 
                 assert_eq!(has_opening(&test_game, &opening_moves), expected);

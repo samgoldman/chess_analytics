@@ -1,7 +1,7 @@
 use std::{fs::File, io::Write};
 
 use crate::{
-    game_wrapper::GameWrapper,
+    game::Game,
     workflow_step::{SharedData, Step, StepGeneric},
 };
 use bzip2::write::BzEncoder;
@@ -56,9 +56,8 @@ impl ExportGames {
         }))
     }
 
-    fn save_games(&self, games: Vec<GameWrapper>, count: i32) {
-        println!("Writing {} games to {}", games.len(), count);
-        let encoded_games = crate::game_wrapper::Games(games).serialize();
+    fn save_games(&self, games: Vec<Game>, count: i32) {
+        let encoded_games = crate::game::Games(games).serialize();
 
         let mut pos = 0;
         let buffer = File::create(format!(
@@ -109,7 +108,7 @@ impl Step for ExportGames {
             }
 
             while games.len() >= self.games_per_file {
-                let to_save: Vec<GameWrapper> = games.drain(0..self.games_per_file).collect();
+                let to_save: Vec<Game> = games.drain(0..self.games_per_file).collect();
 
                 self.save_games(to_save, count);
 

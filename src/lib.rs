@@ -14,13 +14,13 @@ use std::sync::{Arc, Mutex};
 #[macro_use]
 mod basic_types;
 mod board;
-mod chess_generated;
 mod chess_utils;
-mod game_wrapper;
+mod game;
 mod general_utils;
 mod generic_steps;
 #[macro_use]
 mod macros;
+mod parse_pgn;
 mod steps;
 mod steps_manager;
 mod workflow_step;
@@ -86,6 +86,15 @@ where
     let data: StepGeneric = Arc::new(Mutex::new(StepGenericCoreImpl {
         map: HashMap::new(),
     }));
+
+    add_step_description(
+        "noop".to_string(),
+        StepDescription {
+            step_type: "Noop".to_string(),
+            parameters: None,
+        },
+        &data,
+    );
 
     for (step_name, step_data) in steps_map.iter() {
         let step_name = step_name.as_str().unwrap().to_string();

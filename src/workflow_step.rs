@@ -1,4 +1,4 @@
-use crate::game_wrapper::GameWrapper;
+use crate::game::Game;
 use crate::steps::get_step_by_name_and_params;
 use mockall::automock;
 use std::collections::HashMap;
@@ -48,7 +48,7 @@ pub enum SharedData {
     PathBuf(PathBuf),
     FileData(Vec<u8>),
     Bool(bool),
-    Game(GameWrapper),
+    Game(Game),
     BinnedValue((Box<SharedData>, Vec<SharedData>)),
     String(String),
     Vec(Vec<SharedData>),

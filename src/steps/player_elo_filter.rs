@@ -1,4 +1,4 @@
-use crate::game_wrapper::GameWrapper;
+use crate::game::Game;
 use crate::generic_steps::{FilterFn, GenericFilter};
 use crate::workflow_step::{Step, StepGeneric};
 
@@ -51,7 +51,7 @@ impl PlayerEloFilter {
         let min_elo = self.min_elo;
         let max_elo = self.max_elo;
 
-        let filter = move |game: &GameWrapper| {
+        let filter = move |game: &Game| {
             let min_res = match min_elo {
                 Some(value) => {
                     let white_violation = filter_white && u64::from(game.white_rating) < value;

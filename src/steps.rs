@@ -12,6 +12,7 @@ mod min_moves_filter;
 mod noop_step;
 mod parallel_step;
 mod parse_bin_game_step;
+mod parse_pgn_step;
 mod perfect_checkmate_map;
 mod player_elo_filter;
 mod save_data_step;
@@ -35,6 +36,7 @@ use min_moves_filter::MinMovesFilter;
 use noop_step::NoopStep;
 use parallel_step::ParallelStep;
 use parse_bin_game_step::ParseBinGame;
+use parse_pgn_step::ParsePgnStep;
 use perfect_checkmate_map::PerfectCheckmateMap;
 use player_elo_filter::PlayerEloFilter;
 use save_data_step::SaveDataStep;
@@ -67,6 +69,7 @@ pub fn get_step_by_name_and_params(
         "ParseBinGame" => Ok(ParseBinGame::boxed_new()),
         "GlobFileStep" => GlobFileStep::try_new(params),
         "ExportGames" => ExportGames::try_new(params),
+        "ParsePgnStep" => ParsePgnStep::try_new(params),
         _ => Err(format!("Step with name '{}' not found", name)),
     }
 }

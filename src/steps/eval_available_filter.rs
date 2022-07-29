@@ -1,4 +1,4 @@
-use crate::game_wrapper::GameWrapper;
+use crate::game::Game;
 use crate::generic_steps::FilterFn;
 #[mockall_double::double]
 use crate::generic_steps::GenericFilter;
@@ -17,7 +17,7 @@ impl EvalAvailableFilter {
     }
 
     pub fn create_filter() -> &'static FilterFn {
-        &(|game: &GameWrapper| game.eval_available())
+        &(|game: &Game| game.eval_available())
     }
 }
 
@@ -119,20 +119,20 @@ mod test_try_new {
 
 #[cfg(test)]
 mod test_filter_fn {
-    use crate::game_wrapper::GameWrapper;
+    use crate::game::Game;
 
     use super::EvalAvailableFilter;
 
     #[test]
     fn test_true() {
-        let mut g = GameWrapper::default();
+        let mut g = Game::default();
         g.eval_advantage = vec![0.0];
 
         assert_eq!(true, EvalAvailableFilter::create_filter()(&g));
     }
     #[test]
     fn test_false() {
-        let mut g = GameWrapper::default();
+        let mut g = Game::default();
         g.eval_advantage = vec![];
 
         assert_eq!(false, EvalAvailableFilter::create_filter()(&g));
