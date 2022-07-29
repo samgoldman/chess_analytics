@@ -439,7 +439,7 @@ mod parse_header {
         let parser = PgnParser::new();
         assert_eq!(
             parser.parse_header(header, &mut game),
-            Err("Unsupported header field: Unsupported".to_string())
+            Err("Unrecognized header field: Unsupported".to_string())
         );
         assert_eq!(game, Game::default());
     }
