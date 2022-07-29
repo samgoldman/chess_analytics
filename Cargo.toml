@@ -28,6 +28,8 @@ mockall = "0.11.2"
 mockall_double = "0.3.0"
 tui = "0.18.0"
 termion = "1.5.6"
+postcard = { version = "1.0.0", features = ["alloc"] }
+packed_struct = "0.10.0"
 crossterm = "0.24.0"
 
 [dev-dependencies]

@@ -1,4 +1,7 @@
-#[derive(PartialEq, Clone, Debug, Copy, Eq)]
+use packed_struct::prelude::PrimitiveEnum;
+use serde::{Deserialize, Serialize};
+
+#[derive(PartialEq, Clone, Debug, Copy, Eq, Serialize, Deserialize, PrimitiveEnum)]
 pub enum Piece {
     Pawn = 1,
     Knight = 2,

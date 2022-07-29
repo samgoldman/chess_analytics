@@ -1,5 +1,5 @@
 use crate::chess_utils::get_game_elo;
-use crate::game_wrapper::GameWrapper;
+use crate::game::Game;
 use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
@@ -45,7 +45,7 @@ impl GameEloBin {
         }))
     }
 
-    pub fn bin(game: &GameWrapper, bin: &GameEloBin) -> SharedData {
+    pub fn bin(game: &Game, bin: &GameEloBin) -> SharedData {
         SharedData::String(format!(
             "{:04}",
             (u64::from(get_game_elo(game)) / bin.bucket_size) * bin.bucket_size
@@ -136,13 +136,13 @@ mod test_try_new {
 
 #[cfg(test)]
 mod test_game_elo_bin {
-    use crate::game_wrapper::GameWrapper;
+    use crate::game::Game;
 
     use super::*;
 
     #[test]
     fn test_game_elo_bin_1() {
-        let mut game = GameWrapper::default();
+        let mut game = Game::default();
 
         let bin = GameEloBin {
             input_vec_name: "".to_string(),
@@ -164,7 +164,7 @@ mod test_game_elo_bin {
 
     #[test]
     fn test_game_elo_bin_2() {
-        let mut game = GameWrapper::default();
+        let mut game = Game::default();
 
         let bin = GameEloBin {
             input_vec_name: "".to_string(),

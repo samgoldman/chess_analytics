@@ -4,7 +4,7 @@ steps:
   init:
     type: "GlobFileStep"
     params: 
-      glob: /data/data_scratch/lichess_data/converted_v4/2017-0[1-6]/*.bin*
+      glob: /data/data_scratch/lichess_data/converted_v5/2022-01/*.bin*
       child: parallel_step
   parallel_step:
     type: ParallelStep
@@ -29,7 +29,7 @@ steps:
       max_queue_size: 10
       full_queue_delay_ms: 332
   parse_games:
-    type: ParseBinGame
+    type: ParseV5BinGame
   monitor:
     type: UiMonitorStep
     params: 

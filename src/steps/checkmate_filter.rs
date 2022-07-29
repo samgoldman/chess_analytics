@@ -1,5 +1,5 @@
 use crate::basic_types::Termination;
-use crate::game_wrapper::GameWrapper;
+use crate::game::Game;
 use crate::generic_steps::{FilterFn, GenericFilter};
 use crate::workflow_step::{Step, StepGeneric};
 
@@ -16,7 +16,7 @@ impl CheckmateFilter {
     }
 
     pub fn create_filter() -> &'static FilterFn {
-        &|game: &GameWrapper| {
+        &|game: &Game| {
             game.termination == Termination::Normal
                 && !game.moves.is_empty()
                 && game.moves.last().unwrap().mates

@@ -1,4 +1,6 @@
-#[derive(PartialEq, Eq, Clone, Debug)]
+use serde::{Deserialize, Serialize};
+
+#[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
 pub enum TimeControl {
     UltraBullet,
     Bullet,

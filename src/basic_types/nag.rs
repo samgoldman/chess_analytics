@@ -1,4 +1,7 @@
-#[derive(PartialEq, Eq, Clone, Debug, Copy)]
+use packed_struct::prelude::PrimitiveEnum_u8;
+use serde::{Deserialize, Serialize};
+
+#[derive(PartialEq, Eq, Clone, Debug, Copy, Serialize, Deserialize, PrimitiveEnum_u8)]
 pub enum NAG {
     None = 0,
     Questionable = 1,

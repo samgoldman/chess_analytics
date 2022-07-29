@@ -1,18 +1,67 @@
-use crate::basic_types::{Cell, File, PartialCell, Piece, Rank, NAG};
+use crate::basic_types::{Cell, File, OptionalPiece, PartialCell, Piece, Rank, NAG};
 use crate::chess_utils::{extract_coordinate, extract_piece};
+use packed_struct::prelude::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Eq, Clone, Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy, PackedStruct)]
+#[packed_struct(bit_numbering = "msb0", size_bytes = "4")]
 pub struct Move {
+    #[packed_field(size_bytes = "1")]
     pub from: PartialCell,
+    #[packed_field(size_bytes = "1")]
     pub to: Cell,
 
     // Metadata
+    #[packed_field(size_bits = "3", ty = "enum")]
     pub piece_moved: Piece,
+    #[packed_field(size_bits = "1")]
     pub captures: bool,
+    #[packed_field(size_bits = "1")]
     pub checks: bool,
+    #[packed_field(size_bits = "1")]
     pub mates: bool,
+    #[packed_field(size_bits = "2", ty = "enum")]
     pub nag: NAG,
-    pub promoted_to: Option<Piece>,
+    #[packed_field(size_bits = "3")]
+    pub promoted_to: OptionalPiece,
+}
+
+impl Serialize for Move {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let bytes = self.pack().unwrap();
+        serializer.serialize_bytes(&bytes)
+    }
+}
+
+impl<'de> Deserialize<'de> for Move {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct MoveVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for MoveVisitor {
+            type Value = Move;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("struct Move")
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                assert!(v.len() == 4);
+                let vv: &[u8; 4] = v.try_into().unwrap();
+                Ok(Move::unpack(vv).unwrap())
+            }
+        }
+
+        deserializer.deserialize_bytes(MoveVisitor)
+    }
 }
 
 impl Move {
@@ -34,11 +83,10 @@ impl Move {
             checks: false,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: OptionalPiece::new_none(),
         }
     }
 
-    #[cfg(test)]
     pub fn new_to(to_file: File, to_rank: Rank, piece_moved: Piece) -> Self {
         Move {
             from: PartialCell {
@@ -51,7 +99,7 @@ impl Move {
             checks: false,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: OptionalPiece::new_none(),
         }
     }
 
@@ -113,7 +161,7 @@ mod test_convert {
                 checks: true,
                 mates: false,
                 nag: NAG::Questionable,
-                promoted_to: None,
+                promoted_to: OptionalPiece::new_none(),
             },
             Move::convert_from_binary_move_data((data, meta))
         );
@@ -137,7 +185,7 @@ mod test_default_impls {
             checks: true,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: OptionalPiece::new_none(),
         };
         assert_eq!(x.clone(), x);
     }
@@ -155,8 +203,8 @@ mod test_default_impls {
             checks: true,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: OptionalPiece::new_none(),
         };
-        assert_eq!(format!("{:?}", x), "Move { from: PartialCell { file: Some(_B), rank: Some(_2) }, to: Cell { file: _A, rank: _1 }, piece_moved: Bishop, captures: false, checks: true, mates: false, nag: None, promoted_to: None }");
+        assert_eq!(format!("{:?}", x), "Move { from: PartialCell { file: Some(_B), rank: Some(_2) }, to: Cell { file: _A, rank: _1 }, piece_moved: Bishop, captures: false, checks: true, mates: false, nag: None, promoted_to: OptionalPiece { optional_piece: None } }");
     }
 }

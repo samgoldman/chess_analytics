@@ -1,8 +1,9 @@
 use crate::basic_types::{Cell, File, Move, PartialCell, Path, Piece, Player, PlayerPiece, Rank};
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
 pub struct Board {
     board: HashMap<Cell, PlayerPiece>,
     to_move: Player,
@@ -194,6 +195,7 @@ impl Board {
     // TODO convert to Ok/Err
     pub fn find_origin(&self, piece: Piece, dest: Cell, from: PartialCell) -> Cell {
         let possible_origins = self.find_possible_origins(piece, dest, from);
+        // dbg!(&possible_origins);
 
         let filtered_origins = possible_origins
             .iter()
@@ -214,8 +216,32 @@ impl Board {
             .filter(|possible_origin| {
                 if piece == Piece::Pawn {
                     let diff_file = dest.file as i32 - possible_origin.file as i32;
+                    // dbg!(diff_file, possible_origin, self.to_move, dest.rank, self.is_cell_empty(dest), self.is_cell_empty(cell!(dest.file, Rank::_5)));
 
-                    if self.is_cell_empty(dest) {
+                    // TODO: yeah, get rid of this!
+                    if (diff_file != 0
+                        && self.to_move == Player::White
+                        && dest.rank == Rank::_6
+                        && self.is_cell_empty(dest)
+                        && !self.is_cell_empty(cell!(dest.file, Rank::_5))
+                        && *self.board.get(&cell!(dest.file, Rank::_5)).unwrap()
+                            == (PlayerPiece {
+                                player: Player::Black,
+                                piece: Piece::Pawn,
+                            }))
+                        || (diff_file != 0
+                            && self.to_move == Player::Black
+                            && dest.rank == Rank::_3
+                            && self.is_cell_empty(dest)
+                            && !self.is_cell_empty(cell!(dest.file, Rank::_4))
+                            && *self.board.get(&cell!(dest.file, Rank::_4)).unwrap()
+                                == (PlayerPiece {
+                                    player: Player::White,
+                                    piece: Piece::Pawn,
+                                }))
+                    {
+                        true
+                    } else if self.is_cell_empty(dest) {
                         diff_file == 0 // If not capturing, must not be diagonal
                     } else {
                         diff_file != 0 // If capturing, must be diagonal
@@ -1084,6 +1110,7 @@ mod test_find_origin {
 #[cfg(test)]
 mod test_move_piece {
     use super::*;
+    use crate::basic_types::OptionalPiece;
     use crate::basic_types::NAG;
 
     macro_rules! tests {
@@ -1109,7 +1136,7 @@ mod test_move_piece {
             checks: false,
             mates: false,
             nag: NAG::None,
-            promoted_to: None,
+            promoted_to: OptionalPiece::new_none(),
         }, "rnbqr1k1/pp3pbp/5np1/3p4/3NP3/2N2P2/PP2B1PP/R1BQ1R1K w"),
 
         test_2: ("8/2KP1p2/6p1/5pk1/3r4/2R5/6P1/8 w - - 1 53", Move {
@@ -1120,7 +1147,7 @@ mod test_move_piece {
             checks: false,
             mates: false,
             nag: NAG::None,
-            promoted_to: Some(Piece::Queen),
+            promoted_to: OptionalPiece::new_some(Piece::Queen),
         }, "3Q4/2K2p2/6p1/5pk1/3r4/2R5/6P1/8 b"),
 
         test_3: ("r2Q1bkr/p5pp/5p2/1p1n4/8/2pQ1Q2/P1P1PPPP/RNB1KBNR w KQ - 0 16", Move {
@@ -1131,7 +1158,7 @@ mod test_move_piece {
             checks: true,
             mates: true,
             nag: NAG::None,
-            promoted_to: Some(Piece::Queen),
+            promoted_to: OptionalPiece::new_some(Piece::Queen),
         }, "r2Q1bkr/p5pp/5p2/1p1Q4/8/2p2Q2/P1P1PPPP/RNB1KBNR b"),
     }
 }

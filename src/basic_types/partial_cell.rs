@@ -1,6 +1,9 @@
+use serde::{Deserialize, Serialize};
+
 use crate::basic_types::cell::Cell;
 use crate::basic_types::file::File;
 use crate::basic_types::rank::Rank;
+use packed_struct::prelude::*;
 
 #[macro_export]
 macro_rules! partial_cell {
@@ -12,10 +15,52 @@ macro_rules! partial_cell {
     };
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct PartialCell {
     pub file: Option<File>,
     pub rank: Option<Rank>,
+}
+
+impl PackedStruct for PartialCell {
+    type ByteArray = [u8; 1];
+
+    fn pack(&self) -> packed_struct::PackingResult<Self::ByteArray> {
+        let mut n: u8 = 0;
+        if let Some(file) = self.file {
+            n |= file as u8;
+        } else {
+            n |= 0x0F;
+        }
+
+        if let Some(rank) = self.rank {
+            n |= (rank as u8) << 4;
+        } else {
+            n |= 0xF0;
+        }
+
+        Ok([n])
+    }
+
+    fn unpack(src: &Self::ByteArray) -> packed_struct::PackingResult<Self> {
+        assert!(src.len() == 1);
+
+        let file_raw = src[0] & 0x0F;
+        let rank_raw = (src[0] & 0xF0) >> 4;
+
+        let file = if file_raw == 0x0F {
+            None
+        } else {
+            Some(File::from_uint(file_raw as u32))
+        };
+
+        let rank = if rank_raw == 0x0F {
+            None
+        } else {
+            Some(Rank::from_uint(rank_raw as u32))
+        };
+
+        Ok(Self { file, rank })
+    }
 }
 
 impl PartialCell {
