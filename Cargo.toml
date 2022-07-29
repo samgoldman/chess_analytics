@@ -15,15 +15,15 @@ path = "src/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-flatbuffers = "2.0.0"
+flatbuffers = "2.1.2"
 lazy_static = "1.4.0"
 regex = "1.6.0"
 glob = "0.3.0"
-bzip2 = "0.4.1"
+bzip2 = "0.4.3"
 rayon = "1.5.3"
-serde = { version = "1.0.139", features = ["derive"] }
-serde_yaml = "0.8.25"
-itertools = "0.10.0"
+serde = { version = "1.0.140", features = ["derive"] }
+serde_yaml = "0.8.26"
+itertools = "0.10.3"
 mockall = "0.11.1"
 mockall_double = "0.3.0"
 tui = "0.18.0"
@@ -37,7 +37,7 @@ predicates = "2.1.1"
 
 [build-dependencies]
 flatc-rust = "0.2.0"
-mktemp = "0.4.0"
+mktemp = "0.4.1"
 
 [profile.dev]
 opt-level = 3
