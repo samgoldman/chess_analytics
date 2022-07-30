@@ -1,48 +1,20 @@
-mod avg_reduce;
-mod bz2_decompress_step;
-mod checkmate_filter;
-mod count_map;
-mod eval_available_filter;
-mod export_games;
-mod game_elo_bin;
-mod glob_file_step;
-mod init_bins_step;
-mod max_reduce;
-mod min_moves_filter;
-mod noop_step;
-mod parallel_step;
-mod parse_bin_game_step;
-mod parse_pgn_step;
-mod perfect_checkmate_map;
-mod player_elo_filter;
-mod save_data_step;
-mod sum_reduce;
-mod time_control_bin;
-mod ui_monitor_step;
+mod bins;
+mod filters;
+mod io_steps;
+mod maps;
+mod misc_steps;
+mod parsers;
+mod reducers;
 
 use crate::workflow_step::BoxedStep;
 
-use avg_reduce::AvgReduce;
-use bz2_decompress_step::Bz2DecompressStep;
-use checkmate_filter::CheckmateFilter;
-use count_map::CountMap;
-use eval_available_filter::EvalAvailableFilter;
-use export_games::ExportGames;
-use game_elo_bin::GameEloBin;
-use glob_file_step::GlobFileStep;
-use init_bins_step::InitBinStep;
-use max_reduce::MaxReduce;
-use min_moves_filter::MinMovesFilter;
-use noop_step::NoopStep;
-use parallel_step::ParallelStep;
-use parse_bin_game_step::ParseBinGame;
-use parse_pgn_step::ParsePgnStep;
-use perfect_checkmate_map::PerfectCheckmateMap;
-use player_elo_filter::PlayerEloFilter;
-use save_data_step::SaveDataStep;
-use sum_reduce::SumReduce;
-use time_control_bin::TimeControlBin;
-use ui_monitor_step::UiMonitorStep;
+use bins::*;
+use filters::*;
+use io_steps::*;
+use maps::*;
+use misc_steps::*;
+use parsers::*;
+use reducers::*;
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 pub fn get_step_by_name_and_params(
