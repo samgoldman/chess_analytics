@@ -7,6 +7,7 @@ use std::time::Duration;
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Games(pub Vec<Game>);
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Games {
     pub fn serialize(&self) -> Vec<u8> {
         to_allocvec(self).unwrap()
@@ -49,6 +50,7 @@ pub struct Game {
     pub boards: Vec<Board>,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Game {
     pub fn serialize(&self) -> Vec<u8> {
         to_allocvec(self).unwrap()
@@ -58,12 +60,10 @@ impl Game {
         from_bytes(&bytes).unwrap()
     }
 
-    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn clock_available(&self) -> bool {
         !self.clock.is_empty()
     }
 
-    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn build_boards(&self) -> Vec<Board> {
         self.moves
             .iter()
@@ -82,6 +82,7 @@ impl Game {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Default for Game {
     fn default() -> Game {
         Game {

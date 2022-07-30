@@ -20,6 +20,7 @@ pub struct PgnParser {
     coordinate_regex: Regex,
     castling_regex: Regex,
 }
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PgnParser {
     pub fn new() -> Self {
         Self {
@@ -191,8 +192,7 @@ impl PgnParser {
         promotion_piece: &str,
         check_str: &str,
         nag_str: &str,
-        game: &mut Game,
-    ) -> Result<(), String> {
+    ) -> Result<Move, String> {
         let from = if let Some(coord_cap) = self.coordinate_regex.captures(disambiguation_str) {
             let optional_file = File::from_pgn(&coord_cap[1]);
             let optional_rank = Rank::from_pgn(&coord_cap[2]);
@@ -242,7 +242,7 @@ impl PgnParser {
             _ => OptionalPiece::new_none(),
         };
 
-        game.moves.push(Move {
+        Ok(Move {
             from,
             to,
             piece_moved,
@@ -251,14 +251,16 @@ impl PgnParser {
             mates,
             nag,
             promoted_to,
-        });
-
-        Ok(())
+        })
     }
 
-    fn parse_potential_move(&self, token: &str, game: &mut Game) -> Result<(), String> {
-        for cap in self.castling_regex.captures_iter(token) {
-            let white = game.moves.len() % 2 == 0;
+    fn parse_potential_move(
+        &self,
+        token: &str,
+        current_move_count: usize,
+    ) -> Result<Option<Move>, String> {
+        if let Some(cap) = self.castling_regex.captures(token) {
+            let white = current_move_count % 2 == 0;
             let kingside = cap[1].len() == 3;
 
             let disambiguation_str = format!("e{}", if white { "1" } else { "8" });
@@ -271,7 +273,7 @@ impl PgnParser {
             let check_str = &cap[2];
             let nag_str = &cap[3];
 
-            self.parse_move(
+            return Ok(Some(self.parse_move(
                 &disambiguation_str,
                 &dest_str,
                 "K",
@@ -279,11 +281,10 @@ impl PgnParser {
                 "",
                 check_str,
                 nag_str,
-                game,
-            )?;
+            )?));
         }
 
-        for cap in self.move_regex.captures_iter(token) {
+        if let Some(cap) = self.move_regex.captures(token) {
             let piece_str = &cap[1];
             let disambiguation_str = &cap[2];
             let capture_str = &cap[3];
@@ -295,7 +296,7 @@ impl PgnParser {
             let check_str = &cap[7];
             let nag_str = &cap[8];
 
-            self.parse_move(
+            return Ok(Some(self.parse_move(
                 disambiguation_str,
                 dest_str,
                 piece_str,
@@ -303,11 +304,10 @@ impl PgnParser {
                 promotion_piece,
                 check_str,
                 nag_str,
-                game,
-            )?;
+            )?));
         }
 
-        Ok(())
+        Ok(None)
     }
 
     fn parse_potential_moves(&self, moves_str: &str, game: &mut Game) -> Result<(), String> {
@@ -325,7 +325,10 @@ impl PgnParser {
             }
 
             if !in_comment {
-                self.parse_potential_move(token, game)?;
+                let potential_move = self.parse_potential_move(token, game.moves.len())?;
+                if let Some(m) = potential_move {
+                    game.moves.push(m);
+                }
             } else {
                 for cap in self.eval_regex.captures_iter(token) {
                     game.eval_available = true;

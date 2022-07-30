@@ -5,12 +5,14 @@ use crate::workflow_step::{BoxedStep, SharedData, Step, StepGeneric};
 #[derive(Debug)]
 pub struct ParseBinGame {}
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl ParseBinGame {
     pub fn boxed_new() -> BoxedStep {
         Box::new(ParseBinGame {})
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParseBinGame {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {

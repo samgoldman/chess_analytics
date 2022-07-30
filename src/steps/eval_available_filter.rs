@@ -9,6 +9,7 @@ pub struct EvalAvailableFilter {
     generic_filter: GenericFilter,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl EvalAvailableFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         Ok(Box::new(EvalAvailableFilter {
@@ -21,6 +22,7 @@ impl EvalAvailableFilter {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for EvalAvailableFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         self.generic_filter.process(&data, Self::create_filter())
@@ -67,6 +69,7 @@ mod test_try_new {
     use std::sync::{Mutex, MutexGuard};
 
     // Guard static mock
+    use mockall::lazy_static;
     lazy_static! {
         static ref MTX: Mutex<()> = Mutex::new(());
     }

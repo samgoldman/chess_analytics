@@ -9,6 +9,7 @@ pub struct TimeControlBin {
     output_flag: String,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl TimeControlBin {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -45,6 +46,7 @@ impl TimeControlBin {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for TimeControlBin {
     bin_template!(TimeControlBin::bin);
 }

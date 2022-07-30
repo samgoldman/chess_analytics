@@ -12,6 +12,7 @@ pub struct ParsePgnStep {
     pgn_parser: PgnParser,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl ParsePgnStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -63,6 +64,7 @@ impl ParsePgnStep {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParsePgnStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {

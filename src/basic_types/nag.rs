@@ -9,6 +9,7 @@ pub enum NAG {
     Blunder = 3,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl NAG {
     pub fn from_metadata(metadata: u16) -> Self {
         match metadata & 0b0001_1100_0000 {

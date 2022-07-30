@@ -8,6 +8,7 @@ pub struct CheckmateFilter {
     generic_filter: GenericFilter,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl CheckmateFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         Ok(Box::new(CheckmateFilter {
@@ -24,6 +25,7 @@ impl CheckmateFilter {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for CheckmateFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         self.generic_filter

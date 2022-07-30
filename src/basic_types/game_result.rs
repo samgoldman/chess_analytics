@@ -9,6 +9,7 @@ pub enum GameResult {
     Star = 255,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl GameResult {
     pub fn from_u8(n: u8) -> Option<GameResult> {
         match n {
@@ -21,6 +22,7 @@ impl GameResult {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl fmt::Display for GameResult {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self == &GameResult::Star {

@@ -11,6 +11,7 @@ pub enum Piece {
     King = 6,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Piece {
     pub fn from_pgn(piece_str: &str) -> Self {
         match piece_str {

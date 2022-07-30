@@ -9,6 +9,7 @@ pub struct GlobFileStep {
     child_name: String,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl GlobFileStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -29,6 +30,7 @@ impl GlobFileStep {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for GlobFileStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         let glob_result = glob(&self.glob_string);

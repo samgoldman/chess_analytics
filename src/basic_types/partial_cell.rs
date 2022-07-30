@@ -21,6 +21,7 @@ pub struct PartialCell {
     pub rank: Option<Rank>,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PackedStruct for PartialCell {
     type ByteArray = [u8; 1];
 
@@ -63,6 +64,7 @@ impl PackedStruct for PartialCell {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PartialCell {
     pub fn to_cell(self) -> Cell {
         Cell {

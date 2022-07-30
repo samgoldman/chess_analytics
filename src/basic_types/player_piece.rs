@@ -34,6 +34,7 @@ pub struct PlayerPiece {
     pub player: Player,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PlayerPiece {
     #[cfg(test)]
     pub fn new(piece: Piece, player: Player) -> Self {

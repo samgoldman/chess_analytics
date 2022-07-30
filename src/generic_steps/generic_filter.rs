@@ -16,6 +16,7 @@ pub struct GenericFilter {
     output_flag: String,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 #[cfg_attr(test, automock)]
 impl GenericFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<Self>, String> {
@@ -160,6 +161,7 @@ impl GenericFilter {
 }
 
 #[cfg(test)]
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Default for GenericFilter {
     fn default() -> Self {
         GenericFilter {
@@ -181,6 +183,7 @@ mod test_process {
     use mockall::predicate::eq;
 
     // Guard static mock
+    use mockall::lazy_static;
     lazy_static! {
         static ref MTX: Mutex<()> = Mutex::new(());
     }

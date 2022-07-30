@@ -12,11 +12,8 @@ path = "src/lib.rs"
 name = "chess_analytics"
 path = "src/main.rs"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 flatbuffers = "2.1.2"
-lazy_static = "1.4.0"
 regex = "1.6.0"
 glob = "0.3.0"
 bzip2 = "0.4.3"
@@ -31,10 +28,11 @@ termion = "1.5.6"
 postcard = { version = "1.0.0", features = ["alloc"] }
 packed_struct = "0.10.0"
 crossterm = "0.24.0"
+# mutagen = { path = "../mutagen/mutagen", optional = true }
+mutagen = { git = "https://github.com/llogiq/mutagen", optional = true }
 
 [dev-dependencies]
 predicates = "2.1.1"
-mutagen = { path = "../mutagen/mutagen" }
 
 [build-dependencies]
 flatc-rust = "0.2.0"
@@ -44,4 +42,4 @@ mktemp = "0.4.1"
 opt-level = 3
 
 [features]
-with_mutagen = []
+with_mutagen = ["mutagen"]

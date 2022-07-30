@@ -9,6 +9,7 @@ pub enum Termination {
     Unterminated = 4,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Termination {
     pub fn from_u8(n: u8) -> Option<Termination> {
         match n {

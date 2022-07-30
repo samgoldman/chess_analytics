@@ -7,6 +7,7 @@ pub struct OptionalPiece {
     optional_piece: Option<Piece>,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl OptionalPiece {
     pub fn new_none() -> Self {
         OptionalPiece {
@@ -29,6 +30,7 @@ impl OptionalPiece {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PackedStruct for OptionalPiece {
     type ByteArray = [u8; 1];
 

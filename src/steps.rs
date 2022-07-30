@@ -44,6 +44,7 @@ use sum_reduce::SumReduce;
 use time_control_bin::TimeControlBin;
 use ui_monitor_step::UiMonitorStep;
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 pub fn get_step_by_name_and_params(
     name: &str,
     params: std::option::Option<serde_yaml::Value>,

@@ -4,6 +4,7 @@ use crate::general_utils::get_unit_value;
 #[derive(Debug, PartialEq, Eq)]
 pub struct Path(Vec<Cell>);
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Path {
     pub fn empty() -> Self {
         Path(vec![])

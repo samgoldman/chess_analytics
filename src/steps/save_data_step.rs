@@ -8,6 +8,7 @@ pub struct SaveDataStep {
     fields: Vec<Value>,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl SaveDataStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -26,6 +27,7 @@ impl SaveDataStep {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SaveDataStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         let unlocked_data = data.lock().unwrap();

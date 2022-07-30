@@ -22,6 +22,7 @@ pub struct StepGenericCoreImpl {
     pub map: HashMap<String, SharedData>,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl StepGenericCore for StepGenericCoreImpl {
     fn contains_key(&self, k: &str) -> bool {
         self.map.contains_key(k)
@@ -56,6 +57,7 @@ pub enum SharedData {
     Map(HashMap<String, SharedData>),
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl SharedData {
     pub fn to_u64(&self) -> Option<u64> {
         match self {
@@ -139,6 +141,7 @@ impl SharedData {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl std::fmt::Display for SharedData {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
@@ -170,6 +173,7 @@ pub struct StepDescription {
     pub parameters: std::option::Option<serde_yaml::Value>,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl StepDescription {
     pub fn to_step(&self) -> Result<BoxedStep, String> {
         get_step_by_name_and_params(&self.step_type, self.parameters.clone())

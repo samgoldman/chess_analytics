@@ -10,6 +10,7 @@ pub struct AvgReduce {
     output_flag: String,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl AvgReduce {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -42,6 +43,7 @@ impl AvgReduce {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for AvgReduce {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {

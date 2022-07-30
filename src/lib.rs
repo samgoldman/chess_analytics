@@ -25,9 +25,6 @@ mod steps;
 mod steps_manager;
 mod workflow_step;
 
-#[macro_use]
-extern crate lazy_static;
-
 use steps_manager::{add_step_description, get_step_description};
 use workflow_step::{StepDescription, StepGeneric, StepGenericCoreImpl};
 
@@ -43,6 +40,7 @@ use workflow_step::{StepDescription, StepGeneric, StepGenericCoreImpl};
 ///
 /// Currently some failures panic. TODO: eliminate as many panics as possible
 ///
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 pub fn run<T>(mut args: T) -> Result<(), String>
 where
     T: Iterator<Item = String>,

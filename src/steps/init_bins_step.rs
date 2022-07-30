@@ -8,6 +8,7 @@ pub struct InitBinStep {
     output_flag: String,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl InitBinStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -40,6 +41,7 @@ impl InitBinStep {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for InitBinStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {

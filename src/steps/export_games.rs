@@ -16,6 +16,7 @@ pub struct ExportGames {
     output_path: String,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl ExportGames {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -75,6 +76,7 @@ impl ExportGames {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ExportGames {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         let mut quit = false;

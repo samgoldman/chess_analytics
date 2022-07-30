@@ -10,6 +10,7 @@ pub struct SumReduce {
     output_flag: String,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl SumReduce {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -42,6 +43,7 @@ impl SumReduce {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SumReduce {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {

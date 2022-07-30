@@ -26,6 +26,7 @@ pub struct Move {
     pub promoted_to: OptionalPiece,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Serialize for Move {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -36,6 +37,7 @@ impl Serialize for Move {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl<'de> Deserialize<'de> for Move {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -64,8 +66,8 @@ impl<'de> Deserialize<'de> for Move {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Move {
-    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn new_to_from(
         from_file: Option<File>,
         from_rank: Option<Rank>,
@@ -105,7 +107,6 @@ impl Move {
     }
 
     // Extract move data and create a move object from it
-    #[cfg_attr(all(test, feature = "with_mutagen"), ::mutagen::mutate)]
     pub fn convert_from_binary_move_data((data, metadata): (u16, u16)) -> Move {
         // Move coordinates are simple: 4 bits per rank/file
         let (from_file, from_rank) = extract_coordinate(data);
