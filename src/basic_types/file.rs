@@ -13,6 +13,7 @@ pub enum File {
     _H = 8,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl File {
     pub fn from_pgn(file_str: &str) -> Option<Self> {
         match file_str {
@@ -43,6 +44,7 @@ impl File {
         }
     }
 
+    #[cfg(test)]
     pub fn from_usize(val: usize) -> Self {
         match val {
             1 => File::_A,
@@ -89,12 +91,14 @@ impl File {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Ord for File {
     fn cmp(&self, other: &Self) -> Ordering {
         (*self as usize).cmp(&(*other as usize))
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PartialOrd for File {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))

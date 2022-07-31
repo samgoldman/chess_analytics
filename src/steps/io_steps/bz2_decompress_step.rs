@@ -11,6 +11,7 @@ pub struct Bz2DecompressStep {
     full_queue_delay_ms: u64,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Bz2DecompressStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -28,6 +29,7 @@ impl Bz2DecompressStep {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for Bz2DecompressStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         let bufs = {

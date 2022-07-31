@@ -11,6 +11,7 @@ pub struct GameEloBin {
     bucket_size: u64,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl GameEloBin {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -53,6 +54,7 @@ impl GameEloBin {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for GameEloBin {
     bin_template!(GameEloBin::bin);
 }

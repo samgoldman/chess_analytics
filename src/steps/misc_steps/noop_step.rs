@@ -3,12 +3,14 @@ use crate::workflow_step::{BoxedStep, Step, StepGeneric};
 #[derive(Debug)]
 pub struct NoopStep {}
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl NoopStep {
     pub fn boxed_new() -> BoxedStep {
         Box::new(NoopStep {})
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for NoopStep {
     fn process(&mut self, _data: StepGeneric) -> Result<(), String> {
         Ok(())

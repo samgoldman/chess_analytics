@@ -3,18 +3,19 @@ use crate::workflow_step::{SharedData, Step, StepGeneric};
 use std::collections::HashMap;
 
 #[derive(Debug)]
-pub struct SumReduce {
+pub struct MaxReduce {
     input_vec_name: String,
     output_map_name: String,
     input_flag: String,
     output_flag: String,
 }
 
-impl SumReduce {
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
+impl MaxReduce {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
             Some(value) => value,
-            None => return Err("SumReduce: no parameters provided".to_string()),
+            None => return Err("MaxReduce: no parameters provided".to_string()),
         };
 
         // TODO: better error handling
@@ -33,7 +34,7 @@ impl SumReduce {
             .unwrap()
             .to_string();
 
-        Ok(Box::new(SumReduce {
+        Ok(Box::new(MaxReduce {
             input_vec_name,
             output_map_name,
             input_flag,
@@ -42,7 +43,8 @@ impl SumReduce {
     }
 }
 
-impl Step for SumReduce {
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
+impl Step for MaxReduce {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         {
             let mut unlocked_data = data.lock().unwrap();
@@ -72,7 +74,7 @@ impl Step for SumReduce {
                 ret
             };
 
-            let mut new_data: HashMap<String, u64> = HashMap::new();
+            let mut new_data: HashMap<String, SharedData> = HashMap::new();
 
             for shared_binned_game in binned_games {
                 let binned_game = match shared_binned_game.clone() {
@@ -80,11 +82,7 @@ impl Step for SumReduce {
                     _ => return Err("Vector isn't of binned values!".to_string()),
                 };
 
-                let value = match *binned_game.0 {
-                    SharedData::U64(v) => v,
-                    SharedData::USize(v) => v as u64,
-                    _ => return Err("Value isn't an integer!".to_string()),
-                };
+                let value = *binned_game.0;
 
                 let bin_labels = binned_game.1;
                 let bin_str_labels: Vec<String> =
@@ -92,10 +90,12 @@ impl Step for SumReduce {
                 let combined_label = bin_str_labels.join(".");
 
                 if !new_data.contains_key(&combined_label) {
-                    new_data.insert(combined_label.clone(), 0);
+                    new_data.insert(combined_label.clone(), value.clone());
                 }
 
-                *(new_data.get_mut(&combined_label).unwrap()) += value;
+                let original_value = new_data.get_mut(&combined_label).unwrap();
+
+                *(original_value) = original_value.max(&value);
             }
 
             {
@@ -112,10 +112,12 @@ impl Step for SumReduce {
                     if !map.contains_key(key) {
                         map.insert(key.to_string(), SharedData::U64(0));
                     }
-                    let original_count = map.get(key).unwrap().to_u64().unwrap();
-                    let new_count = new_data.get(key).unwrap() + original_count;
-                    map.insert(key.to_string(), SharedData::U64(new_count));
+
+                    let original = map.get_mut(key).unwrap();
+                    let new = new_data.get(key).unwrap();
+                    *original = original.max(new);
                 }
+
                 unlocked_data.insert(&self.output_map_name, SharedData::Map(map));
             }
 

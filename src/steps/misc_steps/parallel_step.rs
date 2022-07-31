@@ -10,6 +10,7 @@ pub struct ParallelStep {
     post_name: String,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl ParallelStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -35,6 +36,7 @@ impl ParallelStep {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParallelStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         // TODO make own step

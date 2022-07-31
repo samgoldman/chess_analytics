@@ -7,6 +7,7 @@ pub struct OptionalPiece {
     optional_piece: Option<Piece>,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl OptionalPiece {
     pub fn new_none() -> Self {
         OptionalPiece {
@@ -29,6 +30,7 @@ impl OptionalPiece {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PackedStruct for OptionalPiece {
     type ByteArray = [u8; 1];
 
@@ -64,6 +66,7 @@ impl PackedStruct for OptionalPiece {
 #[cfg(test)]
 mod test_is_some {
     use super::OptionalPiece;
+    use crate::basic_types::Piece;
 
     #[test]
     fn returns_false_when_none() {
@@ -81,7 +84,7 @@ mod test_is_some {
         assert_eq!(
             true,
             OptionalPiece {
-                optional_piece: Some(crate::basic_types::Piece::Pawn),
+                optional_piece: Some(Piece::Pawn),
             }
             .is_some()
         );
@@ -109,5 +112,39 @@ mod test_unwrap {
             }
             .unwrap()
         );
+    }
+}
+
+#[cfg(test)]
+mod test_pack_unpack {
+    use super::*;
+    use crate::basic_types::Piece;
+
+    #[test]
+    fn test_unpack_reverses_pack() {
+        let pieces = vec![
+            Piece::Pawn,
+            Piece::Rook,
+            Piece::Bishop,
+            Piece::Knight,
+            Piece::Queen,
+            Piece::King,
+        ];
+
+        for piece in pieces {
+            let optional_piece = OptionalPiece::new_some(piece);
+            assert_eq!(
+                optional_piece,
+                OptionalPiece::unpack(&optional_piece.pack().unwrap()).unwrap()
+            );
+        }
+    }
+
+    #[test]
+    fn test_unpack_invalid_data() {
+        assert_eq!(
+            Err(packed_struct::PackingError::InvalidValue),
+            OptionalPiece::unpack(&[0x07])
+        )
     }
 }

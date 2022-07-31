@@ -15,6 +15,7 @@ pub enum Rank {
     _8 = 8,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Rank {
     pub fn from_pgn(rank_str: &str) -> Option<Self> {
         match rank_str {
@@ -91,26 +92,19 @@ impl Rank {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Ord for Rank {
     fn cmp(&self, other: &Self) -> Ordering {
         (*self as usize).cmp(&(*other as usize))
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PartialOrd for Rank {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
-
-// impl ops::Sub<Rank> for u8 {
-//     type Output = Rank;
-
-//     fn sub(self, rhs: Rank) -> Rank {
-//         let new_val = self - rhs.as_integer();
-//         Rank::from_pgn(new_val.to_string().as_ref())
-//     }
-// }
 
 #[cfg(test)]
 mod test_rank_from_pgn {

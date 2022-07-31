@@ -1,8 +1,6 @@
 #![feature(custom_inner_attributes)]
 #![clippy::cognitive_complexity = "20"]
 #![deny(clippy::cognitive_complexity)]
-// TODO: remove
-#![allow(dead_code)]
 #![feature(no_coverage)]
 
 use serde::Deserialize;
@@ -21,12 +19,10 @@ mod generic_steps;
 #[macro_use]
 mod macros;
 mod parse_pgn;
+mod step_param_utils;
 mod steps;
 mod steps_manager;
 mod workflow_step;
-
-#[macro_use]
-extern crate lazy_static;
 
 use steps_manager::{add_step_description, get_step_description};
 use workflow_step::{StepDescription, StepGeneric, StepGenericCoreImpl};
@@ -43,6 +39,7 @@ use workflow_step::{StepDescription, StepGeneric, StepGenericCoreImpl};
 ///
 /// Currently some failures panic. TODO: eliminate as many panics as possible
 ///
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 pub fn run<T>(mut args: T) -> Result<(), String>
 where
     T: Iterator<Item = String>,

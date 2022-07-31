@@ -7,6 +7,7 @@ use std::time::Duration;
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Games(pub Vec<Game>);
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Games {
     pub fn serialize(&self) -> Vec<u8> {
         to_allocvec(self).unwrap()
@@ -49,15 +50,9 @@ pub struct Game {
     pub boards: Vec<Board>,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Game {
-    pub fn serialize(&self) -> Vec<u8> {
-        to_allocvec(self).unwrap()
-    }
-
-    pub fn deserialize(bytes: Vec<u8>) -> Self {
-        from_bytes(&bytes).unwrap()
-    }
-
+    #[allow(dead_code)]
     pub fn clock_available(&self) -> bool {
         !self.clock.is_empty()
     }
@@ -67,7 +62,6 @@ impl Game {
             .iter()
             .fold(vec![Board::default()], |mut boards, curr_move| {
                 let mut new_board = boards.last().unwrap().clone();
-                // dbg!(boards.len(), curr_move, boards.last().unwrap().to_fen());
                 new_board.move_piece(*curr_move);
                 boards.push(new_board);
 
@@ -80,6 +74,7 @@ impl Game {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Default for Game {
     fn default() -> Game {
         Game {

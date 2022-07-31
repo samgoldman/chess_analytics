@@ -17,6 +17,7 @@ const BULLET_THRESHOLD: u32 = 179;
 const BLITZ_THRESHOLD: u32 = 479;
 const RAPID_THRESHOLD: u32 = 1499;
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl TimeControl {
     // Convert initial time + increment time to one of the time control categories
     // as defined here: https://lichess.org/faq#time-controls
@@ -61,6 +62,7 @@ mod test_from_base_and_increment {
     tests! {
         test_0_0: (0, 0, TimeControl::Correspondence),
         test_180_3: (180, 3, TimeControl::Blitz),
+        test_179_0: (179, 0, TimeControl::Blitz),
         test_29_0: (29, 0, TimeControl::Bullet),
         test_28_0: (28, 0, TimeControl::UltraBullet),
         test_28_1: (28, 1, TimeControl::Bullet),
@@ -68,6 +70,8 @@ mod test_from_base_and_increment {
         test_420_3: (420, 3, TimeControl::Rapid),
         test_900_15: (900, 15, TimeControl::Classical),
         test_900_14: (900, 14, TimeControl::Rapid),
+        test_479_0: (479, 0, TimeControl::Rapid),
+        test_1499_0: (1499, 0, TimeControl::Classical),
     }
 }
 

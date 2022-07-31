@@ -2,7 +2,7 @@ steps:
   init:
     type: "GlobFileStep"
     params: 
-      glob: /data/data_scratch/lichess_data/converted_v4/2013-01/000000.bin*
+      glob: tests/data/one_eval_one_no_eval.bin.bz2
       child: parallel_step
   parallel_step:
     type: ParallelStep
@@ -10,10 +10,11 @@ steps:
       children:
         - "load_files"
         - "parse_games"
-        # - "monitor"
-        - "init_bins"
         - "map_count"
         - "reduce_sum"
+        - "init_bins"
+        - "eval_available_filter"
+      post: "save_results"
   load_files:
     type: Bz2DecompressStep
     params:
@@ -21,30 +22,19 @@ steps:
       full_queue_delay_ms: 332
   parse_games:
     type: ParseBinGame
-  monitor:
-    type: UiMonitorStep
-    params: 
-      finish_flag: reduction_done
-      raw:
-        - display_name: Done Reading Files
-          field: done_reading_files
-        - display_name: Done Parsing Games
-          field: done_parsing_games
-        - display_name: Reduction Map
-          field: reduced
-        - display_name: Total File Count
-          field: total_file_count
-      length:
-        - display_name: Raw File Data
-          field: raw_file_data
-        - display_name: Parsed Games
-          field: parsed_games
+  eval_available_filter:
+    type: EvalAvailableFilter
+    params:
+      input: parsed_games
+      output: filtered_games_1
+      input_flag: done_parsing_games
+      output_flag: done_filtering_1
   init_bins:
     type: InitBinStep
     params:
-      input: parsed_games
+      input: filtered_games_1
       output: unbinned_games
-      input_flag: done_parsing_games
+      input_flag: done_filtering_1
       output_flag: init_bins_done
   map_count:
     type: CountMap
@@ -57,6 +47,12 @@ steps:
     type: SumReduce
     params:
       input: mapped_count
-      output: reduced
+      output: game_count
       input_flag: mapping_done
       output_flag: reduction_done
+  save_results:
+    type: SaveDataStep
+    params:
+      file: tests/output/int_5/tmp.txt
+      fields:
+        - game_count

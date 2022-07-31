@@ -1,4 +1,7 @@
-use crate::basic_types::{Cell, File, Move, PartialCell, Path, Piece, Player, PlayerPiece, Rank};
+use crate::{
+    basic_types::{Cell, File, Move, PartialCell, Path, Piece, Player, PlayerPiece, Rank},
+    general_utils::parse_ascii_digit,
+};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -10,7 +13,9 @@ pub struct Board {
 }
 
 // TODO investigate no-panic
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Board {
+    #[cfg(test)]
     pub fn to_fen(&self) -> String {
         let mut fen = String::default();
 
@@ -195,7 +200,6 @@ impl Board {
     // TODO convert to Ok/Err
     pub fn find_origin(&self, piece: Piece, dest: Cell, from: PartialCell) -> Cell {
         let possible_origins = self.find_possible_origins(piece, dest, from);
-        // dbg!(&possible_origins);
 
         let filtered_origins = possible_origins
             .iter()
@@ -216,7 +220,6 @@ impl Board {
             .filter(|possible_origin| {
                 if piece == Piece::Pawn {
                     let diff_file = dest.file as i32 - possible_origin.file as i32;
-                    // dbg!(diff_file, possible_origin, self.to_move, dest.rank, self.is_cell_empty(dest), self.is_cell_empty(cell!(dest.file, Rank::_5)));
 
                     // TODO: yeah, get rid of this!
                     if (diff_file != 0
@@ -393,9 +396,9 @@ impl Board {
     }
 
     #[allow(dead_code)]
-    pub fn from_fen(fen: &str) -> Result<Self, &str> {
+    pub fn from_fen(fen: &str) -> Result<Self, String> {
         if fen.is_empty() {
-            Err("Cannot parse empty FEN")
+            Err("Cannot parse empty FEN".to_string())
         } else {
             let fields: Vec<&str> = fen.split(' ').collect();
 
@@ -415,7 +418,7 @@ impl Board {
                         let mut file = 1;
                         for c in fen_rank.chars() {
                             if c.is_ascii_digit() {
-                                file += c.to_digit(10).unwrap();
+                                file += parse_ascii_digit(c).unwrap();
                             } else {
                                 let piece = PlayerPiece {
                                     piece: Piece::from_fen(c.to_string().as_ref()),
@@ -437,15 +440,16 @@ impl Board {
 
                     Ok(board)
                 } else {
-                    Err("Starting position has wrong number of rows")
+                    Err("Starting position has wrong number of rows".to_string())
                 }
             } else {
-                Err("Incorrect number of fields")
+                Err("Incorrect number of fields".to_string())
             }
         }
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Default for Board {
     fn default() -> Board {
         Board {
@@ -509,10 +513,10 @@ mod test_from_fen {
     }
 
     tests! {
-        test_empty_fen: ("", Err("Cannot parse empty FEN")),
+        test_empty_fen: ("", Err("Cannot parse empty FEN".to_string())),
         test_default_fen: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Ok(Board::default())),
-        test_only_board_portion: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", Err("Incorrect number of fields")),
-        test_not_enough_rows: ("rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Err("Starting position has wrong number of rows")),
+        test_only_board_portion: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", Err("Incorrect number of fields".to_string())),
+        test_not_enough_rows: ("rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Err("Starting position has wrong number of rows".to_string())),
         test_black_to_move: ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", Ok(
             Board {
                 board: [
@@ -845,6 +849,8 @@ mod test_does_piece_check_loc {
         test_rook_2: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (5, 2), (2, 4), false),
         test_rook_3: ("8/8/2r5/8/8/8/3R4/8 w - - 0 1", (5, 2), (5, 7), true),
         test_rook_4: ("8/8/2r5/8/8/4P3/3R4/8 w - - 0 1", (1, 3), (3, 5), false),
+        test_rook_5: ("8/8/2r5/8/8/4P3/3R4/8 w - - 0 1", (1, 3), (2, 3), true),
+        test_rook_6: ("8/8/2r5/8/8/4P3/3R4/8 w - - 0 1", (1, 3), (1, 4), true),
     }
 
     macro_rules! tests_panic {
@@ -977,6 +983,8 @@ mod test_find_possible_origins {
         test_pawn_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_4), partial_cell!(Some(File::_B), None), vec![cell!(File::_B, Rank::_3)]),
         test_pawn_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_5), partial_cell!(Some(File::_B), None), vec![]),
         test_pawn_6: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_E, Rank::_4), partial_cell!(None, None), vec![cell!(File::_E, Rank::_2)]),
+        test_pawn_7: ("3bR3/1ppP2KN/2rn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_5), partial_cell!(None, None), vec![cell!(File::_B, Rank::_7)]),
+        test_pawn_8: ("rnbqkbnr/ppp2ppp/4p3/4p3/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", Piece::Pawn, cell!(File::_E, Rank::_4), partial_cell!(None, None), vec![cell!(File::_E, Rank::_5)]),
 
         test_bishop_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(None, None), vec![cell!(File::_F, Rank::_4), cell!(File::_H, Rank::_6)]),
         test_bishop_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(None, Some(Rank::_4)), vec![cell!(File::_F, Rank::_4)]),
@@ -994,12 +1002,14 @@ mod test_find_possible_origins {
         test_knight_7: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, cell!(File::_C, Rank::_2), partial_cell!(None, Some(Rank::_4)), vec![cell!(File::_B, Rank::_4), cell!(File::_D, Rank::_4)]),
         test_knight_8: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, cell!(File::_C, Rank::_2), partial_cell!(None, Some(Rank::_1)), vec![cell!(File::_A, Rank::_1)]),
         test_knight_9: ("3bR3/2pP2KN/qpr2kpB/2b1pR1N/Pn1n1B1P/1PP2pQ1/1r1QP2B/n3N1q1 b - - 0 1", Piece::Knight, cell!(File::_C, Rank::_2), partial_cell!(Some(File::_D), Some(Rank::_4)), vec![cell!(File::_D, Rank::_4)]),
+        test_knight_10: ("8/2NNN1N1/3NNN2/2NN1NN1/3NNN2/2N1N1N1/8/8 w - - 0 1", Piece::Knight, cell!(File::_E, Rank::_5), partial_cell!(None, None), vec![cell!(File::_D, Rank::_7)]),
 
         test_rook_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, cell!(File::_H, Rank::_8), partial_cell!(None, None), vec![cell!(File::_E, Rank::_8)]),
         test_rook_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, cell!(File::_E, Rank::_5), partial_cell!(None, None), vec![cell!(File::_F, Rank::_5), cell!(File::_E, Rank::_8)]),
         test_rook_3: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, cell!(File::_E, Rank::_5), partial_cell!(Some(File::_F), None), vec![cell!(File::_F, Rank::_5)]),
         test_rook_4: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Rook, cell!(File::_G, Rank::_6), partial_cell!(None, None), vec![cell!(File::_C, Rank::_6)]),
         test_rook_5: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Rook, cell!(File::_F, Rank::_2), partial_cell!(None, None), vec![cell!(File::_B, Rank::_2)]),
+        test_rook_6: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Rook, cell!(File::_F, Rank::_6), partial_cell!(None, None), vec![cell!(File::_F, Rank::_5)]),
 
         test_queen_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, cell!(File::_H, Rank::_8), partial_cell!(None, Some(Rank::_8)), vec![]),
         test_queen_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Queen, cell!(File::_G, Rank::_2), partial_cell!(None, None), vec![cell!(File::_D, Rank::_2), cell!(File::_G, Rank::_3)]),
@@ -1011,6 +1021,7 @@ mod test_find_possible_origins {
         test_queen_8: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, cell!(File::_G, Rank::_6), partial_cell!(None, None), vec![cell!(File::_G, Rank::_1), cell!(File::_A, Rank::_6)]),
         test_queen_9: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, cell!(File::_G, Rank::_6), partial_cell!(None, Some(Rank::_1)), vec![cell!(File::_G, Rank::_1)]),
         test_queen_10: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, cell!(File::_G, Rank::_6), partial_cell!(None, Some(Rank::_6)), vec![cell!(File::_A, Rank::_6)]),
+        test_queen_11: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Queen, cell!(File::_G, Rank::_2), partial_cell!(None, None), vec![cell!(File::_G, Rank::_1)]),
 
         test_king_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, cell!(File::_H, Rank::_8), partial_cell!(None, None), vec![cell!(File::_G, Rank::_7)]),
         test_king_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::King, cell!(File::_F, Rank::_7), partial_cell!(None, None), vec![cell!(File::_G, Rank::_7)]),
@@ -1042,7 +1053,10 @@ mod test_find_origin {
         test_pawn_2: ("k2bR3/2pP2KN/qprn2pB/P1b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Pawn, cell!(File::_A, Rank::_5), partial_cell!(None, None), cell!(File::_B, Rank::_6)),
         test_pawn_3: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_4), partial_cell!(Some(File::_B), None), cell!(File::_B, Rank::_3)),
         test_pawn_4: ("3bR2K/2pP3N/qprn1kpB/2b1pR1N/Pq1n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Pawn, cell!(File::_B, Rank::_4), partial_cell!(None, None), cell!(File::_C, Rank::_3)),
-
+        test_pawn_5: ("rnbqkbnr/ppppp1p1/8/4Pp1p/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3", Piece::Pawn, cell!(File::_F, Rank::_6), partial_cell!(Some(File::_E), None), cell!(File::_E, Rank::_5)),
+        test_pawn_6: ("rnbqkbnr/pp1ppppp/8/8/PPpP4/8/2P1PPPP/RNBQKBNR b KQkq d3 0 3", Piece::Pawn, cell!(File::_D, Rank::_3), partial_cell!(Some(File::_C), None), cell!(File::_C, Rank::_4)),
+        test_pawn_7: ("rnbqkbnr/pppp1p2/1P6/8/2P1P1Pp/3p4/P5PP/RNBQKBNR w KQkq - 0 9", Piece::Pawn, cell!(File::_G, Rank::_3), partial_cell!(None, None), cell!(File::_G, Rank::_2)),
+        test_pawn_8: ("rnbqkbnr/1pppp1pp/8/p5p1/3P4/4P3/PPP2P1P/RNBQKBNR b KQkq - 0 4", Piece::Pawn, cell!(File::_G, Rank::_6), partial_cell!(None, None), cell!(File::_G, Rank::_7)),
         test_bishop_1: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(None, Some(Rank::_4)), cell!(File::_F, Rank::_4)),
         test_bishop_2: ("3bR3/2pP2KN/qprn1kpB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 w - - 0 1", Piece::Bishop, cell!(File::_G, Rank::_5), partial_cell!(Some(File::_H), None), cell!(File::_H, Rank::_6)),
         test_bishop_3: ("3bR3/k1pP2KN/qprn2pB/2b1pR1N/P2n1B1P/1PP2pQ1/1r1QP2B/6q1 b - - 0 1", Piece::Bishop, cell!(File::_E, Rank::_7), partial_cell!(None, None), cell!(File::_D, Rank::_8)),
@@ -1172,6 +1186,20 @@ mod test_debug_fmt {
         assert_eq!(
             format!("{:?}", Board::empty()),
             "Board { board: {}, to_move: NA }".to_string()
+        );
+    }
+}
+
+#[cfg(test)]
+mod test_basic_ser_de {
+    use super::*;
+
+    #[test]
+    fn test_reciprocal() {
+        let board = Board::default();
+        assert_eq!(
+            board,
+            postcard::from_bytes(&postcard::to_allocvec(&board).unwrap()).unwrap()
         );
     }
 }

@@ -7,6 +7,7 @@ pub enum Player {
     NA,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Player {
     pub fn get_opposing_player(self) -> Self {
         assert!(Player::NA != self, "Player::NA has no opposing player");

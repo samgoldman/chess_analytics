@@ -20,6 +20,7 @@ pub struct Cell {
     pub rank: Rank,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PackedStruct for Cell {
     type ByteArray = [u8; 1];
 
@@ -36,7 +37,7 @@ impl PackedStruct for Cell {
         assert!(src.len() == 1);
 
         let file_raw = src[0] & 0x0F;
-        let rank_raw = (src[0] & 0xF0) >> 4;
+        let rank_raw = src[0] >> 4;
 
         let file = File::from_uint(file_raw as u32);
 
@@ -46,6 +47,7 @@ impl PackedStruct for Cell {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Cell {
     #[cfg(test)]
     pub fn from_indices((rank, file): (usize, usize)) -> Self {
@@ -56,6 +58,7 @@ impl Cell {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Ord for Cell {
     fn cmp(&self, other: &Self) -> Ordering {
         let rank_ord = self.rank.cmp(&other.rank);
@@ -68,6 +71,7 @@ impl Ord for Cell {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PartialOrd for Cell {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -75,12 +79,30 @@ impl PartialOrd for Cell {
 }
 
 #[cfg(test)]
-mod test_default_impls {
+mod tests {
     use super::*;
 
     #[test]
     fn test_clone() {
         let x = cell!(File::_A, Rank::_1);
         assert_eq!(x.clone(), x);
+    }
+
+    #[test]
+    fn unpack_reverses_pack() {
+        for file in File::all_files() {
+            for rank in Rank::all_ranks() {
+                let cell = Cell { file, rank };
+
+                assert_eq!(cell, Cell::unpack(&cell.pack().unwrap()).unwrap());
+            }
+        }
+    }
+
+    #[test]
+    fn cmp_on_file_if_ranks_eq() {
+        let cell_1 = cell!(File::_A, Rank::_1);
+        let cell_2 = cell!(File::_B, Rank::_1);
+        assert!(cell_2 > cell_1);
     }
 }

@@ -2,18 +2,19 @@ use crate::game::Game;
 use crate::workflow_step::{SharedData, Step, StepGeneric};
 
 #[derive(Debug)]
-pub struct CountMap {
+pub struct TimeControlBin {
     input_vec_name: String,
     output_vec_name: String,
     input_flag: String,
     output_flag: String,
 }
 
-impl CountMap {
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
+impl TimeControlBin {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
             Some(value) => value,
-            None => return Err("CountMap: no parameters provided".to_string()),
+            None => return Err("TimeControlBin: no parameters provided".to_string()),
         };
 
         // TODO: better error handling
@@ -32,7 +33,7 @@ impl CountMap {
             .unwrap()
             .to_string();
 
-        Ok(Box::new(CountMap {
+        Ok(Box::new(TimeControlBin {
             input_vec_name,
             output_vec_name,
             input_flag,
@@ -40,11 +41,12 @@ impl CountMap {
         }))
     }
 
-    pub fn map(_game: &Game, _filter: &CountMap) -> SharedData {
-        SharedData::U64(1)
+    pub fn bin(game: &Game, _filter: &TimeControlBin) -> SharedData {
+        SharedData::String(format!("{:?}", game.time_control))
     }
 }
 
-impl Step for CountMap {
-    map_template!(CountMap::map);
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
+impl Step for TimeControlBin {
+    bin_template!(TimeControlBin::bin);
 }

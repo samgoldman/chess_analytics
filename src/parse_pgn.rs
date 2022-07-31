@@ -20,12 +20,13 @@ pub struct PgnParser {
     coordinate_regex: Regex,
     castling_regex: Regex,
 }
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PgnParser {
     pub fn new() -> Self {
         Self {
             header_regex: Regex::new(r#"\[(.*) "(.*)"\]"#).unwrap(),
-            eval_regex: Regex::new(r#"(-?\d+\.\d{1,2}|#-?\d+)"#).unwrap(),
-            eval_advantage_regex: Regex::new(r#"(-?\d+\.\d{1,2})"#).unwrap(),
+            eval_regex: Regex::new(r#"-?\d+\.\d{1,2}|#-?\d+"#).unwrap(),
+            eval_advantage_regex: Regex::new(r#"-?\d+\.\d{1,2}"#).unwrap(),
             eval_mate_regex: Regex::new(r#"#(-?\d+)"#).unwrap(),
             clock_regex: Regex::new(r#"(\d+):(\d{2}):(\d{2})"#).unwrap(),
             move_regex: Regex::new(
@@ -173,6 +174,7 @@ impl PgnParser {
             "Opening" => {}
             "UTCTime" => {}
             "Annotator" => {}
+            "Round" => {}
             f => {
                 return Err(format!("Unrecognized header field: {}", f));
             }
@@ -191,8 +193,7 @@ impl PgnParser {
         promotion_piece: &str,
         check_str: &str,
         nag_str: &str,
-        game: &mut Game,
-    ) -> Result<(), String> {
+    ) -> Result<Move, String> {
         let from = if let Some(coord_cap) = self.coordinate_regex.captures(disambiguation_str) {
             let optional_file = File::from_pgn(&coord_cap[1]);
             let optional_rank = Rank::from_pgn(&coord_cap[2]);
@@ -242,7 +243,7 @@ impl PgnParser {
             _ => OptionalPiece::new_none(),
         };
 
-        game.moves.push(Move {
+        Ok(Move {
             from,
             to,
             piece_moved,
@@ -251,14 +252,16 @@ impl PgnParser {
             mates,
             nag,
             promoted_to,
-        });
-
-        Ok(())
+        })
     }
 
-    fn parse_potential_move(&self, token: &str, game: &mut Game) -> Result<(), String> {
-        for cap in self.castling_regex.captures_iter(token) {
-            let white = game.moves.len() % 2 == 0;
+    fn parse_potential_move(
+        &self,
+        token: &str,
+        current_move_count: usize,
+    ) -> Result<Option<Move>, String> {
+        if let Some(cap) = self.castling_regex.captures(token) {
+            let white = current_move_count % 2 == 0;
             let kingside = cap[1].len() == 3;
 
             let disambiguation_str = format!("e{}", if white { "1" } else { "8" });
@@ -271,7 +274,7 @@ impl PgnParser {
             let check_str = &cap[2];
             let nag_str = &cap[3];
 
-            self.parse_move(
+            return Ok(Some(self.parse_move(
                 &disambiguation_str,
                 &dest_str,
                 "K",
@@ -279,11 +282,10 @@ impl PgnParser {
                 "",
                 check_str,
                 nag_str,
-                game,
-            )?;
+            )?));
         }
 
-        for cap in self.move_regex.captures_iter(token) {
+        if let Some(cap) = self.move_regex.captures(token) {
             let piece_str = &cap[1];
             let disambiguation_str = &cap[2];
             let capture_str = &cap[3];
@@ -295,7 +297,7 @@ impl PgnParser {
             let check_str = &cap[7];
             let nag_str = &cap[8];
 
-            self.parse_move(
+            return Ok(Some(self.parse_move(
                 disambiguation_str,
                 dest_str,
                 piece_str,
@@ -303,11 +305,10 @@ impl PgnParser {
                 promotion_piece,
                 check_str,
                 nag_str,
-                game,
-            )?;
+            )?));
         }
 
-        Ok(())
+        Ok(None)
     }
 
     fn parse_potential_moves(&self, moves_str: &str, game: &mut Game) -> Result<(), String> {
@@ -325,12 +326,15 @@ impl PgnParser {
             }
 
             if !in_comment {
-                self.parse_potential_move(token, game)?;
+                let potential_move = self.parse_potential_move(token, game.moves.len())?;
+                if let Some(m) = potential_move {
+                    game.moves.push(m);
+                }
             } else {
                 for cap in self.eval_regex.captures_iter(token) {
                     game.eval_available = true;
 
-                    let eval = &cap[1];
+                    let eval = &cap[0];
 
                     if let Some(cap) = self.eval_mate_regex.captures(eval) {
                         game.eval_advantage.push(0.0);
@@ -339,7 +343,7 @@ impl PgnParser {
 
                     if let Some(cap) = self.eval_advantage_regex.captures(eval) {
                         game.eval_mate_in.push(0);
-                        game.eval_advantage.push(cap[1].parse::<f32>().unwrap());
+                        game.eval_advantage.push(cap[0].parse::<f32>().unwrap());
                     }
                 }
 
@@ -556,10 +560,46 @@ mod parse_header {
         assert_eq!(parser.parse_header(header, &mut game), Ok(()));
         assert_eq!(game.result, GameResult::Black);
     }
+
+    macro_rules! ok_and_game_is_not_modified {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let mut game = Game::default();
+                let parser = PgnParser::new();
+                assert_eq!(parser.parse_header($value, &mut game), Ok(()));
+                assert_eq!(game, Game::default());
+            }
+        )*
+        }
+    }
+
+    ok_and_game_is_not_modified!(
+        variant_standard: r#"[Variant "Standard"]"#,
+        event_header: r#"[Round "1"]"#,
+        date_header: r#"[Date "2022-07-30"]"#,
+        white_title_header: r#"[WhiteTitle "GM"]"#,
+        black_title_header: r#"[BlackTitle "IM"]"#,
+        opening_header: r#"[Opening "Sicilian"]"#,
+        utc_time_header: r#"[UTCTime "12:34:56"]"#,
+        annotator_header: r#"[Annotator "None"]"#,
+        round_header: r#"[Round "1"]"#,
+    );
+
+    #[test]
+    fn parse_eco_question_mark() {
+        let header = r#"[ECO "?"]"#;
+        let mut game = Game::default();
+        let parser = PgnParser::new();
+        assert_eq!(parser.parse_header(header, &mut game), Ok(()));
+        assert_eq!(game.eco_category, '\0');
+        assert_eq!(game.eco_subcategory, 0);
+    }
 }
 
 #[cfg(test)]
-mod parse_potential_moves {
+mod test_move_related {
     use super::*;
 
     #[test]
@@ -597,7 +637,7 @@ mod parse_potential_moves {
     #[test]
     fn test_basic_moves_with_eval_and_clock() {
         let move_str =
-            "1. e4 { [%eval 0.17] [%clk 0:00:30] } 1... c5 { [%eval 0.19] [%clk 0:00:30] }";
+            "1. e4 { [%eval 0.17] [%clk 1:02:30] } 1... c5 { [%eval #-1] [%clk 0:00:30] }";
         let mut game = Game::default();
         let parser = PgnParser::new();
         assert_eq!(parser.parse_potential_moves(move_str, &mut game), Ok(()));
@@ -618,13 +658,128 @@ mod parse_potential_moves {
             Rank::_5,
             Piece::Pawn,
         ));
-        expected_game.clock.push(std::time::Duration::from_secs(30));
+        expected_game
+            .clock
+            .push(std::time::Duration::from_secs(60 * 60 + 150));
         expected_game.clock.push(std::time::Duration::from_secs(30));
         expected_game.eval_advantage.push(0.17);
         expected_game.eval_mate_in.push(0);
-        expected_game.eval_advantage.push(0.19);
-        expected_game.eval_mate_in.push(0);
+        expected_game.eval_advantage.push(0.0);
+        expected_game.eval_mate_in.push(-1);
 
         assert_eq!(game, expected_game);
+    }
+
+    #[test]
+    fn test_castling() {
+        let token = "O-O";
+        let expected_white = Move::new_to_from(
+            Some(File::_E),
+            Some(Rank::_1),
+            File::_G,
+            Rank::_1,
+            Piece::King,
+        );
+        let expected_black = Move::new_to_from(
+            Some(File::_E),
+            Some(Rank::_8),
+            File::_G,
+            Rank::_8,
+            Piece::King,
+        );
+        let parser = PgnParser::new();
+        assert_eq!(
+            Ok(Some(expected_white)),
+            parser.parse_potential_move(token, 6)
+        );
+        assert_eq!(
+            Ok(Some(expected_black)),
+            parser.parse_potential_move(token, 11)
+        );
+
+        let token = "O-O-O";
+        let expected_white = Move::new_to_from(
+            Some(File::_E),
+            Some(Rank::_1),
+            File::_C,
+            Rank::_1,
+            Piece::King,
+        );
+        let expected_black = Move::new_to_from(
+            Some(File::_E),
+            Some(Rank::_8),
+            File::_C,
+            Rank::_8,
+            Piece::King,
+        );
+        let parser = PgnParser::new();
+        assert_eq!(
+            Ok(Some(expected_white)),
+            parser.parse_potential_move(token, 8)
+        );
+        assert_eq!(
+            Ok(Some(expected_black)),
+            parser.parse_potential_move(token, 13)
+        );
+    }
+
+    #[test]
+    fn test_promotion() {
+        let token = "a8=Q";
+        let expected = Move {
+            from: PartialCell {
+                file: None,
+                rank: None,
+            },
+            to: cell!(File::_A, Rank::_8),
+            piece_moved: Piece::Pawn,
+            captures: false,
+            checks: false,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: OptionalPiece::new_some(Piece::Queen),
+        };
+        let parser = PgnParser::new();
+        assert_eq!(Ok(Some(expected)), parser.parse_potential_move(token, 20));
+    }
+
+    #[test]
+    fn test_promotion_capture_and_check() {
+        let token = "xa8=R+";
+        let expected = Move {
+            from: PartialCell {
+                file: None,
+                rank: None,
+            },
+            to: cell!(File::_A, Rank::_8),
+            piece_moved: Piece::Pawn,
+            captures: true,
+            checks: true,
+            mates: false,
+            nag: NAG::None,
+            promoted_to: OptionalPiece::new_some(Piece::Rook),
+        };
+        let parser = PgnParser::new();
+        assert_eq!(Ok(Some(expected)), parser.parse_potential_move(token, 20));
+    }
+
+    #[test]
+    fn test_promotion_capture_and_mate() {
+        let token = "xa8=Q#";
+        let expected = Move {
+            from: PartialCell {
+                file: None,
+                rank: None,
+            },
+            to: cell!(File::_A, Rank::_8),
+            piece_moved: Piece::Pawn,
+            captures: true,
+            checks: false,
+            mates: true,
+            nag: NAG::None,
+            promoted_to: OptionalPiece::new_some(Piece::Queen),
+        };
+        let parser = PgnParser::new();
+        assert_eq!(Ok(Some(expected)), parser.parse_potential_move(token, 20));
     }
 }

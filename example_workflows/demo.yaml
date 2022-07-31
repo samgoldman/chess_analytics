@@ -17,6 +17,7 @@ steps:
         - "bin_time_control"
         - "map_count"
         - "reduce_sum"
+      post: "save_results"
   load_files:
     type: Bz2DecompressStep
     params:
@@ -28,6 +29,7 @@ steps:
     type: UiMonitorStep
     params: 
       finish_flag: reduction_done
+      final_results: reduced
       raw:
         - display_name: Done Reading Files
           field: done_reading_files
@@ -107,6 +109,12 @@ steps:
       output: reduced
       input_flag: mapping_done
       output_flag: reduction_done
+  save_results:
+    type: SaveDataStep
+    params:
+      file: out.txt
+      fields:
+        - reduced
 
   # filter_player_elo:
   #   type: PlayerEloFilter

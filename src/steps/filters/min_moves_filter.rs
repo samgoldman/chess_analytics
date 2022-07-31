@@ -8,6 +8,7 @@ pub struct MinMovesFilter {
     min_moves: u64,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl MinMovesFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration.clone() {
@@ -31,6 +32,7 @@ impl MinMovesFilter {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for MinMovesFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         self.generic_filter.process(&data, &*self.create_filter())

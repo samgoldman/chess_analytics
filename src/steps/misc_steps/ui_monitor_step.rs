@@ -22,6 +22,7 @@ pub struct UiMonitorStep {
     elapsed: std::time::Duration,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl UiMonitorStep {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let stdout = stdout().into_raw_mode().expect("Could not init stdout");
@@ -94,6 +95,7 @@ impl UiMonitorStep {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for UiMonitorStep {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         self.start_time = std::time::Instant::now();

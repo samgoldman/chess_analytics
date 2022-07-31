@@ -10,6 +10,7 @@ pub struct PerfectCheckmateMap {
     output_flag: String,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl PerfectCheckmateMap {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
         let params = match configuration {
@@ -83,6 +84,7 @@ impl PerfectCheckmateMap {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for PerfectCheckmateMap {
     map_template!(PerfectCheckmateMap::map);
 }

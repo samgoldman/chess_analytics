@@ -1,5 +1,6 @@
 use crate::game::Game;
 use crate::steps::get_step_by_name_and_params;
+use itertools::Itertools;
 use mockall::automock;
 use std::collections::HashMap;
 use std::fmt;
@@ -22,6 +23,7 @@ pub struct StepGenericCoreImpl {
     pub map: HashMap<String, SharedData>,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl StepGenericCore for StepGenericCoreImpl {
     fn contains_key(&self, k: &str) -> bool {
         self.map.contains_key(k)
@@ -56,17 +58,11 @@ pub enum SharedData {
     Map(HashMap<String, SharedData>),
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl SharedData {
     pub fn to_u64(&self) -> Option<u64> {
         match self {
             SharedData::U64(val) => Some(*val),
-            _ => None,
-        }
-    }
-
-    pub fn to_usize(&self) -> Option<usize> {
-        match self {
-            SharedData::USize(val) => Some(*val),
             _ => None,
         }
     }
@@ -85,13 +81,7 @@ impl SharedData {
         }
     }
 
-    pub fn to_binned_value(&self) -> Option<&(Box<SharedData>, Vec<SharedData>)> {
-        match self {
-            SharedData::BinnedValue(v) => Some(v),
-            _ => None,
-        }
-    }
-
+    #[cfg(test)]
     pub fn to_string(&self) -> Option<&String> {
         match self {
             SharedData::String(v) => Some(v),
@@ -139,6 +129,7 @@ impl SharedData {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl std::fmt::Display for SharedData {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
@@ -154,9 +145,8 @@ impl std::fmt::Display for SharedData {
             SharedData::Vec(val) => write!(f, "{:?}", val),
             SharedData::StepDescription(val) => write!(f, "{:?}", val),
             SharedData::Map(val) => {
-                writeln!(f, "Map: ").expect("Write fail");
-                for (k, v) in val.iter() {
-                    write!(f, "\t{:?}: {}\t", k, v).expect("Write fail");
+                for k in val.keys().sorted() {
+                    writeln!(f, "\t\"{}\": {}", k, val.get(k).unwrap())?;
                 }
                 Ok(())
             }
@@ -170,6 +160,7 @@ pub struct StepDescription {
     pub parameters: std::option::Option<serde_yaml::Value>,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl StepDescription {
     pub fn to_step(&self) -> Result<BoxedStep, String> {
         get_step_by_name_and_params(&self.step_type, self.parameters.clone())
@@ -179,4 +170,23 @@ impl StepDescription {
 #[automock]
 pub trait Step: fmt::Debug + Send + Sync {
     fn process(&mut self, data: StepGeneric) -> Result<(), String>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn fmt_shared_data_map() {
+        assert_eq!(
+            format!("{}", SharedData::Map(HashMap::new())),
+            "".to_string()
+        );
+        let mut map = HashMap::new();
+        map.insert("key_string".to_string(), SharedData::U64(42));
+        assert_eq!(
+            format!("{}", SharedData::Map(map)),
+            "\t\"key_string\": 42\n".to_string()
+        );
+    }
 }

@@ -11,6 +11,7 @@ pub enum Piece {
     King = 6,
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Piece {
     pub fn from_pgn(piece_str: &str) -> Self {
         match piece_str {
@@ -36,6 +37,7 @@ impl Piece {
         }
     }
 
+    #[allow(dead_code)]
     pub fn to_fen(self) -> &'static str {
         match self {
             Piece::Pawn => "P",
