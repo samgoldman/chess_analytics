@@ -139,4 +139,12 @@ mod test_pack_unpack {
             );
         }
     }
+
+    #[test]
+    fn test_unpack_invalid_data() {
+        assert_eq!(
+            Err(packed_struct::PackingError::InvalidValue),
+            OptionalPiece::unpack(&[0x07])
+        )
+    }
 }
