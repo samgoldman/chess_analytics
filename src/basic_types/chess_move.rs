@@ -39,6 +39,7 @@ impl Serialize for Move {
     }
 }
 
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl<'de> Deserialize<'de> for Move {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -53,7 +54,6 @@ impl<'de> Deserialize<'de> for Move {
                 formatter.write_str("an array of 4 bytes")
             }
 
-            #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
             fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
             where
                 E: serde::de::Error,
@@ -152,5 +152,22 @@ mod test_default_impls {
 
         let x = Move::new_to(File::_A, Rank::_1, Piece::Bishop);
         assert_eq!(format!("{:?}", x), "Move { from: PartialCell { file: None, rank: None }, to: Cell { file: _A, rank: _1 }, piece_moved: Bishop, captures: false, checks: false, mates: false, nag: None, promoted_to: OptionalPiece { optional_piece: None } }");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde::de::value::{Error as ValueError, StrDeserializer};
+    use serde::de::IntoDeserializer;
+
+    #[test]
+    fn test_deserialize_string() {
+        let deserializer: StrDeserializer<ValueError> = "".into_deserializer();
+        let error = Move::deserialize(deserializer).unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "invalid type: string \"\", expected an array of 4 bytes"
+        );
     }
 }

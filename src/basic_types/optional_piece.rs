@@ -66,6 +66,7 @@ impl PackedStruct for OptionalPiece {
 #[cfg(test)]
 mod test_is_some {
     use super::OptionalPiece;
+    use crate::basic_types::Piece;
 
     #[test]
     fn returns_false_when_none() {
@@ -83,7 +84,7 @@ mod test_is_some {
         assert_eq!(
             true,
             OptionalPiece {
-                optional_piece: Some(crate::basic_types::Piece::Pawn),
+                optional_piece: Some(Piece::Pawn),
             }
             .is_some()
         );
@@ -111,5 +112,31 @@ mod test_unwrap {
             }
             .unwrap()
         );
+    }
+}
+
+#[cfg(test)]
+mod test_pack_unpack {
+    use super::*;
+    use crate::basic_types::Piece;
+
+    #[test]
+    fn test_unpack_reverses_pack() {
+        let pieces = vec![
+            Piece::Pawn,
+            Piece::Rook,
+            Piece::Bishop,
+            Piece::Knight,
+            Piece::Queen,
+            Piece::King,
+        ];
+
+        for piece in pieces {
+            let optional_piece = OptionalPiece::new_some(piece);
+            assert_eq!(
+                optional_piece,
+                OptionalPiece::unpack(&optional_piece.pack().unwrap()).unwrap()
+            );
+        }
     }
 }

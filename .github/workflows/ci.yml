@@ -13,11 +13,6 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - run: chmod u+x ./scripts/install-flatbuffers.sh
-      - uses: seanmiddleditch/gha-setup-ninja@master
-      - run: ./scripts/install-flatbuffers.sh
       - uses: actions-rs/cargo@v1
         with:
           command: check
@@ -38,11 +33,6 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - run: chmod u+x ./scripts/install-flatbuffers.sh
-      - uses: seanmiddleditch/gha-setup-ninja@master
-      - run: ./scripts/install-flatbuffers.sh
       - uses: actions-rs/cargo@v1
         with:
           command: test
@@ -59,11 +49,6 @@ jobs:
           toolchain: nightly
           override: true
           components: llvm-tools-preview
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - run: chmod u+x ./scripts/install-flatbuffers.sh
-      - uses: seanmiddleditch/gha-setup-ninja@master
-      - run: ./scripts/install-flatbuffers.sh
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate code coverage
@@ -87,11 +72,6 @@ jobs:
           toolchain: nightly
           components: rustfmt
           override: true
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - run: chmod u+x ./scripts/install-flatbuffers.sh
-      - uses: seanmiddleditch/gha-setup-ninja@master
-      - run: ./scripts/install-flatbuffers.sh
       - uses: actions-rs/cargo@v1
         with: 
           command: build
@@ -110,15 +90,9 @@ jobs:
           toolchain: nightly
           components: clippy
           override: true
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - run: chmod u+x ./scripts/install-flatbuffers.sh
-      - uses: seanmiddleditch/gha-setup-ninja@master
-      - run: ./scripts/install-flatbuffers.sh
       - uses: actions-rs/cargo@v1
         with: 
           command: build
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features
