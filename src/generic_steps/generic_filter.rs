@@ -26,12 +26,12 @@ impl GenericFilter {
             None => return Err("GenericFilter: no parameters provided".to_string()),
         };
 
-        let input_vec_name = get_required_parameter("input", &params)?;
-        let output_vec_name = get_required_parameter("output", &params)?;
+        let input_vec_name = get_required_parameter("GenericFilter", "input", &params)?;
+        let output_vec_name = get_required_parameter("GenericFilter", "output", &params)?;
 
         let discard_vec_name = get_parameter_with_default("discard", "null", &params);
-        let input_flag = get_required_parameter("input_flag", &params)?;
-        let output_flag = get_required_parameter("output_flag", &params)?;
+        let input_flag = get_required_parameter("GenericFilter", "input_flag", &params)?;
+        let output_flag = get_required_parameter("GenericFilter", "output_flag", &params)?;
 
         Ok(Box::new(GenericFilter {
             input_vec_name,

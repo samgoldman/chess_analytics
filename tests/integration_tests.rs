@@ -128,3 +128,27 @@ fn parse_pgn() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+#[test]
+fn avg_perfect_checkmate_unbinned() -> Result<(), Box<dyn std::error::Error>> {
+    let _ = std::fs::create_dir("tests/output/int_7");
+    run(vec![
+        "chess_analytics",
+        "tests/workflows/7_perfect_checkmate_avg.yaml",
+    ]
+    .iter()
+    .map(|x| (*x).to_string()))?;
+
+    let contents = fs::read_to_string("tests/output/int_7/tmp.txt")
+        .expect("Something went wrong reading the file");
+
+    assert_eq!(
+        contents,
+        "avg_perfect_checkmate: \n\t\"\": 1.6666666666666667\n\n"
+    );
+
+    let _ = std::fs::remove_file("tests/output/int_7/tmp.txt");
+    let _ = std::fs::remove_dir("tests/output/int_7");
+
+    Ok(())
+}

@@ -8,11 +8,11 @@ steps:
   parse_pgn:
     type: ParsePgnStep
     params:
-      pgn_filename: tests/data/one_eval_one_no_eval.pgn
+      pgn_filename: tests/data/games_ending_in_mates.pgn
   export_games:
     type: ExportGames
     params:
       input: parsed_games
       input_flag: done_parsing_games
-      file_prefix: one_eval_one_no_eval
+      file_prefix: games_ending_in_mates
       output_path: tests/data/
