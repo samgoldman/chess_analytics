@@ -76,15 +76,19 @@ impl Step for ParsePgnStep {
         let file = std::fs::File::open(&self.pgn_filename).unwrap();
         let mut reader = std::io::BufReader::new(file);
 
-        while let Ok(Some(game)) = self.parse_next_game_from_file(&mut reader) {
-            {
+        loop {
+            let next = self.parse_next_game_from_file(&mut reader);
+            if Ok(None) == next {
+                break;
+            } else if let Ok(Some(game)) = next {
                 let mut unlocked_data = data.lock().unwrap();
                 let game_list = unlocked_data.get("parsed_games").unwrap();
                 let mut game_list: Vec<SharedData> = game_list.to_vec().unwrap();
 
-                dbg!(&game);
                 game_list.push(SharedData::Game(game));
                 unlocked_data.insert("parsed_games", SharedData::Vec(game_list));
+            } else {
+                next.unwrap();
             }
         }
 

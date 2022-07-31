@@ -52,14 +52,7 @@ pub struct Game {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Game {
-    pub fn serialize(&self) -> Vec<u8> {
-        to_allocvec(self).unwrap()
-    }
-
-    pub fn deserialize(bytes: Vec<u8>) -> Self {
-        from_bytes(&bytes).unwrap()
-    }
-
+    #[allow(dead_code)]
     pub fn clock_available(&self) -> bool {
         !self.clock.is_empty()
     }

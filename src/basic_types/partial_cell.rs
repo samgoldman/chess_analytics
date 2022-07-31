@@ -46,7 +46,7 @@ impl PackedStruct for PartialCell {
         assert!(src.len() == 1);
 
         let file_raw = src[0] & 0x0F;
-        let rank_raw = (src[0] & 0xF0) >> 4;
+        let rank_raw = src[0] >> 4;
 
         let file = if file_raw == 0x0F {
             None
@@ -89,7 +89,7 @@ impl PartialCell {
 }
 
 #[cfg(test)]
-mod test_default_impls {
+mod tests {
     use super::*;
 
     #[test]
@@ -99,5 +99,70 @@ mod test_default_impls {
             rank: Some(Rank::_5),
         };
         assert_eq!(a, a.clone());
+    }
+
+    #[test]
+    fn test_is_fully_defined() {
+        let cell_1 = PartialCell {
+            file: Some(File::_A),
+            rank: Some(Rank::_1),
+        };
+        assert_eq!(true, cell_1.is_fully_defined());
+        let cell_2 = PartialCell {
+            file: Some(File::_A),
+            rank: None,
+        };
+        assert_eq!(false, cell_2.is_fully_defined());
+        let cell_3 = PartialCell {
+            file: None,
+            rank: Some(Rank::_1),
+        };
+        assert_eq!(false, cell_3.is_fully_defined());
+        let cell_4 = PartialCell {
+            file: None,
+            rank: None,
+        };
+        assert_eq!(false, cell_4.is_fully_defined());
+    }
+
+    #[test]
+    fn unpack_reverses_pack() {
+        for file in File::all_files() {
+            for rank in Rank::all_ranks() {
+                let cell_1 = PartialCell {
+                    file: Some(file),
+                    rank: Some(rank),
+                };
+                let cell_2 = PartialCell {
+                    file: Some(file),
+                    rank: None,
+                };
+                let cell_3 = PartialCell {
+                    file: None,
+                    rank: Some(rank),
+                };
+
+                assert_eq!(
+                    cell_1,
+                    PartialCell::unpack(&cell_1.pack().unwrap()).unwrap()
+                );
+                assert_eq!(
+                    cell_2,
+                    PartialCell::unpack(&cell_2.pack().unwrap()).unwrap()
+                );
+                assert_eq!(
+                    cell_3,
+                    PartialCell::unpack(&cell_3.pack().unwrap()).unwrap()
+                );
+            }
+        }
+        let cell_none = PartialCell {
+            file: None,
+            rank: None,
+        };
+        assert_eq!(
+            cell_none,
+            PartialCell::unpack(&cell_none.pack().unwrap()).unwrap()
+        );
     }
 }

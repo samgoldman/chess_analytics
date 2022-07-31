@@ -12,6 +12,7 @@ pub struct Board {
 // TODO investigate no-panic
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Board {
+    #[cfg(test)]
     pub fn to_fen(&self) -> String {
         let mut fen = String::default();
 

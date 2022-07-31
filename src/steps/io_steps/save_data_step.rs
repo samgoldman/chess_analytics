@@ -39,7 +39,7 @@ impl Step for SaveDataStep {
             let value = unlocked_data
                 .get(field.as_str().unwrap())
                 .unwrap_or(default);
-            writeln!(file, "{}: {:?}", field.as_str().unwrap(), value).unwrap();
+            writeln!(file, "{}: {}", field.as_str().unwrap(), value).unwrap();
         }
 
         Ok(())

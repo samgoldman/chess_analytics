@@ -1,3 +1,4 @@
+use crate::step_param_utils::*;
 use crate::{
     game::Game,
     workflow_step::{SharedData, StepGeneric},
@@ -25,27 +26,12 @@ impl GenericFilter {
             None => return Err("GenericFilter: no parameters provided".to_string()),
         };
 
-        // TODO: better error handling
-        let input_vec_name = params.get("input").unwrap().as_str().unwrap().to_string();
-        let output_vec_name = params.get("output").unwrap().as_str().unwrap().to_string();
-        let discard_vec_name = params
-            .get("discard")
-            .unwrap_or(&serde_yaml::Value::String("null".to_string()))
-            .as_str()
-            .unwrap()
-            .to_string();
-        let input_flag = params
-            .get("input_flag")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_string();
-        let output_flag = params
-            .get("output_flag")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_string();
+        let input_vec_name = get_required_parameter("input", &params)?;
+        let output_vec_name = get_required_parameter("output", &params)?;
+
+        let discard_vec_name = get_parameter_with_default("discard", "null", &params);
+        let input_flag = get_required_parameter("input_flag", &params)?;
+        let output_flag = get_required_parameter("output_flag", &params)?;
 
         Ok(Box::new(GenericFilter {
             input_vec_name,
@@ -202,9 +188,11 @@ mod test_process {
     }
 
     use mockall::automock;
+    #[allow(dead_code)]
     pub struct FilterStep {}
     #[automock]
     impl FilterStep {
+        #[allow(dead_code)]
         pub fn filter(_game: &Game) -> bool {
             false
         }
@@ -551,6 +539,152 @@ mod test_process {
         let data_param: StepGeneric = Arc::new(Mutex::new(data));
         let res = generic_filter.process(&data_param, &MockFilterStep::filter);
         assert!(res.is_err());
+    }
+}
+
+#[cfg(test)]
+mod test_try_new {
+    use serde_yaml::{Mapping, Value};
+
+    use super::*;
+
+    #[test]
+    fn no_params_returns_err() {
+        assert_eq!(
+            Err("GenericFilter: no parameters provided".to_string()),
+            GenericFilter::try_new(None)
+        );
+    }
+
+    #[test]
+    fn no_input_vector_parameter() {
+        let params = Mapping::new();
+        assert_eq!(
+            Err("GenericFilter: parameter 'input' is required".to_string()),
+            GenericFilter::try_new(Some(Value::Mapping(params)))
+        );
+    }
+
+    #[test]
+    fn no_output_vector_parameter() {
+        let mut params = Mapping::new();
+        params.insert(
+            Value::String("input".to_string()),
+            Value::String("input_vector".to_string()),
+        );
+
+        assert_eq!(
+            Err("GenericFilter: parameter 'output' is required".to_string()),
+            GenericFilter::try_new(Some(Value::Mapping(params)))
+        );
+    }
+
+    #[test]
+    fn no_input_flag_parameter() {
+        let mut params = Mapping::new();
+        params.insert(
+            Value::String("input".to_string()),
+            Value::String("input_vector".to_string()),
+        );
+        params.insert(
+            Value::String("output".to_string()),
+            Value::String("output_vector".to_string()),
+        );
+
+        assert_eq!(
+            Err("GenericFilter: parameter 'input_flag' is required".to_string()),
+            GenericFilter::try_new(Some(Value::Mapping(params)))
+        );
+    }
+
+    #[test]
+    fn no_output_flag_parameter() {
+        let mut params = Mapping::new();
+        params.insert(
+            Value::String("input".to_string()),
+            Value::String("input_vector".to_string()),
+        );
+        params.insert(
+            Value::String("output".to_string()),
+            Value::String("output_vector".to_string()),
+        );
+        params.insert(
+            Value::String("input_flag".to_string()),
+            Value::String("input_flag_value".to_string()),
+        );
+
+        assert_eq!(
+            Err("GenericFilter: parameter 'output_flag' is required".to_string()),
+            GenericFilter::try_new(Some(Value::Mapping(params)))
+        );
+    }
+
+    #[test]
+    fn discard_defaults_to_null() {
+        let mut params = Mapping::new();
+        params.insert(
+            Value::String("input".to_string()),
+            Value::String("input_vector".to_string()),
+        );
+        params.insert(
+            Value::String("output".to_string()),
+            Value::String("output_vector".to_string()),
+        );
+        params.insert(
+            Value::String("input_flag".to_string()),
+            Value::String("input_flag_value".to_string()),
+        );
+        params.insert(
+            Value::String("output_flag".to_string()),
+            Value::String("output_flag_value".to_string()),
+        );
+
+        assert_eq!(
+            Ok(Box::new(GenericFilter {
+                input_vec_name: "input_vector".to_string(),
+                output_vec_name: "output_vector".to_string(),
+                discard_vec_name: "null".to_string(),
+                input_flag: "input_flag_value".to_string(),
+                output_flag: "output_flag_value".to_string(),
+            })),
+            GenericFilter::try_new(Some(Value::Mapping(params)))
+        );
+    }
+
+    #[test]
+    fn discard_defaults_takes_value() {
+        let mut params = Mapping::new();
+        params.insert(
+            Value::String("input".to_string()),
+            Value::String("input_vector".to_string()),
+        );
+        params.insert(
+            Value::String("output".to_string()),
+            Value::String("output_vector".to_string()),
+        );
+        params.insert(
+            Value::String("discard".to_string()),
+            Value::String("discard_vector".to_string()),
+        );
+        params.insert(
+            Value::String("input_flag".to_string()),
+            Value::String("input_flag_value".to_string()),
+        );
+        params.insert(
+            Value::String("output_flag".to_string()),
+            Value::String("output_flag_value".to_string()),
+        );
+
+        assert_eq!(
+            Ok(Box::new(GenericFilter {
+                input_vec_name: "input_vector".to_string(),
+                output_vec_name: "output_vector".to_string(),
+                discard_vec_name: "discard_vector".to_string(),
+                input_flag: "input_flag_value".to_string(),
+                output_flag: "output_flag_value".to_string(),
+            })),
+            GenericFilter::try_new(Some(Value::Mapping(params)))
+        );
     }
 }
 

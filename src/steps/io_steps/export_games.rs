@@ -60,12 +60,17 @@ impl ExportGames {
     fn save_games(&self, games: Vec<Game>, count: i32) {
         let encoded_games = crate::game::Games(games).serialize();
 
+        let path = if count >= 0 {
+            format!(
+                "{}/{}_{:06}.bin.bz2",
+                self.output_path, self.file_prefix, count
+            )
+        } else {
+            format!("{}/{}.bin.bz2", self.output_path, self.file_prefix)
+        };
+
         let mut pos = 0;
-        let buffer = File::create(format!(
-            "{}/{}_{:06}.bin.bz2",
-            self.output_path, self.file_prefix, count
-        ))
-        .unwrap();
+        let buffer = File::create(path).unwrap();
 
         let mut compressor = BzEncoder::new(buffer, Compression::best());
 
@@ -130,6 +135,11 @@ impl Step for ExportGames {
             }
 
             if final_loop && quit {
+                if count == 0 {
+                    count = -1;
+                }
+
+                dbg!(games.clone(), count);
                 self.save_games(games, count);
                 break;
             }

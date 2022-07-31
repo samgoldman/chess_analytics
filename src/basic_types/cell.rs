@@ -79,12 +79,23 @@ impl PartialOrd for Cell {
 }
 
 #[cfg(test)]
-mod test_default_impls {
+mod tests {
     use super::*;
 
     #[test]
     fn test_clone() {
         let x = cell!(File::_A, Rank::_1);
         assert_eq!(x.clone(), x);
+    }
+
+    #[test]
+    fn unpack_reverses_pack() {
+        for file in File::all_files() {
+            for rank in Rank::all_ranks() {
+                let cell = Cell { file, rank };
+
+                assert_eq!(cell, Cell::unpack(&cell.pack().unwrap()).unwrap());
+            }
+        }
     }
 }

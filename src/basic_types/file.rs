@@ -44,6 +44,7 @@ impl File {
         }
     }
 
+    #[cfg(test)]
     pub fn from_usize(val: usize) -> Self {
         match val {
             1 => File::_A,

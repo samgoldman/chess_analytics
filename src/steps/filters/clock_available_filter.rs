@@ -5,14 +5,14 @@ use crate::generic_steps::GenericFilter;
 use crate::workflow_step::{Step, StepGeneric};
 
 #[derive(Debug)]
-pub struct EvalAvailableFilter {
+pub struct ClockAvailableFilter {
     generic_filter: GenericFilter,
 }
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
-impl EvalAvailableFilter {
+impl ClockAvailableFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
-        Ok(Box::new(EvalAvailableFilter {
+        Ok(Box::new(ClockAvailableFilter {
             generic_filter: *GenericFilter::try_new(configuration)?,
         }))
     }
@@ -20,13 +20,13 @@ impl EvalAvailableFilter {
     pub fn create_filter() -> &'static FilterFn {
         &(|game: &Game| {
             dbg!(game);
-            game.eval_available()
+            game.clock_available()
         })
     }
 }
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
-impl Step for EvalAvailableFilter {
+impl Step for ClockAvailableFilter {
     fn process(&mut self, data: StepGeneric) -> Result<(), String> {
         self.generic_filter.process(&data, Self::create_filter())
     }
@@ -54,7 +54,7 @@ mod test_process {
             .return_const(Ok(()));
 
         let mock_data = MockStepGenericCore::new();
-        let mut filter = EvalAvailableFilter {
+        let mut filter = ClockAvailableFilter {
             generic_filter: mock_generic_filter,
         };
 
@@ -97,7 +97,7 @@ mod test_try_new {
         ctx.expect()
             .with(mockall::predicate::eq(None))
             .returning(|_| Err("Test error".to_string()));
-        let result = EvalAvailableFilter::try_new(None);
+        let result = ClockAvailableFilter::try_new(None);
 
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), "Test error".to_string());
@@ -114,10 +114,10 @@ mod test_try_new {
             .with(mockall::predicate::eq(Some(Value::Mapping(params.clone()))))
             .returning(|_| Ok(Box::new(MockGenericFilter::new())));
 
-        let result = EvalAvailableFilter::try_new(Some(Value::Mapping(params)));
+        let result = ClockAvailableFilter::try_new(Some(Value::Mapping(params)));
         assert!(result.is_ok());
         assert_eq!(
-            "EvalAvailableFilter { generic_filter: MockGenericFilter }".to_string(),
+            "ClockAvailableFilter { generic_filter: MockGenericFilter }".to_string(),
             format!("{:?}", result.unwrap())
         );
     }
@@ -127,20 +127,20 @@ mod test_try_new {
 mod test_filter_fn {
     use crate::game::Game;
 
-    use super::EvalAvailableFilter;
+    use super::ClockAvailableFilter;
 
     #[test]
     fn test_true() {
         let mut g = Game::default();
-        g.eval_advantage = vec![0.0];
+        g.clock = vec![std::time::Duration::from_secs(30)];
 
-        assert_eq!(true, EvalAvailableFilter::create_filter()(&g));
+        assert_eq!(true, ClockAvailableFilter::create_filter()(&g));
     }
     #[test]
     fn test_false() {
         let mut g = Game::default();
-        g.eval_advantage = vec![];
+        g.clock = vec![];
 
-        assert_eq!(false, EvalAvailableFilter::create_filter()(&g));
+        assert_eq!(false, ClockAvailableFilter::create_filter()(&g));
     }
 }

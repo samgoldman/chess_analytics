@@ -174,6 +174,7 @@ impl PgnParser {
             "Opening" => {}
             "UTCTime" => {}
             "Annotator" => {}
+            "Round" => {}
             f => {
                 return Err(format!("Unrecognized header field: {}", f));
             }
@@ -559,6 +560,32 @@ mod parse_header {
         assert_eq!(parser.parse_header(header, &mut game), Ok(()));
         assert_eq!(game.result, GameResult::Black);
     }
+
+    macro_rules! ok_and_game_is_not_modified {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let mut game = Game::default();
+                let parser = PgnParser::new();
+                assert_eq!(parser.parse_header($value, &mut game), Ok(()));
+                assert_eq!(game, Game::default());
+            }
+        )*
+        }
+    }
+
+    ok_and_game_is_not_modified!(
+        variant_standard: r#"[Variant "Standard"]"#,
+        event_header: r#"[Round "1"]"#,
+        date_header: r#"[Date "2022-07-30"]"#,
+        white_title_header: r#"[WhiteTitle "GM"]"#,
+        black_title_header: r#"[BlackTitle "IM"]"#,
+        opening_header: r#"[Opening "Sicilian"]"#,
+        utc_time_header: r#"[UTCTime "12:34:56"]"#,
+        annotator_header: r#"[Annotator "None"]"#,
+        round_header: r#"[Round "1"]"#,
+    );
 }
 
 #[cfg(test)]

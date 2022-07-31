@@ -37,6 +37,7 @@ impl Piece {
         }
     }
 
+    #[allow(dead_code)]
     pub fn to_fen(self) -> &'static str {
         match self {
             Piece::Pawn => "P",

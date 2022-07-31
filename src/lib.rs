@@ -1,8 +1,6 @@
 #![feature(custom_inner_attributes)]
 #![clippy::cognitive_complexity = "20"]
 #![deny(clippy::cognitive_complexity)]
-// TODO: remove
-#![allow(dead_code)]
 #![feature(no_coverage)]
 
 use serde::Deserialize;
@@ -21,6 +19,7 @@ mod generic_steps;
 #[macro_use]
 mod macros;
 mod parse_pgn;
+mod step_param_utils;
 mod steps;
 mod steps_manager;
 mod workflow_step;

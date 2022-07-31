@@ -1,5 +1,6 @@
 use crate::game::Game;
 use crate::steps::get_step_by_name_and_params;
+use itertools::Itertools;
 use mockall::automock;
 use std::collections::HashMap;
 use std::fmt;
@@ -66,13 +67,6 @@ impl SharedData {
         }
     }
 
-    pub fn to_usize(&self) -> Option<usize> {
-        match self {
-            SharedData::USize(val) => Some(*val),
-            _ => None,
-        }
-    }
-
     pub fn to_bool(&self) -> Option<bool> {
         match self {
             SharedData::Bool(val) => Some(*val),
@@ -87,13 +81,7 @@ impl SharedData {
         }
     }
 
-    pub fn to_binned_value(&self) -> Option<&(Box<SharedData>, Vec<SharedData>)> {
-        match self {
-            SharedData::BinnedValue(v) => Some(v),
-            _ => None,
-        }
-    }
-
+    #[cfg(test)]
     pub fn to_string(&self) -> Option<&String> {
         match self {
             SharedData::String(v) => Some(v),
@@ -157,9 +145,9 @@ impl std::fmt::Display for SharedData {
             SharedData::Vec(val) => write!(f, "{:?}", val),
             SharedData::StepDescription(val) => write!(f, "{:?}", val),
             SharedData::Map(val) => {
-                writeln!(f, "Map: ").expect("Write fail");
-                for (k, v) in val.iter() {
-                    write!(f, "\t{:?}: {}\t", k, v).expect("Write fail");
+                writeln!(f).expect("Write fail");
+                for k in val.keys().sorted() {
+                    writeln!(f, "\t\"{}\": {}", k, val.get(k).unwrap()).expect("Write fail");
                 }
                 Ok(())
             }

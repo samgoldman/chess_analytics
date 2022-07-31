@@ -8,11 +8,11 @@ steps:
   parse_pgn:
     type: ParsePgnStep
     params:
-      pgn_filename: tests/data/simple_count_eval_and_clock_1_game.pgn
+      pgn_filename: tests/data/one_eval_one_no_eval.pgn
   export_games:
     type: ExportGames
     params:
       input: parsed_games
       input_flag: done_parsing_games
-      file_prefix: simple_count_eval_and_clock_1_game
+      file_prefix: one_eval_one_no_eval
       output_path: tests/data/
