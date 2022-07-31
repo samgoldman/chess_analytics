@@ -595,7 +595,6 @@ mod parse_header {
         assert_eq!(parser.parse_header(header, &mut game), Ok(()));
         assert_eq!(game.eco_category, '\0');
         assert_eq!(game.eco_subcategory, 0);
-
     }
 }
 
@@ -659,7 +658,9 @@ mod test_move_related {
             Rank::_5,
             Piece::Pawn,
         ));
-        expected_game.clock.push(std::time::Duration::from_secs(60*60 + 150));
+        expected_game
+            .clock
+            .push(std::time::Duration::from_secs(60 * 60 + 150));
         expected_game.clock.push(std::time::Duration::from_secs(30));
         expected_game.eval_advantage.push(0.17);
         expected_game.eval_mate_in.push(0);
@@ -672,25 +673,60 @@ mod test_move_related {
     #[test]
     fn test_castling() {
         let token = "O-O";
-        let expected_white = Move::new_to_from(Some(File::_E), Some(Rank::_1), File::_G, Rank::_1, Piece::King);
-        let expected_black = Move::new_to_from(Some(File::_E), Some(Rank::_8), File::_G, Rank::_8, Piece::King);
+        let expected_white = Move::new_to_from(
+            Some(File::_E),
+            Some(Rank::_1),
+            File::_G,
+            Rank::_1,
+            Piece::King,
+        );
+        let expected_black = Move::new_to_from(
+            Some(File::_E),
+            Some(Rank::_8),
+            File::_G,
+            Rank::_8,
+            Piece::King,
+        );
         let parser = PgnParser::new();
-        assert_eq!(Ok(Some(expected_white)), parser.parse_potential_move(token, 6));
-        assert_eq!(Ok(Some(expected_black)), parser.parse_potential_move(token, 11));
+        assert_eq!(
+            Ok(Some(expected_white)),
+            parser.parse_potential_move(token, 6)
+        );
+        assert_eq!(
+            Ok(Some(expected_black)),
+            parser.parse_potential_move(token, 11)
+        );
 
         let token = "O-O-O";
-        let expected_white = Move::new_to_from(Some(File::_E), Some(Rank::_1), File::_C, Rank::_1, Piece::King);
-        let expected_black = Move::new_to_from(Some(File::_E), Some(Rank::_8), File::_C, Rank::_8, Piece::King);
+        let expected_white = Move::new_to_from(
+            Some(File::_E),
+            Some(Rank::_1),
+            File::_C,
+            Rank::_1,
+            Piece::King,
+        );
+        let expected_black = Move::new_to_from(
+            Some(File::_E),
+            Some(Rank::_8),
+            File::_C,
+            Rank::_8,
+            Piece::King,
+        );
         let parser = PgnParser::new();
-        assert_eq!(Ok(Some(expected_white)), parser.parse_potential_move(token, 8));
-        assert_eq!(Ok(Some(expected_black)), parser.parse_potential_move(token, 13));
+        assert_eq!(
+            Ok(Some(expected_white)),
+            parser.parse_potential_move(token, 8)
+        );
+        assert_eq!(
+            Ok(Some(expected_black)),
+            parser.parse_potential_move(token, 13)
+        );
     }
 
     #[test]
     fn test_promotion() {
         let token = "a8=Q";
-        let expected = 
-        Move {
+        let expected = Move {
             from: PartialCell {
                 file: None,
                 rank: None,
@@ -710,8 +746,7 @@ mod test_move_related {
     #[test]
     fn test_promotion_capture_and_check() {
         let token = "xa8=R+";
-        let expected = 
-        Move {
+        let expected = Move {
             from: PartialCell {
                 file: None,
                 rank: None,
@@ -731,8 +766,7 @@ mod test_move_related {
     #[test]
     fn test_promotion_capture_and_mate() {
         let token = "xa8=Q#";
-        let expected = 
-        Move {
+        let expected = Move {
             from: PartialCell {
                 file: None,
                 rank: None,

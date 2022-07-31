@@ -18,9 +18,7 @@ impl ClockAvailableFilter {
     }
 
     pub fn create_filter() -> &'static FilterFn {
-        &(|game: &Game| {
-            game.clock_available()
-        })
+        &(|game: &Game| game.clock_available())
     }
 }
 

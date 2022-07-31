@@ -152,6 +152,5 @@ mod test_default_impls {
 
         let x = Move::new_to(File::_A, Rank::_1, Piece::Bishop);
         assert_eq!(format!("{:?}", x), "Move { from: PartialCell { file: None, rank: None }, to: Cell { file: _A, rank: _1 }, piece_moved: Bishop, captures: false, checks: false, mates: false, nag: None, promoted_to: OptionalPiece { optional_piece: None } }");
-
     }
 }

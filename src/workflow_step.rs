@@ -178,9 +178,15 @@ mod tests {
 
     #[test]
     fn fmt_shared_data_map() {
-        assert_eq!(format!("{}", SharedData::Map(HashMap::new())), "".to_string());
+        assert_eq!(
+            format!("{}", SharedData::Map(HashMap::new())),
+            "".to_string()
+        );
         let mut map = HashMap::new();
         map.insert("key_string".to_string(), SharedData::U64(42));
-        assert_eq!(format!("{}", SharedData::Map(map)), "\t\"key_string\": 42\n".to_string());
+        assert_eq!(
+            format!("{}", SharedData::Map(map)),
+            "\t\"key_string\": 42\n".to_string()
+        );
     }
 }

@@ -112,17 +112,14 @@ fn count_games_with_eval_available() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn parse_pgn() -> Result<(), Box<dyn std::error::Error>> {
     let _ = std::fs::create_dir("tests/output/int_6");
-    run(vec![
-        "chess_analytics",
-        "tests/workflows/6_parse_pgn.yaml",
-    ]
-    .iter()
-    .map(|x| (*x).to_string()))?;
+    run(vec!["chess_analytics", "tests/workflows/6_parse_pgn.yaml"]
+        .iter()
+        .map(|x| (*x).to_string()))?;
 
     let contents = fs::read("tests/output/int_6/int_6_test_set_1.bin.bz2")
         .expect("Something went wrong reading the file");
-    let expected = fs::read("tests/data/test_set_1.bin.bz2")
-        .expect("Something went wrong reading the file");
+    let expected =
+        fs::read("tests/data/test_set_1.bin.bz2").expect("Something went wrong reading the file");
 
     assert_eq!(contents, expected);
 
