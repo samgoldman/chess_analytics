@@ -1189,3 +1189,17 @@ mod test_debug_fmt {
         );
     }
 }
+
+#[cfg(test)]
+mod test_basic_ser_de {
+    use super::*;
+
+    #[test]
+    fn test_reciprocal() {
+        let board = Board::default();
+        assert_eq!(
+            board,
+            postcard::from_bytes(&postcard::to_allocvec(&board).unwrap()).unwrap()
+        );
+    }
+}

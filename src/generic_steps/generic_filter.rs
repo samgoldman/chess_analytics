@@ -192,10 +192,15 @@ mod test_process {
     pub struct FilterStep {}
     #[automock]
     impl FilterStep {
-        #[allow(dead_code)]
         pub fn filter(_game: &Game) -> bool {
             false
         }
+    }
+
+    #[test]
+    fn test_filter_step() {
+        let _m = get_lock(&MTX);
+        assert_eq!(false, FilterStep::filter(&Game::default()));
     }
 
     #[test]
