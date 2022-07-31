@@ -39,7 +39,6 @@ impl Serialize for Move {
     }
 }
 
-#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl<'de> Deserialize<'de> for Move {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -54,6 +53,7 @@ impl<'de> Deserialize<'de> for Move {
                 formatter.write_str("an array of 4 bytes")
             }
 
+            #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
             fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
             where
                 E: serde::de::Error,
@@ -149,5 +149,9 @@ mod test_default_impls {
             promoted_to: OptionalPiece::new_none(),
         };
         assert_eq!(format!("{:?}", x), "Move { from: PartialCell { file: Some(_B), rank: Some(_2) }, to: Cell { file: _A, rank: _1 }, piece_moved: Bishop, captures: false, checks: true, mates: false, nag: None, promoted_to: OptionalPiece { optional_piece: None } }");
+
+        let x = Move::new_to(File::_A, Rank::_1, Piece::Bishop);
+        assert_eq!(format!("{:?}", x), "Move { from: PartialCell { file: None, rank: None }, to: Cell { file: _A, rank: _1 }, piece_moved: Bishop, captures: false, checks: false, mates: false, nag: None, promoted_to: OptionalPiece { optional_piece: None } }");
+
     }
 }

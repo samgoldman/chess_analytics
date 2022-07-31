@@ -62,7 +62,6 @@ impl Game {
             .iter()
             .fold(vec![Board::default()], |mut boards, curr_move| {
                 let mut new_board = boards.last().unwrap().clone();
-                // dbg!(boards.len(), curr_move, boards.last().unwrap().to_fen());
                 new_board.move_piece(*curr_move);
                 boards.push(new_board);
 

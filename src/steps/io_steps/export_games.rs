@@ -139,7 +139,6 @@ impl Step for ExportGames {
                     count = -1;
                 }
 
-                dbg!(games.clone(), count);
                 self.save_games(games, count);
                 break;
             }

@@ -145,9 +145,8 @@ impl std::fmt::Display for SharedData {
             SharedData::Vec(val) => write!(f, "{:?}", val),
             SharedData::StepDescription(val) => write!(f, "{:?}", val),
             SharedData::Map(val) => {
-                writeln!(f).expect("Write fail");
                 for k in val.keys().sorted() {
-                    writeln!(f, "\t\"{}\": {}", k, val.get(k).unwrap()).expect("Write fail");
+                    writeln!(f, "\t\"{}\": {}", k, val.get(k).unwrap())?;
                 }
                 Ok(())
             }
@@ -171,4 +170,17 @@ impl StepDescription {
 #[automock]
 pub trait Step: fmt::Debug + Send + Sync {
     fn process(&mut self, data: StepGeneric) -> Result<(), String>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn fmt_shared_data_map() {
+        assert_eq!(format!("{}", SharedData::Map(HashMap::new())), "".to_string());
+        let mut map = HashMap::new();
+        map.insert("key_string".to_string(), SharedData::U64(42));
+        assert_eq!(format!("{}", SharedData::Map(map)), "\t\"key_string\": 42\n".to_string());
+    }
 }

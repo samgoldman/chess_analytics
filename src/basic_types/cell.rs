@@ -37,7 +37,7 @@ impl PackedStruct for Cell {
         assert!(src.len() == 1);
 
         let file_raw = src[0] & 0x0F;
-        let rank_raw = (src[0] & 0xF0) >> 4;
+        let rank_raw = src[0] >> 4;
 
         let file = File::from_uint(file_raw as u32);
 
@@ -97,5 +97,12 @@ mod tests {
                 assert_eq!(cell, Cell::unpack(&cell.pack().unwrap()).unwrap());
             }
         }
+    }
+
+    #[test]
+    fn cmp_on_file_if_ranks_eq() {
+        let cell_1 = cell!(File::_A, Rank::_1);
+        let cell_2 = cell!(File::_B, Rank::_1);
+        assert!(cell_2 > cell_1);
     }
 }

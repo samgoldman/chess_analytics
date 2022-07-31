@@ -16,3 +16,4 @@ ninja-build/
 
 *_generated.rs
 *.json
+tests/output/*

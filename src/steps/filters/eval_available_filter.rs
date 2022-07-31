@@ -19,7 +19,6 @@ impl EvalAvailableFilter {
 
     pub fn create_filter() -> &'static FilterFn {
         &(|game: &Game| {
-            dbg!(game);
             game.eval_available()
         })
     }

@@ -1,0 +1,18 @@
+steps:
+  init:
+    type: ParallelStep
+    params:
+      children:
+        - "parse_pgn"
+        - "export_games"
+  parse_pgn:
+    type: ParsePgnStep
+    params:
+      pgn_filename: tests/data/test_set_1.pgn
+  export_games:
+    type: ExportGames
+    params:
+      input: parsed_games
+      input_flag: done_parsing_games
+      file_prefix: int_6_test_set_1
+      output_path: tests/output/int_6

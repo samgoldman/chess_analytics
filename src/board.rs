@@ -197,7 +197,6 @@ impl Board {
     // TODO convert to Ok/Err
     pub fn find_origin(&self, piece: Piece, dest: Cell, from: PartialCell) -> Cell {
         let possible_origins = self.find_possible_origins(piece, dest, from);
-        // dbg!(&possible_origins);
 
         let filtered_origins = possible_origins
             .iter()
@@ -218,7 +217,6 @@ impl Board {
             .filter(|possible_origin| {
                 if piece == Piece::Pawn {
                     let diff_file = dest.file as i32 - possible_origin.file as i32;
-                    // dbg!(diff_file, possible_origin, self.to_move, dest.rank, self.is_cell_empty(dest), self.is_cell_empty(cell!(dest.file, Rank::_5)));
 
                     // TODO: yeah, get rid of this!
                     if (diff_file != 0
