@@ -10,12 +10,18 @@ pub enum NAG {
 }
 
 #[cfg(test)]
-mod test_default_impls {
+mod test_derived_implementations {
     use super::*;
 
     #[test]
     fn test_clone() {
         let x = NAG::Questionable;
         assert_eq!(x.clone(), x);
+    }
+
+    #[test]
+    fn test_can_serialize_and_deserialize() {
+        let bytes = postcard::to_allocvec(&NAG::Blunder).unwrap();
+        assert_eq!(NAG::Blunder, postcard::from_bytes(&bytes).unwrap());
     }
 }

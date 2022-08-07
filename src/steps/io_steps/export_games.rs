@@ -58,7 +58,7 @@ impl ExportGames {
     }
 
     fn save_games(&self, games: Vec<Game>, count: i32) {
-        let encoded_games = crate::game::Games(games).serialize();
+        let encoded_games = postcard::to_allocvec(&games).unwrap();
 
         let path = if count >= 0 {
             format!(

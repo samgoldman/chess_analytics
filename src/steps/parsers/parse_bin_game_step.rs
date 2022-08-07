@@ -1,6 +1,8 @@
 // use crate::steps_manager::get_step_description;
-use crate::game::Games;
-use crate::workflow_step::{BoxedStep, SharedData, Step, StepGeneric};
+use crate::{
+    game::Game,
+    workflow_step::{BoxedStep, SharedData, Step, StepGeneric},
+};
 
 #[derive(Debug)]
 pub struct ParseBinGame {}
@@ -66,8 +68,8 @@ impl Step for ParseBinGame {
             };
 
             if !file_data.is_empty() {
-                let mut games = Games::deserialize(file_data)
-                    .0
+                let games: Vec<Game> = postcard::from_bytes(&file_data).unwrap();
+                let mut games = games
                     .iter()
                     .map(|g| SharedData::Game(g.clone()))
                     .collect::<Vec<SharedData>>();

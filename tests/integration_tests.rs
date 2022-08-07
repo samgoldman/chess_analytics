@@ -152,3 +152,40 @@ fn avg_perfect_checkmate_unbinned() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+#[test]
+fn noop_workflow() -> Result<(), Box<dyn std::error::Error>> {
+    let _ = std::fs::create_dir("tests/output/int_8");
+    assert!(run(vec!["chess_analytics", "tests/workflows/8_noop.yaml",]
+        .iter()
+        .map(|x| (*x).to_string()))
+    .is_ok());
+
+    assert!(fs::read_to_string("tests/output/int_8/tmp.txt").is_err());
+
+    let _ = std::fs::remove_file("tests/output/int_7/tmp.txt");
+
+    Ok(())
+}
+
+#[test]
+fn workflow_param_not_provided() -> Result<(), Box<dyn std::error::Error>> {
+    assert_eq!(
+        run(vec!["chess_analytics",].iter().map(|x| (*x).to_string())),
+        Err("First argument (configuration path) is required".to_string())
+    );
+
+    Ok(())
+}
+
+#[test]
+fn non_existent_workflow() -> Result<(), Box<dyn std::error::Error>> {
+    assert_eq!(run(vec![
+        "chess_analytics",
+        "tests/workflows/does_not_exist.yaml",
+    ]
+    .iter()
+    .map(|x| (*x).to_string())), Err("Could not open configuration file: Os { code: 2, kind: NotFound, message: \"No such file or directory\" }".to_string()));
+
+    Ok(())
+}

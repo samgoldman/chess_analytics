@@ -1,22 +1,7 @@
 use crate::basic_types::{GameResult, Move, Termination, TimeControl};
 use crate::board::Board;
-use postcard::{from_bytes, to_allocvec};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub struct Games(pub Vec<Game>);
-
-#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
-impl Games {
-    pub fn serialize(&self) -> Vec<u8> {
-        to_allocvec(self).unwrap()
-    }
-
-    pub fn deserialize(bytes: Vec<u8>) -> Self {
-        from_bytes(&bytes).unwrap()
-    }
-}
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Game {
