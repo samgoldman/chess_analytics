@@ -15,7 +15,6 @@ steps:
         - "init_bins"
         - "bin_tc"
         - "player_elo_filter"
-      post: "save_results"
   load_files:
     type: Bz2DecompressStep
     params:
@@ -62,9 +61,3 @@ steps:
       output: game_count
       input_flag: mapping_done
       output_flag: reduction_done
-  save_results:
-    type: SaveDataStep
-    params:
-      file: tests/output/int_4/tmp.txt
-      fields:
-        - game_count

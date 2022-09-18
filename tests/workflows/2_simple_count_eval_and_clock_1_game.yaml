@@ -2,7 +2,7 @@ steps:
   init:
     type: "GlobFileStep"
     params: 
-      glob: tests/data/simple_count_eval_and_clock_1_game.bin.bz2
+      glob: test_data/simple_count_eval_and_clock_1_game.bin.bz2
       child: parallel_step
   parallel_step:
     type: ParallelStep

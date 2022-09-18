@@ -40,9 +40,10 @@ use workflow_step::{StepDescription, StepGeneric, StepGenericCoreImpl};
 /// Currently some failures panic. TODO: eliminate as many panics as possible
 ///
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
-pub fn run<T>(mut args: T) -> Result<(), String>
+pub fn run<T, I>(mut args: T) -> Result<(), String>
 where
-    T: Iterator<Item = String>,
+    T: Iterator<Item = I>,
+    I: AsRef<std::path::Path>,
 {
     let config_path_string = match args.nth(1) {
         Some(path) => path,

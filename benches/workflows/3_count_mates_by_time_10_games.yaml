@@ -14,8 +14,7 @@ steps:
         - "reduce_sum"
         - "init_bins"
         - "bin_tc"
-        - "player_elo_filter"
-      post: "save_results"
+        - "checkmate_filter"
   load_files:
     type: Bz2DecompressStep
     params:
@@ -23,17 +22,13 @@ steps:
       full_queue_delay_ms: 332
   parse_games:
     type: ParseBinGame
-  player_elo_filter:
-    type: PlayerEloFilter
+  checkmate_filter:
+    type: CheckmateFilter
     params:
       input: parsed_games
       output: filtered_games
       input_flag: done_parsing_games
       output_flag: done_filtering_games
-      white: true
-      black: true
-      min_elo: 1500
-      max_elo: 1700
   init_bins:
     type: InitBinStep
     params:
@@ -62,9 +57,3 @@ steps:
       output: game_count
       input_flag: mapping_done
       output_flag: reduction_done
-  save_results:
-    type: SaveDataStep
-    params:
-      file: tests/output/int_4/tmp.txt
-      fields:
-        - game_count
