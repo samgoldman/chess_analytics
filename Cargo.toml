@@ -7,10 +7,12 @@ edition = "2021"
 [lib]
 name = "chess_analytics"
 path = "src/lib.rs"
+bench = false
 
 [[bin]]
 name = "chess_analytics"
 path = "src/main.rs"
+bench = false
 
 [dependencies]
 regex = "1.6.0"
@@ -32,13 +34,14 @@ mutagen = { git = "https://github.com/llogiq/mutagen", optional = true }
 
 [dev-dependencies]
 predicates = "2.1.1"
-
-[build-dependencies]
-flatc-rust = "0.2.0"
-mktemp = "0.4.1"
+criterion = { version = "0.3", features = ["html_reports"] }
 
 [profile.dev]
 opt-level = 3
+
+[[bench]]
+name = "benchmarks"
+harness = false
 
 [features]
 with_mutagen = ["mutagen"]
