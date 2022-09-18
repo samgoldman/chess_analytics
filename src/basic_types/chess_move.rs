@@ -112,7 +112,7 @@ impl Move {
 }
 
 #[cfg(test)]
-mod test_default_impls {
+mod test_derived_implementations {
     use super::*;
 
     #[test]
@@ -152,6 +152,18 @@ mod test_default_impls {
 
         let x = Move::new_to(File::_A, Rank::_1, Piece::Bishop);
         assert_eq!(format!("{:?}", x), "Move { from: PartialCell { file: None, rank: None }, to: Cell { file: _A, rank: _1 }, piece_moved: Bishop, captures: false, checks: false, mates: false, nag: None, promoted_to: OptionalPiece { optional_piece: None } }");
+    }
+
+    #[test]
+    fn test_pack_unpack_ok() {
+        let m = Move::new_to(File::_A, Rank::_1, Piece::Pawn);
+        assert_eq!(m, Move::unpack(&m.pack().unwrap()).unwrap());
+    }
+
+    #[test]
+    #[should_panic] // TODO: no panics
+    fn test_bad_unpack() {
+        assert!(Move::unpack(&[0, 0, 0, 0]).is_err());
     }
 }
 

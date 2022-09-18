@@ -138,6 +138,11 @@ mod test_pack_unpack {
                 OptionalPiece::unpack(&optional_piece.pack().unwrap()).unwrap()
             );
         }
+
+        assert_eq!(
+            OptionalPiece::new_none(),
+            OptionalPiece::unpack(&OptionalPiece::new_none().pack().unwrap()).unwrap()
+        )
     }
 
     #[test]
@@ -146,5 +151,23 @@ mod test_pack_unpack {
             Err(packed_struct::PackingError::InvalidValue),
             OptionalPiece::unpack(&[0x07])
         )
+    }
+}
+
+#[cfg(test)]
+mod test_derived_implementations {
+    use super::*;
+
+    #[test]
+    fn test_clone() {
+        let optional_piece = OptionalPiece::new_some(Piece::Bishop);
+        assert_eq!(optional_piece, optional_piece.clone());
+    }
+
+    #[test]
+    fn test_can_serialize_and_deserialize() {
+        let optional_piece = OptionalPiece::new_some(Piece::Bishop);
+        let bytes = postcard::to_allocvec(&optional_piece).unwrap();
+        assert_eq!(optional_piece, postcard::from_bytes(&bytes).unwrap());
     }
 }

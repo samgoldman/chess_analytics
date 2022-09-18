@@ -17,11 +17,11 @@ impl InitBoardsStep {
             None => return Err("GenericFilter: no parameters provided".to_string()),
         };
 
-        let input_vec_name = get_required_parameter("input", &params)?;
-        let output_vec_name = get_required_parameter("output", &params)?;
+        let input_vec_name = get_required_parameter("InitBoardsStep", "input", &params)?;
+        let output_vec_name = get_required_parameter("InitBoardsStep", "output", &params)?;
 
-        let input_flag = get_required_parameter("input_flag", &params)?;
-        let output_flag = get_required_parameter("output_flag", &params)?;
+        let input_flag = get_required_parameter("InitBoardsStep", "input_flag", &params)?;
+        let output_flag = get_required_parameter("InitBoardsStep", "output_flag", &params)?;
 
         Ok(Box::new(InitBoardsStep {
             input_vec_name,
@@ -114,5 +114,23 @@ impl Step for InitBoardsStep {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_yaml::{Mapping, Value};
+
+    use super::*;
+
+    #[test]
+    fn no_input_vector_parameter() {
+        let params = Mapping::new();
+        let res = InitBoardsStep::try_new(Some(Value::Mapping(params)));
+        assert!(res.is_err());
+        assert_eq!(
+            res.unwrap_err(),
+            "InitBoardsStep: parameter 'input' is required".to_string()
+        );
     }
 }

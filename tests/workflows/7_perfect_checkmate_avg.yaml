@@ -1,0 +1,58 @@
+steps:
+  init:
+    type: "GlobFileStep"
+    params: 
+      glob: tests/data/games_ending_in_mates.bin.bz2
+      child: parallel_step
+  parallel_step:
+    type: ParallelStep
+    params:
+      children:
+        - "load_files"
+        - "parse_games"
+        - "perfect_checkmate"
+        - "reduce_avg"
+        - "init_bins"
+        - "eval_available_filter"
+      post: "save_results"
+  load_files:
+    type: Bz2DecompressStep
+    params:
+      max_queue_size: 10
+      full_queue_delay_ms: 332
+  parse_games:
+    type: ParseBinGame
+  eval_available_filter:
+    type: EvalAvailableFilter
+    params:
+      input: parsed_games
+      output: filtered_games_1
+      input_flag: done_parsing_games
+      output_flag: done_filtering_1
+  init_bins:
+    type: InitBinStep
+    params:
+      input: filtered_games_1
+      output: unbinned_games
+      input_flag: done_filtering_1
+      output_flag: init_bins_done
+  perfect_checkmate:
+    type: PerfectCheckmateMap
+    params:
+      input: unbinned_games
+      output: mapped_count
+      input_flag: init_bins_done
+      output_flag: mapping_done
+  reduce_avg:
+    type: AvgReduce
+    params:
+      input: mapped_count
+      output: avg_perfect_checkmate
+      input_flag: mapping_done
+      output_flag: reduction_done
+  save_results:
+    type: SaveDataStep
+    params:
+      file: tests/output/int_7/tmp.txt
+      fields:
+        - avg_perfect_checkmate

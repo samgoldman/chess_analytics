@@ -17,3 +17,5 @@ ninja-build/
 *_generated.rs
 *.json
 tests/output/*
+*perf.data*
+*.svg
