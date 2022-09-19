@@ -110,5 +110,5 @@ jobs:
           override: true
       - run: cargo install cargo-criterion
       - run: chmod u+x ./scripts/*
-      - run: ./scripts/bench_diff.sh ${{ github.sha }} ${{ github.event.pull_request.head.sha }}
+      - run: ./scripts/bench_diff.sh ${{ github.base_ref }} ${{ github.sha }}
 
