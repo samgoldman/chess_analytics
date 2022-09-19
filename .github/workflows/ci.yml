@@ -108,11 +108,7 @@ jobs:
         with:
           toolchain: nightly
           override: true
-      - run: |
-          cargo install cargo-criterion
-          chmod u+x ./scripts/*
-          ./scripts/bench_diff.sh ${{ github.sha }} ${{ github.event.pull_request.head.sha }}
-      - uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo install cargo-criterion
+      - run: chmod u+x ./scripts/*
+      - run: ./scripts/bench_diff.sh ${{ github.sha }} ${{ github.event.pull_request.head.sha }}
 
