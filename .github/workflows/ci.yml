@@ -106,7 +106,7 @@ jobs:
           toolchain: nightly
       - run: |
           chmod u+x ./scripts/*
-          ./scripts/bench_diff ${{ github.base_ref }} ${{ github.head_ref }}
+          ./scripts/bench_diff.sh ${{ github.base_ref }} ${{ github.head_ref }}
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
