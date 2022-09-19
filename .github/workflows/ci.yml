@@ -99,12 +99,14 @@ jobs:
 
   bench:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
       - run: |
+          cargo install cargo-criterion
           chmod u+x ./scripts/*
           ./scripts/bench_diff.sh ${{ github.base_ref }} ${{ github.head_ref }}
       - uses: actions-rs/clippy-check@v1
