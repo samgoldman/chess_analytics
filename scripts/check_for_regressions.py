@@ -5,6 +5,8 @@ import json
 
 filename = sys.argv[1]
 
+regressed = False
+
 with open(filename) as file:
     for line in file:
         if line.startswith('{'):
@@ -13,3 +15,7 @@ with open(filename) as file:
                 continue
             if j["change"]["change"] == "Regressed":
                 print(f"::error title=Regression::'{j['id']}' has regressed")
+                regressed = True
+
+if regressed:
+    exit(1)
