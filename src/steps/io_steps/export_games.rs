@@ -2,7 +2,7 @@ use std::{fs::File, io::Write};
 
 use crate::{
     game::Game,
-    workflow_step::{SharedData, Step, StepGeneric},
+    workflow_step::{SharedData, Step},
 };
 use bzip2::write::BzEncoder;
 use bzip2::Compression;
@@ -83,7 +83,10 @@ impl ExportGames {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ExportGames {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+    fn process<'a>(
+        &mut self,
+        data: &mut dyn crate::workflow_step::StepGenericCore,
+    ) -> Result<(), String> {
         let mut quit = false;
         let mut final_loop = false;
         let mut games = vec![];
@@ -94,16 +97,14 @@ impl Step for ExportGames {
             }
 
             {
-                let mut unlocked_data = data.lock().unwrap();
-
-                let potential_data = unlocked_data.get(&self.input_vec_name);
-                let data = match potential_data {
+                let potential_data = data.get(&self.input_vec_name);
+                let shared_data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };
-                let vec_to_filter = data.to_vec().unwrap();
+                let vec_to_filter = shared_data.to_vec().unwrap();
 
-                unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
                 for possible_game in vec_to_filter {
                     if let SharedData::Game(game) = possible_game {
@@ -120,9 +121,7 @@ impl Step for ExportGames {
                 count += 1;
             }
 
-            let unlocked_data = data.lock().unwrap();
-
-            let flag = unlocked_data
+            let flag = data
                 .get(&self.input_flag)
                 .unwrap_or(SharedData::Bool(false));
 

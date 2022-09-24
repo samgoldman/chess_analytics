@@ -1,8 +1,6 @@
 use crate::step_param_utils::*;
-use crate::{
-    game::Game,
-    workflow_step::{SharedData, StepGeneric},
-};
+use crate::workflow_step::StepGenericCore;
+use crate::{game::Game, workflow_step::SharedData};
 #[cfg(test)]
 use mockall::automock;
 
@@ -42,12 +40,11 @@ impl GenericFilter {
         }))
     }
 
-    pub fn process(&self, data: &StepGeneric, logic: &FilterFn) -> Result<(), String> {
+    pub fn process(&self, data: &mut dyn StepGenericCore, logic: &FilterFn) -> Result<(), String> {
         {
-            let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
+            data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
             if self.discard_vec_name != "null" {
-                unlocked_data.insert(&self.discard_vec_name, SharedData::Vec(vec![]));
+                data.insert(&self.discard_vec_name, SharedData::Vec(vec![]));
             }
         }
 
@@ -59,16 +56,14 @@ impl GenericFilter {
             }
 
             let games = {
-                let mut unlocked_data = data.lock().unwrap();
-
-                let potential_data = unlocked_data.get(&self.input_vec_name);
-                let data = match potential_data {
+                let potential_data = data.get(&self.input_vec_name);
+                let shared_data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };
-                let vec_to_filter = data.to_vec().unwrap();
+                let vec_to_filter = shared_data.to_vec().unwrap();
 
-                unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
                 vec_to_filter
             };
@@ -90,36 +85,30 @@ impl GenericFilter {
             }
 
             {
-                let mut unlocked_data = data.lock().unwrap();
-
-                let potential_data = unlocked_data.get(&self.output_vec_name);
-                let data = match potential_data {
+                let potential_data = data.get(&self.output_vec_name);
+                let shared_data = match potential_data {
                     Some(data) => data,
                     None => return Err("GenericFilter: no output vector".to_string()),
                 };
-                let mut vec_to_append = data.to_vec().unwrap();
+                let mut vec_to_append = shared_data.to_vec().unwrap();
 
                 vec_to_append.append(&mut output_games);
-                unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
+                data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
             }
 
             if &self.discard_vec_name != "null" {
-                let mut unlocked_data = data.lock().unwrap();
-
-                let potential_data = unlocked_data.get(&self.discard_vec_name);
-                let data = match potential_data {
+                let potential_data = data.get(&self.discard_vec_name);
+                let shared_data = match potential_data {
                     Some(data) => data,
                     None => return Err("GenericFilter: no discard vector".to_string()),
                 };
-                let mut vec_to_append = data.to_vec().unwrap();
+                let mut vec_to_append = shared_data.to_vec().unwrap();
 
                 vec_to_append.append(&mut discard_games);
-                unlocked_data.insert(&self.discard_vec_name, SharedData::Vec(vec_to_append));
+                data.insert(&self.discard_vec_name, SharedData::Vec(vec_to_append));
             }
 
-            let unlocked_data = data.lock().unwrap();
-
-            let flag = unlocked_data
+            let flag = data
                 .get(&self.input_flag)
                 .unwrap_or(SharedData::Bool(false));
 
@@ -135,9 +124,8 @@ impl GenericFilter {
         }
 
         {
-            let mut unlocked_data = data.lock().unwrap();
             let d: bool = true;
-            unlocked_data.insert(&self.output_flag, SharedData::Bool(d));
+            data.insert(&self.output_flag, SharedData::Bool(d));
         }
 
         Ok(())
@@ -161,7 +149,7 @@ impl Default for GenericFilter {
 #[cfg(test)]
 mod test_process {
     use crate::workflow_step::MockStepGenericCore;
-    use std::sync::{Arc, Mutex, MutexGuard};
+    use std::sync::{Mutex, MutexGuard};
 
     use super::*;
     use mockall::predicate::eq;
@@ -270,8 +258,8 @@ mod test_process {
         ctx.expect().times(2).return_const(false);
 
         let generic_filter = GenericFilter::default();
-        let data_param: StepGeneric = Arc::new(Mutex::new(data));
-        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
+        let data_param = &mut data;
+        let res = generic_filter.process(data_param, &MockFilterStep::filter);
         assert!(res.is_ok());
     }
 
@@ -344,8 +332,8 @@ mod test_process {
         ctx.expect().times(2).return_const(true);
 
         let generic_filter = GenericFilter::default();
-        let data_param: StepGeneric = Arc::new(Mutex::new(data));
-        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
+        let data_param = &mut data;
+        let res = generic_filter.process(data_param, &MockFilterStep::filter);
         assert!(res.is_ok());
     }
 
@@ -403,8 +391,8 @@ mod test_process {
 
         let mut generic_filter = GenericFilter::default();
         generic_filter.discard_vec_name = "null".to_string();
-        let data_param: StepGeneric = Arc::new(Mutex::new(data));
-        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
+        let data_param = &mut data;
+        let res = generic_filter.process(data_param, &MockFilterStep::filter);
         assert!(res.is_ok());
     }
 
@@ -445,8 +433,8 @@ mod test_process {
 
         let mut generic_filter = GenericFilter::default();
         generic_filter.discard_vec_name = "null".to_string();
-        let data_param: StepGeneric = Arc::new(Mutex::new(data));
-        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
+        let data_param = &mut data;
+        let res = generic_filter.process(data_param, &MockFilterStep::filter);
         assert!(res.is_err());
     }
 
@@ -502,8 +490,8 @@ mod test_process {
         ctx.expect().times(1).return_const(false);
 
         let generic_filter = GenericFilter::default();
-        let data_param: StepGeneric = Arc::new(Mutex::new(data));
-        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
+        let data_param = &mut data;
+        let res = generic_filter.process(data_param, &MockFilterStep::filter);
         assert!(res.is_err());
     }
 
@@ -539,8 +527,8 @@ mod test_process {
         ctx.expect().times(0);
 
         let generic_filter = GenericFilter::default();
-        let data_param: StepGeneric = Arc::new(Mutex::new(data));
-        let res = generic_filter.process(&data_param, &MockFilterStep::filter);
+        let data_param = &mut data;
+        let res = generic_filter.process(data_param, &MockFilterStep::filter);
         assert!(res.is_err());
     }
 }

@@ -1,6 +1,6 @@
 use crate::chess_utils::get_game_elo;
 use crate::game::Game;
-use crate::workflow_step::{SharedData, Step, StepGeneric};
+use crate::workflow_step::{SharedData, Step};
 
 #[derive(Debug)]
 pub struct GameEloBin {

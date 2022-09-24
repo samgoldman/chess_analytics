@@ -7,7 +7,6 @@ use serde::Deserialize;
 use serde_yaml::Value;
 use std::collections::HashMap;
 use std::fs::File;
-use std::sync::{Arc, Mutex};
 
 #[macro_use]
 mod basic_types;
@@ -25,7 +24,7 @@ mod steps_manager;
 mod workflow_step;
 
 use steps_manager::{add_step_description, get_step_description};
-use workflow_step::{StepDescription, StepGeneric, StepGenericCoreImpl};
+use workflow_step::{StepDescription, StepGenericCoreImpl};
 
 // TODO: global: Ok/Err
 // TODO: global: currently count 20 calls to 'panic!()'
@@ -81,9 +80,9 @@ where
         None => return Err("Steps is not a map".to_string()),
     };
 
-    let data: StepGeneric = Arc::new(Mutex::new(StepGenericCoreImpl {
+    let mut data = StepGenericCoreImpl {
         map: HashMap::new(),
-    }));
+    };
 
     add_step_description(
         "noop".to_string(),
@@ -91,7 +90,7 @@ where
             step_type: "Noop".to_string(),
             parameters: None,
         },
-        &data,
+        &mut data,
     );
 
     for (step_name, step_data) in steps_map.iter() {
@@ -115,12 +114,12 @@ where
             step_type: step_type.to_string(),
             parameters: params,
         };
-        add_step_description(step_name, step, &data);
+        add_step_description(step_name, step, &mut data);
     }
 
-    let init_desc = get_step_description("init", &data);
+    let init_desc = get_step_description("init", &mut data);
     let mut init = init_desc.to_step()?;
-    init.process(data)?;
+    init.process(&mut data)?;
 
     Ok(())
 }

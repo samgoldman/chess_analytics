@@ -3,7 +3,7 @@ use std::io::{BufRead, Read};
 use crate::{
     game::Game,
     parse_pgn::PgnParser,
-    workflow_step::{SharedData, Step, StepGeneric},
+    workflow_step::{SharedData, Step},
 };
 
 #[derive(Debug)]
@@ -66,11 +66,13 @@ impl ParsePgnStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParsePgnStep {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+    fn process<'a>(
+        &mut self,
+        data: &mut dyn crate::workflow_step::StepGenericCore,
+    ) -> Result<(), String> {
         {
-            let mut unlocked_data = data.lock().unwrap();
             let vec: Vec<SharedData> = vec![];
-            unlocked_data.insert("parsed_games", SharedData::Vec(vec));
+            data.insert("parsed_games", SharedData::Vec(vec));
         }
 
         let file = std::fs::File::open(&self.pgn_filename).unwrap();
@@ -81,20 +83,18 @@ impl Step for ParsePgnStep {
             if Ok(None) == next {
                 break;
             } else if let Ok(Some(game)) = next {
-                let mut unlocked_data = data.lock().unwrap();
-                let game_list = unlocked_data.get("parsed_games").unwrap();
+                let game_list = data.get("parsed_games").unwrap();
                 let mut game_list: Vec<SharedData> = game_list.to_vec().unwrap();
 
                 game_list.push(SharedData::Game(game));
-                unlocked_data.insert("parsed_games", SharedData::Vec(game_list));
+                data.insert("parsed_games", SharedData::Vec(game_list));
             } else {
                 next.unwrap();
             }
         }
 
-        let mut unlocked_data = data.lock().unwrap();
         let d: bool = true;
-        unlocked_data.insert("done_parsing_games", SharedData::Bool(d));
+        data.insert("done_parsing_games", SharedData::Bool(d));
 
         Ok(())
     }

@@ -10,7 +10,7 @@ use tui::{
     widgets::{Block, Borders, List, ListItem},
 };
 
-use crate::workflow_step::{SharedData, Step, StepGeneric};
+use crate::workflow_step::{SharedData, Step};
 
 pub struct UiMonitorStep {
     terminal: Terminal<CrosstermBackend<RawTerminal<Stdout>>>,
@@ -97,19 +97,21 @@ impl UiMonitorStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for UiMonitorStep {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+    fn process<'a>(
+        &mut self,
+        data: &mut dyn crate::workflow_step::StepGenericCore,
+    ) -> Result<(), String> {
         self.start_time = std::time::Instant::now();
         self.terminal.clear().unwrap();
         loop {
             let mut done = false;
 
             let monitored_data = {
-                let unlocked_data = data.lock().unwrap();
                 let mut raw = self
                     .raw_fields
                     .iter()
                     .map(|(title, field)| {
-                        let data = unlocked_data.get(field).unwrap_or(SharedData::Bool(false));
+                        let data = data.get(field).unwrap_or(SharedData::Bool(false));
                         format!("{}: {}", title, data)
                     })
                     .collect::<Vec<String>>();
@@ -118,7 +120,7 @@ impl Step for UiMonitorStep {
                     .length_fields
                     .iter()
                     .map(|(title, field)| {
-                        let data = unlocked_data
+                        let data = data
                             .get(field)
                             .unwrap_or(SharedData::Vec(vec![]))
                             .to_vec()
@@ -130,12 +132,8 @@ impl Step for UiMonitorStep {
 
                 raw.append(&mut length);
 
-                if unlocked_data.contains_key(&self.finish_flag_name)
-                    && unlocked_data
-                        .get(&self.finish_flag_name)
-                        .unwrap()
-                        .to_bool()
-                        .unwrap()
+                if data.contains_key(&self.finish_flag_name)
+                    && data.get(&self.finish_flag_name).unwrap().to_bool().unwrap()
                 {
                     done = true;
                 }
@@ -146,7 +144,7 @@ impl Step for UiMonitorStep {
 
                 raw.push(format!("Duration: {:?}", self.elapsed));
 
-                let final_results_map = unlocked_data
+                let final_results_map = data
                     .get(&self.final_results_field_name)
                     .unwrap()
                     .to_map()

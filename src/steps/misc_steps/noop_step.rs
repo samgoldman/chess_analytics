@@ -1,4 +1,4 @@
-use crate::workflow_step::{BoxedStep, Step, StepGeneric};
+use crate::workflow_step::{BoxedStep, Step, StepGenericCore};
 
 #[derive(Debug)]
 pub struct NoopStep {}
@@ -12,17 +12,14 @@ impl NoopStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for NoopStep {
-    fn process(&mut self, _data: StepGeneric) -> Result<(), String> {
+    fn process(&mut self, _data: &mut dyn StepGenericCore) -> Result<(), String> {
         Ok(())
     }
 }
 
 #[cfg(test)]
 mod test_noop_step {
-    use std::{
-        collections::HashMap,
-        sync::{Arc, Mutex},
-    };
+    use std::collections::HashMap;
 
     use crate::workflow_step::StepGenericCoreImpl;
 
@@ -38,9 +35,9 @@ mod test_noop_step {
         let mut step = NoopStep {};
         assert_eq!(
             Ok(()),
-            step.process(Arc::new(Mutex::new(StepGenericCoreImpl {
+            step.process(&mut StepGenericCoreImpl {
                 map: HashMap::new()
-            })))
+            })
         );
     }
 }

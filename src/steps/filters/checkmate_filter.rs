@@ -1,7 +1,7 @@
 use crate::basic_types::Termination;
 use crate::game::Game;
 use crate::generic_steps::{FilterFn, GenericFilter};
-use crate::workflow_step::{Step, StepGeneric};
+use crate::workflow_step::Step;
 
 #[derive(Debug)]
 pub struct CheckmateFilter {
@@ -27,8 +27,11 @@ impl CheckmateFilter {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for CheckmateFilter {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+    fn process<'a>(
+        &mut self,
+        data: &mut dyn crate::workflow_step::StepGenericCore,
+    ) -> Result<(), String> {
         self.generic_filter
-            .process(&data, CheckmateFilter::create_filter())
+            .process(data, CheckmateFilter::create_filter())
     }
 }

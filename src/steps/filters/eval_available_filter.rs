@@ -2,7 +2,7 @@ use crate::game::Game;
 use crate::generic_steps::FilterFn;
 #[mockall_double::double]
 use crate::generic_steps::GenericFilter;
-use crate::workflow_step::{Step, StepGeneric};
+use crate::workflow_step::Step;
 
 #[derive(Debug)]
 pub struct EvalAvailableFilter {
@@ -24,15 +24,16 @@ impl EvalAvailableFilter {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for EvalAvailableFilter {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-        self.generic_filter.process(&data, Self::create_filter())
+    fn process<'a>(
+        &mut self,
+        data: &mut dyn crate::workflow_step::StepGenericCore,
+    ) -> Result<(), String> {
+        self.generic_filter.process(data, Self::create_filter())
     }
 }
 
 #[cfg(test)]
 mod test_process {
-    use std::sync::{Arc, Mutex};
-
     use mockall::predicate::always;
 
     use super::*;
@@ -50,12 +51,12 @@ mod test_process {
             .times(1)
             .return_const(Ok(()));
 
-        let mock_data = MockStepGenericCore::new();
+        let mut mock_data = MockStepGenericCore::new();
         let mut filter = EvalAvailableFilter {
             generic_filter: mock_generic_filter,
         };
 
-        let res = filter.process(Arc::new(Mutex::new(mock_data)));
+        let res = filter.process(&mut mock_data);
         assert_eq!(res, Ok(()));
     }
 }

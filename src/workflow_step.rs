@@ -5,11 +5,8 @@ use mockall::automock;
 use std::collections::HashMap;
 use std::fmt;
 use std::path::PathBuf;
-use std::sync::Arc;
-use std::sync::Mutex;
 
 pub type BoxedStep = Box<dyn Step>;
-pub type StepGeneric = Arc<Mutex<dyn StepGenericCore>>;
 
 #[automock]
 pub trait StepGenericCore: Send {
@@ -174,7 +171,7 @@ impl StepDescription {
 
 #[automock]
 pub trait Step: fmt::Debug + Send + Sync {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String>;
+    fn process(&mut self, data: &mut dyn StepGenericCore) -> Result<(), String>;
 }
 
 #[cfg(test)]
