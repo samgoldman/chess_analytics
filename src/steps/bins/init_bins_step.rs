@@ -70,16 +70,15 @@ impl Step for InitBinStep {
                 };
                 let vec_to_filter = data.to_vec().unwrap();
 
-                let ret = vec_to_filter.clone();
                 unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
-                ret
+                vec_to_filter
             };
 
             let mut output_games = vec![];
 
             for shared_game in games {
-                let game = match shared_game.clone() {
+                let game = match shared_game {
                     SharedData::Game(game) => game,
                     _ => return Err("Vector isn't of games!".to_string()),
                 };

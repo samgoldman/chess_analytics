@@ -103,11 +103,9 @@ impl Step for ExportGames {
                 };
                 let vec_to_filter = data.to_vec().unwrap();
 
-                let ret = vec_to_filter.clone();
-
                 unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
-                for possible_game in ret {
+                for possible_game in vec_to_filter {
                     if let SharedData::Game(game) = possible_game {
                         games.push(game);
                     }

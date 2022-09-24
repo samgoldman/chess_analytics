@@ -77,7 +77,7 @@ impl Step for AvgReduce {
             let mut new_data: HashMap<String, Vec<u64>> = HashMap::new();
 
             for shared_binned_game in binned_games {
-                let binned_game = match shared_binned_game.clone() {
+                let binned_game = match shared_binned_game {
                     SharedData::BinnedValue(game) => game,
                     _ => return Err("Vector isn't of binned values!".to_string()),
                 };

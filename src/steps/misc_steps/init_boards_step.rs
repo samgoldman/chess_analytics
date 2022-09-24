@@ -57,11 +57,9 @@ impl Step for InitBoardsStep {
                 };
                 let vec_to_filter = data.to_vec().unwrap();
 
-                let ret = vec_to_filter.clone();
-
                 unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
-                ret
+                vec_to_filter
             };
 
             let mut output_games: Vec<SharedData> = vec![];

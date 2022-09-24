@@ -1,6 +1,6 @@
 use crate::workflow_step::{SharedData, Step, StepGeneric};
 
-use std::collections::HashMap;
+use std::collections::{hash_map::Entry, HashMap};
 
 #[derive(Debug)]
 pub struct MaxReduce {
@@ -68,16 +68,15 @@ impl Step for MaxReduce {
                 };
                 let vec_to_filter = data.to_vec().unwrap();
 
-                let ret = vec_to_filter.clone();
                 unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
-                ret
+                vec_to_filter
             };
 
             let mut new_data: HashMap<String, SharedData> = HashMap::new();
 
             for shared_binned_game in binned_games {
-                let binned_game = match shared_binned_game.clone() {
+                let binned_game = match shared_binned_game {
                     SharedData::BinnedValue(game) => game,
                     _ => return Err("Vector isn't of binned values!".to_string()),
                 };
@@ -89,13 +88,12 @@ impl Step for MaxReduce {
                     bin_labels.iter().map(|b| format!("{}", b)).collect();
                 let combined_label = bin_str_labels.join(".");
 
-                if !new_data.contains_key(&combined_label) {
-                    new_data.insert(combined_label.clone(), value.clone());
+                if let Entry::Vacant(entry) = new_data.entry(combined_label.clone()) {
+                    entry.insert(value);
+                } else {
+                    let original_value = new_data.get_mut(&combined_label).unwrap();
+                    *(original_value) = original_value.max(&value);
                 }
-
-                let original_value = new_data.get_mut(&combined_label).unwrap();
-
-                *(original_value) = original_value.max(&value);
             }
 
             {

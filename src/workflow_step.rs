@@ -17,6 +17,7 @@ pub trait StepGenericCore: Send {
     fn contains_key(&self, k: &str) -> bool;
     fn get(&self, k: &str) -> Option<SharedData>;
     fn remove(&mut self, k: &str) -> Option<SharedData>;
+    fn get_underlying_data(&self) -> &HashMap<String, SharedData>;
 }
 
 pub struct StepGenericCoreImpl {
@@ -39,6 +40,10 @@ impl StepGenericCore for StepGenericCoreImpl {
 
     fn remove(&mut self, k: &str) -> Option<SharedData> {
         self.map.remove(k)
+    }
+
+    fn get_underlying_data(&self) -> &HashMap<String, SharedData> {
+        &self.map
     }
 }
 
@@ -98,7 +103,7 @@ impl SharedData {
 
     pub fn to_map(&self) -> Option<HashMap<String, SharedData>> {
         match self {
-            SharedData::Map(v) => Some((*v).clone()),
+            SharedData::Map(v) => Some(v.clone()),
             _ => None,
         }
     }

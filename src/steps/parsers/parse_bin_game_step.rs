@@ -55,12 +55,10 @@ impl Step for ParseBinGame {
                 let ret = if remaining_files == 0 {
                     vec![]
                 } else {
-                    let file_data = match file_data_vec.pop().unwrap() {
+                    match file_data_vec.pop().unwrap() {
                         SharedData::FileData(data) => data,
                         _ => panic!(), // TODO
-                    };
-
-                    file_data.clone()
+                    }
                 };
                 unlocked_data.insert("raw_file_data", SharedData::Vec(file_data_vec));
 

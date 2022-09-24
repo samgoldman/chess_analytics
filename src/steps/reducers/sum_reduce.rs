@@ -68,16 +68,15 @@ impl Step for SumReduce {
                 };
                 let vec_to_filter = data.to_vec().unwrap();
 
-                let ret = vec_to_filter.clone();
                 unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
-                ret
+                vec_to_filter
             };
 
             let mut new_data: HashMap<String, u64> = HashMap::new();
 
             for shared_binned_game in binned_games {
-                let binned_game = match shared_binned_game.clone() {
+                let binned_game = match shared_binned_game {
                     SharedData::BinnedValue(game) => game,
                     _ => return Err("Vector isn't of binned values!".to_string()),
                 };
@@ -94,10 +93,10 @@ impl Step for SumReduce {
                 let combined_label = bin_str_labels.join(".");
 
                 if !new_data.contains_key(&combined_label) {
-                    new_data.insert(combined_label.clone(), 0);
+                    new_data.insert(combined_label.clone(), value);
+                } else {
+                    *(new_data.get_mut(&combined_label).unwrap()) += value;
                 }
-
-                *(new_data.get_mut(&combined_label).unwrap()) += value;
             }
 
             {
