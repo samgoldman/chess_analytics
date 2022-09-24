@@ -100,7 +100,7 @@ impl Step for UiMonitorStep {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         self.start_time = std::time::Instant::now();
         self.terminal.clear().unwrap();
         loop {
@@ -191,7 +191,7 @@ impl Step for UiMonitorStep {
             std::thread::sleep(std::time::Duration::from_millis(332));
         }
 
-        Ok(())
+        Ok(true)
     }
 }
 

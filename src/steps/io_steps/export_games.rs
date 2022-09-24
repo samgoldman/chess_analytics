@@ -86,7 +86,7 @@ impl Step for ExportGames {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         let mut quit = false;
         let mut final_loop = false;
         let mut games = vec![];
@@ -141,6 +141,6 @@ impl Step for ExportGames {
             }
         }
 
-        Ok(())
+        Ok(false)
     }
 }

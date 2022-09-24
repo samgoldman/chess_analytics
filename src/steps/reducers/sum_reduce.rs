@@ -48,7 +48,7 @@ impl Step for SumReduce {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         {
             data.insert(&self.output_map_name, SharedData::Map(HashMap::new()));
         }
@@ -138,6 +138,6 @@ impl Step for SumReduce {
             data.insert(&self.output_flag, SharedData::Bool(d));
         }
 
-        Ok(())
+        Ok(true)
     }
 }

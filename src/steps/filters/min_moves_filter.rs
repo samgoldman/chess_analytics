@@ -37,7 +37,7 @@ impl Step for MinMovesFilter {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         self.generic_filter.process(data, &*self.create_filter())
     }
 }

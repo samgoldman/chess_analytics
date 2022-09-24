@@ -40,7 +40,7 @@ impl Step for ParallelStep {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         // TODO make own step
         {
             let d: bool = false;
@@ -61,6 +61,6 @@ impl Step for ParallelStep {
             .unwrap_or_else(|_| Box::new(NoopStep {}));
         post.process(data)?;
 
-        Ok(())
+        Ok(true)
     }
 }

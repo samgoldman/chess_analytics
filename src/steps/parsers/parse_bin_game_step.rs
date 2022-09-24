@@ -19,7 +19,7 @@ impl Step for ParseBinGame {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         {
             let vec: Vec<SharedData> = vec![];
             data.insert("parsed_games", SharedData::Vec(vec));
@@ -87,6 +87,6 @@ impl Step for ParseBinGame {
         let d: bool = true;
         data.insert("done_parsing_games", SharedData::Bool(d));
 
-        Ok(())
+        Ok(true)
     }
 }

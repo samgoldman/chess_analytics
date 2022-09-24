@@ -27,7 +27,7 @@ impl Step for ClockAvailableFilter {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         self.generic_filter.process(data, Self::create_filter())
     }
 }
@@ -50,7 +50,7 @@ mod test_process {
             .expect_process()
             .with(always(), always())
             .times(1)
-            .return_const(Ok(()));
+            .return_const(Ok(false));
 
         let mut mock_data = MockStepGenericCore::new();
         let mut filter = ClockAvailableFilter {
@@ -58,7 +58,7 @@ mod test_process {
         };
 
         let res = filter.process(&mut mock_data);
-        assert_eq!(res, Ok(()));
+        assert_eq!(res, Ok(false));
     }
 }
 

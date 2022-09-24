@@ -35,7 +35,7 @@ impl Step for Bz2DecompressStep {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         let bufs = { data.remove("file_path_bufs").unwrap() };
 
         let paths = bufs.to_vec().unwrap();
@@ -100,6 +100,6 @@ impl Step for Bz2DecompressStep {
                 .insert("done_reading_files", SharedData::Bool(d));
         }
 
-        Ok(())
+        Ok(false)
     }
 }

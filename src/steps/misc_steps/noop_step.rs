@@ -12,8 +12,8 @@ impl NoopStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for NoopStep {
-    fn process(&mut self, _data: &mut dyn StepGenericCore) -> Result<(), String> {
-        Ok(())
+    fn process(&mut self, _data: &mut dyn StepGenericCore) -> Result<bool, String> {
+        Ok(true)
     }
 }
 
@@ -34,7 +34,7 @@ mod test_noop_step {
     fn test_process() {
         let mut step = NoopStep {};
         assert_eq!(
-            Ok(()),
+            Ok(true),
             step.process(&mut StepGenericCoreImpl {
                 map: HashMap::new()
             })

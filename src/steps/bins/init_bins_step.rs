@@ -46,7 +46,7 @@ impl Step for InitBinStep {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         {
             data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
         }
@@ -121,6 +121,6 @@ impl Step for InitBinStep {
             data.insert(&self.output_flag, SharedData::Bool(d));
         }
 
-        Ok(())
+        Ok(false)
     }
 }

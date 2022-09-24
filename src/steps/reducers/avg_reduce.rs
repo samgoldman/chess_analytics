@@ -48,7 +48,7 @@ impl Step for AvgReduce {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         {
             data.insert(&self.output_map_name, SharedData::Map(HashMap::new()));
         }
@@ -180,6 +180,6 @@ impl Step for AvgReduce {
             data.insert(&self.output_map_name, SharedData::Map(map));
         }
 
-        Ok(())
+        Ok(true)
     }
 }

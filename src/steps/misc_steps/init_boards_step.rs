@@ -37,7 +37,7 @@ impl Step for InitBoardsStep {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         {
             data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
         }
@@ -106,7 +106,7 @@ impl Step for InitBoardsStep {
             data.insert(&self.output_flag, SharedData::Bool(d));
         }
 
-        Ok(())
+        Ok(false)
     }
 }
 

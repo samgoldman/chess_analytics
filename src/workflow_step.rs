@@ -171,7 +171,7 @@ impl StepDescription {
 
 #[automock]
 pub trait Step: fmt::Debug + Send + Sync {
-    fn process(&mut self, data: &mut dyn StepGenericCore) -> Result<(), String>;
+    fn process(&mut self, data: &mut dyn StepGenericCore) -> Result<bool, String>;
 }
 
 #[cfg(test)]

@@ -28,7 +28,7 @@ impl SerialStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SerialStep {
-    fn process<'a>(&mut self, data: &mut dyn StepGenericCore) -> Result<(), String> {
+    fn process<'a>(&mut self, data: &mut dyn StepGenericCore) -> Result<bool, String> {
         // TODO make own step
         {
             let d: bool = false;
@@ -43,6 +43,6 @@ impl Step for SerialStep {
             step.process(data)?;
         }
 
-        Ok(())
+        Ok(true)
     }
 }

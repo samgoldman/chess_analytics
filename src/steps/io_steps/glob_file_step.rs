@@ -35,7 +35,7 @@ impl Step for GlobFileStep {
     fn process<'a>(
         &mut self,
         data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    ) -> Result<bool, String> {
         let glob_result = glob(&self.glob_string);
 
         let file_glob = if let Ok(file_glob) = glob_result {
