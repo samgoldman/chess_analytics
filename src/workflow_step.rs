@@ -13,6 +13,7 @@ pub trait StepGenericCore: Send {
     fn insert(&mut self, k: &str, v: SharedData) -> Option<SharedData>;
     fn contains_key(&self, k: &str) -> bool;
     fn get(&self, k: &str) -> Option<SharedData>;
+    fn get_vec(&self, k: &str) -> Option<Vec<SharedData>>;
     fn remove(&mut self, k: &str) -> Option<SharedData>;
     fn get_underlying_data(&self) -> &HashMap<String, SharedData>;
 }
@@ -29,6 +30,13 @@ impl StepGenericCore for StepGenericCoreImpl {
 
     fn get(&self, k: &str) -> Option<SharedData> {
         self.map.get(k).map(|v| (*v).clone())
+    }
+
+    fn get_vec(&self, k: &str) -> Option<Vec<SharedData>> {
+        match self.map.get(k) {
+            Some(v) => v.clone().to_vec(),
+            None => None,
+        }
     }
 
     fn insert(&mut self, k: &str, v: SharedData) -> Option<SharedData> {
