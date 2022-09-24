@@ -102,185 +102,67 @@ impl Default for GenericFilter {
     }
 }
 
-// #[cfg(test)]
-// mod test_process {
-//     use crate::workflow_step::MockStepData;
-//     use std::sync::{Mutex, MutexGuard};
+#[cfg(test)]
+mod test_process {
+    use super::*;
 
-//     use super::*;
-//     use mockall::predicate::eq;
+    use std::collections::HashMap;
 
-//     // Guard static mock
-//     use mockall::lazy_static;
-//     lazy_static! {
-//         static ref MTX: Mutex<()> = Mutex::new(());
-//     }
+    use crate::{game::Game, workflow_step::SharedData};
 
-//     // When a test panics, it will poison the Mutex. Since we don't actually
-//     // care about the state of the data we ignore that it is poisoned and grab
-//     // the lock regardless.  If you just do `let _m = &MTX.lock().unwrap()`, one
-//     // test panicking will cause all other tests that try and acquire a lock on
-//     // that Mutex to also panic.
-//     #[cfg_attr(coverage_nightly, no_coverage)]
-//     fn get_lock(m: &'static Mutex<()>) -> MutexGuard<'static, ()> {
-//         match m.lock() {
-//             Ok(guard) => guard,
-//             Err(poisoned) => poisoned.into_inner(),
-//         }
-//     }
+    #[test]
+    fn test_nominal_1() {
+        let mut actual_data = HashMap::new();
 
-//     use mockall::automock;
-//     #[allow(dead_code)]
-//     pub struct FilterStep {}
-//     #[automock]
-//     impl FilterStep {
-//         pub fn filter(_game: &Game) -> bool {
-//             false
-//         }
-//     }
+        let default_game = Game::default();
+        let game_data = SharedData::Vec(vec![SharedData::Game(default_game.clone())]);
 
-//     #[test]
-//     fn test_filter_step() {
-//         let _m = get_lock(&MTX);
-//         assert_eq!(false, FilterStep::filter(&Game::default()));
-//     }
+        actual_data.insert("input_vec".to_string(), game_data);
 
-//     #[test]
-//     fn test_nominal_1() {
-//         let _m = get_lock(&MTX);
+        let expected_data = HashMap::from([
+            ("output_vec".to_string(), SharedData::Vec(vec![])),
+            ("input_vec".to_string(), SharedData::Vec(vec![])),
+            (
+                "discard_vec".to_string(),
+                SharedData::Vec(vec![SharedData::Game(default_game)]),
+            ),
+            ("output_flag".to_string(), SharedData::Bool(true)),
+        ]);
 
-//         let ctx = MockFilterStep::filter_context();
-//         let mut data = MockStepData::new();
+        let generic_filter = GenericFilter::default();
+        let res = generic_filter.process(&mut actual_data, &|_| false);
+        assert_eq!(res, Ok(false)); // Not done since we processed a game
+        assert_eq!(actual_data, expected_data);
+    }
 
-//         let default_game = Game::default();
-//         let game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
+    #[test]
+    fn test_nominal_2() {
+        let mut actual_data = HashMap::new();
 
-//         // Set up output vectors
-//         data.expect_insert()
-//             .with(eq("output_vec"), eq(SharedData::Vec(vec![])))
-//             .times(1)
-//             .return_const(None);
+        let default_game = Game::default();
+        let game_data = SharedData::Vec(vec![SharedData::Game(default_game.clone())]);
 
-//         data.expect_insert()
-//             .with(eq("discard_vec"), eq(SharedData::Vec(vec![])))
-//             .times(1)
-//             .return_const(None);
+        actual_data.insert("input_vec".to_string(), game_data);
 
-//         // Get input data
-//         data.expect_get()
-//             .with(eq("input_vec"))
-//             .times(1)
-//             .return_const(Some(game_data.clone()));
+        let expected_data = HashMap::from([
+            (
+                "output_vec".to_string(),
+                SharedData::Vec(vec![SharedData::Game(default_game)]),
+            ),
+            ("input_vec".to_string(), SharedData::Vec(vec![])),
+            ("discard_vec".to_string(), SharedData::Vec(vec![])),
+            ("output_flag".to_string(), SharedData::Bool(true)),
+        ]);
 
-//         data.expect_insert()
-//             .with(eq("input_vec"), eq(SharedData::Vec(vec![])))
-//             .times(1)
-//             .return_const(None);
+        let generic_filter = GenericFilter::default();
+        let res = generic_filter.process(&mut actual_data, &|_| true);
+        assert_eq!(res, Ok(false)); // Not done since we processed a game
+        assert_eq!(actual_data, expected_data);
+    }
 
-//         // Both games will be rejected, so no output
-//         data.expect_get()
-//             .with(eq("output_vec"))
-//             .times(1)
-//             .return_const(Some(SharedData::Vec(vec![])));
-
-//         data.expect_insert()
-//             .with(eq("output_vec"), eq(SharedData::Vec(vec![])))
-//             .times(1)
-//             .return_const(None);
-
-//         // Both games will be rejected, so two discards
-//         data.expect_get()
-//             .with(eq("discard_vec"))
-//             .times(1)
-//             .return_const(Some(SharedData::Vec(vec![])));
-
-//         data.expect_insert()
-//             .with(eq("discard_vec"), eq(game_data))
-//             .times(1)
-//             .return_const(None);
-
-//         // Set end condition
-//         data.expect_insert()
-//             .with(eq("output_flag"), eq(SharedData::Bool(true)))
-//             .times(1)
-//             .return_const(None);
-
-//         ctx.expect().times(1).return_const(false);
-
-//         let generic_filter = GenericFilter::default();
-//         let data_param = &mut data;
-//         let res = generic_filter.process(data_param, &MockFilterStep::filter);
-//         assert!(res.is_ok());
-//     }
-
-//     #[test]
-//     fn test_nominal_2() {
-//         let _m = get_lock(&MTX);
-
-//         let ctx = MockFilterStep::filter_context();
-//         let mut data = MockStepData::new();
-
-//         let default_game = Game::default();
-//         let game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
-
-//         // Set up output vectors
-//         data.expect_insert()
-//             .with(eq("output_vec"), eq(SharedData::Vec(vec![])))
-//             .times(1)
-//             .return_const(None);
-
-//         data.expect_insert()
-//             .with(eq("discard_vec"), eq(SharedData::Vec(vec![])))
-//             .times(1)
-//             .return_const(None);
-
-//         // Get input data
-//         data.expect_get()
-//             .with(eq("input_vec"))
-//             .times(1)
-//             .return_const(Some(game_data.clone()));
-
-//         data.expect_insert()
-//             .with(eq("input_vec"), eq(SharedData::Vec(vec![])))
-//             .times(1)
-//             .return_const(None);
-
-//         // Both games will be accepted, so output both
-//         data.expect_get()
-//             .with(eq("output_vec"))
-//             .times(1)
-//             .return_const(Some(SharedData::Vec(vec![])));
-
-//         data.expect_insert()
-//             .with(eq("output_vec"), eq(game_data))
-//             .times(1)
-//             .return_const(None);
-
-//         // Both games will be accepted, so no discard
-//         data.expect_get()
-//             .with(eq("discard_vec"))
-//             .times(1)
-//             .return_const(Some(SharedData::Vec(vec![])));
-
-//         data.expect_insert()
-//             .with(eq("discard_vec"), eq(SharedData::Vec(vec![])))
-//             .times(1)
-//             .return_const(None);
-
-//         // Set end condition
-//         data.expect_insert()
-//             .with(eq("output_flag"), eq(SharedData::Bool(true)))
-//             .times(1)
-//             .return_const(None);
-
-//         ctx.expect().times(1).return_const(true);
-
-//         let generic_filter = GenericFilter::default();
-//         let data_param = &mut data;
-//         let res = generic_filter.process(data_param, &MockFilterStep::filter);
-//         assert!(res.is_ok());
-//     }
-// }
+    // TODO: test case when input_vec has no games (return true)
+    // TODO: test case when output/discard vec already has games
+}
 
 #[cfg(test)]
 mod test_try_new {
