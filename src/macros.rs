@@ -34,16 +34,15 @@ macro_rules! bin_template {
                     };
                     let vec_to_filter = data.to_vec().unwrap();
 
-                    let ret = vec_to_filter.clone();
                     unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
-                    ret
+                    vec_to_filter
                 };
 
                 let mut new_binned_games = vec![];
 
                 for shared_binned_game in binned_games {
-                    let binned_game = match shared_binned_game.clone() {
+                    let binned_game = match shared_binned_game {
                         SharedData::BinnedValue(game) => game,
                         _ => return Err("Vector isn't of binned games!".to_string()),
                     };
@@ -130,16 +129,15 @@ macro_rules! map_template {
                     };
                     let vec_to_filter = data.to_vec().unwrap();
 
-                    let ret = vec_to_filter.clone();
                     unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
-                    ret
+                    vec_to_filter
                 };
 
                 let mut new_binned_games = vec![];
 
                 for shared_binned_game in binned_games {
-                    let binned_game = match shared_binned_game.clone() {
+                    let binned_game = match shared_binned_game {
                         SharedData::BinnedValue(game) => game,
                         _ => return Err("Vector isn't of binned games!".to_string()),
                     };

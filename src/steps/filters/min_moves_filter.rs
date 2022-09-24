@@ -11,7 +11,7 @@ pub struct MinMovesFilter {
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl MinMovesFilter {
     pub fn try_new(configuration: Option<serde_yaml::Value>) -> Result<Box<dyn Step>, String> {
-        let params = match configuration.clone() {
+        let params = match configuration {
             Some(value) => value,
             None => return Err("MinMovesFilter: no parameters provided".to_string()),
         };
@@ -20,7 +20,7 @@ impl MinMovesFilter {
         let min_moves = params.get("min_moves").unwrap().as_u64().unwrap();
 
         Ok(Box::new(MinMovesFilter {
-            generic_filter: *GenericFilter::try_new(configuration)?,
+            generic_filter: *GenericFilter::try_new(Some(params))?,
             min_moves,
         }))
     }

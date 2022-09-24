@@ -68,26 +68,24 @@ impl GenericFilter {
                 };
                 let vec_to_filter = data.to_vec().unwrap();
 
-                let ret = vec_to_filter.clone();
-
                 unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
-                ret
+                vec_to_filter
             };
 
             let mut output_games: Vec<SharedData> = vec![];
             let mut discard_games: Vec<SharedData> = vec![];
 
             for shared_game in games {
-                let game = match shared_game.clone() {
-                    SharedData::Game(game) => game,
+                match shared_game {
+                    SharedData::Game(game) => {
+                        if logic(&game) {
+                            output_games.push(SharedData::Game(game));
+                        } else {
+                            discard_games.push(SharedData::Game(game));
+                        }
+                    }
                     _ => return Err("Vector isn't of games!".to_string()),
-                };
-
-                if logic(&game) {
-                    output_games.push(shared_game);
-                } else {
-                    discard_games.push(shared_game);
                 }
             }
 
