@@ -2,6 +2,7 @@ use crate::workflow_step::{SharedData, Step};
 
 use bzip2::read::BzDecoder;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::sync::Mutex;
@@ -32,10 +33,7 @@ impl Bz2DecompressStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for Bz2DecompressStep {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepData,
-    ) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         let bufs = { data.remove("file_path_bufs").unwrap() };
 
         let paths = bufs.to_vec().unwrap();

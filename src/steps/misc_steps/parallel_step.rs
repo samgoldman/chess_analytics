@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::steps_manager::get_step_description;
 use crate::workflow_step::{SharedData, Step};
 
@@ -37,10 +39,7 @@ impl ParallelStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParallelStep {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepData,
-    ) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         // TODO make own step
         {
             let d: bool = false;

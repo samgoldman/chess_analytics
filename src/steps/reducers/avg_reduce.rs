@@ -45,10 +45,7 @@ impl AvgReduce {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for AvgReduce {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepData,
-    ) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         {
             data.insert(
                 self.output_map_name.clone(),
@@ -147,7 +144,7 @@ impl Step for AvgReduce {
 
             let flag = data
                 .get(&self.input_flag)
-                .unwrap_or(SharedData::Bool(false));
+                .unwrap_or(&SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 

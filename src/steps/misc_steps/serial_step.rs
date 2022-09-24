@@ -1,5 +1,7 @@
+use std::collections::HashMap;
+
 use crate::steps_manager::get_step_description;
-use crate::workflow_step::{SharedData, Step, StepData};
+use crate::workflow_step::{SharedData, Step};
 
 #[derive(Debug)]
 pub struct SerialStep {
@@ -28,7 +30,7 @@ impl SerialStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SerialStep {
-    fn process<'a>(&mut self, data: &mut dyn StepData) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         // TODO make own step
         {
             let d: bool = false;

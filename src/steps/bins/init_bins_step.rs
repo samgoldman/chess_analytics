@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::workflow_step::{SharedData, Step};
 
 #[derive(Debug)]
@@ -43,10 +45,7 @@ impl InitBinStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for InitBinStep {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepData,
-    ) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         {
             data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
         }
@@ -103,7 +102,7 @@ impl Step for InitBinStep {
 
             let flag = data
                 .get(&self.input_flag)
-                .unwrap_or(SharedData::Bool(false));
+                .unwrap_or(&SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 

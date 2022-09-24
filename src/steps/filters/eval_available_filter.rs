@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 use crate::game::Game;
 use crate::generic_steps::FilterFn;
 #[mockall_double::double]
 use crate::generic_steps::GenericFilter;
-use crate::workflow_step::Step;
+use crate::workflow_step::{SharedData, Step};
 
 #[derive(Debug)]
 pub struct EvalAvailableFilter {
@@ -24,10 +26,7 @@ impl EvalAvailableFilter {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for EvalAvailableFilter {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepData,
-    ) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         self.generic_filter.process(data, Self::create_filter())
     }
 }

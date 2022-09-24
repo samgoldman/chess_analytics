@@ -1,4 +1,6 @@
-use crate::workflow_step::{BoxedStep, Step, StepData};
+use std::collections::HashMap;
+
+use crate::workflow_step::{BoxedStep, SharedData, Step};
 
 #[derive(Debug)]
 pub struct NoopStep {}
@@ -12,7 +14,7 @@ impl NoopStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for NoopStep {
-    fn process(&mut self, _data: &mut dyn StepData) -> Result<bool, String> {
+    fn process(&mut self, _data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         Ok(true)
     }
 }

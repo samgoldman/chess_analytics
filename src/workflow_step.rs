@@ -12,7 +12,6 @@ pub type BoxedStep = Box<dyn Step>;
 pub trait StepData: Send {
     fn insert(&mut self, k: String, v: SharedData) -> Option<SharedData>;
     fn contains_key(&self, k: &str) -> bool;
-    fn get(&self, k: &str) -> Option<SharedData>;
     fn remove(&mut self, k: &str) -> Option<SharedData>;
 
     fn get_vec(&self, k: &str) -> Option<Vec<SharedData>>;
@@ -33,10 +32,6 @@ impl StepData for HashMap<String, SharedData> {
 
     fn contains_key(&self, k: &str) -> bool {
         self.contains_key(k)
-    }
-
-    fn get(&self, k: &str) -> Option<SharedData> {
-        self.get(k).map(|v| (*v).clone())
     }
 
     fn remove(&mut self, k: &str) -> Option<SharedData> {
@@ -79,6 +74,13 @@ impl SharedData {
     pub fn to_vec(&self) -> Option<Vec<SharedData>> {
         match self {
             SharedData::Vec(v) => Some(v.clone()),
+            _ => None,
+        }
+    }
+
+    pub fn into_vec(self) -> Option<Vec<SharedData>> {
+        match self {
+            SharedData::Vec(v) => Some(v),
             _ => None,
         }
     }
@@ -171,7 +173,7 @@ impl StepDescription {
 
 #[automock]
 pub trait Step: fmt::Debug + Send + Sync {
-    fn process(&mut self, data: &mut dyn StepData) -> Result<bool, String>;
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String>;
 }
 
 #[cfg(test)]

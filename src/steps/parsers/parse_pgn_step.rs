@@ -1,4 +1,7 @@
-use std::io::{BufRead, Read};
+use std::{
+    collections::HashMap,
+    io::{BufRead, Read},
+};
 
 use crate::{
     game::Game,
@@ -66,10 +69,7 @@ impl ParsePgnStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParsePgnStep {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepData,
-    ) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         {
             let vec: Vec<SharedData> = vec![];
             data.insert("parsed_games".to_string(), SharedData::Vec(vec));

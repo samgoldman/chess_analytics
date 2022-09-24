@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 // use crate::steps_manager::get_step_description;
 use crate::{
     game::Game,
@@ -16,10 +18,7 @@ impl ParseBinGame {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParseBinGame {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepData,
-    ) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         {
             let vec: Vec<SharedData> = vec![];
             data.insert("parsed_games".to_string(), SharedData::Vec(vec));
@@ -42,12 +41,12 @@ impl Step for ParseBinGame {
                     continue;
                 }
 
-                let potential_data = data.get("raw_file_data");
+                let potential_data = data.remove("raw_file_data");
                 let raw_file_data = match potential_data {
                     Some(data) => data,
                     None => continue,
                 };
-                let mut file_data_vec = raw_file_data.to_vec().unwrap();
+                let mut file_data_vec = raw_file_data.into_vec().unwrap();
 
                 remaining_files = file_data_vec.len();
                 let ret = if remaining_files == 0 {
@@ -66,13 +65,13 @@ impl Step for ParseBinGame {
             if !file_data.is_empty() {
                 let games: Vec<Game> = postcard::from_bytes(&file_data).unwrap();
                 let mut games = games
-                    .iter()
-                    .map(|g| SharedData::Game(g.clone()))
+                    .into_iter()
+                    .map(SharedData::Game)
                     .collect::<Vec<SharedData>>();
 
                 {
-                    let game_list = data.get("parsed_games").unwrap();
-                    let mut game_list: Vec<SharedData> = game_list.to_vec().unwrap();
+                    let game_list = data.remove("parsed_games").unwrap();
+                    let mut game_list: Vec<SharedData> = game_list.into_vec().unwrap();
 
                     game_list.append(&mut games);
                     data.insert("parsed_games".to_string(), SharedData::Vec(game_list));

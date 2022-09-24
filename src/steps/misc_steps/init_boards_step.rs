@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::{
     step_param_utils::get_required_parameter,
     workflow_step::{SharedData, Step},
@@ -36,10 +38,7 @@ impl InitBoardsStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for InitBoardsStep {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepData,
-    ) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         {
             data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
         }
@@ -90,7 +89,7 @@ impl Step for InitBoardsStep {
 
             let flag = data
                 .get(&self.input_flag)
-                .unwrap_or(SharedData::Bool(false));
+                .unwrap_or(&SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 

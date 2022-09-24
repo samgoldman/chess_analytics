@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write};
+use std::{collections::HashMap, fs::File, io::Write};
 
 use crate::{
     game::Game,
@@ -83,10 +83,7 @@ impl ExportGames {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ExportGames {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepData,
-    ) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         let mut quit = false;
         let mut final_loop = false;
         let mut games = vec![];
@@ -123,7 +120,7 @@ impl Step for ExportGames {
 
             let flag = data
                 .get(&self.input_flag)
-                .unwrap_or(SharedData::Bool(false));
+                .unwrap_or(&SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 

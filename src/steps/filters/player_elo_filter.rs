@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 use crate::game::Game;
 use crate::generic_steps::{FilterFn, GenericFilter};
-use crate::workflow_step::Step;
+use crate::workflow_step::{SharedData, Step};
 
 #[derive(Debug)]
 pub struct PlayerEloFilter {
@@ -80,10 +82,7 @@ impl PlayerEloFilter {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for PlayerEloFilter {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepData,
-    ) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         self.generic_filter.process(data, &*self.create_filter())
     }
 }
