@@ -51,13 +51,13 @@ impl PackedStruct for PartialCell {
         let file = if file_raw == 0x0F {
             None
         } else {
-            Some(File::from_uint(file_raw as u32))
+            Some(File::from_uint(u32::from(file_raw)))
         };
 
         let rank = if rank_raw == 0x0F {
             None
         } else {
-            Some(Rank::from_uint(rank_raw as u32))
+            Some(Rank::from_uint(u32::from(rank_raw)))
         };
 
         Ok(Self { file, rank })

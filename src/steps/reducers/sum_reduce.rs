@@ -95,10 +95,10 @@ impl Step for SumReduce {
                     bin_labels.iter().map(|b| format!("{}", b)).collect();
                 let combined_label = bin_str_labels.join(".");
 
-                if !new_data.contains_key(&combined_label) {
-                    new_data.insert(combined_label.clone(), value);
-                } else {
+                if new_data.contains_key(&combined_label) {
                     *(new_data.get_mut(&combined_label).unwrap()) += value;
+                } else {
+                    new_data.insert(combined_label.clone(), value);
                 }
             }
 

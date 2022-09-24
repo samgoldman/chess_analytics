@@ -57,7 +57,7 @@ impl ExportGames {
         }))
     }
 
-    fn save_games(&self, games: Vec<Game>, count: i32) {
+    fn save_games(&self, games: &[Game], count: i32) {
         let encoded_games = postcard::to_allocvec(&games).unwrap();
 
         let path = if count >= 0 {
@@ -116,7 +116,7 @@ impl Step for ExportGames {
             while games.len() >= self.games_per_file {
                 let to_save: Vec<Game> = games.drain(0..self.games_per_file).collect();
 
-                self.save_games(to_save, count);
+                self.save_games(&to_save, count);
 
                 count += 1;
             }
@@ -136,7 +136,7 @@ impl Step for ExportGames {
                     count = -1;
                 }
 
-                self.save_games(games, count);
+                self.save_games(&games, count);
                 break;
             }
         }

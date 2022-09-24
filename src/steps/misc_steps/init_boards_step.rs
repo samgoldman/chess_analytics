@@ -1,5 +1,7 @@
-use crate::step_param_utils::*;
-use crate::workflow_step::{SharedData, Step};
+use crate::{
+    step_param_utils::get_required_parameter,
+    workflow_step::{SharedData, Step},
+};
 
 #[derive(Debug)]
 pub struct InitBoardsStep {
