@@ -26,7 +26,7 @@ impl EvalAvailableFilter {
 impl Step for EvalAvailableFilter {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         self.generic_filter.process(data, Self::create_filter())
     }
@@ -34,12 +34,13 @@ impl Step for EvalAvailableFilter {
 
 #[cfg(test)]
 mod test_process {
+    use std::collections::HashMap;
+
     use mockall::predicate::always;
 
     use super::*;
 
     use crate::generic_steps::MockGenericFilter;
-    use crate::workflow_step::MockStepGenericCore;
 
     #[test]
     fn test_process() {
@@ -51,7 +52,7 @@ mod test_process {
             .times(1)
             .return_const(Ok(true));
 
-        let mut mock_data = MockStepGenericCore::new();
+        let mut mock_data = HashMap::new();
         let mut filter = EvalAvailableFilter {
             generic_filter: mock_generic_filter,
         };

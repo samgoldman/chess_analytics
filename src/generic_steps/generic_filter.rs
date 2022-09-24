@@ -1,5 +1,5 @@
 use crate::step_param_utils::*;
-use crate::workflow_step::StepGenericCore;
+use crate::workflow_step::StepData;
 use crate::{game::Game, workflow_step::SharedData};
 #[cfg(test)]
 use mockall::automock;
@@ -36,18 +36,14 @@ impl GenericFilter {
         }))
     }
 
-    pub fn process(
-        &self,
-        data: &mut dyn StepGenericCore,
-        logic: &FilterFn,
-    ) -> Result<bool, String> {
-        data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
-        data.insert(&self.discard_vec_name, SharedData::Vec(vec![]));
+    pub fn process(&self, data: &mut dyn StepData, logic: &FilterFn) -> Result<bool, String> {
+        data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
+        data.insert(self.discard_vec_name.clone(), SharedData::Vec(vec![]));
 
         let games = {
             let vec_to_filter = data.get_vec(&self.input_vec_name).unwrap();
 
-            data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+            data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
             vec_to_filter
         };
@@ -75,16 +71,19 @@ impl GenericFilter {
         let mut vec_to_append = data.get_vec(&self.output_vec_name).unwrap();
 
         vec_to_append.append(&mut output_games);
-        data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
+        data.insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
 
         if &self.discard_vec_name != "null" {
             let mut vec_to_append = data.get_vec(&self.discard_vec_name).unwrap();
 
             vec_to_append.append(&mut discard_games);
-            data.insert(&self.discard_vec_name, SharedData::Vec(vec_to_append));
+            data.insert(
+                self.discard_vec_name.clone(),
+                SharedData::Vec(vec_to_append),
+            );
         }
 
-        data.insert(&self.output_flag, SharedData::Bool(true));
+        data.insert(self.output_flag.clone(), SharedData::Bool(true));
 
         Ok(false)
     }
@@ -105,7 +104,7 @@ impl Default for GenericFilter {
 
 // #[cfg(test)]
 // mod test_process {
-//     use crate::workflow_step::MockStepGenericCore;
+//     use crate::workflow_step::MockStepData;
 //     use std::sync::{Mutex, MutexGuard};
 
 //     use super::*;
@@ -151,7 +150,7 @@ impl Default for GenericFilter {
 //         let _m = get_lock(&MTX);
 
 //         let ctx = MockFilterStep::filter_context();
-//         let mut data = MockStepGenericCore::new();
+//         let mut data = MockStepData::new();
 
 //         let default_game = Game::default();
 //         let game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);
@@ -219,7 +218,7 @@ impl Default for GenericFilter {
 //         let _m = get_lock(&MTX);
 
 //         let ctx = MockFilterStep::filter_context();
-//         let mut data = MockStepGenericCore::new();
+//         let mut data = MockStepData::new();
 
 //         let default_game = Game::default();
 //         let game_data = SharedData::Vec(vec![SharedData::Game(default_game)]);

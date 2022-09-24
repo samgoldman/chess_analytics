@@ -13,10 +13,10 @@ macro_rules! bin_template {
     ($logic:expr) => {
         fn process<'a>(
             &mut self,
-            data: &mut dyn crate::workflow_step::StepGenericCore,
+            data: &mut dyn crate::workflow_step::StepData,
         ) -> Result<bool, String> {
             {
-                data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
+                data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
             }
 
             let mut quit = false;
@@ -34,7 +34,7 @@ macro_rules! bin_template {
                     };
                     let vec_to_filter = shared_data.to_vec().unwrap();
 
-                    data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                    data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                     vec_to_filter
                 };
@@ -71,7 +71,7 @@ macro_rules! bin_template {
                     let mut vec_to_append = shared_data.to_vec().unwrap();
 
                     vec_to_append.append(&mut new_binned_games);
-                    data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
+                    data.insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
                 }
 
                 let flag = data
@@ -91,7 +91,7 @@ macro_rules! bin_template {
 
             {
                 let d: bool = true;
-                data.insert(&self.output_flag, SharedData::Bool(d));
+                data.insert(self.output_flag.clone(), SharedData::Bool(d));
             }
 
             Ok(true)
@@ -103,10 +103,10 @@ macro_rules! map_template {
     ($logic:expr) => {
         fn process<'a>(
             &mut self,
-            data: &mut dyn crate::workflow_step::StepGenericCore,
+            data: &mut dyn crate::workflow_step::StepData,
         ) -> Result<bool, String> {
             {
-                data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
+                data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
             }
 
             let mut quit = false;
@@ -124,7 +124,7 @@ macro_rules! map_template {
                     };
                     let vec_to_filter = shared_data.to_vec().unwrap();
 
-                    data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                    data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                     vec_to_filter
                 };
@@ -160,7 +160,7 @@ macro_rules! map_template {
                     let mut vec_to_append = shared_data.to_vec().unwrap();
 
                     vec_to_append.append(&mut new_binned_games);
-                    data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
+                    data.insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
                 }
 
                 let flag = data
@@ -180,7 +180,7 @@ macro_rules! map_template {
 
             {
                 let d: bool = true;
-                data.insert(&self.output_flag, SharedData::Bool(d));
+                data.insert(self.output_flag.clone(), SharedData::Bool(d));
             }
 
             Ok(true)

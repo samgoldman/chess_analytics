@@ -47,10 +47,13 @@ impl AvgReduce {
 impl Step for AvgReduce {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         {
-            data.insert(&self.output_map_name, SharedData::Map(HashMap::new()));
+            data.insert(
+                self.output_map_name.clone(),
+                SharedData::Map(HashMap::new()),
+            );
         }
 
         let mut quit = false;
@@ -69,7 +72,7 @@ impl Step for AvgReduce {
                 let vec_to_filter = shared_data.to_vec().unwrap();
 
                 let ret = vec_to_filter.clone();
-                data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 ret
             };
@@ -139,7 +142,7 @@ impl Step for AvgReduce {
                         ]),
                     );
                 }
-                data.insert(&self.output_map_name, SharedData::Map(map));
+                data.insert(self.output_map_name.clone(), SharedData::Map(map));
             }
 
             let flag = data
@@ -159,7 +162,7 @@ impl Step for AvgReduce {
 
         {
             let d: bool = true;
-            data.insert(&self.output_flag, SharedData::Bool(d));
+            data.insert(self.output_flag.clone(), SharedData::Bool(d));
 
             let potential_data = data.get(&self.output_map_name);
             let shared_data = match potential_data {
@@ -177,7 +180,7 @@ impl Step for AvgReduce {
                 let avg = total / count;
                 map.insert(key.clone(), SharedData::F64(avg));
             }
-            data.insert(&self.output_map_name, SharedData::Map(map));
+            data.insert(self.output_map_name.clone(), SharedData::Map(map));
         }
 
         Ok(true)

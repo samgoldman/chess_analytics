@@ -47,10 +47,13 @@ impl SumReduce {
 impl Step for SumReduce {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         {
-            data.insert(&self.output_map_name, SharedData::Map(HashMap::new()));
+            data.insert(
+                self.output_map_name.clone(),
+                SharedData::Map(HashMap::new()),
+            );
         }
 
         let mut quit = false;
@@ -68,7 +71,7 @@ impl Step for SumReduce {
                 };
                 let vec_to_filter = shared_data.to_vec().unwrap();
 
-                data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 vec_to_filter
             };
@@ -115,7 +118,7 @@ impl Step for SumReduce {
                     let new_count = new_data.get(key).unwrap() + original_count;
                     map.insert(key.to_string(), SharedData::U64(new_count));
                 }
-                data.insert(&self.output_map_name, SharedData::Map(map));
+                data.insert(self.output_map_name.clone(), SharedData::Map(map));
             }
 
             let flag = data
@@ -135,7 +138,7 @@ impl Step for SumReduce {
 
         {
             let d: bool = true;
-            data.insert(&self.output_flag, SharedData::Bool(d));
+            data.insert(self.output_flag.clone(), SharedData::Bool(d));
         }
 
         Ok(true)

@@ -82,7 +82,7 @@ impl PlayerEloFilter {
 impl Step for PlayerEloFilter {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         self.generic_filter.process(data, &*self.create_filter())
     }

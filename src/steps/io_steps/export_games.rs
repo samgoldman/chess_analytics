@@ -85,7 +85,7 @@ impl ExportGames {
 impl Step for ExportGames {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         let mut quit = false;
         let mut final_loop = false;
@@ -104,7 +104,7 @@ impl Step for ExportGames {
                 };
                 let vec_to_filter = shared_data.to_vec().unwrap();
 
-                data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 for possible_game in vec_to_filter {
                     if let SharedData::Game(game) = possible_game {

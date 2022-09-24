@@ -18,11 +18,11 @@ impl ParseBinGame {
 impl Step for ParseBinGame {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         {
             let vec: Vec<SharedData> = vec![];
-            data.insert("parsed_games", SharedData::Vec(vec));
+            data.insert("parsed_games".to_string(), SharedData::Vec(vec));
         }
         loop {
             let done_reading_files = {
@@ -58,7 +58,7 @@ impl Step for ParseBinGame {
                         _ => panic!(), // TODO
                     }
                 };
-                data.insert("raw_file_data", SharedData::Vec(file_data_vec));
+                data.insert("raw_file_data".to_string(), SharedData::Vec(file_data_vec));
 
                 ret
             };
@@ -75,7 +75,7 @@ impl Step for ParseBinGame {
                     let mut game_list: Vec<SharedData> = game_list.to_vec().unwrap();
 
                     game_list.append(&mut games);
-                    data.insert("parsed_games", SharedData::Vec(game_list));
+                    data.insert("parsed_games".to_string(), SharedData::Vec(game_list));
                 }
             }
 
@@ -85,7 +85,7 @@ impl Step for ParseBinGame {
         }
 
         let d: bool = true;
-        data.insert("done_parsing_games", SharedData::Bool(d));
+        data.insert("done_parsing_games".to_string(), SharedData::Bool(d));
 
         Ok(true)
     }

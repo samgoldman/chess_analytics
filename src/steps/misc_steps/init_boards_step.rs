@@ -36,10 +36,10 @@ impl InitBoardsStep {
 impl Step for InitBoardsStep {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         {
-            data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
+            data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
         }
 
         let mut quit = false;
@@ -57,7 +57,7 @@ impl Step for InitBoardsStep {
                 };
                 let vec_to_filter = shared_data.to_vec().unwrap();
 
-                data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 vec_to_filter
             };
@@ -83,7 +83,7 @@ impl Step for InitBoardsStep {
                 let mut vec_to_append = shared_data.to_vec().unwrap();
 
                 vec_to_append.append(&mut output_games);
-                data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
+                data.insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
             }
 
             let flag = data
@@ -103,7 +103,7 @@ impl Step for InitBoardsStep {
 
         {
             let d: bool = true;
-            data.insert(&self.output_flag, SharedData::Bool(d));
+            data.insert(self.output_flag.clone(), SharedData::Bool(d));
         }
 
         Ok(false)

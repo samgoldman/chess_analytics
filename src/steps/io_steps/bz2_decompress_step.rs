@@ -34,14 +34,14 @@ impl Bz2DecompressStep {
 impl Step for Bz2DecompressStep {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         let bufs = { data.remove("file_path_bufs").unwrap() };
 
         let paths = bufs.to_vec().unwrap();
 
         {
-            data.insert("raw_file_data", SharedData::Vec(vec![]));
+            data.insert("raw_file_data".to_string(), SharedData::Vec(vec![]));
         }
 
         let mutex_data = Mutex::new(data);
@@ -88,7 +88,7 @@ impl Step for Bz2DecompressStep {
 
                 file_data_vec.push(SharedData::FileData(file_data));
 
-                data.insert("raw_file_data", SharedData::Vec(file_data_vec));
+                data.insert("raw_file_data".to_string(), SharedData::Vec(file_data_vec));
             }
         });
 
@@ -97,7 +97,7 @@ impl Step for Bz2DecompressStep {
             mutex_data
                 .lock()
                 .unwrap()
-                .insert("done_reading_files", SharedData::Bool(d));
+                .insert("done_reading_files".to_string(), SharedData::Bool(d));
         }
 
         Ok(false)

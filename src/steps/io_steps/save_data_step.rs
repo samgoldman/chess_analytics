@@ -31,7 +31,7 @@ impl SaveDataStep {
 impl Step for SaveDataStep {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         // TODO: better error handling
         let mut file = fs::File::create(self.file.clone()).unwrap();

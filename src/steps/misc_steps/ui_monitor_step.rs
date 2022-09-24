@@ -99,7 +99,7 @@ impl UiMonitorStep {
 impl Step for UiMonitorStep {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         self.start_time = std::time::Instant::now();
         self.terminal.clear().unwrap();

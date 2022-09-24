@@ -1,5 +1,5 @@
 use crate::steps_manager::get_step_description;
-use crate::workflow_step::{SharedData, Step, StepGenericCore};
+use crate::workflow_step::{SharedData, Step, StepData};
 
 #[derive(Debug)]
 pub struct SerialStep {
@@ -28,13 +28,13 @@ impl SerialStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SerialStep {
-    fn process<'a>(&mut self, data: &mut dyn StepGenericCore) -> Result<bool, String> {
+    fn process<'a>(&mut self, data: &mut dyn StepData) -> Result<bool, String> {
         // TODO make own step
         {
             let d: bool = false;
-            data.insert("done_reading_files", SharedData::Bool(d));
+            data.insert("done_reading_files".to_string(), SharedData::Bool(d));
             let f: bool = false;
-            data.insert("done_parsing_games", SharedData::Bool(f));
+            data.insert("done_parsing_games".to_string(), SharedData::Bool(f));
         }
 
         for child_name in self.children_names.clone() {

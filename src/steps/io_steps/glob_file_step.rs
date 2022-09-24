@@ -34,7 +34,7 @@ impl GlobFileStep {
 impl Step for GlobFileStep {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         let glob_result = glob(&self.glob_string);
 
@@ -50,8 +50,11 @@ impl Step for GlobFileStep {
             .collect();
 
         {
-            data.insert("total_file_count", SharedData::USize(files.len()));
-            data.insert("file_path_bufs", SharedData::Vec(files));
+            data.insert(
+                "total_file_count".to_string(),
+                SharedData::USize(files.len()),
+            );
+            data.insert("file_path_bufs".to_string(), SharedData::Vec(files));
         }
 
         let mut child = get_step_description(&self.child_name, data).to_step()?;

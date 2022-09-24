@@ -9,46 +9,38 @@ use std::path::PathBuf;
 pub type BoxedStep = Box<dyn Step>;
 
 #[automock]
-pub trait StepGenericCore: Send {
-    fn insert(&mut self, k: &str, v: SharedData) -> Option<SharedData>;
+pub trait StepData: Send {
+    fn insert(&mut self, k: String, v: SharedData) -> Option<SharedData>;
     fn contains_key(&self, k: &str) -> bool;
     fn get(&self, k: &str) -> Option<SharedData>;
-    fn get_vec(&self, k: &str) -> Option<Vec<SharedData>>;
     fn remove(&mut self, k: &str) -> Option<SharedData>;
-    fn get_underlying_data(&self) -> &HashMap<String, SharedData>;
-}
 
-pub struct StepGenericCoreImpl {
-    pub map: HashMap<String, SharedData>,
+    fn get_vec(&self, k: &str) -> Option<Vec<SharedData>>;
 }
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
-impl StepGenericCore for StepGenericCoreImpl {
-    fn contains_key(&self, k: &str) -> bool {
-        self.map.contains_key(k)
-    }
-
-    fn get(&self, k: &str) -> Option<SharedData> {
-        self.map.get(k).map(|v| (*v).clone())
-    }
-
+impl StepData for HashMap<String, SharedData> {
     fn get_vec(&self, k: &str) -> Option<Vec<SharedData>> {
-        match self.map.get(k) {
+        match self.get(k) {
             Some(v) => v.clone().to_vec(),
             None => None,
         }
     }
 
-    fn insert(&mut self, k: &str, v: SharedData) -> Option<SharedData> {
-        self.map.insert(k.to_string(), v)
+    fn insert(&mut self, k: String, v: SharedData) -> Option<SharedData> {
+        self.insert(k, v)
+    }
+
+    fn contains_key(&self, k: &str) -> bool {
+        self.contains_key(k)
+    }
+
+    fn get(&self, k: &str) -> Option<SharedData> {
+        self.get(k).map(|v| (*v).clone())
     }
 
     fn remove(&mut self, k: &str) -> Option<SharedData> {
-        self.map.remove(k)
-    }
-
-    fn get_underlying_data(&self) -> &HashMap<String, SharedData> {
-        &self.map
+        self.remove(k)
     }
 }
 
@@ -179,7 +171,7 @@ impl StepDescription {
 
 #[automock]
 pub trait Step: fmt::Debug + Send + Sync {
-    fn process(&mut self, data: &mut dyn StepGenericCore) -> Result<bool, String>;
+    fn process(&mut self, data: &mut dyn StepData) -> Result<bool, String>;
 }
 
 #[cfg(test)]

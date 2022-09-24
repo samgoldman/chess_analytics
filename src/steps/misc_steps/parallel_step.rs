@@ -39,14 +39,14 @@ impl ParallelStep {
 impl Step for ParallelStep {
     fn process<'a>(
         &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
+        data: &mut dyn crate::workflow_step::StepData,
     ) -> Result<bool, String> {
         // TODO make own step
         {
             let d: bool = false;
-            data.insert("done_reading_files", SharedData::Bool(d));
+            data.insert("done_reading_files".to_string(), SharedData::Bool(d));
             let f: bool = false;
-            data.insert("done_parsing_games", SharedData::Bool(f));
+            data.insert("done_parsing_games".to_string(), SharedData::Bool(f));
         }
 
         let mut children = vec![];
