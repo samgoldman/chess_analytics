@@ -1,9 +1,10 @@
-use crate::workflow_step::{SharedData, Step, StepGeneric};
+use crate::workflow_step::{SharedData, Step};
 
 use bzip2::read::BzDecoder;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::fs::File;
 use std::io::Read;
+use std::sync::Mutex;
 
 #[derive(Debug)]
 pub struct Bz2DecompressStep {
@@ -31,18 +32,19 @@ impl Bz2DecompressStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for Bz2DecompressStep {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-        let bufs = {
-            let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.remove("file_path_bufs").unwrap()
-        };
+    fn process<'a>(
+        &mut self,
+        data: &mut dyn crate::workflow_step::StepGenericCore,
+    ) -> Result<(), String> {
+        let bufs = { data.remove("file_path_bufs").unwrap() };
 
         let paths = bufs.to_vec().unwrap();
 
         {
-            let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert("raw_file_data", SharedData::Vec(vec![]));
+            data.insert("raw_file_data", SharedData::Vec(vec![]));
         }
+
+        let mutex_data = Mutex::new(data);
 
         paths.par_iter().for_each(|path| {
             let path = path.to_path_buf().unwrap();
@@ -68,13 +70,8 @@ impl Step for Bz2DecompressStep {
 
             loop {
                 {
-                    let unlocked_data = data.lock().unwrap();
-                    if (unlocked_data
-                        .get("raw_file_data")
-                        .unwrap()
-                        .to_vec()
-                        .unwrap()
-                        .len() as u64)
+                    let data = mutex_data.lock().unwrap();
+                    if (data.get("raw_file_data").unwrap().to_vec().unwrap().len() as u64)
                         < self.max_queue_size
                     {
                         break;
@@ -84,21 +81,23 @@ impl Step for Bz2DecompressStep {
             }
 
             {
-                let mut unlocked_data = data.lock().unwrap();
+                let mut data = mutex_data.lock().unwrap();
 
-                let raw_file_data = unlocked_data.get("raw_file_data").unwrap();
+                let raw_file_data = data.get("raw_file_data").unwrap();
                 let mut file_data_vec: Vec<SharedData> = raw_file_data.to_vec().unwrap();
 
                 file_data_vec.push(SharedData::FileData(file_data));
 
-                unlocked_data.insert("raw_file_data", SharedData::Vec(file_data_vec));
+                data.insert("raw_file_data", SharedData::Vec(file_data_vec));
             }
         });
 
         {
-            let mut unlocked_data = data.lock().unwrap();
             let d: bool = true;
-            unlocked_data.insert("done_reading_files", SharedData::Bool(d));
+            mutex_data
+                .lock()
+                .unwrap()
+                .insert("done_reading_files", SharedData::Bool(d));
         }
 
         Ok(())

@@ -2,22 +2,22 @@ steps:
   init:
     type: "GlobFileStep"
     params: 
-      glob: /data/data_scratch/lichess_data/converted_v5/2013-01/00000*.bin*
-      child: parallel_step
-  parallel_step:
-    type: ParallelStep
+      glob: /data/data_scratch/lichess_data/converted_v5/2022-01/2022-01_00000*.bin*
+      child: serial_step
+  serial_step:
+    type: SerialStep
     params:
       children:
         - "load_files"
         - "parse_games"
-        - "filter_mate"
-        - "filter_eval_available"
         - "filter_min_moves"
+        - "filter_eval_available"
+        - "filter_mate"
         - "init_bins"
         - "bin_time_control"
         - "map_count"
         - "reduce_sum"
-      post: "save_results"
+        - "save_results"
   load_files:
     type: Bz2DecompressStep
     params:
@@ -25,37 +25,6 @@ steps:
       full_queue_delay_ms: 332
   parse_games:
     type: ParseBinGame
-  monitor:
-    type: UiMonitorStep
-    params: 
-      finish_flag: reduction_done
-      final_results: reduced
-      raw:
-        - display_name: Done Reading Files
-          field: done_reading_files
-        - display_name: Done Parsing Games
-          field: done_parsing_games
-        - display_name: Done Filter 1
-          field: filter_1_done
-        - display_name: Done Filter 2
-          field: filter_2_done
-        - display_name: Done Filter 3
-          field: filter_3_done
-        - display_name: Reduction Map
-          field: reduced
-        - display_name: Total File Count
-          field: total_file_count
-      length:
-        - display_name: Raw File Data
-          field: raw_file_data
-        - display_name: Parsed Games
-          field: parsed_games
-        - display_name: Filtered Games 1
-          field: filtered_games_1
-        - display_name: Filtered Games 2
-          field: filtered_games_2
-        - display_name: Filtered Games 3
-          field: filtered_games_3
   filter_mate:
     type: CheckmateFilter
     params:
@@ -115,16 +84,3 @@ steps:
       file: out.txt
       fields:
         - reduced
-
-  # filter_player_elo:
-  #   type: PlayerEloFilter
-  #   params:
-  #     input: filtered_games_1
-  #     output: filtered_games_2
-  #     discard: "null"
-  #     input_flag: filter_1_done
-  #     output_flag: filter_2_done
-  #     max_elo: 1500
-  #     min_elo: 1600
-  #     white: true
-  #     black: true

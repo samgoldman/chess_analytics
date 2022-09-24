@@ -1,6 +1,6 @@
 use crate::game::Game;
 use crate::generic_steps::{FilterFn, GenericFilter};
-use crate::workflow_step::{Step, StepGeneric};
+use crate::workflow_step::Step;
 
 #[derive(Debug)]
 pub struct PlayerEloFilter {
@@ -80,7 +80,10 @@ impl PlayerEloFilter {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for PlayerEloFilter {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-        self.generic_filter.process(&data, &*self.create_filter())
+    fn process<'a>(
+        &mut self,
+        data: &mut dyn crate::workflow_step::StepGenericCore,
+    ) -> Result<(), String> {
+        self.generic_filter.process(data, &*self.create_filter())
     }
 }

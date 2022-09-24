@@ -1,5 +1,5 @@
 use crate::steps_manager::get_step_description;
-use crate::workflow_step::{SharedData, Step, StepGeneric};
+use crate::workflow_step::{SharedData, Step};
 
 use glob::glob;
 
@@ -32,7 +32,10 @@ impl GlobFileStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for GlobFileStep {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+    fn process<'a>(
+        &mut self,
+        data: &mut dyn crate::workflow_step::StepGenericCore,
+    ) -> Result<(), String> {
         let glob_result = glob(&self.glob_string);
 
         let file_glob = if let Ok(file_glob) = glob_result {
@@ -47,12 +50,11 @@ impl Step for GlobFileStep {
             .collect();
 
         {
-            let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert("total_file_count", SharedData::USize(files.len()));
-            unlocked_data.insert("file_path_bufs", SharedData::Vec(files));
+            data.insert("total_file_count", SharedData::USize(files.len()));
+            data.insert("file_path_bufs", SharedData::Vec(files));
         }
 
-        let mut child = get_step_description(&self.child_name, &data).to_step()?;
+        let mut child = get_step_description(&self.child_name, data).to_step()?;
         child.process(data)
     }
 }

@@ -1,4 +1,4 @@
-use crate::workflow_step::{SharedData, Step, StepGeneric};
+use crate::workflow_step::{SharedData, Step};
 use serde_yaml::Value;
 use std::{fs, io::Write};
 
@@ -29,16 +29,16 @@ impl SaveDataStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SaveDataStep {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
-        let unlocked_data = data.lock().unwrap();
+    fn process<'a>(
+        &mut self,
+        data: &mut dyn crate::workflow_step::StepGenericCore,
+    ) -> Result<(), String> {
         // TODO: better error handling
         let mut file = fs::File::create(self.file.clone()).unwrap();
 
         for field in &self.fields {
             let default = SharedData::String("<Field Not Present>".to_string());
-            let value = unlocked_data
-                .get(field.as_str().unwrap())
-                .unwrap_or(default);
+            let value = data.get(field.as_str().unwrap()).unwrap_or(default);
             writeln!(file, "{}: \n{}", field.as_str().unwrap(), value).unwrap();
         }
 

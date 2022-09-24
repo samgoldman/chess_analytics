@@ -1,5 +1,5 @@
 use crate::step_param_utils::*;
-use crate::workflow_step::{SharedData, Step, StepGeneric};
+use crate::workflow_step::{SharedData, Step};
 
 #[derive(Debug)]
 pub struct InitBoardsStep {
@@ -34,10 +34,12 @@ impl InitBoardsStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for InitBoardsStep {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+    fn process<'a>(
+        &mut self,
+        data: &mut dyn crate::workflow_step::StepGenericCore,
+    ) -> Result<(), String> {
         {
-            let mut unlocked_data = data.lock().unwrap();
-            unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
+            data.insert(&self.output_vec_name, SharedData::Vec(vec![]));
         }
 
         let mut quit = false;
@@ -48,16 +50,14 @@ impl Step for InitBoardsStep {
             }
 
             let games = {
-                let mut unlocked_data = data.lock().unwrap();
-
-                let potential_data = unlocked_data.get(&self.input_vec_name);
-                let data = match potential_data {
-                    Some(data) => data,
+                let potential_data = data.get(&self.input_vec_name);
+                let shared_data = match potential_data {
+                    Some(shared_data) => shared_data,
                     None => continue,
                 };
-                let vec_to_filter = data.to_vec().unwrap();
+                let vec_to_filter = shared_data.to_vec().unwrap();
 
-                unlocked_data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
 
                 vec_to_filter
             };
@@ -75,22 +75,18 @@ impl Step for InitBoardsStep {
             }
 
             {
-                let mut unlocked_data = data.lock().unwrap();
-
-                let potential_data = unlocked_data.get(&self.output_vec_name);
-                let data = match potential_data {
-                    Some(data) => data,
+                let potential_data = data.get(&self.output_vec_name);
+                let shared_data = match potential_data {
+                    Some(shared_data) => shared_data,
                     None => return Err("GenericFilter: no output vector".to_string()),
                 };
-                let mut vec_to_append = data.to_vec().unwrap();
+                let mut vec_to_append = shared_data.to_vec().unwrap();
 
                 vec_to_append.append(&mut output_games);
-                unlocked_data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
+                data.insert(&self.output_vec_name, SharedData::Vec(vec_to_append));
             }
 
-            let unlocked_data = data.lock().unwrap();
-
-            let flag = unlocked_data
+            let flag = data
                 .get(&self.input_flag)
                 .unwrap_or(SharedData::Bool(false));
 
@@ -106,9 +102,8 @@ impl Step for InitBoardsStep {
         }
 
         {
-            let mut unlocked_data = data.lock().unwrap();
             let d: bool = true;
-            unlocked_data.insert(&self.output_flag, SharedData::Bool(d));
+            data.insert(&self.output_flag, SharedData::Bool(d));
         }
 
         Ok(())

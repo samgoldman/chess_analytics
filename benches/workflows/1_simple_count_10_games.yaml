@@ -3,16 +3,16 @@ steps:
     type: "GlobFileStep"
     params: 
       glob: test_data/test_set_1.bin.bz2
-      child: parallel_step
-  parallel_step:
-    type: ParallelStep
+      child: serial_step
+  serial_step:
+    type: SerialStep
     params:
       children:
         - "load_files"
         - "parse_games"
+        - "init_bins"
         - "map_count"
         - "reduce_sum"
-        - "init_bins"
   load_files:
     type: Bz2DecompressStep
     params:

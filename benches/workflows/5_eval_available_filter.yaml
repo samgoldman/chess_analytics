@@ -3,17 +3,17 @@ steps:
     type: "GlobFileStep"
     params: 
       glob: test_data/one_eval_one_no_eval.bin.bz2
-      child: parallel_step
-  parallel_step:
-    type: ParallelStep
+      child: serial_step
+  serial_step:
+    type: SerialStep
     params:
       children:
         - "load_files"
         - "parse_games"
+        - "eval_available_filter"
+        - "init_bins"
         - "map_count"
         - "reduce_sum"
-        - "init_bins"
-        - "eval_available_filter"
   load_files:
     type: Bz2DecompressStep
     params:

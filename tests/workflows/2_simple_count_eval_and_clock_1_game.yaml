@@ -3,17 +3,17 @@ steps:
     type: "GlobFileStep"
     params: 
       glob: test_data/simple_count_eval_and_clock_1_game.bin.bz2
-      child: parallel_step
-  parallel_step:
-    type: ParallelStep
+      child: serial_step
+  serial_step:
+    type: SerialStep
     params:
       children:
         - "load_files"
         - "parse_games"
+        - "init_bins"
         - "map_count"
         - "reduce_sum"
-        - "init_bins"
-      post: "save_results"
+        - "save_results"
   load_files:
     type: Bz2DecompressStep
     params:

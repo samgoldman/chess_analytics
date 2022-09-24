@@ -1,7 +1,7 @@
 // use crate::steps_manager::get_step_description;
 use crate::{
     game::Game,
-    workflow_step::{BoxedStep, SharedData, Step, StepGeneric},
+    workflow_step::{BoxedStep, SharedData, Step},
 };
 
 #[derive(Debug)]
@@ -16,21 +16,21 @@ impl ParseBinGame {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParseBinGame {
-    fn process(&mut self, data: StepGeneric) -> Result<(), String> {
+    fn process<'a>(
+        &mut self,
+        data: &mut dyn crate::workflow_step::StepGenericCore,
+    ) -> Result<(), String> {
         {
-            let mut unlocked_data = data.lock().unwrap();
             let vec: Vec<SharedData> = vec![];
-            unlocked_data.insert("parsed_games", SharedData::Vec(vec));
+            data.insert("parsed_games", SharedData::Vec(vec));
         }
         loop {
             let done_reading_files = {
-                let unlocked_data = data.lock().unwrap();
-
-                if !unlocked_data.contains_key("done_reading_files") {
+                if !data.contains_key("done_reading_files") {
                     continue;
                 }
 
-                let flag = unlocked_data.get("done_reading_files").unwrap();
+                let flag = data.get("done_reading_files").unwrap();
 
                 flag.to_bool().unwrap()
             };
@@ -38,13 +38,11 @@ impl Step for ParseBinGame {
             let remaining_files;
 
             let file_data = {
-                let mut unlocked_data = data.lock().unwrap();
-
-                if !unlocked_data.contains_key("raw_file_data") {
+                if !data.contains_key("raw_file_data") {
                     continue;
                 }
 
-                let potential_data = unlocked_data.get("raw_file_data");
+                let potential_data = data.get("raw_file_data");
                 let raw_file_data = match potential_data {
                     Some(data) => data,
                     None => continue,
@@ -60,7 +58,7 @@ impl Step for ParseBinGame {
                         _ => panic!(), // TODO
                     }
                 };
-                unlocked_data.insert("raw_file_data", SharedData::Vec(file_data_vec));
+                data.insert("raw_file_data", SharedData::Vec(file_data_vec));
 
                 ret
             };
@@ -73,12 +71,11 @@ impl Step for ParseBinGame {
                     .collect::<Vec<SharedData>>();
 
                 {
-                    let mut unlocked_data = data.lock().unwrap();
-                    let game_list = unlocked_data.get("parsed_games").unwrap();
+                    let game_list = data.get("parsed_games").unwrap();
                     let mut game_list: Vec<SharedData> = game_list.to_vec().unwrap();
 
                     game_list.append(&mut games);
-                    unlocked_data.insert("parsed_games", SharedData::Vec(game_list));
+                    data.insert("parsed_games", SharedData::Vec(game_list));
                 }
             }
 
@@ -87,9 +84,8 @@ impl Step for ParseBinGame {
             }
         }
 
-        let mut unlocked_data = data.lock().unwrap();
         let d: bool = true;
-        unlocked_data.insert("done_parsing_games", SharedData::Bool(d));
+        data.insert("done_parsing_games", SharedData::Bool(d));
 
         Ok(())
     }

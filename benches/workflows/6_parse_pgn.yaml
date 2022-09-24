@@ -1,6 +1,6 @@
 steps:
   init:
-    type: ParallelStep
+    type: SerialStep
     params:
       children:
         - "parse_pgn"
