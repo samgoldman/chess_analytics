@@ -2,7 +2,7 @@ steps:
   init:
     type: "GlobFileStep"
     params: 
-      glob: /data/data_scratch/lichess_data/converted_v5/2022-01/2022-01_00000*.bin*
+      glob: /data/data_scratch/lichess_data/converted_v5/2022-01/2022-01_0000*.bin*
       child: serial_step
   serial_step:
     type: SerialStep

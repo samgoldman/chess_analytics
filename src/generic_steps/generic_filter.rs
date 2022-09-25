@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::{
     game::Game,
     step_param_utils::{get_parameter_with_default, get_required_parameter},
@@ -13,7 +15,6 @@ pub struct GenericFilter {
     input_vec_name: String,
     output_vec_name: String,
     discard_vec_name: String,
-    output_flag: String,
 }
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
@@ -28,19 +29,21 @@ impl GenericFilter {
         let input_vec_name = get_required_parameter("GenericFilter", "input", &params)?;
         let output_vec_name = get_required_parameter("GenericFilter", "output", &params)?;
         let discard_vec_name = get_parameter_with_default("discard", "null", &params);
-        let output_flag = get_required_parameter("GenericFilter", "output_flag", &params)?;
 
         Ok(Box::new(GenericFilter {
             input_vec_name,
             output_vec_name,
             discard_vec_name,
-            output_flag,
         }))
     }
 
-    pub fn process(&self, data: &mut dyn StepData, logic: &FilterFn) -> Result<bool, String> {
-        data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
-        data.insert(self.discard_vec_name.clone(), SharedData::Vec(vec![]));
+    pub fn process(
+        &self,
+        data: &mut HashMap<String, SharedData>,
+        logic: &FilterFn,
+    ) -> Result<bool, String> {
+        data.init_vec_if_unset(&self.output_vec_name);
+        data.init_vec_if_unset(&self.discard_vec_name);
 
         let games = {
             let vec_to_filter = data.get_vec(&self.input_vec_name).unwrap();
@@ -85,8 +88,6 @@ impl GenericFilter {
             );
         }
 
-        data.insert(self.output_flag.clone(), SharedData::Bool(true));
-
         Ok(false)
     }
 }
@@ -99,7 +100,6 @@ impl Default for GenericFilter {
             input_vec_name: "input_vec".to_string(),
             output_vec_name: "output_vec".to_string(),
             discard_vec_name: "discard_vec".to_string(),
-            output_flag: "output_flag".to_string(),
         }
     }
 }
@@ -128,7 +128,6 @@ mod test_process {
                 "discard_vec".to_string(),
                 SharedData::Vec(vec![SharedData::Game(default_game)]),
             ),
-            ("output_flag".to_string(), SharedData::Bool(true)),
         ]);
 
         let generic_filter = GenericFilter::default();
@@ -153,7 +152,6 @@ mod test_process {
             ),
             ("input_vec".to_string(), SharedData::Vec(vec![])),
             ("discard_vec".to_string(), SharedData::Vec(vec![])),
-            ("output_flag".to_string(), SharedData::Bool(true)),
         ]);
 
         let generic_filter = GenericFilter::default();
@@ -162,8 +160,51 @@ mod test_process {
         assert_eq!(actual_data, expected_data);
     }
 
-    // TODO: test case when input_vec has no games (return true)
-    // TODO: test case when output/discard vec already has games
+    #[test]
+    fn test_nominal_3() {
+        let mut actual_data = HashMap::new();
+
+        actual_data.insert("input_vec".to_string(), SharedData::Vec(vec![]));
+
+        let expected_data = HashMap::from([
+            ("output_vec".to_string(), SharedData::Vec(vec![])),
+            ("input_vec".to_string(), SharedData::Vec(vec![])),
+            ("discard_vec".to_string(), SharedData::Vec(vec![])),
+        ]);
+
+        let generic_filter = GenericFilter::default();
+        let res = generic_filter.process(&mut actual_data, &|_| true);
+        assert_eq!(res, Ok(true));
+        assert_eq!(actual_data, expected_data);
+    }
+
+    #[test]
+    fn test_nominal_4() {
+        let mut actual_data = HashMap::new();
+
+        let default_game = Game::default();
+        let game_data = SharedData::Vec(vec![SharedData::Game(default_game.clone())]);
+
+        actual_data.insert("output_vec".to_string(), game_data.clone());
+        actual_data.insert("input_vec".to_string(), game_data.clone());
+
+        let expected_data = HashMap::from([
+            (
+                "output_vec".to_string(),
+                SharedData::Vec(vec![
+                    SharedData::Game(default_game.clone()),
+                    SharedData::Game(default_game.clone()),
+                ]),
+            ),
+            ("input_vec".to_string(), SharedData::Vec(vec![])),
+            ("discard_vec".to_string(), SharedData::Vec(vec![])),
+        ]);
+
+        let generic_filter = GenericFilter::default();
+        let res = generic_filter.process(&mut actual_data, &|_| true);
+        assert_eq!(res, Ok(false)); // Not done since we processed a game
+        assert_eq!(actual_data, expected_data);
+    }
 }
 
 #[cfg(test)]
@@ -224,7 +265,6 @@ mod test_try_new {
                 input_vec_name: "input_vector".to_string(),
                 output_vec_name: "output_vector".to_string(),
                 discard_vec_name: "null".to_string(),
-                output_flag: "output_flag_value".to_string(),
             })),
             GenericFilter::try_new(Some(Value::Mapping(params)))
         );
@@ -255,7 +295,6 @@ mod test_try_new {
                 input_vec_name: "input_vector".to_string(),
                 output_vec_name: "output_vector".to_string(),
                 discard_vec_name: "discard_vector".to_string(),
-                output_flag: "output_flag_value".to_string(),
             })),
             GenericFilter::try_new(Some(Value::Mapping(params)))
         );
@@ -270,7 +309,7 @@ mod test_misc {
     fn test_debug() {
         let f = GenericFilter::default();
 
-        assert_eq!(format!("{:?}", f), "GenericFilter { input_vec_name: \"input_vec\", output_vec_name: \"output_vec\", discard_vec_name: \"discard_vec\", output_flag: \"output_flag\" }");
+        assert_eq!(format!("{:?}", f), "GenericFilter { input_vec_name: \"input_vec\", output_vec_name: \"output_vec\", discard_vec_name: \"discard_vec\" }");
     }
 
     #[test]
@@ -281,7 +320,6 @@ mod test_misc {
                 input_vec_name: "input_vec_name".to_string(),
                 output_vec_name: "output_vec_name".to_string(),
                 discard_vec_name: "discard_vec_name".to_string(),
-                output_flag: "output_flag".to_string(),
             },
             GenericFilter::default()
         );

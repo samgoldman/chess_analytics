@@ -15,6 +15,11 @@ pub trait StepData: Send {
     fn remove(&mut self, k: &str) -> Option<SharedData>;
 
     fn get_vec(&self, k: &str) -> Option<Vec<SharedData>>;
+    fn init_vec_if_unset(&mut self, k: &str) {
+        if !self.contains_key(k) {
+            self.insert(k.to_string(), SharedData::Vec(vec![]));
+        }
+    }
 }
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
