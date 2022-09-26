@@ -45,13 +45,7 @@ impl GenericFilter {
         data.init_vec_if_unset(&self.output_vec_name);
         data.init_vec_if_unset(&self.discard_vec_name);
 
-        let games = {
-            let vec_to_filter = data.get_vec(&self.input_vec_name).unwrap();
-
-            data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
-
-            vec_to_filter
-        };
+        let games = data.clear_vec(&self.input_vec_name).unwrap();
 
         if games.is_empty() {
             return Ok(true);
@@ -73,13 +67,13 @@ impl GenericFilter {
             }
         }
 
-        let mut vec_to_append = data.get_vec(&self.output_vec_name).unwrap();
+        let mut vec_to_append = data.remove_vec(&self.output_vec_name).unwrap();
 
         vec_to_append.append(&mut output_games);
         data.insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
 
         if &self.discard_vec_name != "null" {
-            let mut vec_to_append = data.get_vec(&self.discard_vec_name).unwrap();
+            let mut vec_to_append = data.remove_vec(&self.discard_vec_name).unwrap();
 
             vec_to_append.append(&mut discard_games);
             data.insert(

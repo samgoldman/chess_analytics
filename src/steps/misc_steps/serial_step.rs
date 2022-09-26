@@ -42,7 +42,7 @@ impl Step for SerialStep {
         for child_name in self.children_names.clone() {
             let child = get_step_description(&child_name, data);
             let mut step = child.to_step().expect("ok");
-            step.process(data)?;
+            while !step.process(data)? {}
         }
 
         Ok(true)

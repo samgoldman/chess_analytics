@@ -1,4 +1,5 @@
 #![feature(custom_inner_attributes)]
+#![feature(map_entry_replace)]
 #![clippy::cognitive_complexity = "20"]
 #![deny(clippy::cognitive_complexity)]
 #![feature(no_coverage)]

@@ -85,6 +85,6 @@ impl Step for InitBinStep {
 
         data.insert(self.output_flag.clone(), SharedData::Bool(true));
 
-        Ok(false)
+        Ok(true)
     }
 }

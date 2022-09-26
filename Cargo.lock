@@ -166,7 +166,6 @@ dependencies = [
  "packed_struct",
  "postcard",
  "predicates",
- "rayon",
  "regex",
  "serde",
  "serde_yaml",

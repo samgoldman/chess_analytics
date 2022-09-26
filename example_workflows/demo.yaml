@@ -22,7 +22,6 @@ steps:
     type: Bz2DecompressStep
     params:
       max_queue_size: 10
-      full_queue_delay_ms: 332
   parse_games:
     type: ParseBinGame
   filter_mate:

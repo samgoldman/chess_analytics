@@ -138,6 +138,6 @@ impl Step for ExportGames {
             }
         }
 
-        Ok(false)
+        Ok(true)
     }
 }

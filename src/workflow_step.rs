@@ -2,6 +2,7 @@ use crate::game::Game;
 use crate::steps::get_step_by_name_and_params;
 use itertools::Itertools;
 use mockall::automock;
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::fmt;
 use std::path::PathBuf;
@@ -14,19 +15,17 @@ pub trait StepData: Send {
     fn contains_key(&self, k: &str) -> bool;
     fn remove(&mut self, k: &str) -> Option<SharedData>;
 
-    fn get_vec(&self, k: &str) -> Option<Vec<SharedData>>;
-    fn init_vec_if_unset(&mut self, k: &str) {
-        if !self.contains_key(k) {
-            self.insert(k.to_string(), SharedData::Vec(vec![]));
-        }
-    }
+    fn remove_vec(&mut self, k: &str) -> Option<Vec<SharedData>>;
+    fn init_vec_if_unset(&mut self, k: &str);
+    fn clear_vec(&mut self, k: &str) -> Option<Vec<SharedData>>;
+    fn try_push_to_vec(&mut self, k: &str, v: SharedData) -> Result<(), &'static str>;
 }
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl StepData for HashMap<String, SharedData> {
-    fn get_vec(&self, k: &str) -> Option<Vec<SharedData>> {
-        match self.get(k) {
-            Some(v) => v.clone().to_vec(),
+    fn remove_vec(&mut self, k: &str) -> Option<Vec<SharedData>> {
+        match self.remove(k) {
+            Some(v) => v.into_vec(),
             None => None,
         }
     }
@@ -41,6 +40,35 @@ impl StepData for HashMap<String, SharedData> {
 
     fn remove(&mut self, k: &str) -> Option<SharedData> {
         self.remove(k)
+    }
+
+    fn init_vec_if_unset(&mut self, k: &str) {
+        if !self.contains_key(k) {
+            self.insert(k.to_string(), SharedData::Vec(vec![]));
+        }
+    }
+
+    fn clear_vec(&mut self, k: &str) -> Option<Vec<SharedData>> {
+        match self.entry(k.to_string()) {
+            Entry::Occupied(entry) => {
+                let old = entry.replace_entry(SharedData::Vec(vec![]));
+                old.1.into_vec()
+            }
+            Entry::Vacant(_) => None,
+        }
+    }
+
+    fn try_push_to_vec(&mut self, k: &str, v: SharedData) -> Result<(), &'static str> {
+        match self.entry(k.to_string()) {
+            Entry::Occupied(mut entry) => match entry.get_mut() {
+                SharedData::Vec(vec) => {
+                    vec.push(v);
+                    Ok(())
+                }
+                _ => Err("Not a Vec"),
+            },
+            Entry::Vacant(_) => Err("Key not present"),
+        }
     }
 }
 

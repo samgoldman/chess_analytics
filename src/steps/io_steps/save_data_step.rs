@@ -39,6 +39,6 @@ impl Step for SaveDataStep {
             writeln!(file, "{}: \n{}", field.as_str().unwrap(), value).unwrap();
         }
 
-        Ok(false)
+        Ok(true)
     }
 }
