@@ -21,7 +21,7 @@ jobs:
         with:
           name: check-archive
           path: ./
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
 
   test:
     name: Test Suite
@@ -36,7 +36,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
 
   coverage:
     name: Coverage
@@ -59,7 +59,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           files: lcov.info
           fail_ci_if_error: true
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
           
   fmt:
     name: Rustfmt
@@ -79,7 +79,7 @@ jobs:
         with:
           command: fmt
           args: -- --check
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
 
   clippy_check:
     runs-on: ubuntu-latest
