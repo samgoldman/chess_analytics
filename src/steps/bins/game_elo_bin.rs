@@ -72,7 +72,7 @@ mod test_try_new {
         let result = GameEloBin::try_new(None);
         assert!(result.is_err());
         assert_eq!(
-            result.err().unwrap_or("".to_string()),
+            result.err().unwrap_or(String::new()),
             "GameEloBin: no parameters provided".to_string()
         );
     }
@@ -149,10 +149,10 @@ mod test_game_elo_bin {
         let mut game = Game::default();
 
         let bin = GameEloBin {
-            input_vec_name: "".to_string(),
-            output_vec_name: "".to_string(),
-            input_flag: "".to_string(),
-            output_flag: "".to_string(),
+            input_vec_name: String::new(),
+            output_vec_name: String::new(),
+            input_flag: String::new(),
+            output_flag: String::new(),
             bucket_size: 100,
         };
 
@@ -161,7 +161,7 @@ mod test_game_elo_bin {
         assert_eq!(
             GameEloBin::bin(&game, &bin)
                 .to_string()
-                .unwrap_or(&"".to_string()),
+                .unwrap_or(&String::new()),
             "0200"
         );
     }
@@ -171,10 +171,10 @@ mod test_game_elo_bin {
         let mut game = Game::default();
 
         let bin = GameEloBin {
-            input_vec_name: "".to_string(),
-            output_vec_name: "".to_string(),
-            input_flag: "".to_string(),
-            output_flag: "".to_string(),
+            input_vec_name: String::new(),
+            output_vec_name: String::new(),
+            input_flag: String::new(),
+            output_flag: String::new(),
             bucket_size: 600,
         };
 
@@ -183,7 +183,7 @@ mod test_game_elo_bin {
         assert_eq!(
             GameEloBin::bin(&game, &bin)
                 .to_string()
-                .unwrap_or(&"".to_string()),
+                .unwrap_or(&String::new()),
             "2400"
         );
     }
