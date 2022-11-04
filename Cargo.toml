@@ -31,6 +31,7 @@ packed_struct = "0.10.0"
 crossterm = "0.25.0"
 # mutagen = { path = "../mutagen/mutagen", optional = true }
 mutagen = { git = "https://github.com/llogiq/mutagen", optional = true }
+sysinfo = "0.26.4"
 
 [dev-dependencies]
 predicates = "2.1.1"

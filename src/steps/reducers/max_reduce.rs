@@ -45,12 +45,12 @@ impl MaxReduce {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for MaxReduce {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         {
-            data.insert(&self.output_map_name, SharedData::Map(HashMap::new()));
+            data.insert(
+                self.output_map_name.clone(),
+                SharedData::Map(HashMap::new()),
+            );
         }
 
         let mut quit = false;
@@ -68,7 +68,7 @@ impl Step for MaxReduce {
                 };
                 let vec_to_filter = shared_data.to_vec().unwrap();
 
-                data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 vec_to_filter
             };
@@ -114,12 +114,12 @@ impl Step for MaxReduce {
                     *original = original.max(new);
                 }
 
-                data.insert(&self.output_map_name, SharedData::Map(map));
+                data.insert(self.output_map_name.clone(), SharedData::Map(map));
             }
 
             let flag = data
                 .get(&self.input_flag)
-                .unwrap_or(SharedData::Bool(false));
+                .unwrap_or(&SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 
@@ -134,9 +134,9 @@ impl Step for MaxReduce {
 
         {
             let d: bool = true;
-            data.insert(&self.output_flag, SharedData::Bool(d));
+            data.insert(self.output_flag.clone(), SharedData::Bool(d));
         }
 
-        Ok(())
+        Ok(true)
     }
 }

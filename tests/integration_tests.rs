@@ -163,7 +163,8 @@ fn noop_workflow() -> Result<(), Box<dyn std::error::Error>> {
 
     assert!(fs::read_to_string("tests/output/int_8/tmp.txt").is_err());
 
-    let _ = std::fs::remove_file("tests/output/int_7/tmp.txt");
+    let _ = std::fs::remove_file("tests/output/int_8/tmp.txt");
+    let _ = std::fs::remove_dir("tests/output/int_8");
 
     Ok(())
 }

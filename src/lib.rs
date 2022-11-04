@@ -1,4 +1,5 @@
 #![feature(custom_inner_attributes)]
+#![feature(map_entry_replace)]
 #![clippy::cognitive_complexity = "20"]
 #![deny(clippy::cognitive_complexity)]
 #![feature(no_coverage)]
@@ -24,7 +25,7 @@ mod steps_manager;
 mod workflow_step;
 
 use steps_manager::{add_step_description, get_step_description};
-use workflow_step::{StepDescription, StepGenericCoreImpl};
+use workflow_step::StepDescription;
 
 // TODO: global: Ok/Err
 // TODO: global: currently count 20 calls to 'panic!()'
@@ -80,9 +81,7 @@ where
         None => return Err("Steps is not a map".to_string()),
     };
 
-    let mut data = StepGenericCoreImpl {
-        map: HashMap::new(),
-    };
+    let mut data = HashMap::new();
 
     add_step_description(
         "noop".to_string(),

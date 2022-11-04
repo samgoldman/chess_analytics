@@ -45,12 +45,12 @@ impl SumReduce {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SumReduce {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         {
-            data.insert(&self.output_map_name, SharedData::Map(HashMap::new()));
+            data.insert(
+                self.output_map_name.clone(),
+                SharedData::Map(HashMap::new()),
+            );
         }
 
         let mut quit = false;
@@ -68,7 +68,7 @@ impl Step for SumReduce {
                 };
                 let vec_to_filter = shared_data.to_vec().unwrap();
 
-                data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 vec_to_filter
             };
@@ -92,10 +92,10 @@ impl Step for SumReduce {
                     bin_labels.iter().map(|b| format!("{}", b)).collect();
                 let combined_label = bin_str_labels.join(".");
 
-                if !new_data.contains_key(&combined_label) {
-                    new_data.insert(combined_label.clone(), value);
-                } else {
+                if new_data.contains_key(&combined_label) {
                     *(new_data.get_mut(&combined_label).unwrap()) += value;
+                } else {
+                    new_data.insert(combined_label.clone(), value);
                 }
             }
 
@@ -115,12 +115,12 @@ impl Step for SumReduce {
                     let new_count = new_data.get(key).unwrap() + original_count;
                     map.insert(key.to_string(), SharedData::U64(new_count));
                 }
-                data.insert(&self.output_map_name, SharedData::Map(map));
+                data.insert(self.output_map_name.clone(), SharedData::Map(map));
             }
 
             let flag = data
                 .get(&self.input_flag)
-                .unwrap_or(SharedData::Bool(false));
+                .unwrap_or(&SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 
@@ -135,9 +135,9 @@ impl Step for SumReduce {
 
         {
             let d: bool = true;
-            data.insert(&self.output_flag, SharedData::Bool(d));
+            data.insert(self.output_flag.clone(), SharedData::Bool(d));
         }
 
-        Ok(())
+        Ok(true)
     }
 }

@@ -1,6 +1,6 @@
 use crate::workflow_step::{SharedData, Step};
 use serde_yaml::Value;
-use std::{fs, io::Write};
+use std::{collections::HashMap, fs, io::Write};
 
 #[derive(Debug)]
 pub struct SaveDataStep {
@@ -29,19 +29,16 @@ impl SaveDataStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SaveDataStep {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         // TODO: better error handling
         let mut file = fs::File::create(self.file.clone()).unwrap();
 
         for field in &self.fields {
             let default = SharedData::String("<Field Not Present>".to_string());
-            let value = data.get(field.as_str().unwrap()).unwrap_or(default);
+            let value = data.get(field.as_str().unwrap()).unwrap_or(&default);
             writeln!(file, "{}: \n{}", field.as_str().unwrap(), value).unwrap();
         }
 
-        Ok(())
+        Ok(true)
     }
 }

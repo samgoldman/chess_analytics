@@ -1,4 +1,7 @@
-use std::io::{stdout, Stdout};
+use std::{
+    collections::HashMap,
+    io::{stdout, Stdout},
+};
 use termion::raw::{IntoRawMode, RawTerminal};
 use tui::{backend::CrosstermBackend, Terminal};
 
@@ -97,10 +100,7 @@ impl UiMonitorStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for UiMonitorStep {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         self.start_time = std::time::Instant::now();
         self.terminal.clear().unwrap();
         loop {
@@ -111,7 +111,7 @@ impl Step for UiMonitorStep {
                     .raw_fields
                     .iter()
                     .map(|(title, field)| {
-                        let data = data.get(field).unwrap_or(SharedData::Bool(false));
+                        let data = data.get(field).unwrap_or(&SharedData::Bool(false));
                         format!("{}: {}", title, data)
                     })
                     .collect::<Vec<String>>();
@@ -122,7 +122,7 @@ impl Step for UiMonitorStep {
                     .map(|(title, field)| {
                         let data = data
                             .get(field)
-                            .unwrap_or(SharedData::Vec(vec![]))
+                            .unwrap_or(&SharedData::Vec(vec![]))
                             .to_vec()
                             .unwrap_or_default()
                             .len();
@@ -191,7 +191,7 @@ impl Step for UiMonitorStep {
             std::thread::sleep(std::time::Duration::from_millis(332));
         }
 
-        Ok(())
+        Ok(true)
     }
 }
 

@@ -39,9 +39,9 @@ impl PackedStruct for Cell {
         let file_raw = src[0] & 0x0F;
         let rank_raw = src[0] >> 4;
 
-        let file = File::from_uint(file_raw as u32);
+        let file = File::from_uint(u32::from(file_raw));
 
-        let rank = Rank::from_uint(rank_raw as u32);
+        let rank = Rank::from_uint(u32::from(rank_raw));
 
         Ok(Self { file, rank })
     }

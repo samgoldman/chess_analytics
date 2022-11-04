@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::steps_manager::get_step_description;
 use crate::workflow_step::{SharedData, Step};
 
@@ -37,16 +39,13 @@ impl ParallelStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParallelStep {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         // TODO make own step
         {
             let d: bool = false;
-            data.insert("done_reading_files", SharedData::Bool(d));
+            data.insert("done_reading_files".to_string(), SharedData::Bool(d));
             let f: bool = false;
-            data.insert("done_parsing_games", SharedData::Bool(f));
+            data.insert("done_parsing_games".to_string(), SharedData::Bool(f));
         }
 
         let mut children = vec![];
@@ -56,11 +55,22 @@ impl Step for ParallelStep {
             children.push(step);
         }
 
+        let mut any_not_done = true;
+        while any_not_done {
+            any_not_done = false;
+            children.iter_mut().for_each(|step| {
+                let res = (step.as_mut()).process(data).unwrap();
+                if !res {
+                    any_not_done = true;
+                }
+            });
+        }
+
         let mut post = get_step_description(&self.post_name, data)
             .to_step()
             .unwrap_or_else(|_| Box::new(NoopStep {}));
         post.process(data)?;
 
-        Ok(())
+        Ok(true)
     }
 }

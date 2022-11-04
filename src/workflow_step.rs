@@ -2,6 +2,7 @@ use crate::game::Game;
 use crate::steps::get_step_by_name_and_params;
 use itertools::Itertools;
 use mockall::automock;
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::fmt;
 use std::path::PathBuf;
@@ -9,38 +10,65 @@ use std::path::PathBuf;
 pub type BoxedStep = Box<dyn Step>;
 
 #[automock]
-pub trait StepGenericCore: Send {
-    fn insert(&mut self, k: &str, v: SharedData) -> Option<SharedData>;
+pub trait StepData: Send {
+    fn insert(&mut self, k: String, v: SharedData) -> Option<SharedData>;
     fn contains_key(&self, k: &str) -> bool;
-    fn get(&self, k: &str) -> Option<SharedData>;
     fn remove(&mut self, k: &str) -> Option<SharedData>;
-    fn get_underlying_data(&self) -> &HashMap<String, SharedData>;
-}
 
-pub struct StepGenericCoreImpl {
-    pub map: HashMap<String, SharedData>,
+    fn remove_vec(&mut self, k: &str) -> Option<Vec<SharedData>>;
+    fn init_vec_if_unset(&mut self, k: &str);
+    fn clear_vec(&mut self, k: &str) -> Option<Vec<SharedData>>;
+    fn try_push_to_vec(&mut self, k: &str, v: SharedData) -> Result<(), &'static str>;
 }
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
-impl StepGenericCore for StepGenericCoreImpl {
+impl StepData for HashMap<String, SharedData> {
+    fn remove_vec(&mut self, k: &str) -> Option<Vec<SharedData>> {
+        match self.remove(k) {
+            Some(v) => v.into_vec(),
+            None => None,
+        }
+    }
+
+    fn insert(&mut self, k: String, v: SharedData) -> Option<SharedData> {
+        self.insert(k, v)
+    }
+
     fn contains_key(&self, k: &str) -> bool {
-        self.map.contains_key(k)
-    }
-
-    fn get(&self, k: &str) -> Option<SharedData> {
-        self.map.get(k).map(|v| (*v).clone())
-    }
-
-    fn insert(&mut self, k: &str, v: SharedData) -> Option<SharedData> {
-        self.map.insert(k.to_string(), v)
+        self.contains_key(k)
     }
 
     fn remove(&mut self, k: &str) -> Option<SharedData> {
-        self.map.remove(k)
+        self.remove(k)
     }
 
-    fn get_underlying_data(&self) -> &HashMap<String, SharedData> {
-        &self.map
+    fn init_vec_if_unset(&mut self, k: &str) {
+        if !self.contains_key(k) {
+            self.insert(k.to_string(), SharedData::Vec(vec![]));
+        }
+    }
+
+    fn clear_vec(&mut self, k: &str) -> Option<Vec<SharedData>> {
+        match self.entry(k.to_string()) {
+            Entry::Occupied(entry) => {
+                let old = entry.replace_entry(SharedData::Vec(vec![]));
+                old.1.into_vec()
+            }
+            Entry::Vacant(_) => None,
+        }
+    }
+
+    fn try_push_to_vec(&mut self, k: &str, v: SharedData) -> Result<(), &'static str> {
+        match self.entry(k.to_string()) {
+            Entry::Occupied(mut entry) => match entry.get_mut() {
+                SharedData::Vec(vec) => {
+                    vec.push(v);
+                    Ok(())
+                }
+                _ => Err("Not a Vec"),
+            },
+            Entry::Vacant(_) => Err("Key not present"),
+        }
     }
 }
 
@@ -79,6 +107,13 @@ impl SharedData {
     pub fn to_vec(&self) -> Option<Vec<SharedData>> {
         match self {
             SharedData::Vec(v) => Some(v.clone()),
+            _ => None,
+        }
+    }
+
+    pub fn into_vec(self) -> Option<Vec<SharedData>> {
+        match self {
+            SharedData::Vec(v) => Some(v),
             _ => None,
         }
     }
@@ -170,8 +205,8 @@ impl StepDescription {
 }
 
 #[automock]
-pub trait Step: fmt::Debug + Send + Sync {
-    fn process(&mut self, data: &mut dyn StepGenericCore) -> Result<(), String>;
+pub trait Step: fmt::Debug {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String>;
 }
 
 #[cfg(test)]

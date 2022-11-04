@@ -21,11 +21,11 @@ impl OptionalPiece {
         }
     }
 
-    pub fn is_some(&self) -> bool {
+    pub fn is_some(self) -> bool {
         self.optional_piece.is_some()
     }
 
-    pub fn unwrap(&self) -> Piece {
+    pub fn unwrap(self) -> Piece {
         self.optional_piece.unwrap()
     }
 }

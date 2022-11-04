@@ -8,13 +8,15 @@ mod reducers;
 
 use crate::workflow_step::BoxedStep;
 
-use bins::*;
-use filters::*;
-use io_steps::*;
-use maps::*;
-use misc_steps::*;
-use parsers::*;
-use reducers::*;
+use bins::{GameEloBin, InitBinStep, TimeControlBin};
+use filters::{
+    CheckmateFilter, ClockAvailableFilter, EvalAvailableFilter, MinMovesFilter, PlayerEloFilter,
+};
+use io_steps::{Bz2DecompressStep, ExportGames, GlobFileStep, SaveDataStep};
+use maps::{CountMap, PerfectCheckmateMap};
+use misc_steps::{InitBoardsStep, NoopStep, ParallelStep, SerialStep, UiMonitorStep};
+use parsers::{ParseBinGame, ParsePgnStep};
+use reducers::{AvgReduce, MaxReduce, SumReduce};
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 pub fn get_step_by_name_and_params(

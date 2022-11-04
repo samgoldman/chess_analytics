@@ -2,10 +2,10 @@ steps:
   init:
     type: "GlobFileStep"
     params: 
-      glob: /data/data_scratch/lichess_data/converted_v5/2022-01/2022-01_00000*.bin*
-      child: serial_step
-  serial_step:
-    type: SerialStep
+      glob: /data/data_scratch/lichess_data/converted_v5/2022-01/2022-01_0000*.bin*
+      child: parallel_step
+  parallel_step:
+    type: ParallelStep
     params:
       children:
         - "load_files"
@@ -17,12 +17,11 @@ steps:
         - "bin_time_control"
         - "map_count"
         - "reduce_sum"
-        - "save_results"
+      post: "save_results"
   load_files:
     type: Bz2DecompressStep
     params:
       max_queue_size: 10
-      full_queue_delay_ms: 332
   parse_games:
     type: ParseBinGame
   filter_mate:

@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 use crate::game::Game;
 use crate::generic_steps::FilterFn;
 #[mockall_double::double]
 use crate::generic_steps::GenericFilter;
-use crate::workflow_step::Step;
+use crate::workflow_step::{SharedData, Step};
 
 #[derive(Debug)]
 pub struct ClockAvailableFilter {
@@ -18,16 +20,13 @@ impl ClockAvailableFilter {
     }
 
     pub fn create_filter() -> &'static FilterFn {
-        &(|game: &Game| game.clock_available())
+        &Game::clock_available
     }
 }
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ClockAvailableFilter {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         self.generic_filter.process(data, Self::create_filter())
     }
 }
@@ -35,12 +34,13 @@ impl Step for ClockAvailableFilter {
 #[cfg(test)]
 mod test_process {
 
+    use std::collections::HashMap;
+
     use mockall::predicate::always;
 
     use super::*;
 
     use crate::generic_steps::MockGenericFilter;
-    use crate::workflow_step::MockStepGenericCore;
 
     #[test]
     fn test_process() {
@@ -50,15 +50,15 @@ mod test_process {
             .expect_process()
             .with(always(), always())
             .times(1)
-            .return_const(Ok(()));
+            .return_const(Ok(false));
 
-        let mut mock_data = MockStepGenericCore::new();
+        let mut mock_data = HashMap::new();
         let mut filter = ClockAvailableFilter {
             generic_filter: mock_generic_filter,
         };
 
         let res = filter.process(&mut mock_data);
-        assert_eq!(res, Ok(()));
+        assert_eq!(res, Ok(false));
     }
 }
 

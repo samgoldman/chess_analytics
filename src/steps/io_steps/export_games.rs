@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write};
+use std::{collections::HashMap, fs::File, io::Write};
 
 use crate::{
     game::Game,
@@ -57,7 +57,7 @@ impl ExportGames {
         }))
     }
 
-    fn save_games(&self, games: Vec<Game>, count: i32) {
+    fn save_games(&self, games: &[Game], count: i32) {
         let encoded_games = postcard::to_allocvec(&games).unwrap();
 
         let path = if count >= 0 {
@@ -83,10 +83,7 @@ impl ExportGames {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ExportGames {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         let mut quit = false;
         let mut final_loop = false;
         let mut games = vec![];
@@ -104,7 +101,7 @@ impl Step for ExportGames {
                 };
                 let vec_to_filter = shared_data.to_vec().unwrap();
 
-                data.insert(&self.input_vec_name, SharedData::Vec(vec![]));
+                data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
 
                 for possible_game in vec_to_filter {
                     if let SharedData::Game(game) = possible_game {
@@ -116,14 +113,14 @@ impl Step for ExportGames {
             while games.len() >= self.games_per_file {
                 let to_save: Vec<Game> = games.drain(0..self.games_per_file).collect();
 
-                self.save_games(to_save, count);
+                self.save_games(&to_save, count);
 
                 count += 1;
             }
 
             let flag = data
                 .get(&self.input_flag)
-                .unwrap_or(SharedData::Bool(false));
+                .unwrap_or(&SharedData::Bool(false));
 
             let flag = flag.to_bool().unwrap();
 
@@ -136,11 +133,11 @@ impl Step for ExportGames {
                     count = -1;
                 }
 
-                self.save_games(games, count);
+                self.save_games(&games, count);
                 break;
             }
         }
 
-        Ok(())
+        Ok(true)
     }
 }

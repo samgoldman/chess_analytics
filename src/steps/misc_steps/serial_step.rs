@@ -1,5 +1,7 @@
+use std::collections::HashMap;
+
 use crate::steps_manager::get_step_description;
-use crate::workflow_step::{SharedData, Step, StepGenericCore};
+use crate::workflow_step::{SharedData, Step};
 
 #[derive(Debug)]
 pub struct SerialStep {
@@ -28,21 +30,21 @@ impl SerialStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SerialStep {
-    fn process<'a>(&mut self, data: &mut dyn StepGenericCore) -> Result<(), String> {
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         // TODO make own step
         {
             let d: bool = false;
-            data.insert("done_reading_files", SharedData::Bool(d));
+            data.insert("done_reading_files".to_string(), SharedData::Bool(d));
             let f: bool = false;
-            data.insert("done_parsing_games", SharedData::Bool(f));
+            data.insert("done_parsing_games".to_string(), SharedData::Bool(f));
         }
 
         for child_name in self.children_names.clone() {
             let child = get_step_description(&child_name, data);
             let mut step = child.to_step().expect("ok");
-            step.process(data)?;
+            while !step.process(data)? {}
         }
 
-        Ok(())
+        Ok(true)
     }
 }

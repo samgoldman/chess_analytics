@@ -2,8 +2,8 @@ use regex::Regex;
 
 use crate::{
     basic_types::{
-        Cell, File, GameResult, Move, OptionalPiece, PartialCell, Piece, Rank, Termination,
-        TimeControl, NAG,
+        Annotation, Cell, File, GameResult, Move, OptionalPiece, PartialCell, Piece, Rank,
+        Termination, TimeControl,
     },
     game::Game,
     general_utils::hours_min_sec_to_duration,
@@ -38,7 +38,7 @@ impl PgnParser {
         }
     }
 
-    fn parse_date_field(&self, value: &str, game: &mut Game) -> Result<(), String> {
+    fn parse_date_field(value: &str, game: &mut Game) -> Result<(), String> {
         let date_parts: Vec<&str> = value.split('.').collect();
         let year = if let Ok(year) = date_parts[0].parse::<u16>() {
             year
@@ -65,7 +65,7 @@ impl PgnParser {
         Ok(())
     }
 
-    fn parse_time_control_field(&self, value: &str, game: &mut Game) -> Result<(), String> {
+    fn parse_time_control_field(value: &str, game: &mut Game) {
         if value == "-" {
             game.time_control_main = 0;
             game.time_control_increment = 0;
@@ -76,31 +76,29 @@ impl PgnParser {
             game.time_control_increment = time_control_parts[1].parse::<u8>().unwrap();
             game.time_control = TimeControl::from_base_and_increment(
                 game.time_control_main,
-                game.time_control_increment as u16,
+                u16::from(game.time_control_increment),
             );
         }
-        Ok(())
     }
 
-    fn parse_white_elo(&self, value: &str, game: &mut Game) -> Result<(), String> {
+    fn parse_white_elo(value: &str, game: &mut Game) {
         if value == "?" {
             game.white_rating = 0;
         } else {
             game.white_rating = value.parse::<u16>().unwrap();
         }
-        Ok(())
     }
 
-    fn parse_black_elo(&self, value: &str, game: &mut Game) -> Result<(), String> {
+    fn parse_black_elo(value: &str, game: &mut Game) {
         if value == "?" {
             game.black_rating = 0;
         } else {
             game.black_rating = value.parse::<u16>().unwrap();
         }
-        Ok(())
     }
 
-    fn parse_eco(&self, value: &str, game: &mut Game) -> Result<(), String> {
+    // TODO consider error handling
+    fn parse_eco(value: &str, game: &mut Game) {
         if value == "?" {
             game.eco_category = '\0';
             game.eco_subcategory = 0;
@@ -113,11 +111,9 @@ impl PgnParser {
             game.eco_category = cat_char_vec[0] as char;
             game.eco_subcategory = value[1..].parse::<u8>().unwrap();
         }
-
-        Ok(())
     }
 
-    fn parse_termination(&self, value: &str, game: &mut Game) -> Result<(), String> {
+    fn parse_termination(value: &str, game: &mut Game) -> Result<(), String> {
         game.termination = match value {
             "Normal" => Termination::Normal,
             "Time forfeit" => Termination::TimeForfeit,
@@ -129,7 +125,7 @@ impl PgnParser {
         Ok(())
     }
 
-    fn parse_result(&self, value: &str, game: &mut Game) -> Result<(), String> {
+    fn parse_result(value: &str, game: &mut Game) -> Result<(), String> {
         game.result = match value {
             "1-0" => GameResult::White,
             "0-1" => GameResult::Black,
@@ -150,31 +146,25 @@ impl PgnParser {
         let value = captures.get(2).unwrap().as_str();
 
         match field {
-            "UTCDate" => self.parse_date_field(value, game)?,
-            "TimeControl" => self.parse_time_control_field(value, game)?,
-            "WhiteElo" => self.parse_white_elo(value, game)?,
-            "BlackElo" => self.parse_black_elo(value, game)?,
+            "UTCDate" => Self::parse_date_field(value, game)?,
+            "TimeControl" => Self::parse_time_control_field(value, game),
+            "WhiteElo" => Self::parse_white_elo(value, game),
+            "BlackElo" => Self::parse_black_elo(value, game),
             "Site" => game.site = value.to_string(),
             "White" => game.white = value.to_string(),
             "Black" => game.black = value.to_string(),
             "WhiteRatingDiff" => game.white_diff = value.parse::<i16>().unwrap(),
             "BlackRatingDiff" => game.black_diff = value.parse::<i16>().unwrap(),
-            "ECO" => self.parse_eco(value, game)?,
-            "Termination" => self.parse_termination(value, game)?,
-            "Result" => self.parse_result(value, game)?,
+            "ECO" => Self::parse_eco(value, game),
+            "Termination" => Self::parse_termination(value, game)?,
+            "Result" => Self::parse_result(value, game)?,
             "Variant" => {
                 if value != "Standard" {
                     return Err("Variant must be Standard".to_string());
                 }
             }
-            "Event" => {}
-            "Date" => {}
-            "WhiteTitle" => {}
-            "BlackTitle" => {}
-            "Opening" => {}
-            "UTCTime" => {}
-            "Annotator" => {}
-            "Round" => {}
+            "Event" | "Date" | "WhiteTitle" | "BlackTitle" | "Opening" | "UTCTime"
+            | "Annotator" | "Round" => {}
             f => {
                 return Err(format!("Unrecognized header field: {}", f));
             }
@@ -227,10 +217,10 @@ impl PgnParser {
         let mates = check_str == "#";
 
         let nag = match nag_str {
-            "" => NAG::None,
-            "?" => NAG::Mistake,
-            "??" => NAG::Blunder,
-            "?!" => NAG::Questionable,
+            "" => Annotation::None,
+            "?" => Annotation::Mistake,
+            "??" => Annotation::Blunder,
+            "?!" => Annotation::Questionable,
             s => return Err(format!("Unrecognized NAG: `{}`", s)),
         };
 
@@ -325,12 +315,7 @@ impl PgnParser {
                 in_comment = false;
             }
 
-            if !in_comment {
-                let potential_move = self.parse_potential_move(token, game.moves.len())?;
-                if let Some(m) = potential_move {
-                    game.moves.push(m);
-                }
-            } else {
+            if in_comment {
                 for cap in self.eval_regex.captures_iter(token) {
                     game.eval_available = true;
 
@@ -354,6 +339,11 @@ impl PgnParser {
 
                     game.clock
                         .push(hours_min_sec_to_duration((&hours, &minutes, &seconds)));
+                }
+            } else {
+                let potential_move = self.parse_potential_move(token, game.moves.len())?;
+                if let Some(m) = potential_move {
+                    game.moves.push(m);
                 }
             }
         }
@@ -736,7 +726,7 @@ mod test_move_related {
             captures: false,
             checks: false,
             mates: false,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_some(Piece::Queen),
         };
         let parser = PgnParser::new();
@@ -756,7 +746,7 @@ mod test_move_related {
             captures: true,
             checks: true,
             mates: false,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_some(Piece::Rook),
         };
         let parser = PgnParser::new();
@@ -776,7 +766,7 @@ mod test_move_related {
             captures: true,
             checks: false,
             mates: true,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_some(Piece::Queen),
         };
         let parser = PgnParser::new();

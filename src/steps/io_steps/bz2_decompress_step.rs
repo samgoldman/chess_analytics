@@ -1,15 +1,14 @@
-use crate::workflow_step::{SharedData, Step};
+use crate::workflow_step::{SharedData, Step, StepData};
 
 use bzip2::read::BzDecoder;
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
-use std::sync::Mutex;
 
 #[derive(Debug)]
 pub struct Bz2DecompressStep {
-    max_queue_size: u64,
-    full_queue_delay_ms: u64,
+    max_queue_size: usize,
+    paths: Option<Vec<SharedData>>,
 }
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
@@ -21,32 +20,33 @@ impl Bz2DecompressStep {
         };
 
         // TODO: better error handling
-        let max_queue_size = params.get("max_queue_size").unwrap().as_u64().unwrap();
-        let full_queue_delay_ms = params.get("full_queue_delay_ms").unwrap().as_u64().unwrap();
+        let max_queue_size = params.get("max_queue_size").unwrap().as_u64().unwrap() as usize;
         Ok(Box::new(Bz2DecompressStep {
             max_queue_size,
-            full_queue_delay_ms,
+            paths: None,
         }))
     }
 }
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for Bz2DecompressStep {
-    fn process<'a>(
-        &mut self,
-        data: &mut dyn crate::workflow_step::StepGenericCore,
-    ) -> Result<(), String> {
-        let bufs = { data.remove("file_path_bufs").unwrap() };
+    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+        data.init_vec_if_unset("raw_file_data");
 
-        let paths = bufs.to_vec().unwrap();
+        if self.paths.is_none() {
+            let bufs = { data.remove("file_path_bufs").unwrap() };
 
-        {
-            data.insert("raw_file_data", SharedData::Vec(vec![]));
+            self.paths = Some(bufs.to_vec().unwrap());
         }
 
-        let mutex_data = Mutex::new(data);
+        let paths = self.paths.as_mut().unwrap();
 
-        paths.par_iter().for_each(|path| {
+        if paths.is_empty() {
+            return Ok(true);
+        }
+
+        for _ in 0..(paths.len().min(self.max_queue_size)) {
+            let path = paths.remove(0);
             let path = path.to_path_buf().unwrap();
 
             let mut file = File::open(&path).expect("Could not open file");
@@ -68,38 +68,8 @@ impl Step for Bz2DecompressStep {
                     .expect("Could not read file");
             }
 
-            loop {
-                {
-                    let data = mutex_data.lock().unwrap();
-                    if (data.get("raw_file_data").unwrap().to_vec().unwrap().len() as u64)
-                        < self.max_queue_size
-                    {
-                        break;
-                    }
-                }
-                std::thread::sleep(std::time::Duration::from_millis(self.full_queue_delay_ms));
-            }
-
-            {
-                let mut data = mutex_data.lock().unwrap();
-
-                let raw_file_data = data.get("raw_file_data").unwrap();
-                let mut file_data_vec: Vec<SharedData> = raw_file_data.to_vec().unwrap();
-
-                file_data_vec.push(SharedData::FileData(file_data));
-
-                data.insert("raw_file_data", SharedData::Vec(file_data_vec));
-            }
-        });
-
-        {
-            let d: bool = true;
-            mutex_data
-                .lock()
-                .unwrap()
-                .insert("done_reading_files", SharedData::Bool(d));
+            data.try_push_to_vec("raw_file_data", SharedData::FileData(file_data))?;
         }
-
-        Ok(())
+        Ok(false)
     }
 }
