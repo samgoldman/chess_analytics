@@ -18,6 +18,7 @@ bench = false
 regex = "1.6.0"
 glob = "0.3.0"
 bzip2 = "0.4.3"
+rayon = "1.5.3"
 serde = { version = "1.0.144", features = ["derive"] }
 serde_yaml = "0.9.13"
 itertools = "0.10.4"
@@ -30,6 +31,7 @@ packed_struct = "0.10.0"
 crossterm = "0.25.0"
 # mutagen = { path = "../mutagen/mutagen", optional = true }
 mutagen = { git = "https://github.com/llogiq/mutagen", optional = true }
+sysinfo = "0.26.4"
 
 [dev-dependencies]
 predicates = "2.1.1"

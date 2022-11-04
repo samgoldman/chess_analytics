@@ -1,4 +1,4 @@
-use crate::basic_types::{Cell, OptionalPiece, PartialCell, Piece, NAG};
+use crate::basic_types::{Annotation, Cell, OptionalPiece, PartialCell, Piece};
 use packed_struct::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -23,7 +23,7 @@ pub struct Move {
     #[packed_field(size_bits = "1")]
     pub mates: bool,
     #[packed_field(size_bits = "2", ty = "enum")]
-    pub nag: NAG,
+    pub nag: Annotation,
     #[packed_field(size_bits = "3")]
     pub promoted_to: OptionalPiece,
 }
@@ -88,7 +88,7 @@ impl Move {
             captures: false,
             checks: false,
             mates: false,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_none(),
         }
     }
@@ -105,7 +105,7 @@ impl Move {
             captures: false,
             checks: false,
             mates: false,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_none(),
         }
     }
@@ -127,7 +127,7 @@ mod test_derived_implementations {
             captures: false,
             checks: true,
             mates: false,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_none(),
         };
         assert_eq!(x.clone(), x);
@@ -145,7 +145,7 @@ mod test_derived_implementations {
             captures: false,
             checks: true,
             mates: false,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_none(),
         };
         assert_eq!(format!("{:?}", x), "Move { from: PartialCell { file: Some(_B), rank: Some(_2) }, to: Cell { file: _A, rank: _1 }, piece_moved: Bishop, captures: false, checks: true, mates: false, nag: None, promoted_to: OptionalPiece { optional_piece: None } }");

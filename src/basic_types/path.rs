@@ -33,8 +33,8 @@ impl Path {
             let length = i32::max(rank_diff.abs(), file_diff.abs());
             let mapped = (1..length).map(|i| {
                 cell!(
-                    from_cell.file.shift(file_inc as i32 * i),
-                    from_cell.rank.shift(rank_inc as i32 * i)
+                    from_cell.file.shift(file_inc * i),
+                    from_cell.rank.shift(rank_inc * i)
                 )
             });
             let path_vector = mapped.collect();

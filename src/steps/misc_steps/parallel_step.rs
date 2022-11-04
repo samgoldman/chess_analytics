@@ -55,6 +55,17 @@ impl Step for ParallelStep {
             children.push(step);
         }
 
+        let mut any_not_done = true;
+        while any_not_done {
+            any_not_done = false;
+            children.iter_mut().for_each(|step| {
+                let res = (step.as_mut()).process(data).unwrap();
+                if !res {
+                    any_not_done = true;
+                }
+            });
+        }
+
         let mut post = get_step_description(&self.post_name, data)
             .to_step()
             .unwrap_or_else(|_| Box::new(NoopStep {}));

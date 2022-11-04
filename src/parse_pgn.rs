@@ -2,8 +2,8 @@ use regex::Regex;
 
 use crate::{
     basic_types::{
-        Cell, File, GameResult, Move, OptionalPiece, PartialCell, Piece, Rank, Termination,
-        TimeControl, NAG,
+        Annotation, Cell, File, GameResult, Move, OptionalPiece, PartialCell, Piece, Rank,
+        Termination, TimeControl,
     },
     game::Game,
     general_utils::hours_min_sec_to_duration,
@@ -217,10 +217,10 @@ impl PgnParser {
         let mates = check_str == "#";
 
         let nag = match nag_str {
-            "" => NAG::None,
-            "?" => NAG::Mistake,
-            "??" => NAG::Blunder,
-            "?!" => NAG::Questionable,
+            "" => Annotation::None,
+            "?" => Annotation::Mistake,
+            "??" => Annotation::Blunder,
+            "?!" => Annotation::Questionable,
             s => return Err(format!("Unrecognized NAG: `{}`", s)),
         };
 
@@ -726,7 +726,7 @@ mod test_move_related {
             captures: false,
             checks: false,
             mates: false,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_some(Piece::Queen),
         };
         let parser = PgnParser::new();
@@ -746,7 +746,7 @@ mod test_move_related {
             captures: true,
             checks: true,
             mates: false,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_some(Piece::Rook),
         };
         let parser = PgnParser::new();
@@ -766,7 +766,7 @@ mod test_move_related {
             captures: true,
             checks: false,
             mates: true,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_some(Piece::Queen),
         };
         let parser = PgnParser::new();

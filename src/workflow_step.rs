@@ -205,7 +205,7 @@ impl StepDescription {
 }
 
 #[automock]
-pub trait Step: fmt::Debug + Send + Sync {
+pub trait Step: fmt::Debug {
     fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String>;
 }
 

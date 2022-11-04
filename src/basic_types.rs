@@ -1,9 +1,9 @@
 #[macro_use]
 mod cell;
+mod annotation;
 mod chess_move;
 mod file;
 mod game_result;
-mod nag;
 mod optional_piece;
 #[macro_use]
 pub mod partial_cell;
@@ -16,11 +16,11 @@ mod rank;
 mod termination;
 mod time_control;
 
+pub use annotation::Annotation;
 pub use cell::Cell;
 pub use chess_move::Move;
 pub use file::File;
 pub use game_result::GameResult;
-pub use nag::NAG;
 pub use optional_piece::OptionalPiece;
 pub use partial_cell::PartialCell;
 pub use path::Path;

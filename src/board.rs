@@ -1124,8 +1124,8 @@ mod test_find_origin {
 #[cfg(test)]
 mod test_move_piece {
     use super::*;
+    use crate::basic_types::Annotation;
     use crate::basic_types::OptionalPiece;
-    use crate::basic_types::NAG;
 
     macro_rules! tests {
         ($($name:ident: $value:expr,)*) => {
@@ -1149,7 +1149,7 @@ mod test_move_piece {
             from: partial_cell!(None, None),
             checks: false,
             mates: false,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_none(),
         }, "rnbqr1k1/pp3pbp/5np1/3p4/3NP3/2N2P2/PP2B1PP/R1BQ1R1K w"),
 
@@ -1160,7 +1160,7 @@ mod test_move_piece {
             from: partial_cell!(None, None),
             checks: false,
             mates: false,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_some(Piece::Queen),
         }, "3Q4/2K2p2/6p1/5pk1/3r4/2R5/6P1/8 b"),
 
@@ -1171,7 +1171,7 @@ mod test_move_piece {
             from: partial_cell!(Some(File::_D), Some(Rank::_3)),
             checks: true,
             mates: true,
-            nag: NAG::None,
+            nag: Annotation::None,
             promoted_to: OptionalPiece::new_some(Piece::Queen),
         }, "r2Q1bkr/p5pp/5p2/1p1Q4/8/2p2Q2/P1P1PPPP/RNB1KBNR b"),
     }
