@@ -1,4 +1,4 @@
-use crate::workflow_step::{SharedData, Step, StepData};
+use crate::workflow_step::{ProcessStatus, SharedData, Step, StepData};
 
 use bzip2::read::BzDecoder;
 use std::collections::HashMap;
@@ -30,7 +30,7 @@ impl Bz2DecompressStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for Bz2DecompressStep {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         data.init_vec_if_unset("raw_file_data");
 
         if self.paths.is_none() {
@@ -42,7 +42,7 @@ impl Step for Bz2DecompressStep {
         let paths = self.paths.as_mut().unwrap();
 
         if paths.is_empty() {
-            return Ok(true);
+            return Ok(ProcessStatus::Complete);
         }
 
         for _ in 0..((paths.len() as u64).min(self.max_queue_size)) {
@@ -70,6 +70,6 @@ impl Step for Bz2DecompressStep {
 
             data.try_push_to_vec("raw_file_data", SharedData::FileData(file_data))?;
         }
-        Ok(false)
+        Ok(ProcessStatus::Incomplete)
     }
 }

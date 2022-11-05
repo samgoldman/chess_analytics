@@ -211,9 +211,15 @@ impl StepDescription {
     }
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum ProcessStatus {
+    Incomplete,
+    Complete,
+}
+
 #[automock]
 pub trait Step: fmt::Debug {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String>;
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String>;
 }
 
 #[cfg(test)]

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{
     game::Game,
     step_param_utils::{get_parameter_with_default, get_required_parameter},
-    workflow_step::{SharedData, StepData},
+    workflow_step::{ProcessStatus, SharedData, StepData},
 };
 #[cfg(test)]
 use mockall::automock;
@@ -41,14 +41,14 @@ impl GenericFilter {
         &self,
         data: &mut HashMap<String, SharedData>,
         logic: &FilterFn,
-    ) -> Result<bool, String> {
+    ) -> Result<ProcessStatus, String> {
         data.init_vec_if_unset(&self.output_vec_name);
         data.init_vec_if_unset(&self.discard_vec_name);
 
         let games = data.clear_vec(&self.input_vec_name).unwrap();
 
         if games.is_empty() {
-            return Ok(true);
+            return Ok(ProcessStatus::Complete);
         }
 
         for shared_game in games {
@@ -64,7 +64,7 @@ impl GenericFilter {
             }
         }
 
-        Ok(false)
+        Ok(ProcessStatus::Incomplete)
     }
 }
 
@@ -108,7 +108,7 @@ mod test_process {
 
         let generic_filter = GenericFilter::default();
         let res = generic_filter.process(&mut actual_data, &|_| false);
-        assert_eq!(res, Ok(false)); // Not done since we processed a game
+        assert_eq!(res, Ok(ProcessStatus::Incomplete)); // Not done since we processed a game
         assert_eq!(actual_data, expected_data);
     }
 
@@ -132,7 +132,7 @@ mod test_process {
 
         let generic_filter = GenericFilter::default();
         let res = generic_filter.process(&mut actual_data, &|_| true);
-        assert_eq!(res, Ok(false)); // Not done since we processed a game
+        assert_eq!(res, Ok(ProcessStatus::Incomplete)); // Not done since we processed a game
         assert_eq!(actual_data, expected_data);
     }
 
@@ -150,7 +150,7 @@ mod test_process {
 
         let generic_filter = GenericFilter::default();
         let res = generic_filter.process(&mut actual_data, &|_| true);
-        assert_eq!(res, Ok(true));
+        assert_eq!(res, Ok(ProcessStatus::Complete));
         assert_eq!(actual_data, expected_data);
     }
 
@@ -178,7 +178,7 @@ mod test_process {
 
         let generic_filter = GenericFilter::default();
         let res = generic_filter.process(&mut actual_data, &|_| true);
-        assert_eq!(res, Ok(false)); // Not done since we processed a game
+        assert_eq!(res, Ok(ProcessStatus::Incomplete)); // Not done since we processed a game
         assert_eq!(actual_data, expected_data);
     }
 }

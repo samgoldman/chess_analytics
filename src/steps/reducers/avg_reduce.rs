@@ -1,4 +1,4 @@
-use crate::workflow_step::{SharedData, Step, StepData};
+use crate::workflow_step::{ProcessStatus, SharedData, Step, StepData};
 
 use std::collections::HashMap;
 
@@ -46,7 +46,7 @@ impl AvgReduce {
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for AvgReduce {
     #[allow(clippy::cast_precision_loss)]
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         data.init_map_if_unset(&self.output_map_name);
 
         let mut quit = false;
@@ -158,6 +158,6 @@ impl Step for AvgReduce {
             data.insert(self.output_map_name.clone(), SharedData::Map(map));
         }
 
-        Ok(true)
+        Ok(ProcessStatus::Complete)
     }
 }

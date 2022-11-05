@@ -1,4 +1,4 @@
-use crate::workflow_step::{SharedData, Step};
+use crate::workflow_step::{ProcessStatus, SharedData, Step};
 use serde_yaml::Value;
 use std::{collections::HashMap, fs, io::Write};
 
@@ -29,7 +29,7 @@ impl SaveDataStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SaveDataStep {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         // TODO: better error handling
         let mut file = fs::File::create(self.file.clone()).unwrap();
 
@@ -39,6 +39,6 @@ impl Step for SaveDataStep {
             writeln!(file, "{}: \n{value}", field.as_str().unwrap()).unwrap();
         }
 
-        Ok(true)
+        Ok(ProcessStatus::Complete)
     }
 }

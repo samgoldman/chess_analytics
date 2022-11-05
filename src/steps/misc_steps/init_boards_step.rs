@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     step_param_utils::get_required_parameter,
-    workflow_step::{SharedData, Step},
+    workflow_step::{ProcessStatus, SharedData, Step},
 };
 
 #[derive(Debug)]
@@ -35,14 +35,14 @@ impl InitBoardsStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for InitBoardsStep {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
 
         let games = {
             let potential_data = data.get(&self.input_vec_name);
             let shared_data = match potential_data {
                 Some(shared_data) => shared_data,
-                None => return Ok(true),
+                None => return Ok(ProcessStatus::Complete),
             };
             let vec_to_filter = shared_data.to_vec().unwrap();
 
@@ -54,7 +54,7 @@ impl Step for InitBoardsStep {
         if games.is_empty() {
             let d: bool = true;
             data.insert(self.output_flag.clone(), SharedData::Bool(d));
-            return Ok(true);
+            return Ok(ProcessStatus::Complete);
         }
 
         let mut output_games: Vec<SharedData> = vec![];
@@ -79,7 +79,7 @@ impl Step for InitBoardsStep {
         vec_to_append.append(&mut output_games);
         data.insert(self.output_vec_name.clone(), SharedData::Vec(vec_to_append));
 
-        Ok(false)
+        Ok(ProcessStatus::Incomplete)
     }
 }
 

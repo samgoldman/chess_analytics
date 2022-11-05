@@ -1,4 +1,4 @@
-use crate::workflow_step::{SharedData, Step};
+use crate::workflow_step::{ProcessStatus, SharedData, Step};
 
 use std::collections::{hash_map::Entry, HashMap};
 
@@ -45,7 +45,7 @@ impl MaxReduce {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for MaxReduce {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         {
             data.insert(
                 self.output_map_name.clone(),
@@ -137,6 +137,6 @@ impl Step for MaxReduce {
             data.insert(self.output_flag.clone(), SharedData::Bool(d));
         }
 
-        Ok(true)
+        Ok(ProcessStatus::Complete)
     }
 }

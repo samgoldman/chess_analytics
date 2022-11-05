@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::workflow_step::{SharedData, Step};
+use crate::workflow_step::{ProcessStatus, SharedData, Step};
 
 #[derive(Debug)]
 pub struct InitBinStep {
@@ -37,18 +37,18 @@ impl InitBinStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for InitBinStep {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
 
         let games = {
             if !data.contains_key(&self.input_vec_name) {
-                return Ok(true);
+                return Ok(ProcessStatus::Complete);
             }
 
             let potential_data = data.get(&self.input_vec_name);
             let shared_data = match potential_data {
                 Some(shared_data) => shared_data,
-                None => return Ok(true),
+                None => return Ok(ProcessStatus::Complete),
             };
             let vec_to_filter = shared_data.to_vec().unwrap();
 
@@ -75,7 +75,7 @@ impl Step for InitBinStep {
             let potential_data = data.get(&self.output_vec_name);
             let shared_data = match potential_data {
                 Some(shared_data) => shared_data,
-                None => return Ok(true),
+                None => return Ok(ProcessStatus::Complete),
             };
             let mut vec_to_append = shared_data.to_vec().unwrap();
 
@@ -85,6 +85,6 @@ impl Step for InitBinStep {
 
         data.insert(self.output_flag.clone(), SharedData::Bool(true));
 
-        Ok(true)
+        Ok(ProcessStatus::Complete)
     }
 }
