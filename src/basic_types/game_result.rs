@@ -15,7 +15,7 @@ impl fmt::Display for GameResult {
         if self == &GameResult::Star {
             write!(f, "?")
         } else {
-            write!(f, "{:?}", self)
+            write!(f, "{self:?}")
         }
     }
 }

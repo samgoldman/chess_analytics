@@ -260,7 +260,7 @@ impl Board {
             panic!("No possible origins found");
         } else if filtered_origins.len() > 1 {
             // TODO convert to Ok/Err
-            panic!("Too many possible origins found: {:?}", filtered_origins);
+            panic!("Too many possible origins found: {filtered_origins:?}");
         } else {
             *filtered_origins[0]
         }

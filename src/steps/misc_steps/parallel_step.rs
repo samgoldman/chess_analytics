@@ -49,8 +49,8 @@ impl Step for ParallelStep {
         }
 
         let mut children = vec![];
-        for child_name in self.children_names.clone() {
-            let child = get_step_description(&child_name, data);
+        for child_name in &self.children_names {
+            let child = get_step_description(child_name, data);
             let step = child.to_step().expect("ok");
             children.push(step);
         }
@@ -58,12 +58,12 @@ impl Step for ParallelStep {
         let mut any_not_done = true;
         while any_not_done {
             any_not_done = false;
-            children.iter_mut().for_each(|step| {
+            for step in &mut children {
                 let res = (step.as_mut()).process(data).unwrap();
                 if !res {
                     any_not_done = true;
                 }
-            });
+            }
         }
 
         let mut post = get_step_description(&self.post_name, data)

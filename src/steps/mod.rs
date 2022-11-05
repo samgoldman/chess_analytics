@@ -48,6 +48,6 @@ pub fn get_step_by_name_and_params(
         "ExportGames" => ExportGames::try_new(params),
         "ParsePgnStep" => ParsePgnStep::try_new(params),
         "InitBoardsStep" => InitBoardsStep::try_new(params),
-        _ => Err(format!("Step with name '{}' not found", name)),
+        _ => Err(format!("Step with name '{name}' not found")),
     }
 }

@@ -3,9 +3,9 @@ steps:
     type: "GlobFileStep"
     params: 
       glob: /data/data_scratch/lichess_data/converted_v5/2022-01/2022-01_0000*.bin*
-      child: parallel_step
-  parallel_step:
-    type: ParallelStep
+      child: serial_step
+  serial_step:
+    type: SerialStep
     params:
       children:
         - "load_files"

@@ -112,7 +112,7 @@ impl Step for UiMonitorStep {
                     .iter()
                     .map(|(title, field)| {
                         let data = data.get(field).unwrap_or(&SharedData::Bool(false));
-                        format!("{}: {}", title, data)
+                        format!("{title}: {data}")
                     })
                     .collect::<Vec<String>>();
 
@@ -126,7 +126,7 @@ impl Step for UiMonitorStep {
                             .to_vec()
                             .unwrap_or_default()
                             .len();
-                        format!("{}: {}", title, data)
+                        format!("{title}: {data}")
                     })
                     .collect::<Vec<String>>();
 
@@ -151,7 +151,7 @@ impl Step for UiMonitorStep {
                     .unwrap();
 
                 for (k, v) in &final_results_map {
-                    raw.push(format!("{:?}: {}\t", k, v));
+                    raw.push(format!("{k:?}: {v}\t"));
                 }
 
                 raw.sort();

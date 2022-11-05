@@ -62,8 +62,8 @@ impl ExportGames {
 
         let path = if count >= 0 {
             format!(
-                "{}/{}_{:06}.bin.bz2",
-                self.output_path, self.file_prefix, count
+                "{}/{}_{count:06}.bin.bz2",
+                self.output_path, self.file_prefix
             )
         } else {
             format!("{}/{}.bin.bz2", self.output_path, self.file_prefix)

@@ -6,7 +6,7 @@ pub fn get_required_parameter(
 ) -> Result<String, String> {
     match params.get(param) {
         Some(v) => Ok(v.as_str().unwrap().to_string()),
-        None => Err(format!("{}: parameter '{}' is required", step_name, param)),
+        None => Err(format!("{step_name}: parameter '{param}' is required")),
     }
 }
 

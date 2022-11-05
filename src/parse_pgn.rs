@@ -120,7 +120,7 @@ impl PgnParser {
             "Abandoned" => Termination::Abandoned,
             "Rules infraction" => Termination::RulesInfraction,
             "Unterminated" => Termination::Unterminated,
-            u => return Err(format!("Unknown termination: {}", u)),
+            u => return Err(format!("Unknown termination: {u}")),
         };
         Ok(())
     }
@@ -131,7 +131,7 @@ impl PgnParser {
             "0-1" => GameResult::Black,
             "1/2-1/2" => GameResult::Draw,
             "*" => GameResult::Star,
-            u => return Err(format!("Unknown result: {}", u)),
+            u => return Err(format!("Unknown result: {u}")),
         };
         Ok(())
     }
@@ -166,7 +166,7 @@ impl PgnParser {
             "Event" | "Date" | "WhiteTitle" | "BlackTitle" | "Opening" | "UTCTime"
             | "Annotator" | "Round" => {}
             f => {
-                return Err(format!("Unrecognized header field: {}", f));
+                return Err(format!("Unrecognized header field: {f}"));
             }
         }
 
@@ -193,8 +193,7 @@ impl PgnParser {
             }
         } else {
             return Err(format!(
-                "Error parsing disambiguation string {}",
-                disambiguation_str
+                "Error parsing disambiguation string {disambiguation_str}"
             ));
         };
 
@@ -206,7 +205,7 @@ impl PgnParser {
                 rank: optional_rank.unwrap(),
             }
         } else {
-            return Err(format!("Error parsing destination string {}", dest_str));
+            return Err(format!("Error parsing destination string {dest_str}"));
         };
 
         let piece_moved = Piece::from_pgn(piece_str);
@@ -221,7 +220,7 @@ impl PgnParser {
             "?" => Annotation::Mistake,
             "??" => Annotation::Blunder,
             "?!" => Annotation::Questionable,
-            s => return Err(format!("Unrecognized NAG: `{}`", s)),
+            s => return Err(format!("Unrecognized annotation: `{s}`")),
         };
 
         let promoted_to = match promotion_piece {

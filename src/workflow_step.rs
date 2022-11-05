@@ -151,17 +151,17 @@ impl SharedData {
         match self {
             SharedData::U64(s) => match rhs {
                 SharedData::U64(r) => SharedData::U64(u64::max(*s, *r)),
-                _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs),
+                _ => panic!("Max: Cannot compare {self:?} to {rhs:?}"),
             },
             SharedData::F64(s) => match rhs {
                 SharedData::F64(r) => SharedData::F64(f64::max(*s, *r)),
-                _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs),
+                _ => panic!("Max: Cannot compare {self:?} to {rhs:?}"),
             },
             SharedData::USize(s) => match rhs {
                 SharedData::USize(r) => SharedData::USize(usize::max(*s, *r)),
-                _ => panic!("Max: Cannot compare {:?} to {:?}", self, rhs),
+                _ => panic!("Max: Cannot compare {self:?} to {rhs:?}"),
             },
-            _ => panic!("Max is not valid for {:?}", self),
+            _ => panic!("Max is not valid for {self:?}"),
         }
     }
 }
@@ -170,20 +170,20 @@ impl SharedData {
 impl std::fmt::Display for SharedData {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            SharedData::U64(val) => write!(f, "{}", val),
-            SharedData::F64(val) => write!(f, "{}", val),
-            SharedData::USize(val) => write!(f, "{}", val),
-            SharedData::PathBuf(val) => write!(f, "{:?}", val),
-            SharedData::FileData(val) => write!(f, "{:?}", val),
-            SharedData::Bool(val) => write!(f, "{}", val),
-            SharedData::Game(val) => write!(f, "{:?}", val),
-            SharedData::BinnedValue(val) => write!(f, "{:?}", val),
-            SharedData::String(val) => write!(f, "{}", val),
-            SharedData::Vec(val) => write!(f, "{:?}", val),
-            SharedData::StepDescription(val) => write!(f, "{:?}", val),
+            SharedData::U64(val) => write!(f, "{val}"),
+            SharedData::F64(val) => write!(f, "{val}"),
+            SharedData::USize(val) => write!(f, "{val}"),
+            SharedData::PathBuf(val) => write!(f, "{val:?}"),
+            SharedData::FileData(val) => write!(f, "{val:?}"),
+            SharedData::Bool(val) => write!(f, "{val}"),
+            SharedData::Game(val) => write!(f, "{val:?}"),
+            SharedData::BinnedValue(val) => write!(f, "{val:?}"),
+            SharedData::String(val) => write!(f, "{val}"),
+            SharedData::Vec(val) => write!(f, "{val:?}"),
+            SharedData::StepDescription(val) => write!(f, "{val:?}"),
             SharedData::Map(val) => {
                 for k in val.keys().sorted() {
-                    writeln!(f, "\t\"{}\": {}", k, val.get(k).unwrap())?;
+                    writeln!(f, "\t\"{k}\": {}", val.get(k).unwrap())?;
                 }
                 Ok(())
             }

@@ -52,7 +52,7 @@ where
 
     let file = match File::open(config_path_string) {
         Ok(file) => file,
-        Err(err) => return Err(format!("Could not open configuration file: {:?}", err)),
+        Err(err) => return Err(format!("Could not open configuration file: {err:?}")),
     };
 
     let mut config_doc_deserializer = serde_yaml::Deserializer::from_reader(file);
@@ -65,8 +65,7 @@ where
         Ok(data) => data,
         Err(err) => {
             return Err(format!(
-                "Could not deserialize document into yaml values: {:?}",
-                err
+                "Could not deserialize document into yaml values: {err:?}",
             ))
         }
     };
@@ -97,14 +96,9 @@ where
         let step_type = match step_data.get("type") {
             Some(step_type) => match step_type {
                 serde_yaml::Value::String(step_type) => step_type,
-                _ => {
-                    return Err(format!(
-                        "Step type for step {:?} is not a string",
-                        step_name
-                    ))
-                }
+                _ => return Err(format!("Step type for step {step_name:?} is not a string")),
             },
-            None => return Err(format!("Step {:?} does not have a type field", step_name)),
+            None => return Err(format!("Step {step_name:?} does not have a type field")),
         };
 
         let params = step_data.get("params").cloned();

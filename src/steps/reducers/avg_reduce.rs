@@ -45,6 +45,7 @@ impl AvgReduce {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for AvgReduce {
+    #[allow(clippy::cast_precision_loss)]
     fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         {
             data.insert(
@@ -90,7 +91,7 @@ impl Step for AvgReduce {
 
                 let bin_labels = binned_game.1;
                 let bin_str_labels: Vec<String> =
-                    bin_labels.iter().map(|b| format!("{}", b)).collect();
+                    bin_labels.iter().map(|b| format!("{b}")).collect();
                 let combined_label = bin_str_labels.join(".");
 
                 if !new_data.contains_key(&combined_label) {

@@ -58,7 +58,7 @@ mod test_path_misc {
     #[test]
     fn test_debug_fmt() {
         let p = Path::empty();
-        assert_eq!(format!("{:?}", p), "Path([])");
+        assert_eq!(format!("{p:?}"), "Path([])");
     }
 }
 

@@ -21,7 +21,7 @@ impl Piece {
             "R" => Piece::Rook,
             "Q" => Piece::Queen,
             "K" => Piece::King,
-            u => panic!("Unrecognized piece: {}", u),
+            u => panic!("Unrecognized piece: {u}"),
         }
     }
 
@@ -33,7 +33,7 @@ impl Piece {
             "R" => Piece::Rook,
             "Q" => Piece::Queen,
             "K" => Piece::King,
-            u => panic!("Unrecognized piece: {}", u),
+            u => panic!("Unrecognized piece: {u}"),
         }
     }
 

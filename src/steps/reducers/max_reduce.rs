@@ -85,7 +85,7 @@ impl Step for MaxReduce {
 
                 let bin_labels = binned_game.1;
                 let bin_str_labels: Vec<String> =
-                    bin_labels.iter().map(|b| format!("{}", b)).collect();
+                    bin_labels.iter().map(|b| format!("{b}")).collect();
                 let combined_label = bin_str_labels.join(".");
 
                 if let Entry::Vacant(entry) = new_data.entry(combined_label.clone()) {

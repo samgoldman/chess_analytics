@@ -26,7 +26,7 @@ impl File {
             "f" => Some(File::_F),
             "g" => Some(File::_G),
             "h" => Some(File::_H),
-            u => panic!("Unrecognized file: {}", u),
+            u => panic!("Unrecognized file: {u}"),
         }
     }
 
@@ -40,7 +40,7 @@ impl File {
             6 => File::_F,
             7 => File::_G,
             8 => File::_H,
-            u => panic!("Unrecognized file: {}", u),
+            u => panic!("Unrecognized file: {u}"),
         }
     }
 
@@ -55,7 +55,7 @@ impl File {
             6 => File::_F,
             7 => File::_G,
             8 => File::_H,
-            u => panic!("Unrecognized file: {}", u),
+            u => panic!("Unrecognized file: {u}"),
         }
     }
 
@@ -69,7 +69,7 @@ impl File {
             6 => File::_F,
             7 => File::_G,
             8 => File::_H,
-            u => panic!("Unrecognized file: {}", u),
+            u => panic!("Unrecognized file: {u}"),
         }
     }
 

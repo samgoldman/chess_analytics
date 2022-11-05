@@ -28,7 +28,7 @@ impl Rank {
             "6" => Some(Rank::_6),
             "7" => Some(Rank::_7),
             "8" => Some(Rank::_8),
-            u => panic!("Unrecognized rank: {}", u),
+            u => panic!("Unrecognized rank: {u}"),
         }
     }
 
@@ -42,7 +42,7 @@ impl Rank {
             6 => Rank::_6,
             7 => Rank::_7,
             8 => Rank::_8,
-            u => panic!("Unrecognized rank: {}", u),
+            u => panic!("Unrecognized rank: {u}"),
         }
     }
 
@@ -56,7 +56,7 @@ impl Rank {
             6 => Rank::_6,
             7 => Rank::_7,
             8 => Rank::_8,
-            u => panic!("Unrecognized rank: {}", u),
+            u => panic!("Unrecognized rank: {u}"),
         }
     }
 
@@ -70,7 +70,7 @@ impl Rank {
             6 => Rank::_6,
             7 => Rank::_7,
             8 => Rank::_8,
-            u => panic!("Unrecognized rank: {}", u),
+            u => panic!("Unrecognized rank: {u}"),
         }
     }
 

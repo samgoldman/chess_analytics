@@ -36,7 +36,7 @@ impl Step for SaveDataStep {
         for field in &self.fields {
             let default = SharedData::String("<Field Not Present>".to_string());
             let value = data.get(field.as_str().unwrap()).unwrap_or(&default);
-            writeln!(file, "{}: \n{}", field.as_str().unwrap(), value).unwrap();
+            writeln!(file, "{}: \n{value}", field.as_str().unwrap()).unwrap();
         }
 
         Ok(true)
