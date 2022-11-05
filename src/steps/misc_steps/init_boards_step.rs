@@ -35,7 +35,7 @@ impl InitBoardsStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for InitBoardsStep {
-    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
 
         let games = {

@@ -11,7 +11,7 @@ macro_rules! timed_data_lock {
 
 macro_rules! bin_template {
     ($logic:expr) => {
-        fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+        fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
             {
                 data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
             }
@@ -98,7 +98,7 @@ macro_rules! bin_template {
 
 macro_rules! map_template {
     ($logic:expr) => {
-        fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+        fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
             {
                 data.insert(self.output_vec_name.clone(), SharedData::Vec(vec![]));
             }

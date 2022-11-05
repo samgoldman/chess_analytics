@@ -29,7 +29,7 @@ impl CheckmateFilter {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for CheckmateFilter {
-    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         self.generic_filter
             .process(data, CheckmateFilter::create_filter())
     }

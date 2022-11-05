@@ -29,7 +29,7 @@ impl SaveDataStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SaveDataStep {
-    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         // TODO: better error handling
         let mut file = fs::File::create(self.file.clone()).unwrap();
 

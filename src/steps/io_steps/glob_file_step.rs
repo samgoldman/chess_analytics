@@ -34,7 +34,7 @@ impl GlobFileStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for GlobFileStep {
-    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         let glob_result = glob(&self.glob_string);
 
         let file_glob = if let Ok(file_glob) = glob_result {

@@ -83,7 +83,7 @@ impl ExportGames {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ExportGames {
-    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         let mut quit = false;
         let mut final_loop = false;
         let mut games = vec![];

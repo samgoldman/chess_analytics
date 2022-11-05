@@ -18,7 +18,7 @@ impl ParseBinGame {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParseBinGame {
-    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         data.init_vec_if_unset("parsed_games");
 
         let remaining_files;

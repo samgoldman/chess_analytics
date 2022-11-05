@@ -82,7 +82,7 @@ impl PlayerEloFilter {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for PlayerEloFilter {
-    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         self.generic_filter.process(data, &*self.create_filter())
     }
 }

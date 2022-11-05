@@ -7,7 +7,7 @@ use std::io::Read;
 
 #[derive(Debug)]
 pub struct Bz2DecompressStep {
-    max_queue_size: usize,
+    max_queue_size: u64,
     paths: Option<Vec<SharedData>>,
 }
 
@@ -20,7 +20,7 @@ impl Bz2DecompressStep {
         };
 
         // TODO: better error handling
-        let max_queue_size = params.get("max_queue_size").unwrap().as_u64().unwrap() as usize;
+        let max_queue_size = params.get("max_queue_size").unwrap().as_u64().unwrap();
         Ok(Box::new(Bz2DecompressStep {
             max_queue_size,
             paths: None,
@@ -30,7 +30,7 @@ impl Bz2DecompressStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for Bz2DecompressStep {
-    fn process<'a>(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
         data.init_vec_if_unset("raw_file_data");
 
         if self.paths.is_none() {
@@ -45,7 +45,7 @@ impl Step for Bz2DecompressStep {
             return Ok(true);
         }
 
-        for _ in 0..(paths.len().min(self.max_queue_size)) {
+        for _ in 0..((paths.len() as u64).min(self.max_queue_size)) {
             let path = paths.remove(0);
             let path = path.to_path_buf().unwrap();
 
