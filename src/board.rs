@@ -429,7 +429,7 @@ impl Board {
                                     },
                                 };
 
-                                let piece_file = File::from_uint(file);
+                                let piece_file = File::try_from(file)?;
                                 let piece_rank = Rank::from_usize(8 - rank);
 
                                 board.set_piece(cell!(piece_file, piece_rank), piece);

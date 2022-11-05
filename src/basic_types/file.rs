@@ -14,6 +14,25 @@ pub enum File {
 }
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
+impl TryFrom<u32> for File {
+    type Error = String;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            1 => Ok(File::_A),
+            2 => Ok(File::_B),
+            3 => Ok(File::_C),
+            4 => Ok(File::_D),
+            5 => Ok(File::_E),
+            6 => Ok(File::_F),
+            7 => Ok(File::_G),
+            8 => Ok(File::_H),
+            u => Err(format!("Unrecognized file: {u}")),
+        }
+    }
+}
+
+#[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl File {
     pub fn from_pgn(file_str: &str) -> Option<Self> {
         match file_str {
@@ -26,20 +45,6 @@ impl File {
             "f" => Some(File::_F),
             "g" => Some(File::_G),
             "h" => Some(File::_H),
-            u => panic!("Unrecognized file: {u}"),
-        }
-    }
-
-    pub fn from_uint(val: u32) -> Self {
-        match val {
-            1 => File::_A,
-            2 => File::_B,
-            3 => File::_C,
-            4 => File::_D,
-            5 => File::_E,
-            6 => File::_F,
-            7 => File::_G,
-            8 => File::_H,
             u => panic!("Unrecognized file: {u}"),
         }
     }
@@ -211,40 +216,25 @@ mod test_file_from_uint {
             #[test]
             fn $name() {
                 let (input, expected) = $value;
-                assert_eq!(expected, File::from_uint(input));
+                assert_eq!(expected, File::try_from(input));
             }
         )*
         }
     }
 
     tests! {
-        test_from_pgn_a: (1, File::_A),
-        test_from_pgn_b: (2, File::_B),
-        test_from_pgn_c: (3, File::_C),
-        test_from_pgn_d: (4, File::_D),
-        test_from_pgn_e: (5, File::_E),
-        test_from_pgn_f: (6, File::_F),
-        test_from_pgn_g: (7, File::_G),
-        test_from_pgn_h: (8, File::_H),
-    }
-
-    macro_rules! panic_tests {
-        ($($name:ident: $input:expr, $panic_str:expr,)*) => {
-        $(
-            #[test]
-            #[should_panic(expected = $panic_str)]
-            fn $name() {
-                File::from_uint($input);
-            }
-        )*
-        }
-    }
-
-    panic_tests! {
-        test_from_pgn_invalid_1: 0, "Unrecognized file: 0",
-        test_from_pgn_invalid_2: 9, "Unrecognized file: 9",
-        test_from_pgn_invalid_3: 54656, "Unrecognized file: 54656",
-        test_from_pgn_invalid_4: u32::MAX, "Unrecognized file: 4294967295",
+        test_from_pgn_a: (1, Ok(File::_A)),
+        test_from_pgn_b: (2, Ok(File::_B)),
+        test_from_pgn_c: (3, Ok(File::_C)),
+        test_from_pgn_d: (4, Ok(File::_D)),
+        test_from_pgn_e: (5, Ok(File::_E)),
+        test_from_pgn_f: (6, Ok(File::_F)),
+        test_from_pgn_g: (7, Ok(File::_G)),
+        test_from_pgn_h: (8, Ok(File::_H)),
+        test_from_pgn_invalid_1: (0, Err("Unrecognized file: 0".to_string())),
+        test_from_pgn_invalid_2: (9, Err("Unrecognized file: 9".to_string())),
+        test_from_pgn_invalid_3: (54656, Err("Unrecognized file: 54656".to_string())),
+        test_from_pgn_invalid_4: (u32::MAX, Err("Unrecognized file: 4294967295".to_string())),
     }
 }
 

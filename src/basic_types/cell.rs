@@ -39,7 +39,7 @@ impl PackedStruct for Cell {
         let file_raw = src[0] & 0x0F;
         let rank_raw = src[0] >> 4;
 
-        let file = File::from_uint(u32::from(file_raw));
+        let file = File::try_from(u32::from(file_raw)).unwrap();
 
         let rank = Rank::from_uint(u32::from(rank_raw));
 
@@ -52,7 +52,7 @@ impl Cell {
     #[cfg(test)]
     pub fn from_indices((rank, file): (usize, usize)) -> Self {
         cell!(
-            File::from_uint((file + 1) as u32),
+            File::try_from((file + 1) as u32).unwrap(),
             Rank::from_uint((rank + 1) as u32)
         )
     }
