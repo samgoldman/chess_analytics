@@ -6,7 +6,11 @@
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true
+      "matchPackagePatterns": ["*"],
+      "automerge": true,
+      "schedule": [
+        "before 3am Sunday"
+      ]
     }
   ]
 }
