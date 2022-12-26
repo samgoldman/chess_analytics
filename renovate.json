@@ -9,7 +9,7 @@
       "matchPackagePatterns": ["*"],
       "automerge": true,
       "schedule": [
-        "before 3am Sunday"
+        "before 3am on Sunday"
       ]
     }
   ]
