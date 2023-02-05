@@ -28,7 +28,7 @@ tui = "0.19.0"
 termion = "2.0.1"
 postcard = { version = "1.0.2", features = ["alloc"] }
 packed_struct = "0.10.1"
-crossterm = "0.25.0"
+crossterm = "0.26.0"
 # mutagen = { path = "../mutagen/mutagen", optional = true }
 mutagen = { git = "https://github.com/llogiq/mutagen", optional = true }
 sysinfo = "0.27.7"
