@@ -34,7 +34,7 @@ mutagen = { git = "https://github.com/llogiq/mutagen", optional = true }
 sysinfo = "0.29.10"
 
 [dev-dependencies]
-predicates = "3.0.3"
+predicates = "3.0.4"
 criterion = { version = "0.5", features = ["html_reports"] }
 
 [profile.dev]
