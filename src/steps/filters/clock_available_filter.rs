@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use crate::game::Game;
 use crate::generic_steps::FilterFn;
 #[mockall_double::double]
 use crate::generic_steps::GenericFilter;
 use crate::workflow_step::{SharedData, Step};
+use crate::{game::Game, workflow_step::ProcessStatus};
 
 #[derive(Debug)]
 pub struct ClockAvailableFilter {
@@ -26,7 +26,7 @@ impl ClockAvailableFilter {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ClockAvailableFilter {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         self.generic_filter.process(data, Self::create_filter())
     }
 }
@@ -50,7 +50,7 @@ mod test_process {
             .expect_process()
             .with(always(), always())
             .times(1)
-            .return_const(Ok(false));
+            .return_const(Ok(ProcessStatus::Incomplete));
 
         let mut mock_data = HashMap::new();
         let mut filter = ClockAvailableFilter {
@@ -58,7 +58,7 @@ mod test_process {
         };
 
         let res = filter.process(&mut mock_data);
-        assert_eq!(res, Ok(false));
+        assert_eq!(res, Ok(ProcessStatus::Incomplete));
     }
 }
 
@@ -81,7 +81,7 @@ mod test_try_new {
     // the lock regardless.  If you just do `let _m = &MTX.lock().unwrap()`, one
     // test panicking will cause all other tests that try and acquire a lock on
     // that Mutex to also panic.
-    #[cfg_attr(coverage_nightly, no_coverage)]
+    #[cfg_attr(coverage_nightly, coverage_attribute)]
     fn get_lock(m: &'static Mutex<()>) -> MutexGuard<'static, ()> {
         match m.lock() {
             Ok(guard) => guard,

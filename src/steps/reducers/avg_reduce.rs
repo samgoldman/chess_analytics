@@ -1,4 +1,4 @@
-use crate::workflow_step::{SharedData, Step};
+use crate::workflow_step::{ProcessStatus, SharedData, Step, StepData};
 
 use std::collections::HashMap;
 
@@ -46,13 +46,8 @@ impl AvgReduce {
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for AvgReduce {
     #[allow(clippy::cast_precision_loss)]
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
-        {
-            data.insert(
-                self.output_map_name.clone(),
-                SharedData::Map(HashMap::new()),
-            );
-        }
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
+        data.init_map_if_unset(&self.output_map_name);
 
         let mut quit = false;
         let mut final_loop = false;
@@ -61,19 +56,7 @@ impl Step for AvgReduce {
                 final_loop = true;
             }
 
-            let binned_games = {
-                let potential_data = data.get(&self.input_vec_name);
-                let shared_data = match potential_data {
-                    Some(shared_data) => shared_data,
-                    None => continue,
-                };
-                let vec_to_filter = shared_data.to_vec().unwrap();
-
-                let ret = vec_to_filter.clone();
-                data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
-
-                ret
-            };
+            let binned_games = data.clear_vec(&self.input_vec_name).unwrap();
 
             let mut new_data: HashMap<String, Vec<u64>> = HashMap::new();
 
@@ -114,11 +97,7 @@ impl Step for AvgReduce {
                     if !map.contains_key(key) {
                         map.insert(
                             key.to_string(),
-                            SharedData::Vec(vec![
-                                SharedData::U64(0),
-                                SharedData::U64(0),
-                                SharedData::F64(0.0),
-                            ]),
+                            SharedData::Vec(vec![SharedData::U64(0), SharedData::U64(0)]),
                         );
                     }
 
@@ -130,13 +109,11 @@ impl Step for AvgReduce {
                     let original_count = shared_vec[1].to_u64().unwrap();
                     let new_count = new_data.get(key).unwrap()[1] + original_count;
 
-                    let average = new_total as f64 / new_count as f64;
                     map.insert(
                         key.to_string(),
                         SharedData::Vec(vec![
                             SharedData::U64(new_total),
                             SharedData::U64(new_count),
-                            SharedData::F64(average),
                         ]),
                     );
                 }
@@ -181,6 +158,6 @@ impl Step for AvgReduce {
             data.insert(self.output_map_name.clone(), SharedData::Map(map));
         }
 
-        Ok(true)
+        Ok(ProcessStatus::Complete)
     }
 }

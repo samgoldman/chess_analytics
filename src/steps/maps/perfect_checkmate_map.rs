@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::basic_types::GameResult;
 use crate::game::Game;
-use crate::workflow_step::{SharedData, Step};
+use crate::workflow_step::{ProcessStatus, SharedData, Step};
 
 #[derive(Debug)]
 pub struct PerfectCheckmateMap {

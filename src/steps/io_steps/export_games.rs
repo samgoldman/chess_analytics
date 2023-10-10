@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs::File, io::Write};
 
 use crate::{
     game::Game,
-    workflow_step::{SharedData, Step},
+    workflow_step::{ProcessStatus, SharedData, Step},
 };
 use bzip2::write::BzEncoder;
 use bzip2::Compression;
@@ -83,7 +83,7 @@ impl ExportGames {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ExportGames {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         let mut quit = false;
         let mut final_loop = false;
         let mut games = vec![];
@@ -138,6 +138,6 @@ impl Step for ExportGames {
             }
         }
 
-        Ok(true)
+        Ok(ProcessStatus::Complete)
     }
 }

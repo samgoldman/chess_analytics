@@ -2,7 +2,7 @@
 #![feature(map_entry_replace)]
 #![clippy::cognitive_complexity = "20"]
 #![deny(clippy::cognitive_complexity)]
-#![feature(no_coverage)]
+#![feature(coverage_attribute)]
 
 use serde::Deserialize;
 use serde_yaml::Value;

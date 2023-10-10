@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::basic_types::Termination;
 use crate::game::Game;
 use crate::generic_steps::{FilterFn, GenericFilter};
-use crate::workflow_step::{SharedData, Step};
+use crate::workflow_step::{ProcessStatus, SharedData, Step};
 
 #[derive(Debug)]
 pub struct CheckmateFilter {
@@ -29,7 +29,7 @@ impl CheckmateFilter {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for CheckmateFilter {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         self.generic_filter
             .process(data, CheckmateFilter::create_filter())
     }

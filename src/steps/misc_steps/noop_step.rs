@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::workflow_step::{BoxedStep, SharedData, Step};
+use crate::workflow_step::{BoxedStep, ProcessStatus, SharedData, Step};
 
 #[derive(Debug)]
 pub struct NoopStep {}
@@ -14,8 +14,11 @@ impl NoopStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for NoopStep {
-    fn process(&mut self, _data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
-        Ok(true)
+    fn process(
+        &mut self,
+        _data: &mut HashMap<String, SharedData>,
+    ) -> Result<ProcessStatus, String> {
+        Ok(ProcessStatus::Complete)
     }
 }
 
@@ -33,6 +36,9 @@ mod test_noop_step {
     #[test]
     fn test_process() {
         let mut step = NoopStep {};
-        assert_eq!(Ok(true), step.process(&mut HashMap::new()));
+        assert_eq!(
+            Ok(ProcessStatus::Complete),
+            step.process(&mut HashMap::new())
+        );
     }
 }

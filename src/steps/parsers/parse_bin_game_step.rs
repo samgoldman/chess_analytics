@@ -3,7 +3,7 @@ use std::collections::HashMap;
 // use crate::steps_manager::get_step_description;
 use crate::{
     game::Game,
-    workflow_step::{BoxedStep, SharedData, Step, StepData},
+    workflow_step::{BoxedStep, ProcessStatus, SharedData, Step, StepData},
 };
 
 #[derive(Debug)]
@@ -18,26 +18,26 @@ impl ParseBinGame {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParseBinGame {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         data.init_vec_if_unset("parsed_games");
 
         let remaining_files;
 
         let file_data = {
             if !data.contains_key("raw_file_data") {
-                return Ok(true);
+                return Ok(ProcessStatus::Complete);
             }
 
             let potential_data = data.remove("raw_file_data");
             let raw_file_data = match potential_data {
                 Some(data) => data,
-                None => return Ok(true),
+                None => return Ok(ProcessStatus::Complete),
             };
             let mut file_data_vec = raw_file_data.into_vec().unwrap();
 
             remaining_files = file_data_vec.len();
             if remaining_files == 0 {
-                return Ok(true);
+                return Ok(ProcessStatus::Complete);
             }
             let ret = match file_data_vec.pop().unwrap() {
                 SharedData::FileData(data) => data,
@@ -65,6 +65,6 @@ impl Step for ParseBinGame {
         let d: bool = true;
         data.insert("done_parsing_games".to_string(), SharedData::Bool(d));
 
-        Ok(false)
+        Ok(ProcessStatus::Incomplete)
     }
 }

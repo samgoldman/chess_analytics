@@ -6,7 +6,7 @@ use std::{
 use crate::{
     game::Game,
     parse_pgn::PgnParser,
-    workflow_step::{SharedData, Step},
+    workflow_step::{ProcessStatus, SharedData, Step},
 };
 
 #[derive(Debug)]
@@ -69,7 +69,7 @@ impl ParsePgnStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParsePgnStep {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         {
             let vec: Vec<SharedData> = vec![];
             data.insert("parsed_games".to_string(), SharedData::Vec(vec));
@@ -96,6 +96,6 @@ impl Step for ParsePgnStep {
         let d: bool = true;
         data.insert("done_parsing_games".to_string(), SharedData::Bool(d));
 
-        Ok(true)
+        Ok(ProcessStatus::Complete)
     }
 }

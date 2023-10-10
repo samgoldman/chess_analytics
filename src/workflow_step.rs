@@ -17,6 +17,7 @@ pub trait StepData: Send {
 
     fn remove_vec(&mut self, k: &str) -> Option<Vec<SharedData>>;
     fn init_vec_if_unset(&mut self, k: &str);
+    fn init_map_if_unset(&mut self, k: &str);
     fn clear_vec(&mut self, k: &str) -> Option<Vec<SharedData>>;
     fn try_push_to_vec(&mut self, k: &str, v: SharedData) -> Result<(), &'static str>;
 }
@@ -45,6 +46,12 @@ impl StepData for HashMap<String, SharedData> {
     fn init_vec_if_unset(&mut self, k: &str) {
         if !self.contains_key(k) {
             self.insert(k.to_string(), SharedData::Vec(vec![]));
+        }
+    }
+
+    fn init_map_if_unset(&mut self, k: &str) {
+        if !self.contains_key(k) {
+            self.insert(k.to_string(), SharedData::Map(HashMap::new()));
         }
     }
 
@@ -204,9 +211,15 @@ impl StepDescription {
     }
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum ProcessStatus {
+    Incomplete,
+    Complete,
+}
+
 #[automock]
 pub trait Step: fmt::Debug {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String>;
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String>;
 }
 
 #[cfg(test)]

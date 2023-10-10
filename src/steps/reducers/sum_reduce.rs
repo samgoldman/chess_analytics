@@ -1,4 +1,4 @@
-use crate::workflow_step::{SharedData, Step};
+use crate::workflow_step::{ProcessStatus, SharedData, Step, StepData};
 
 use std::collections::HashMap;
 
@@ -45,13 +45,8 @@ impl SumReduce {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for SumReduce {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
-        {
-            data.insert(
-                self.output_map_name.clone(),
-                SharedData::Map(HashMap::new()),
-            );
-        }
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
+        data.init_map_if_unset(&self.output_map_name);
 
         let mut quit = false;
         let mut final_loop = false;
@@ -60,18 +55,7 @@ impl Step for SumReduce {
                 final_loop = true;
             }
 
-            let binned_games = {
-                let potential_data = data.get(&self.input_vec_name);
-                let shared_data = match potential_data {
-                    Some(shared_data) => shared_data,
-                    None => continue,
-                };
-                let vec_to_filter = shared_data.to_vec().unwrap();
-
-                data.insert(self.input_vec_name.clone(), SharedData::Vec(vec![]));
-
-                vec_to_filter
-            };
+            let binned_games = data.clear_vec(&self.input_vec_name).unwrap();
 
             let mut new_data: HashMap<String, u64> = HashMap::new();
 
@@ -138,6 +122,6 @@ impl Step for SumReduce {
             data.insert(self.output_flag.clone(), SharedData::Bool(d));
         }
 
-        Ok(true)
+        Ok(ProcessStatus::Complete)
     }
 }

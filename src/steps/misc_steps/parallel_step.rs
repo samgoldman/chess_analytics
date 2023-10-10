@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::steps_manager::get_step_description;
-use crate::workflow_step::{SharedData, Step};
+use crate::workflow_step::{ProcessStatus, SharedData, Step};
 
 use super::noop_step::NoopStep;
 
@@ -39,7 +39,7 @@ impl ParallelStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for ParallelStep {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         // TODO make own step
         {
             let d: bool = false;
@@ -60,7 +60,7 @@ impl Step for ParallelStep {
             any_not_done = false;
             for step in &mut children {
                 let res = (step.as_mut()).process(data).unwrap();
-                if !res {
+                if res == ProcessStatus::Complete {
                     any_not_done = true;
                 }
             }
@@ -71,6 +71,6 @@ impl Step for ParallelStep {
             .unwrap_or_else(|_| Box::new(NoopStep {}));
         post.process(data)?;
 
-        Ok(true)
+        Ok(ProcessStatus::Complete)
     }
 }

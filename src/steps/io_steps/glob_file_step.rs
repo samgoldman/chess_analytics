@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::steps_manager::get_step_description;
-use crate::workflow_step::{SharedData, Step};
+use crate::workflow_step::{ProcessStatus, SharedData, Step};
 
 use glob::glob;
 
@@ -34,7 +34,7 @@ impl GlobFileStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for GlobFileStep {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         let glob_result = glob(&self.glob_string);
 
         let file_glob = if let Ok(file_glob) = glob_result {

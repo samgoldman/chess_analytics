@@ -13,7 +13,7 @@ use tui::{
     widgets::{Block, Borders, List, ListItem},
 };
 
-use crate::workflow_step::{SharedData, Step};
+use crate::workflow_step::{ProcessStatus, SharedData, Step};
 
 pub struct UiMonitorStep {
     terminal: Terminal<CrosstermBackend<RawTerminal<Stdout>>>,
@@ -100,7 +100,7 @@ impl UiMonitorStep {
 
 #[cfg_attr(feature = "with_mutagen", ::mutagen::mutate)]
 impl Step for UiMonitorStep {
-    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<bool, String> {
+    fn process(&mut self, data: &mut HashMap<String, SharedData>) -> Result<ProcessStatus, String> {
         self.start_time = std::time::Instant::now();
         self.terminal.clear().unwrap();
         loop {
@@ -191,7 +191,7 @@ impl Step for UiMonitorStep {
             std::thread::sleep(std::time::Duration::from_millis(332));
         }
 
-        Ok(true)
+        Ok(ProcessStatus::Complete)
     }
 }
 
