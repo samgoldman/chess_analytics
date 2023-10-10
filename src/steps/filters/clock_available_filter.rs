@@ -81,7 +81,7 @@ mod test_try_new {
     // the lock regardless.  If you just do `let _m = &MTX.lock().unwrap()`, one
     // test panicking will cause all other tests that try and acquire a lock on
     // that Mutex to also panic.
-    #[cfg_attr(coverage_nightly, no_coverage)]
+    #[cfg_attr(coverage_nightly, coverage_attribute)]
     fn get_lock(m: &'static Mutex<()>) -> MutexGuard<'static, ()> {
         match m.lock() {
             Ok(guard) => guard,
