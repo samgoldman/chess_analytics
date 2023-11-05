@@ -25,7 +25,7 @@ itertools = "0.11.0"
 mockall = "0.11.4"
 mockall_double = "0.3.0"
 tui = "0.19.0"
-termion = "2.0.1"
+termion = "2.0.3"
 postcard = { version = "1.0.7", features = ["alloc"] }
 packed_struct = "0.10.1"
 crossterm = "0.27.0"
